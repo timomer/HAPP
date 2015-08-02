@@ -16,6 +16,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,7 +31,8 @@ import java.util.Locale;
 
 public class EnterCarb extends Activity implements View.OnFocusChangeListener {
 
-    private SimpleDateFormat dateFormatter;
+    private SimpleDateFormat dateFormatterDate;
+    private SimpleDateFormat dateFormatterTime;
     private EditText carbDate;
     private EditText carbTime;
     private DatePickerDialog carbDatePickerDialog;
@@ -57,24 +59,29 @@ public class EnterCarb extends Activity implements View.OnFocusChangeListener {
     public void setupDateTimePickers(){
         //setups the date and time picker
 
+        Calendar newCalendar = Calendar.getInstance();
+
         //Date picker
-        dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.UK);
+
         carbDate = (EditText) findViewById(R.id.carbDate);
         carbDate.setInputType(InputType.TYPE_NULL);
         carbDate.setOnFocusChangeListener(this);
+        dateFormatterDate = new SimpleDateFormat("dd-MM-yyyy", Locale.UK);
+        carbDate.setText(dateFormatterDate.format(newCalendar.getTime()));
 
-        Calendar newCalendar = Calendar.getInstance();
         carbDatePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 Calendar newDate = Calendar.getInstance();
                 newDate.set(year, monthOfYear, dayOfMonth);
-                carbDate.setText(dateFormatter.format(newDate.getTime()));
+                carbDate.setText(dateFormatterDate.format(newDate.getTime()));
             }
         },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 
         //Time Picker
         carbTime = (EditText) findViewById(R.id.carbTime);
         carbTime.setInputType(InputType.TYPE_NULL);
+        dateFormatterTime = new SimpleDateFormat("HH:MM", Locale.UK);
+        carbTime.setText(dateFormatterTime.format(newCalendar.getTime()));
         carbTime.setOnFocusChangeListener(this);
 
         Calendar mcurrentTime = Calendar.getInstance();
@@ -129,19 +136,25 @@ public class EnterCarb extends Activity implements View.OnFocusChangeListener {
         EditText editText_carb_time;
         EditText editText_carb_date;
 
-        SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyyHHmm");
-        Date carbDateTime;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyyHH:mm");
+        Date carbDateTime = new Date();
+        String carbDateTimeString = new String();
 
         //gets the values the user has entered
         editText_carb_amount = (EditText) findViewById(R.id.carbAmount);
         editText_carb_time = (EditText) findViewById(R.id.carbTime);
         editText_carb_date = (EditText) findViewById(R.id.carbDate);
+        carbDateTimeString = editText_carb_date.getText().toString() + editText_carb_time.getText().toString();
 
         carb.carb_amount = Integer.parseInt(editText_carb_amount.getText().toString());
-        carbDateTime = sdf.parse("dd");
-        carb.carb_datetime =
+        try {
+            carbDateTime = sdf.parse(carbDateTimeString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
-                timePicker_carb_datetime.getText().toString();
+        Long carbUnixTimeStamp = carbDateTime.getTime() / 1000;
+        carb.carb_datetime = carbUnixTimeStamp;
 
         if (carb.carb_amount == 0){
             Toast.makeText(this, "Enter a Carbs value", Toast.LENGTH_SHORT).show();

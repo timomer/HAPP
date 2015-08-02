@@ -9,7 +9,7 @@
         android:paddingLeft="6dip"
         android:textSize="22sp"
         android:id="@+id/carbDateTimeLayout"
-        android:layout_weight=".5"/>
+        android:layout_weight="1"/>
 
     <TextView
         android:id="@+id/carbAmountLayout"
@@ -17,6 +17,6 @@
         android:layout_height="wrap_content"
         android:paddingLeft="6dip"
         android:textSize="22sp"
-        android:layout_weight=".5"/>
+        android:layout_weight="1.5"/>
 
 </LinearLayout>

@@ -34,10 +34,10 @@
     </LinearLayout>
 
     <Button
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:text="Enter"
-       android:onClick="enterCarbDB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter"
+        android:onClick="enterCarbDB"
         />
 
     <ListView

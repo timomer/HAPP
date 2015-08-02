@@ -15,7 +15,7 @@ public class Carbs {
 
     // property help us to keep data
     public int carb_ID;
-    public String carb_datetime;
+    public Long carb_datetime;
     public Integer carb_amount;
 
 }

@@ -5,8 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 /**
  * Created by tim on 01/08/2015.
@@ -57,11 +61,11 @@ public class CarbsRepo {
     public ArrayList<HashMap<String, String>> getCarbsList() {
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String selectQuery =  "SELECT  " +
+        String selectQuery =  "select * from (SELECT  " +
                 Carbs.KEY_ID + "," +
                 Carbs.KEY_datetime + "," +
                 Carbs.KEY_amount +
-                " FROM " + Carbs.TABLE;
+                " FROM " + Carbs.TABLE + " order by " + Carbs.KEY_datetime + " DESC limit 5) order by " + Carbs.KEY_datetime + "  ASC";
 
         //Student student = new Student();
         ArrayList<HashMap<String, String>> carbList = new ArrayList<HashMap<String, String>>();
@@ -69,15 +73,22 @@ public class CarbsRepo {
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
 
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToLast()) {
             do {
                 HashMap<String, String> carb = new HashMap<String, String>();
                 carb.put("id", cursor.getString(cursor.getColumnIndex(Carbs.KEY_ID)));
-                carb.put("datetime", cursor.getString(cursor.getColumnIndex(Carbs.KEY_datetime)));
+
+                long unixSeconds = cursor.getLong(cursor.getColumnIndex(Carbs.KEY_datetime));
+                Date date = new Date(unixSeconds*1000L); // *1000 is to convert seconds to milliseconds
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd MMM"); // the format of your date
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT")); // give a timezone reference for formating (see comment at the bottom
+                String formattedDate = sdf.format(date);
+
+                carb.put("datetime", formattedDate);
                 carb.put("amount", cursor.getString(cursor.getColumnIndex(Carbs.KEY_amount)));
                 carbList.add(carb);
 
-            } while (cursor.moveToNext());
+            } while (cursor.moveToPrevious());
         }
 
         cursor.close();
