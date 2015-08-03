@@ -7,32 +7,34 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 
 /**
- * Created by tim on 01/08/2015.
+ * Created by tim on 03/08/2015.
  */
-public class CarbsRepo {
+public class TreatmentsRepo {
 
     private DBHelper dbHelper;
 
-    public CarbsRepo(Context context) {
+    public TreatmentsRepo(Context context) {
         dbHelper = new DBHelper(context);
     }
 
-    public int insert(Carbs carb) {
+    //Save a new Treatment
+    public int insert(Treatments treatment) {
 
         //Open connection to write data
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(Carbs.KEY_datetime,carb.carb_datetime);
-        values.put(Carbs.KEY_amount,carb.carb_amount);
+        values.put(Treatments.KEY_TYPE,treatment.treatment_type);
+        values.put(Treatments.KEY_datetime,treatment.treatment_datetime);
+        values.put(Treatments.KEY_value,treatment.treatment_value);
+        values.put(Treatments.KEY_note,treatment.treatment_note);
 
         // Inserting Row
-        long record_Id = db.insert(Carbs.TABLE, null, values);
+        long record_Id = db.insert(Treatments.TABLE, null, values);
         db.close(); // Closing database connection
         return (int) record_Id;
     }
@@ -58,44 +60,47 @@ public class CarbsRepo {
     //    db.close(); // Closing database connection
     //}
 
-    public ArrayList<HashMap<String, String>> getCarbsList() {
+    //Reads in the last x of Treatments
+    public ArrayList<HashMap<String, String>> getTreatmentsList(Integer listLimit) {
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String selectQuery =  "select * from (SELECT  " +
-                Carbs.KEY_ID + "," +
-                Carbs.KEY_datetime + "," +
-                Carbs.KEY_amount +
-                " FROM " + Carbs.TABLE + " order by " + Carbs.KEY_datetime + " DESC limit 5) order by " + Carbs.KEY_datetime + "  ASC";
+                Treatments.KEY_ID + "," +
+                Treatments.KEY_TYPE + "," +
+                Treatments.KEY_datetime + "," +
+                Treatments.KEY_note + "," +
+                Treatments.KEY_value +
+                " FROM " + Treatments.TABLE + " order by " + Treatments.KEY_datetime + " DESC limit " + listLimit + ") order by " + Treatments.KEY_datetime + "  ASC";
 
         //Student student = new Student();
-        ArrayList<HashMap<String, String>> carbList = new ArrayList<HashMap<String, String>>();
+        ArrayList<HashMap<String, String>> treatmentList = new ArrayList<HashMap<String, String>>();
 
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
 
         if (cursor.moveToLast()) {
             do {
-                HashMap<String, String> carb = new HashMap<String, String>();
-                carb.put("id", cursor.getString(cursor.getColumnIndex(Carbs.KEY_ID)));
+                HashMap<String, String> treatment = new HashMap<String, String>();
 
-                long unixSeconds = cursor.getLong(cursor.getColumnIndex(Carbs.KEY_datetime));
+                treatment.put("id", cursor.getString(cursor.getColumnIndex(Treatments.KEY_ID)));
+                treatment.put("type", cursor.getString(cursor.getColumnIndex(Treatments.KEY_TYPE)));
+
+                long unixSeconds = cursor.getLong(cursor.getColumnIndex(Treatments.KEY_datetime));
                 Date date = new Date(unixSeconds*1000L); // *1000 is to convert seconds to milliseconds
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd MMM"); // the format of your date
-                sdf.setTimeZone(TimeZone.getTimeZone("GMT")); // give a timezone reference for formating (see comment at the bottom
                 String formattedDate = sdf.format(date);
 
-                carb.put("datetime", formattedDate);
-                carb.put("amount", cursor.getString(cursor.getColumnIndex(Carbs.KEY_amount)));
-                carbList.add(carb);
+                treatment.put("datetime", formattedDate);
+                treatment.put("value", cursor.getString(cursor.getColumnIndex(Treatments.KEY_value)));
+                treatment.put("note", cursor.getString(cursor.getColumnIndex(Treatments.KEY_note)));
+                treatmentList.add(treatment);
 
             } while (cursor.moveToPrevious());
         }
 
         cursor.close();
         db.close();
-        return carbList;
+        return treatmentList;
 
     }
-
 }
-

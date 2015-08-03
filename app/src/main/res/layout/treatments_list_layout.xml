@@ -8,11 +8,19 @@
         android:layout_height="wrap_content"
         android:paddingLeft="6dip"
         android:textSize="22sp"
-        android:id="@+id/carbDateTimeLayout"
+        android:id="@+id/treatmentDateTimeLayout"
         android:layout_weight="1"/>
 
     <TextView
-        android:id="@+id/carbAmountLayout"
+        android:id="@+id/treatmentAmountLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="6dip"
+        android:textSize="22sp"
+        android:layout_weight="1.5"/>
+
+    <TextView
+        android:id="@+id/treatmentTypeLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="6dip"

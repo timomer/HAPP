@@ -20,6 +20,10 @@
             android:name=".EnterCarb"
             android:label="@string/title_activity_enter_carb" >
         </activity>
+        <activity
+            android:name=".EnterTreatment"
+            android:label="@string/title_activity_enter_treatment" >
+        </activity>
     </application>
 
 </manifest>

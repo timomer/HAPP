@@ -39,9 +39,9 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //loads enter Carb screen
-    public void enterCarbButton(View view) {
-        Intent intent = new Intent(this,EnterCarb.class);
+    //loads enter Treatment screen
+    public void enterTreatment(View view) {
+        Intent intent = new Intent(this,EnterTreatment.class);
         startActivity(intent);
 
     }

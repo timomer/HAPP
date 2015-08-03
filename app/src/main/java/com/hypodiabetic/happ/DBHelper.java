@@ -12,10 +12,10 @@ public class DBHelper  extends SQLiteOpenHelper {
     //version number to upgrade database version
     //each time if you Add, Edit table, you need to change the
     //version number.
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
 
     // Database Name
-    private static final String DATABASE_NAME = "happ.db";
+    private static final String DATABASE_NAME = "happ_treatments.db";
 
     public DBHelper(Context context ) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -25,19 +25,21 @@ public class DBHelper  extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         //All necessary tables you like to create will create here
 
-        String CREATE_TABLE_CARBS = "CREATE TABLE " + Carbs.TABLE  + "("
-                + Carbs.KEY_ID  + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
-                + Carbs.KEY_datetime  + " STRING ,"
-                + Carbs.KEY_amount + " INTEGER)";
+        String CREATE_TABLE_TREATMENTS = "CREATE TABLE " + Treatments.TABLE  + "("
+                + Treatments.KEY_ID  + " INTEGER PRIMARY KEY AUTOINCREMENT ,"
+                + Treatments.KEY_TYPE  + " STRING ,"
+                + Treatments.KEY_datetime  + " STRING ,"
+                + Treatments.KEY_value + " INTEGER ,"
+                + Treatments.KEY_note  + " STRING)";
 
-        db.execSQL(CREATE_TABLE_CARBS);
+        db.execSQL(CREATE_TABLE_TREATMENTS);
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed, all data will be gone!!!
-        db.execSQL("DROP TABLE IF EXISTS " + Carbs.TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + Treatments.TABLE);
 
         // Create tables again
         onCreate(db);
