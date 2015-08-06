@@ -13,12 +13,12 @@ public class Treatments {
     public static final String KEY_TYPE = "type";
     public static final String KEY_datetime = "datetime";
     public static final String KEY_value = "value";
-    public static final String KEY_note = "note";
+    public static final String KEY_note = "note";           //Could be: bolus
 
     // property help us to keep data
     public int treatment_ID;
     public String treatment_type;
     public Long treatment_datetime;
-    public Integer treatment_value;
+    public Double treatment_value;
     public String treatment_note;
 }
