@@ -132,7 +132,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
         treatmentDateTimeString     = editText_treatment_date.getText().toString() + editText_treatment_time.getText().toString();
 
-        treatment.treatment_value = Integer.parseInt(editText_treatment_value.getText().toString());
+        treatment.treatment_value = Double.parseDouble(editText_treatment_value.getText().toString());
         treatment.treatment_type = spinner_treatment_type.getSelectedItem().toString();
         try {
             treatmentDateTime = sdf.parse(treatmentDateTimeString);

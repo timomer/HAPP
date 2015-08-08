@@ -1,6 +1,9 @@
-package com.hypodiabetic.happ;
+package com.hypodiabetic.happ.code.openaps;
 
 import android.util.Log;
+
+import com.hypodiabetic.happ.Profile;
+import com.hypodiabetic.happ.Treatments;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,6 +16,35 @@ import java.util.Date;
  * source openaps-js https://github.com/openaps/openaps-js/blob/master
  */
 public class iob {
+
+    //main function
+    public void mainFunction() {
+
+        //TODO: what the hell is in this file, pump records?
+        JSONArray pumpHistory = new JSONArray();
+        //TODO: OK, so treatments appear to be a list of pump actions that have delivered insulin
+        Treatments[] treatments;
+        treatments = new Treatments[1]; //creates a object in the array
+        treatments[0] = new Treatments(); //assigns the object as a treatment
+
+
+        JSONArray all_treatments =  calcTempTreatments(pumpHistory);
+        //console.log(all_treatments);
+        //JSONArray treatments = all_treatments; // .tempBoluses.concat(all_treatments.tempHistory);
+        //treatments.sort(function (a, b) { return a.date > b.date });
+        //var lastTimestamp = new Date(treatments[treatments.length -1].date + 1000 * 60);
+        //console.log(clock_data);
+        Date now = new Date();
+        //var timeZone = now.toString().match(/([-\+][0-9]+)\s/)[1]
+        //var clock_iso = clock_data + timeZone;
+        //var clock = new Date(clock_iso);
+        //console.log(clock);
+        JSONObject iob = iobTotal(treatments, now);
+        //var iobs = iobTotal(treatments, lastTimestamp);
+        // console.log(iobs);
+        Log.i("iob: ", iob.toString());
+    }
+
 
     //Caculates the IOB from only one treatment, called from iobTotal below
     public JSONObject iobCalc(Treatments treatment, Date time, Integer dia) {
@@ -210,44 +242,6 @@ public class iob {
 
     }
 
-    //main function
-    public void mainFunction() {
-        //var iob_input = process.argv.slice(2, 3).pop()
-        //var profile_input = process.argv.slice(3, 4).pop()
-        //var clock_input = process.argv.slice(4, 5).pop()
-        //if (!iob_input || !profile_input) {
-        //    console.log('usage: ', process.argv.slice(0, 2), '<pumphistory> <profile.json> <clock.json>');
-        //    process.exit(1);
-        //}
-        //var cwd = process.cwd()
-        //var all_data = require(cwd + '/' + iob_input);
-        //var profile_data = require(cwd + '/' + profile_input);
-        //var clock_data = require(cwd + '/' + clock_input);
-        //TODO: what the hell is in this file, pump records?
-        JSONArray pumpHistory = new JSONArray();
-        //TODO: OK, so treatments appear to be a list of pump commands to deliver insulin
-        Treatments[] treatments;
-        treatments = new Treatments[1]; //creates a object in the array
-        treatments[0] = new Treatments(); //assigns the object as a treatment
-        //var pumpHistory = all_data;
-        //pumpHistory.reverse( );
 
-
-        JSONArray all_treatments =  calcTempTreatments(pumpHistory);
-        //console.log(all_treatments);
-        //JSONArray treatments = all_treatments; // .tempBoluses.concat(all_treatments.tempHistory);
-        //treatments.sort(function (a, b) { return a.date > b.date });
-        //var lastTimestamp = new Date(treatments[treatments.length -1].date + 1000 * 60);
-        //console.log(clock_data);
-        Date now = new Date();
-        //var timeZone = now.toString().match(/([-\+][0-9]+)\s/)[1]
-        //var clock_iso = clock_data + timeZone;
-        //var clock = new Date(clock_iso);
-        //console.log(clock);
-        JSONObject iob = iobTotal(treatments, now);
-        //var iobs = iobTotal(treatments, lastTimestamp);
-        // console.log(iobs);
-        Log.i("iob: ", iob.toString());
-    }
 
 }

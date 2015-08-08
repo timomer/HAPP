@@ -1,6 +1,8 @@
-package com.hypodiabetic.happ;
+package com.hypodiabetic.happ.code.openaps;
 
 import android.util.Log;
+
+import com.hypodiabetic.happ.Profile;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,6 +57,7 @@ public class determine_basal {
 
     }
 
+    //main finction
     public void runOpenAPS (JSONArray glucose_data, JSONObject temps_data, JSONObject iob_data) {
 
         //TODO: VAR JSONArray glucose_data: Appears to be an Array with values: glucose, display_time, dateString

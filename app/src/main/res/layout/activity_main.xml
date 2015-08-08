@@ -11,7 +11,7 @@
         android:text="Sys Msg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/SysMsg"
+        android:id="@+id/notices"
         />
 
     <LinearLayout
@@ -74,6 +74,7 @@
                 android:text="Blood:"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:id="@+id/currentBgValueRealTime"
                 android:layout_weight="1" />
             <TextView
                 android:text="Delta:"
