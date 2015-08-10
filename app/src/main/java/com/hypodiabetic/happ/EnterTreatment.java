@@ -9,6 +9,7 @@ import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -44,6 +45,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_treatment);
 
+
         setupPickers();
         loadLastTreatments();
 
@@ -55,11 +57,34 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
         Calendar newCalendar = Calendar.getInstance();
 
-        //Type picker
+        //Type Spinner
         String[] treatmentTypes = {"Carbs", "Insulin"};
         ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, treatmentTypes);
-        Spinner treatmentspinner= (Spinner)findViewById(R.id.treatmentSpinner);
-        treatmentspinner.setAdapter(stringArrayAdapter);
+        Spinner treatmentSpinner= (Spinner)findViewById(R.id.treatmentSpinner);
+        treatmentSpinner.setAdapter(stringArrayAdapter);
+
+        treatmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (parent.getSelectedItem().equals("Insulin")){
+                    // TODO: 10/08/2015 treatment duration (for Insulin TempBasal) is being logged in openaps-js, but appears to never be used, not capturing it for now
+                    String[] InsulinNotes = {"bolus", "TempBasal"};
+                    ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(EnterTreatment.this, android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
+                    Spinner notesSpinner= (Spinner)findViewById(R.id.noteSpinner);
+                    notesSpinner.setAdapter(stringArrayAdapter);
+                } else {
+                    String[] EmptyNotes = {""};
+                    ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(EnterTreatment.this, android.R.layout.simple_spinner_dropdown_item, EmptyNotes);
+                    Spinner notesSpinner= (Spinner)findViewById(R.id.noteSpinner);
+                    notesSpinner.setAdapter(stringArrayAdapter);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
         //Value picker
@@ -102,6 +127,8 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
     }
 
+
+
     //enters the last 8 treatments into a list
     public void loadLastTreatments(){
         TreatmentsRepo repo = new TreatmentsRepo(this);
@@ -120,6 +147,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         EditText editText_treatment_date;
         EditText editText_treatment_value;
         Spinner spinner_treatment_type;
+        Spinner spinner_notes;
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyyHH:mm", getResources().getConfiguration().locale);
         Date treatmentDateTime = new Date();
@@ -127,13 +155,15 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
         //gets the values the user has entered
         spinner_treatment_type      = (Spinner) findViewById(R.id.treatmentSpinner);
+        spinner_notes               = (Spinner) findViewById(R.id.noteSpinner);
         editText_treatment_time     = (EditText) findViewById(R.id.treatmentTime);
         editText_treatment_date     = (EditText) findViewById(R.id.treatmentDate);
         editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
         treatmentDateTimeString     = editText_treatment_date.getText().toString() + editText_treatment_time.getText().toString();
 
-        treatment.treatment_value = Double.parseDouble(editText_treatment_value.getText().toString());
-        treatment.treatment_type = spinner_treatment_type.getSelectedItem().toString();
+        treatment.treatment_value   = Double.parseDouble(editText_treatment_value.getText().toString());
+        treatment.treatment_type    = spinner_treatment_type.getSelectedItem().toString();
+        treatment.treatment_note    = spinner_notes.getSelectedItem().toString();
         try {
             treatmentDateTime = sdf.parse(treatmentDateTimeString);
         } catch (ParseException e) {

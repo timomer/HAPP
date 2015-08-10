@@ -4,12 +4,29 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.view.View;
+import android.widget.Spinner;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TimeZone;
+import java.util.jar.JarException;
+import java.util.zip.Inflater;
+
+import android.view.LayoutInflater;
+import android.widget.TextView;
+
+import com.hypodiabetic.happ.code.openaps.iob;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.view.LineChartView;
 
 /**
  * Created by tim on 03/08/2015.
@@ -17,6 +34,7 @@ import java.util.TimeZone;
 public class TreatmentsRepo {
 
     private DBHelper dbHelper;
+
 
     public TreatmentsRepo(Context context) {
         dbHelper = new DBHelper(context);
@@ -103,4 +121,43 @@ public class TreatmentsRepo {
         return treatmentList;
 
     }
+
+    //returns a list of treatments
+    public Treatments[] getTreatments(Integer listLimit, String TreatmentType){
+
+        //Open connection to read only
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String selectQuery =  "select * from (SELECT  " +
+                Treatments.KEY_ID + "," +
+                Treatments.KEY_TYPE + "," +
+                Treatments.KEY_datetime + "," +
+                Treatments.KEY_note + "," +
+                Treatments.KEY_value +
+                " FROM " + Treatments.TABLE + " WHERE " + Treatments.KEY_TYPE + " = '" + TreatmentType + "' order by " + Treatments.KEY_datetime + " DESC limit " + listLimit + ") order by " + Treatments.KEY_datetime + "  ASC";
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        // looping through all rows and adding to list
+
+        Treatments[] treatments = new Treatments[cursor.getCount()];
+        Integer i = 0;
+
+        if (cursor.moveToLast()) {
+            do {
+
+                treatments[i] = new Treatments();
+                treatments[i].treatment_datetime = cursor.getLong(cursor.getColumnIndex(Treatments.KEY_datetime));
+                treatments[i].treatment_note = cursor.getString(cursor.getColumnIndex(Treatments.KEY_note));
+                treatments[i].treatment_value = cursor.getDouble(cursor.getColumnIndex(Treatments.KEY_value));
+                treatments[i].treatment_type = cursor.getString(cursor.getColumnIndex(Treatments.KEY_TYPE));
+                i++;
+            } while (cursor.moveToPrevious());
+        }
+
+        cursor.close();
+        db.close();
+
+        return treatments;
+
+    }
+
 }

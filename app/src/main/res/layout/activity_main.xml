@@ -29,12 +29,13 @@
                 android:text="IOB:"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"/>
             <TextView
                 android:text="Last:"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:id="@+id/iobValue"/>
 
         </LinearLayout>
 
@@ -63,6 +64,12 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:onClick="enterTreatment"/>
+        <Button
+            android:text="iob"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="getIOBCommand"/>
 
         <LinearLayout
             android:layout_width="match_parent"

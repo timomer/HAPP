@@ -165,6 +165,7 @@ public class DataCollectionService extends Service {
     //    }
     //}
 
+    //Ran after the IntentService service picks up new data and saved it to db
     public static void newDataArrived(Context context, boolean success, Bg bg) {
         Log.d("NewDataArrived", "New Data Arrived");
         if (success && bg != null) {

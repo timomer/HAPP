@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -14,13 +16,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.nightwatch.SettingsActivity;
+import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -34,6 +41,8 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 
 
 public class MainActivity extends Activity {
+    private TextView iobValueTextView;
+
     //xdrip start
     private LineChartView chart;
     private PreviewLineChartView previewChart;
@@ -225,4 +234,26 @@ public class MainActivity extends Activity {
         startActivity(intent);
 
     }
+
+    //sends a list of tretments to IOB function
+    public void getIOBCommand(View view){
+        TreatmentsRepo repo = new TreatmentsRepo(this);
+
+        // TODO: 10/08/2015 openaps-js reads all Insulin treatments from the pump and checks if they are still active, for now we just pick the last 20, trusting there has not been > 20 treatments in the last 3 hours
+        Treatments[] treatments = repo.getTreatments(20,"Insulin");             //Get the x most recent Insulin treatments
+        Date timeNow = new Date();
+
+        JSONObject iobJSONValue = iob.iobTotal(treatments, timeNow);            //Based on these treatments, get total IOB as of now
+
+        iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
+        try {
+            iobValueTextView.setText(iobJSONValue.getString("iob").toString());
+        } catch (JSONException e)  {
+
+        }
+
+
+    }
+
+
 }

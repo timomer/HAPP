@@ -18,17 +18,18 @@ import java.util.Date;
 public class iob {
 
     //main function
-    public void mainFunction() {
+    //UPDATE: not in use as iobTotal is called from else where
+    public JSONObject getIOB(Treatments[] treatments) {
 
         //TODO: what the hell is in this file, pump records?
-        JSONArray pumpHistory = new JSONArray();
+        //JSONArray pumpHistory = new JSONArray();
         //TODO: OK, so treatments appear to be a list of pump actions that have delivered insulin
-        Treatments[] treatments;
-        treatments = new Treatments[1]; //creates a object in the array
-        treatments[0] = new Treatments(); //assigns the object as a treatment
+        ;
+        //treatments = new Treatments[1]; //creates a object in the array
+        //treatments[0] = new Treatments(); //assigns the object as a treatment
 
 
-        JSONArray all_treatments =  calcTempTreatments(pumpHistory);
+        //JSONArray all_treatments =  calcTempTreatments(pumpHistory);
         //console.log(all_treatments);
         //JSONArray treatments = all_treatments; // .tempBoluses.concat(all_treatments.tempHistory);
         //treatments.sort(function (a, b) { return a.date > b.date });
@@ -43,25 +44,29 @@ public class iob {
         //var iobs = iobTotal(treatments, lastTimestamp);
         // console.log(iobs);
         Log.i("iob: ", iob.toString());
+
+        return iob;
     }
 
 
-    //Caculates the IOB from only one treatment, called from iobTotal below
-    public JSONObject iobCalc(Treatments treatment, Date time, Integer dia) {
+    //Calculates the IOB from only one treatment, called from iobTotal below
+    public static JSONObject iobCalc(Treatments treatment, Date time, Double dia) {
 
         JSONObject returnValue = new JSONObject();
         Double iobContrib;
         Double activityContrib;
 
-        Integer diaratio = dia / 3;
-        Integer peak = 75 * diaratio;
+        Double diaratio = dia / 3;
+        Double peak = 75 * diaratio;                                                    //Peak of the active insulin?
         //var sens = profile_data.sens;
-        if (time != null) {
+        if (time == null) {
             time = new Date();
         }
 
-        if (treatment.treatment_type == "insulin") {
-            Date bolusTime = new Date(treatment.treatment_datetime);
+        if (treatment.treatment_type.equals("Insulin")) {                               //Im only ever passing Insulin, but anyway whatever
+
+            long unixSeconds = treatment.treatment_datetime;
+            Date bolusTime = new Date(unixSeconds*1000L);                               // *1000 is to convert seconds to milliseconds
             Long minAgo = (time.getTime() - bolusTime.getTime()) /1000/60;
 
             if (minAgo < 0) {
@@ -69,14 +74,14 @@ public class iob {
                 activityContrib=0D;
             }
             if (minAgo < peak) {
-                Long x = (minAgo/5 + 1) * diaratio;
+                Double x = (minAgo/5 + 1) * diaratio;
                 iobContrib=treatment.treatment_value*(1-0.001852*x*x+0.001852*x);
                 //var activityContrib=sens*treatment.insulin*(2/dia/60/peak)*minAgo;
                 activityContrib=treatment.treatment_value*(2/dia/60/peak)*minAgo;
 
             }
             else if (minAgo < 180) {
-                Long x = (minAgo-peak)/5 * diaratio;
+                Double x = (minAgo-peak)/5 * diaratio;
                 iobContrib=treatment.treatment_value*(0.001323*x*x - .054233*x + .55556);
                 //var activityContrib=sens*treatment.insulin*(2/dia/60-(minAgo-peak)*2/dia/60/(60*dia-peak));
                 activityContrib=treatment.treatment_value*(2/dia/60-(minAgo-peak)*2/dia/60/(60*dia-peak));
@@ -103,35 +108,35 @@ public class iob {
     }
 
     //gets the total IOB from mutiple Treatments
-    public JSONObject iobTotal(Treatments[] treatments, Date time) {
+    public static JSONObject iobTotal(Treatments[] treatments, Date time) {
 
         JSONObject returnValue = new JSONObject();
 
         Double iob = 0D;
         Double bolusiob = 0D;
-        Long activity = 0L;
+        Double activity = 0D;
 
         try {
 
             for (int i = 0; i < treatments.length; i++) {
-                if (treatments[i].treatment_datetime.longValue() < time.getTime()) {
-                    Integer dia = Profile.dia;
+                if (treatments[i].treatment_datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
+                    Double dia = Profile.dia;
                     JSONObject tIOB = iobCalc(treatments[i], time, dia);
                     if (tIOB.getDouble("iobContrib") > 0) iob += tIOB.getDouble("iobContrib");
-                    if (tIOB.getLong("activityContrib") > 0) activity += tIOB.getLong("activityContrib");
+                    if (tIOB.getDouble("activityContrib") > 0) activity += tIOB.getDouble("activityContrib");
                     // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
-                    if (treatments[i].treatment_value >= 0.2 && treatments[i].treatment_note == "bolus") {
-                        JSONObject bIOB = iobCalc(treatments[i], time, dia / 2);
-                        //console.log(treatment);
-                        //console.log(bIOB);
-                        if (bIOB.getDouble("iobContrib") > 0) bolusiob += bIOB.getDouble("iobContrib");
+                    if (treatments[i].treatment_value >= 0.2 && treatments[i].treatment_note != null && treatments[i].treatment_note.equals("bolus")) { //Whats going on here?
+                       JSONObject bIOB = iobCalc(treatments[i], time, dia / 2);
+                       //console.log(treatment);
+                       //console.log(bIOB);
+                       if (bIOB.getDouble("iobContrib") > 0) bolusiob += bIOB.getDouble("iobContrib");
                     }
                 }
             }
 
-            returnValue.put("iob", iob);
-            returnValue.put("activity", activity);
-            returnValue.put("bolusiob", bolusiob);
+            returnValue.put("iob", String.format("%.2f",iob));
+            returnValue.put("activity", String.format("%.2f",activity));
+            returnValue.put("bolusiob", String.format("%.2f",bolusiob));
             return returnValue;
 
         } catch (JSONException e) {
@@ -142,6 +147,7 @@ public class iob {
     }
 
     // dont get this, appears to retirn two JSON arrays, one with bouls amounts and with the history of them? why?
+    //UPDATE: this take the Insulin Boluses and TempBasal and formats them for processing - should not be needed as we log the Insulin treatment direct in App
     public JSONArray calcTempTreatments(JSONArray pumpHistory) {
         //TODO: var pumphistory: Appears to be a JSON Array of pump insulin delivery history, values: _type (Bolus,TempBasal,TempBasalDuration), timestamp, amount, temp (percent), rate, date, duration (min),
 

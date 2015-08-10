@@ -10,7 +10,7 @@ import java.text.ParseException;
  */
 public class Profile {
 
-    public static final Integer dia = 90;                       //Duration of Insulin Action (mins)
+    public static final Double dia = 1.5;                       //Duration of Insulin Action (hours)
     public static final Double isf = 1.5;                       //Insulin Sensitivity Factor (mg/dL/U)
     public static final Integer min_bg = 90;               //low end of BG Target range
     public static final Integer max_bg = 144;              //high end of BG Target range
