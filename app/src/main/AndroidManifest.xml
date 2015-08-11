@@ -45,17 +45,21 @@
             android:label="@string/title_activity_settings" >
         </activity>
 
-        <receiver android:name=".code.nightwatch.AutoStart" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+
         <service
             android:name=".code.nightwatch.DataCollectionService"
             android:enabled="true"
             android:exported="true" >
         </service>
+        <service
+            android:name=".integration.dexdrip.IntentService"
+            android:exported="false" />
 
+        <receiver android:name=".code.nightwatch.AutoStart" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".integration.dexdrip.DataReceiver"
             android:exported="true" >
@@ -63,9 +67,9 @@
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <service
-            android:name=".integration.dexdrip.IntentService"
-            android:exported="false" />
+        <receiver android:name=".openAPSReceiver"></receiver>
+
+
     </application>
 
 </manifest>

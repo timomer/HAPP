@@ -1,9 +1,17 @@
 package com.hypodiabetic.happ.code.openaps;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.widget.TextView;
 
+import com.hypodiabetic.happ.ApplicationContextProvider;
+import com.hypodiabetic.happ.DBHelper;
+import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Profile;
+import com.hypodiabetic.happ.R;
 import com.hypodiabetic.happ.Treatments;
+import com.hypodiabetic.happ.TreatmentsRepo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,42 +19,14 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
+
 /**
  * Created by tim on 06/08/2015.
  * source openaps-js https://github.com/openaps/openaps-js/blob/master
  */
 public class iob {
 
-    //main function
-    //UPDATE: not in use as iobTotal is called from else where
-    public JSONObject getIOB(Treatments[] treatments) {
 
-        //TODO: what the hell is in this file, pump records?
-        //JSONArray pumpHistory = new JSONArray();
-        //TODO: OK, so treatments appear to be a list of pump actions that have delivered insulin
-        ;
-        //treatments = new Treatments[1]; //creates a object in the array
-        //treatments[0] = new Treatments(); //assigns the object as a treatment
-
-
-        //JSONArray all_treatments =  calcTempTreatments(pumpHistory);
-        //console.log(all_treatments);
-        //JSONArray treatments = all_treatments; // .tempBoluses.concat(all_treatments.tempHistory);
-        //treatments.sort(function (a, b) { return a.date > b.date });
-        //var lastTimestamp = new Date(treatments[treatments.length -1].date + 1000 * 60);
-        //console.log(clock_data);
-        Date now = new Date();
-        //var timeZone = now.toString().match(/([-\+][0-9]+)\s/)[1]
-        //var clock_iso = clock_data + timeZone;
-        //var clock = new Date(clock_iso);
-        //console.log(clock);
-        JSONObject iob = iobTotal(treatments, now);
-        //var iobs = iobTotal(treatments, lastTimestamp);
-        // console.log(iobs);
-        Log.i("iob: ", iob.toString());
-
-        return iob;
-    }
 
 
     //Calculates the IOB from only one treatment, called from iobTotal below

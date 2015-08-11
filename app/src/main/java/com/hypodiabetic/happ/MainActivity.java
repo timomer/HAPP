@@ -1,6 +1,8 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
@@ -41,6 +44,10 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 
 
 public class MainActivity extends Activity {
+
+    private static MainActivity ins;
+    private PendingIntent pendingIntent;
+    private AlarmManager manager;
     private TextView iobValueTextView;
 
     //xdrip start
@@ -63,10 +70,14 @@ public class MainActivity extends Activity {
 
 
 
+    public static MainActivity getInstace(){
+        return ins;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ins = this;
 
         //xdrip start
         //Fabric.with(this, new Crashlytics()); todo not sure what this is for? Fabric is twitter? http://docs.fabric.io/android/twitter/twitter.html
@@ -79,6 +90,9 @@ public class MainActivity extends Activity {
         //xdrip end
 
         setContentView(R.layout.activity_main);
+
+        //starts OpenAPS loop
+        startOpenAPSLoop();
     }
 
     public void setupCharts() {
@@ -235,22 +249,34 @@ public class MainActivity extends Activity {
 
     }
 
-    //sends a list of tretments to IOB function
-    public void getIOBCommand(View view){
-        TreatmentsRepo repo = new TreatmentsRepo(this);
+    //Updates the OpenAPS details
+    public void updateOpenAPSDetails(final JSONObject details){
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
+                try {
+                    iobValueTextView.setText(details.getString("iob").toString());
+                } catch (JSONException e)  {
 
-        // TODO: 10/08/2015 openaps-js reads all Insulin treatments from the pump and checks if they are still active, for now we just pick the last 20, trusting there has not been > 20 treatments in the last 3 hours
-        Treatments[] treatments = repo.getTreatments(20,"Insulin");             //Get the x most recent Insulin treatments
-        Date timeNow = new Date();
+                }
+            }
+        });
+    }
 
-        JSONObject iobJSONValue = iob.iobTotal(treatments, timeNow);            //Based on these treatments, get total IOB as of now
 
-        iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
-        try {
-            iobValueTextView.setText(iobJSONValue.getString("iob").toString());
-        } catch (JSONException e)  {
+    //setups the OpenAPS Loop
+    public void startOpenAPSLoop(){
 
-        }
+        // Retrieve a PendingIntent that will perform a broadcast
+        Intent alarmIntent = new Intent(this, openAPSReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+
+        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        int interval = 60000;
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
+        Toast.makeText(this, "OpenAPS will loop " + interval , Toast.LENGTH_LONG).show();
 
 
     }

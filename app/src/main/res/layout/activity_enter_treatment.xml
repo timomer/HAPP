@@ -37,7 +37,6 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
             android:hint="Enter Value"
             android:id="@+id/treatmentValue"/>
 

@@ -3,6 +3,7 @@ package com.hypodiabetic.happ;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputType;
@@ -21,6 +22,8 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.hypodiabetic.happ.integration.dexdrip.Intents;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +39,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
     private SimpleDateFormat dateFormatterTime;
     private EditText treatmentDate;
     private EditText treatmentTime;
+    private EditText treatmentValue;
     private DatePickerDialog treatmentDatePickerDialog;
     private TimePickerDialog treatmentTimePicker;
 
@@ -88,7 +92,8 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
 
         //Value picker
-
+        treatmentValue = (EditText) findViewById(R.id.treatmentValue);
+        treatmentValue.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
 
         //Date picker
@@ -179,6 +184,10 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
             repo.insert(treatment);
             Toast.makeText(this, treatment.treatment_value + " " + treatment.treatment_type + " entered", Toast.LENGTH_SHORT).show();
+
+            //Updates the OpenAPS
+
+
             finish();
         }
 
