@@ -1,0 +1,41 @@
+{
+  "sensitivities": [
+    {
+      "i": 0,
+      "start": "00:00:00",
+      "sensitivity": 120,
+      "offset": 0,
+      "x": 0
+    },
+    {
+      "i": 12,
+      "start": "06:00:00",
+      "sensitivity": 120,
+      "offset": 360,
+      "x": 1
+    },
+    {
+      "i": 18,
+      "start": "09:00:00",
+      "sensitivity": 120,
+      "offset": 540,
+      "x": 2
+    },
+    {
+      "i": 22,
+      "start": "11:00:00",
+      "sensitivity": 120,
+      "offset": 660,
+      "x": 3
+    },
+    {
+      "i": 40,
+      "start": "20:00:00",
+      "sensitivity": 120,
+      "offset": 1200,
+      "x": 4
+    }
+  ],
+  "action_type": "Fast",
+  "first": 1
+}

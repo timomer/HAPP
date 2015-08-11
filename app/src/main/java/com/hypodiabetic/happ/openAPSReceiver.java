@@ -5,8 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -24,18 +28,33 @@ public class openAPSReceiver extends BroadcastReceiver{
             TreatmentsRepo repo = new TreatmentsRepo(context);
 
             // TODO: 10/08/2015 openaps-js reads all Insulin treatments from the pump and checks if they are still active, for now we just pick the last 20, trusting there has not been > 20 treatments in the last 3 hours
-            Treatments[] treatments = repo.getTreatments(20,"Insulin");             //Get the x most recent Insulin treatments
+            Treatments[] treatments = repo.getTreatments(20,"Insulin");                 //Get the x most recent Insulin treatments
             Date timeNow = new Date();
 
-            JSONObject iobJSONValue = iob.iobTotal(treatments, timeNow);            //Based on these treatments, get total IOB as of now
+            JSONObject iobJSONValue = iob.iobTotal(treatments, timeNow);                //Based on these treatments, get total IOB as of now
 
             try {
-                MainActivity.getInstace().updateOpenAPSDetails(iobJSONValue);
+                MainActivity.getInstace().updateOpenAPSDetails(iobJSONValue);           //Updates the Main Activity Text View
+                //// TODO: 11/08/2015 get note, for example user entered, app suggested, etc?
+                saveHistoricalValues(iobJSONValue.getDouble("iob"),"",timeNow,"iob");   //Record the iob value to DB
 
             } catch (Exception e)  {
 
             }
 
         }
+
+    public void saveHistoricalValues(Double value, String note, Date datetime, String type){
+
+        //Long carbUnixTimeStamp = datetime.getTime() / 1000;
+
+        final historicalIOBCOB item = new historicalIOBCOB();
+        item.datetime = datetime.getTime();
+        item.note = note;
+        item.type = type;
+        item.value = value;
+        item.save();
+
+    }
 
 }

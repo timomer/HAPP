@@ -1,0 +1,13 @@
+{
+  "carbs_hr": 28,
+  "max_iob": 3,
+  "dia": 4,
+  "type": "current",
+  "current_basal": 0.9,
+  "max_daily_basal": 1.1,
+  "max_basal": 2,
+  "max_bg": 125,
+  "min_bg": 106,
+  "carbratio": 15,
+  "sens": 45
+}
