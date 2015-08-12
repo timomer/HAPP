@@ -51,13 +51,13 @@ public class BgGraphBuilder {
     final int hoursPreviewStep;
 
     private double endHour;
-    private final int numValues =(60/5)*24;
+    public final int numValues =(60/5)*24;
     private final List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
-    private final List<historicalIOBCOB> iobReadings = historicalIOBCOB.latestForGraph(numValues, start_time * fuzz);    //IOB Line
+    //private final List<historicalIOBCOB> iobReadings = historicalIOBCOB.latestForGraph(numValues, start_time * fuzz);    //IOB Line
     private List<PointValue> inRangeValues = new ArrayList<PointValue>();
     private List<PointValue> highValues = new ArrayList<PointValue>();
     private List<PointValue> lowValues = new ArrayList<PointValue>();
-    private List<PointValue> iobValues = new ArrayList<PointValue>();                                        //IOB line
+    //private List<PointValue> iobValues = new ArrayList<PointValue>();                                        //IOB line
     public Viewport viewport;
 
 
@@ -94,7 +94,7 @@ public class BgGraphBuilder {
 
     public List<Line> defaultLines() {
         addBgReadingValues();
-        addIOBValues();                                                                             //IOB line
+        //addIOBValues();                                                                             //IOB line
         List<Line> lines = new ArrayList<Line>();
         lines.add(minShowLine());
         lines.add(maxShowLine());
@@ -103,18 +103,18 @@ public class BgGraphBuilder {
         lines.add(inRangeValuesLine());
         lines.add(lowValuesLine());
         lines.add(highValuesLine());
-        lines.add(iobValuesLine());                                                                 //IOB line
+        //lines.add(iobValuesLine());                                                                 //IOB line
         return lines;
     }
 
-    public Line iobValuesLine(){                                                                    //IOB line
-        Line iobValuesLine = new Line(iobValues);
-        iobValuesLine.setColor(ChartUtils.COLOR_GREEN);
-        iobValuesLine.setHasLines(false);
-        iobValuesLine.setPointRadius(3);
-        iobValuesLine.setHasPoints(true);
-        return iobValuesLine;
-    }
+    //public Line iobValuesLine(){                                                                    //IOB line
+    //    Line iobValuesLine = new Line(iobValues);
+    //    iobValuesLine.setColor(ChartUtils.COLOR_GREEN);
+    //    iobValuesLine.setHasLines(false);
+    //    iobValuesLine.setPointRadius(3);
+    //    iobValuesLine.setHasPoints(true);
+    //    return iobValuesLine;
+    //}
 
     public Line highValuesLine() {
         Line highValuesLine = new Line(highValues);
@@ -143,7 +143,7 @@ public class BgGraphBuilder {
         return inRangeValuesLine;
     }
 
-    private void addBgReadingValues() {
+    public void addBgReadingValues() {
         for (Bg bgReading : bgReadings) {
             if (bgReading.sgv_double() >= 400) {
                 highValues.add(new PointValue((float) (bgReading.datetime/fuzz), (float) unitized(400)));
@@ -159,21 +159,21 @@ public class BgGraphBuilder {
         }
     }
 
-    public void addIOBValues(){                                                                     // IOB Line
-        for (historicalIOBCOB iobReading : iobReadings) {
-            iobValues.add(new PointValue((float) (iobReading.datetime/fuzz), (float) fitRange(iobReading.value)));
-        }
-    }
-    public double fitRange(double value){                                                           //IOB Line
-        Double yBgMax = highMark;
-        Double yBgMin = lowMark;
+    //public void addIOBValues(){                                                                     // IOB Line
+     //   for (historicalIOBCOB iobReading : iobReadings) {
+    //        iobValues.add(new PointValue((float) (iobReading.datetime/fuzz), (float) fitRange(iobReading.value)));
+    //    }
+    //}
+    //public double fitRange(double value){                                                           //IOB Line
+    //    Double yBgMax = highMark;
+    //    Double yBgMin = lowMark;
 
-        Double yIOBMax = 30D;
-        Double yIOBMin = 0.5D;
+    //    Double yIOBMax = 30D;
+    //    Double yIOBMin = 0.5D;
 
-        Double percent = (value - yIOBMin) / (yIOBMax - yIOBMin);
-        return percent * (yBgMax - yBgMin) + yBgMin;
-    }
+    //    Double percent = (value - yIOBMin) / (yIOBMax - yIOBMin);
+    //    return percent * (yBgMax - yBgMin) + yBgMin;
+    //}
 
     public Line highLine() {
         List<PointValue> highLineValues = new ArrayList<PointValue>();

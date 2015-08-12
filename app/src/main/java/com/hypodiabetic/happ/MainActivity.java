@@ -45,6 +45,7 @@ public class MainActivity extends Activity {
     private PendingIntent pendingIntent;
     private AlarmManager manager;
     private TextView iobValueTextView;
+    public ExtendedGraphBuilder extendedGraphBuilder;
 
     //xdrip start
     private LineChartView chart;
@@ -100,8 +101,8 @@ public class MainActivity extends Activity {
         previewChart = (PreviewLineChartView) findViewById(R.id.chart_preview);
         previewChart.setZoomType(ZoomType.HORIZONTAL);
 
-        chart.setLineChartData(bgGraphBuilder.lineData());
-        previewChart.setLineChartData(bgGraphBuilder.previewLineData());
+        chart.setLineChartData(extendedGraphBuilder.lineData());
+        previewChart.setLineChartData(extendedGraphBuilder.previewLineData());
         updateStuff = true;
 
         previewChart.setViewportCalculationEnabled(true);
@@ -140,7 +141,7 @@ public class MainActivity extends Activity {
     }
     public void setViewport() {
         if (tempViewport.left == 0.0 || holdViewport.left == 0.0 || holdViewport.right  >= (new Date().getTime())) {
-            previewChart.setCurrentViewport(bgGraphBuilder.advanceViewport(chart, previewChart));
+            previewChart.setCurrentViewport(extendedGraphBuilder.advanceViewport(chart, previewChart));
         } else {
             previewChart.setCurrentViewport(holdViewport);
         }
@@ -155,7 +156,7 @@ public class MainActivity extends Activity {
 
         if (lastBgreading != null) {
             notificationText.setText(lastBgreading.readingAge());
-            currentBgValueText.setText(bgGraphBuilder.unitized_string(lastBgreading.sgv_double()) + " " + lastBgreading.slopeArrow());
+            currentBgValueText.setText(extendedGraphBuilder.unitized_string(lastBgreading.sgv_double()) + " " + lastBgreading.slopeArrow());
             if ((new Date().getTime()) - (60000 * 16) - lastBgreading.datetime > 0) {
                 notificationText.setTextColor(Color.parseColor("#C30909"));
                 currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
@@ -163,9 +164,9 @@ public class MainActivity extends Activity {
                 notificationText.setTextColor(Color.WHITE);
             }
             double estimate = lastBgreading.sgv_double();
-            if(bgGraphBuilder.unitized(estimate) <= bgGraphBuilder.lowMark) {
+            if(extendedGraphBuilder.unitized(estimate) <= extendedGraphBuilder.lowMark) {
                 currentBgValueText.setTextColor(Color.parseColor("#C30909"));
-            } else if(bgGraphBuilder.unitized(estimate) >= bgGraphBuilder.highMark) {
+            } else if(extendedGraphBuilder.unitized(estimate) >= extendedGraphBuilder.highMark) {
                 currentBgValueText.setTextColor(Color.parseColor("#FFBB33"));
             } else {
                 currentBgValueText.setTextColor(Color.WHITE);
@@ -189,7 +190,10 @@ public class MainActivity extends Activity {
     protected void onResume(){
         super.onResume();
         //xdrip start
-        bgGraphBuilder = new BgGraphBuilder(getApplicationContext());
+        //bgGraphBuilder = new BgGraphBuilder(getApplicationContext());
+        extendedGraphBuilder = new ExtendedGraphBuilder(getApplicationContext());
+
+
         _broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
@@ -256,6 +260,10 @@ public class MainActivity extends Activity {
                 } catch (JSONException e)  {
 
                 }
+
+                //reloads charts with OpenAPS data
+                setupCharts();
+
             }
         });
     }

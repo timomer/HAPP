@@ -47,14 +47,14 @@ public class openAPSReceiver extends BroadcastReceiver{
     public void saveHistoricalValues(Double value, String note, Date datetime, String type){
 
         //Long carbUnixTimeStamp = datetime.getTime() / 1000;
-
-        final historicalIOBCOB item = new historicalIOBCOB();
-        item.datetime = datetime.getTime();
-        item.note = note;
-        item.type = type;
-        item.value = value;
-        item.save();
-
+        if (value > 0) {
+            final historicalIOBCOB item = new historicalIOBCOB();
+            item.datetime = datetime.getTime();
+            item.note = note;
+            item.type = type;
+            item.value = value;
+            item.save();
+        }
     }
 
 }

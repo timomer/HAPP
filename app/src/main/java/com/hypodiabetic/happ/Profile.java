@@ -15,7 +15,7 @@ public class Profile {
     public static final Integer max_iob = 3;                //maximum amount of non-bolus IOB OpenAPS will ever deliver
     public static final Double dia = 1.5;                   //Duration of Insulin Action (hours)
     public static final String type = "current";            //? live info from pump?
-    public static final Integer current_basal = 0;          //? live info from pump?
+    public static final Integer current_basal = 0;          //Your current background basal at this moment of time from the pump
     public static final Integer max_daily_basal = 0;        //?
     public static final Integer max_basal = 0;              //?
     public static final Integer min_bg = 90;                //low end of BG Target range
