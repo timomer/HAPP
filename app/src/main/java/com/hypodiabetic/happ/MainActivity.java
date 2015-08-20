@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,6 +24,7 @@ import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.nightwatch.SettingsActivity;
+import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
@@ -32,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.List;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.ColumnChartData;
@@ -51,6 +54,7 @@ public class MainActivity extends Activity {
     private AlarmManager manager;
     private TextView iobValueTextView;
     private TextView cobValueTextView;
+    private TextView sysMsg;
     public ExtendedGraphBuilder extendedGraphBuilder;
 
     private ColumnChartView iobcobChart;
@@ -304,20 +308,32 @@ public class MainActivity extends Activity {
 
     }
 
-    public void getCOBCommand(View view){
-        TreatmentsRepo repo = new TreatmentsRepo(this);
+    public void runThis(View view){
 
-        // TODO: 10/08/2015 openaps-js reads all Insulin treatments from the pump and checks if they are still active, for now we just pick the last 20, trusting there has not been > 20 treatments in the last 3 hours
-        Treatments[] treatments = repo.getTreatments(20,"all");                 //Get the x most recent Insulin treatments
-        Date timeNow = new Date();
+        int numValues =5;
+        double fuzz = (1000 * 30 * 5);
+        double start_time = (new Date().getTime() - ((60000 * 60 * 24)))/fuzz;
 
-        JSONObject cobJSONValue = cob.cobTotal(treatments, timeNow);                //Based on these treatments, get total IOB as of now
-
-        cobValueTextView = (TextView) findViewById(R.id.cobValue);
+        List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
+        JSONObject pumpTemp = new JSONObject();
         try {
-            cobValueTextView.setText(cobJSONValue.getString("display"));
-        }  catch (JSONException e){
+            pumpTemp.put("rate", 0);
+            pumpTemp.put("duration", 0);
+        }catch (Exception e)  {
+
         }
+        TreatmentsRepo repo = new TreatmentsRepo(this);
+        Date dateVar = new Date();
+        Treatments[] treatments = repo.getTreatments(20, "Insulin");
+        JSONObject iobJSONValue = iob.iobTotal(treatments, dateVar);
+
+        JSONObject reply = new JSONObject();
+        reply = determine_basal.runOpenAPS(bgReadings, pumpTemp,iobJSONValue);
+
+        sysMsg = (TextView) findViewById(R.id.sysmsg);
+        sysMsg.setText(reply.toString());
+        Log.i("MSG: ", reply.toString());
+
     }
 
 }

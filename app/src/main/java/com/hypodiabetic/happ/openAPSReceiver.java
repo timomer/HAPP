@@ -37,7 +37,7 @@ public class openAPSReceiver extends BroadcastReceiver{
             Date dateVar = new Date();
             Treatments[] treatments = repo.getTreatments(20, "Insulin");                 //Get the x most recent Insulin treatments
             Treatments[] cobtreatments = repo.getTreatments(20, "all");
-            Collections.reverse(Arrays.asList(treatments));                              //Sort the Treatments from oldest to newest
+            Collections.reverse(Arrays.asList(cobtreatments));                              //Sort the Treatments from oldest to newest
 
             for (int v=0; v<=5; v++) {
                 JSONObject iobcobValue = new JSONObject();
