@@ -21,7 +21,13 @@ public class Profile {
     public static final Integer min_bg = 90;                //low end of BG Target range
     public static final Integer max_bg = 144;               //high end of BG Target range
     public static final Integer carbratio = 15;             //? live info on current carb to insulin ratio?
-    public static final Integer sens = 0;                   //?
+    public static final Integer sens = 54;                   //? see getSensitivity below
+
+    //carb profile items
+    public static final Double getSensitivity = 25D;         //Insulin sensitivity at this time? In US format
+    public static final Double getCarbRatio = 8D;          //Grams of Carbs per 1 Unit of Insulin
+    public static final Double getCarbAbsorptionRate = 30D; //Carbs Disgested per hour http://diyps.org/2014/05/29/determining-your-carbohydrate-absorption-rate-diyps-lessons-learned/
+
 
     public static final Double isf = 1.5;                   //Insulin Sensitivity Factor (mg/dL/U)
     public static final Integer bgSuspend = min_bg - 20;    //temp to 0 if dropping below this BG

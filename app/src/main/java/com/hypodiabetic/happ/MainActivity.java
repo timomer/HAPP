@@ -23,15 +23,20 @@ import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.nightwatch.SettingsActivity;
+import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
+import lecho.lib.hellocharts.model.ColumnChartData;
 import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
 import lecho.lib.hellocharts.view.PreviewLineChartView;
 import lecho.lib.hellocharts.listener.ViewportChangeListener;
@@ -45,7 +50,10 @@ public class MainActivity extends Activity {
     private PendingIntent pendingIntent;
     private AlarmManager manager;
     private TextView iobValueTextView;
+    private TextView cobValueTextView;
     public ExtendedGraphBuilder extendedGraphBuilder;
+
+    private ColumnChartView iobcobChart;
 
     //xdrip start
     private LineChartView chart;
@@ -60,7 +68,6 @@ public class MainActivity extends Activity {
     public boolean updatingPreviewViewport = false;
     public boolean updatingChartViewport = false;
     public SharedPreferences prefs;
-    public BgGraphBuilder bgGraphBuilder;
     BroadcastReceiver _broadcastReceiver;
     BroadcastReceiver newDataReceiver;
     //xdrip end
@@ -94,6 +101,7 @@ public class MainActivity extends Activity {
 
     public void setupCharts() {
 
+        //BG charts
         updateStuff = false;
         chart = (LineChartView) findViewById(R.id.chart);
         chart.setZoomType(ZoomType.HORIZONTAL);
@@ -110,6 +118,13 @@ public class MainActivity extends Activity {
         previewChart.setViewportChangeListener(new ViewportListener());
         chart.setViewportChangeListener(new ChartViewPortListener());
         setViewport();
+
+        //IOB and COB chart
+        //iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
+        //iobcobChart.setColumnChartData(extendedGraphBuilder.columnData());
+        //Viewport iobv = new Viewport();
+        //iobv.set(iobcobChart.getWidth() / 4,iobcobChart.getHeight(),0,0);
+        //iobcobChart.setCurrentViewport(iobv);
     }
 
     //xdrip functions start
@@ -250,19 +265,23 @@ public class MainActivity extends Activity {
     }
 
     //Updates the OpenAPS details
-    public void updateOpenAPSDetails(final JSONObject details){
+    public void updateOpenAPSDetails(final JSONArray iobcobValues){
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
+                cobValueTextView = (TextView) findViewById(R.id.cobValue);
+
                 try {
-                    iobValueTextView.setText(details.getString("iob").toString());
-                } catch (JSONException e)  {
+                    iobValueTextView.setText(iobcobValues.getJSONObject(0).getString("iob"));
+                    cobValueTextView.setText(iobcobValues.getJSONObject(0).getString("cob"));
+                } catch (JSONException e) {
 
                 }
 
                 //reloads charts with OpenAPS data
-                setupCharts();
+                iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
+                iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(iobcobValues));
 
             }
         });
@@ -285,5 +304,20 @@ public class MainActivity extends Activity {
 
     }
 
+    public void getCOBCommand(View view){
+        TreatmentsRepo repo = new TreatmentsRepo(this);
+
+        // TODO: 10/08/2015 openaps-js reads all Insulin treatments from the pump and checks if they are still active, for now we just pick the last 20, trusting there has not been > 20 treatments in the last 3 hours
+        Treatments[] treatments = repo.getTreatments(20,"all");                 //Get the x most recent Insulin treatments
+        Date timeNow = new Date();
+
+        JSONObject cobJSONValue = cob.cobTotal(treatments, timeNow);                //Based on these treatments, get total IOB as of now
+
+        cobValueTextView = (TextView) findViewById(R.id.cobValue);
+        try {
+            cobValueTextView.setText(cobJSONValue.getString("display"));
+        }  catch (JSONException e){
+        }
+    }
 
 }

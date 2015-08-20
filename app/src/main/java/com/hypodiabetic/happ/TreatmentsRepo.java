@@ -127,14 +127,18 @@ public class TreatmentsRepo {
 
         //Open connection to read only
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String selectQuery =  "select * from (SELECT  " +
+        String selectQuery = "select * from (SELECT  " +
                 Treatments.KEY_ID + "," +
                 Treatments.KEY_TYPE + "," +
                 Treatments.KEY_datetime + "," +
                 Treatments.KEY_note + "," +
                 Treatments.KEY_value +
-                " FROM " + Treatments.TABLE + " WHERE " + Treatments.KEY_TYPE + " = '" + TreatmentType + "' order by " + Treatments.KEY_datetime + " DESC limit " + listLimit + ") order by " + Treatments.KEY_datetime + "  ASC";
-
+                " FROM " + Treatments.TABLE;
+        if (TreatmentType.equals("all")){
+            selectQuery = selectQuery + " order by " + Treatments.KEY_datetime + " DESC limit " + listLimit + ") order by " + Treatments.KEY_datetime + "  ASC";
+        } else {
+            selectQuery = selectQuery + " WHERE " + Treatments.KEY_TYPE + " = '" + TreatmentType + "' order by " + Treatments.KEY_datetime + " DESC limit " + listLimit + ") order by " + Treatments.KEY_datetime + "  ASC";
+        }
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
 

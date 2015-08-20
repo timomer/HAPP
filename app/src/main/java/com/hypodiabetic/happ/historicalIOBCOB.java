@@ -38,13 +38,27 @@ public class historicalIOBCOB extends Model {
     @Column(name = "note")
     public String note;
 
-    public static List<historicalIOBCOB> latestForGraph(int number, double startTime) {
+    public static List<historicalIOBCOB> latestForGraphIOB(int number, double startTime) {
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(1);
 
         return new Select()
                 .from(historicalIOBCOB.class)
                 .where("datetime >= " + df.format(startTime))
+                .where("type = 'iob'")
+                .orderBy("datetime desc")
+                .limit(number)
+                .execute();
+    }
+
+    public static List<historicalIOBCOB> latestForGraphCOB(int number, double startTime) {
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(1);
+
+        return new Select()
+                .from(historicalIOBCOB.class)
+                .where("datetime >= " + df.format(startTime))
+                .where("type = 'cob'")
                 .orderBy("datetime desc")
                 .limit(number)
                 .execute();

@@ -99,17 +99,21 @@ public class iob {
         try {
 
             for (int i = 0; i < treatments.length; i++) {
-                if (treatments[i].treatment_datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
-                    Double dia = Profile.dia;
-                    JSONObject tIOB = iobCalc(treatments[i], time, dia);
-                    if (tIOB.getDouble("iobContrib") > 0) iob += tIOB.getDouble("iobContrib");
-                    if (tIOB.getDouble("activityContrib") > 0) activity += tIOB.getDouble("activityContrib");
-                    // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
-                    if (treatments[i].treatment_value >= 0.2 && treatments[i].treatment_note != null && treatments[i].treatment_note.equals("bolus")) { //Whats going on here?
-                       JSONObject bIOB = iobCalc(treatments[i], time, dia / 2);
-                       //console.log(treatment);
-                       //console.log(bIOB);
-                       if (bIOB.getDouble("iobContrib") > 0) bolusiob += bIOB.getDouble("iobContrib");
+                if (treatments[i].treatment_type.equals("Insulin")) {
+                    if (treatments[i].treatment_datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
+                        Double dia = Profile.dia;
+                        JSONObject tIOB = iobCalc(treatments[i], time, dia);
+                        if (tIOB.getDouble("iobContrib") > 0) iob += tIOB.getDouble("iobContrib");
+                        if (tIOB.getDouble("activityContrib") > 0)
+                            activity += tIOB.getDouble("activityContrib");
+                        // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
+                        if (treatments[i].treatment_value >= 0.2 && treatments[i].treatment_note != null && treatments[i].treatment_note.equals("bolus")) { //Whats going on here?
+                            JSONObject bIOB = iobCalc(treatments[i], time, dia / 2);
+                            //console.log(treatment);
+                            //console.log(bIOB);
+                            if (bIOB.getDouble("iobContrib") > 0)
+                                bolusiob += bIOB.getDouble("iobContrib");
+                        }
                     }
                 }
             }
