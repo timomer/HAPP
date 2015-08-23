@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by tim on 11/08/2015.
@@ -29,25 +30,26 @@ public class openAPSReceiver extends BroadcastReceiver{
             // For our recurring task, we'll just display a message
             Toast.makeText(context, "Running OpenAPS", Toast.LENGTH_LONG).show();
 
-            TreatmentsRepo repo = new TreatmentsRepo(context);
+            //TreatmentsRepo repo = new TreatmentsRepo(context);
 
             // TODO: 10/08/2015 openaps-js reads all Insulin treatments from the pump and checks if they are still active, for now we just pick the last 20, trusting there has not been > 20 treatments in the last 3 hours
             // Gets the current and future iob and cob values
             JSONArray iobcobValues = new JSONArray();
             Date dateVar = new Date();
-            Treatments[] treatments = repo.getTreatments(20, "Insulin");                 //Get the x most recent Insulin treatments
-            Treatments[] cobtreatments = repo.getTreatments(20, "all");
+            List treatments = Treatments.latestTreatments(20, "Insulin");                   //Get the x most recent Insulin treatments
+            List cobtreatments = Treatments.latestTreatments(20,null);
             Collections.reverse(Arrays.asList(cobtreatments));                              //Sort the Treatments from oldest to newest
 
             for (int v=0; v<=5; v++) {
                 JSONObject iobcobValue = new JSONObject();
 
-                JSONObject iobJSONValue = iob.iobTotal(treatments, dateVar);             //Based on these treatments, get total IOB as of dateVar
+                JSONObject iobJSONValue = iob.iobTotal(treatments, dateVar);                //Based on these treatments, get total IOB as of dateVar
                 JSONObject cobJSONValue = cob.cobTotal(cobtreatments, dateVar);
 
                 try {
                     iobcobValue.put("iob", iobJSONValue.getDouble("iob"));
                     iobcobValue.put("cob", cobJSONValue.getDouble("display"));
+                    iobcobValue.put("time", dateVar.getTime());
                     if (v==0){
                         iobcobValue.put("when", "now");
                     } else {
@@ -57,11 +59,9 @@ public class openAPSReceiver extends BroadcastReceiver{
                     iobcobValues.put(iobcobValue);
                     dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
                 } catch (Exception e)  {
-
+                    Toast.makeText(context, "Error getting IOB or COB Value on OpenAPS run", Toast.LENGTH_LONG).show();
                 }
             }
-
-            MainActivity.getInstace().updateOpenAPSDetails(iobcobValues);           //Updates the Main Activity screen
 
             try {
                 //// TODO: 11/08/2015 get note, for example user entered, app suggested, etc?
@@ -69,14 +69,15 @@ public class openAPSReceiver extends BroadcastReceiver{
                 saveHistoricalValues(iobcobValues.optJSONObject(0).getDouble("iob"),"",dateVar,"iob");   //Record the iob value to DB
                 saveHistoricalValues(iobcobValues.optJSONObject(0).getDouble("cob"),"",dateVar,"cob");   //Record the cob value to DB
             } catch (Exception e)  {
-
+                Toast.makeText(context, "Error saving IOB or COB Value on OpenAPS run to DB", Toast.LENGTH_LONG).show();
             }
+
+            MainActivity.getInstace().updateOpenAPSDetails(iobcobValues);                               //Updates the Main Activity screen
 
         }
 
     public void saveHistoricalValues(Double value, String note, Date datetime, String type){
 
-        //Long carbUnixTimeStamp = datetime.getTime() / 1000;
         if (value > 0) {
             final historicalIOBCOB item = new historicalIOBCOB();
             item.datetime = datetime.getTime();

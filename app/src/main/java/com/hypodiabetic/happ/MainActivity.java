@@ -55,6 +55,7 @@ public class MainActivity extends Activity {
     private TextView iobValueTextView;
     private TextView cobValueTextView;
     private TextView sysMsg;
+    private TextView openAPSStatus;
     public ExtendedGraphBuilder extendedGraphBuilder;
 
     private ColumnChartView iobcobChart;
@@ -168,6 +169,7 @@ public class MainActivity extends Activity {
     public void displayCurrentInfo() {
         final TextView currentBgValueText = (TextView)findViewById(R.id.currentBgValueRealTime);
         final TextView notificationText = (TextView)findViewById(R.id.notices);
+        final TextView deltaText = (TextView)findViewById(R.id.bgDelta);
         if ((currentBgValueText.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) > 0) {
             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
@@ -175,7 +177,11 @@ public class MainActivity extends Activity {
 
         if (lastBgreading != null) {
             notificationText.setText(lastBgreading.readingAge());
+            String bgDelta = new String(String.format("%.2f", lastBgreading.bgdelta));
+            if (lastBgreading.bgdelta >= 0) bgDelta = "+" + bgDelta;
+            deltaText.setText(bgDelta);
             currentBgValueText.setText(extendedGraphBuilder.unitized_string(lastBgreading.sgv_double()) + " " + lastBgreading.slopeArrow());
+
             if ((new Date().getTime()) - (60000 * 16) - lastBgreading.datetime > 0) {
                 notificationText.setTextColor(Color.parseColor("#C30909"));
                 currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
@@ -208,6 +214,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume(){
         super.onResume();
+
+        sinceLastOpenAPS(); //Update OpenAPS Last run time
+
         //xdrip start
         //bgGraphBuilder = new BgGraphBuilder(getApplicationContext());
         extendedGraphBuilder = new ExtendedGraphBuilder(getApplicationContext());
@@ -273,12 +282,13 @@ public class MainActivity extends Activity {
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
-                cobValueTextView = (TextView) findViewById(R.id.cobValue);
+                iobValueTextView    = (TextView) findViewById(R.id.iobValue);              //set value to textbox
+                cobValueTextView    = (TextView) findViewById(R.id.cobValue);
 
                 try {
                     iobValueTextView.setText(iobcobValues.getJSONObject(0).getString("iob"));
                     cobValueTextView.setText(iobcobValues.getJSONObject(0).getString("cob"));
+                    sinceLastOpenAPS();
                 } catch (JSONException e) {
 
                 }
@@ -291,6 +301,14 @@ public class MainActivity extends Activity {
         });
     }
 
+    //Updates OpenAPS time since last reading
+    public void sinceLastOpenAPS(){
+        openAPSStatus       = (TextView) findViewById(R.id.openAPSStatus);
+        historicalIOBCOB lastRun = new historicalIOBCOB();
+
+        lastRun = historicalIOBCOB.last();
+        if (lastRun != null) openAPSStatus.setText(lastRun.readingAge());
+    }
 
     //setups the OpenAPS Loop
     public void startOpenAPSLoop(){
@@ -322,9 +340,9 @@ public class MainActivity extends Activity {
         }catch (Exception e)  {
 
         }
-        TreatmentsRepo repo = new TreatmentsRepo(this);
+        //TreatmentsRepo repo = new TreatmentsRepo(this);
         Date dateVar = new Date();
-        Treatments[] treatments = repo.getTreatments(20, "Insulin");
+        List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
         JSONObject iobJSONValue = iob.iobTotal(treatments, dateVar);
 
         JSONObject reply = new JSONObject();

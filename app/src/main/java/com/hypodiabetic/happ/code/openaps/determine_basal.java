@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -79,7 +80,7 @@ public class determine_basal {
         //    requestedTemp.duration = duration;
         //    requestedTemp.rate = Math.round( rate * 1000 ) / 1000;
         //};
-
+        DecimalFormat df2 = new DecimalFormat(".##");
 
         Integer max_iob = Profile.max_iob; // maximum amount of non-bolus IOB OpenAPS will ever deliver
 
@@ -88,9 +89,9 @@ public class determine_basal {
         Integer bg = 0;
         JSONObject glucose_status = getLastGlucose(glucose_data);
         JSONObject requestedTemp = new JSONObject();
-        Integer eventualBG = 0;
+        Double eventualBG = 0D;
         String tick = "";
-        Integer snoozeBG = 0;
+        Double snoozeBG = 0D;
 
         if (Profile.target_bg != 0) {
             target_bg = Profile.target_bg;
@@ -106,23 +107,23 @@ public class determine_basal {
 
             bg = glucose_status.getInt("glucose");
 
-            if (glucose_status.getInt("delta") >= 0) {
-                tick = "+" + glucose_status.getInt("delta"); }
+            if (glucose_status.getDouble("delta") >= 0) {
+                tick = "+" + glucose_status.getString("delta"); }
             else {
                 tick = glucose_status.getString("delta");
             }
-            Log.i("IOB: ", iob_data.getInt("iob") + ", Bolus IOB: " + iob_data.getInt("bolusiob"));
-            Integer bgi = -iob_data.getInt("activity") * Profile.sens * 5;
-            Log.i("Avg. Delta: ", glucose_status.getInt("avgdelta") + ", BGI: " + bgi);
+            Log.i("HAPP: ", iob_data.getDouble("iob") + ", Bolus IOB: " + iob_data.getDouble("bolusiob"));
+            Double bgi = -iob_data.getDouble("activity") * Profile.sens * 5;
+            Log.i("HAPP: Avg. Delta: ", glucose_status.getDouble("avgdelta") + ", BGI: " + bgi);
             // project deviation over next 15 minutes
-            Integer deviation = Math.round( 15 / 5 * ( glucose_status.getInt("avgdelta") - bgi ) );
-            Log.i("15m deviation: ", deviation.toString());
-            Integer bolusContrib = iob_data.getInt("bolusiob") * Profile.sens;
-            Integer naive_eventualBG = Math.round( bg - (iob_data.getInt("iob") * Profile.sens) );
+            Double deviation = (double) Math.round( 15 / 5 * ( glucose_status.getDouble("avgdelta") - bgi ) );
+            Log.i("HAPP: 15m deviation: ", deviation.toString());
+            Double bolusContrib = iob_data.getDouble("bolusiob") * Profile.sens;
+            Double naive_eventualBG = (double) Math.round( bg - (iob_data.getDouble("iob") * Profile.sens) );
             eventualBG = naive_eventualBG + deviation;
-            Integer naive_snoozeBG = Math.round( naive_eventualBG + bolusContrib );
+            Double naive_snoozeBG = (double) Math.round( naive_eventualBG + bolusContrib );
             snoozeBG = naive_snoozeBG + deviation;
-            Log.i("Info:" ,"BG: " + bg + tick + " -> " + eventualBG + "-" + snoozeBG + " (Unadjusted: " + naive_eventualBG + "-" + naive_snoozeBG + ")");
+            Log.i("HAPP:" ,"BG: " + bg + tick + " -> " + eventualBG + "-" + snoozeBG + " (Unadjusted: " + naive_eventualBG + "-" + naive_snoozeBG + ")");
             if (eventualBG == 0) { Log.e("Error eventualBG: ", "could not calculate eventualBG"); }
 
             requestedTemp.put("temp", "absolute");
@@ -159,12 +160,12 @@ public class determine_basal {
                     if (bg < threshold) { // low glucose suspend mode: BG is < ~80
                         reason = "BG " + bg + "<" + threshold;
                         Log.i("HAPP: basal info: ", reason);
-                        if (glucose_status.getInt("delta") > 0) { // if BG is rising
-                            if (temps_data.getInt("rate") > Profile.current_basal) { // if a high-temp is running
+                        if (glucose_status.getDouble("delta") > 0) { // if BG is rising
+                            if (temps_data.getDouble("rate") > Profile.current_basal) { // if a high-temp is running
                                 //todo setTempBasal(0, 0); // cancel high temp
                                 sysMsg += "Cancel current High temp Basal";
                                 Log.i("HAPP: Set temp basal: ", "cancel high temp");
-                            } else if (temps_data.getInt("duration") != 0 && eventualBG > Profile.max_bg) { // if low-temped and predicted to go high from negative IOB
+                            } else if (temps_data.getDouble("duration") != 0 && eventualBG > Profile.max_bg) { // if low-temped and predicted to go high from negative IOB
                                 //todo setTempBasal(0, 0); // cancel low temp
                                 sysMsg += "Cancel current Low temp Basal";
                                 Log.i("HAPP: Set temp basal: ", "cancel low temp");
@@ -179,10 +180,10 @@ public class determine_basal {
                         }
                     } else {
                         // if BG is rising but eventual BG is below min, or BG is falling but eventual BG is above min
-                        if ((glucose_status.getInt("delta") > 0 && eventualBG < Profile.min_bg) || (glucose_status.getInt("delta") < 0 && eventualBG >= Profile.min_bg)) {
-                            if (temps_data.getInt("duration") > 0) { // if there is currently any temp basal running
+                        if ((glucose_status.getDouble("delta") > 0 && eventualBG < Profile.min_bg) || (glucose_status.getDouble("delta") < 0 && eventualBG >= Profile.min_bg)) {
+                            if (temps_data.getDouble("duration") > 0) { // if there is currently any temp basal running
                                 // if it's a low-temp and eventualBG < profile_data.max_bg, let it run a bit longer
-                                if (temps_data.getInt("rate") != 0 && eventualBG < Profile.max_bg) {
+                                if (temps_data.getDouble("rate") != 0 && eventualBG < Profile.max_bg) {
                                     reason = "BG" + tick + " but " + eventualBG + "<" + Profile.max_bg;
                                     Log.i("HAPP basal info: ", reason);
                                 } else {
@@ -199,13 +200,13 @@ public class determine_basal {
                             // if this is just due to boluses, we can snooze until the bolus IOB decays (at double speed)
                             if (snoozeBG > Profile.min_bg) { // if adding back in the bolus contribution BG would be above min
                                 // if BG is falling and high-temped, or rising and low-temped, cancel
-                                if (glucose_status.getInt("delta") < 0 && temps_data.getInt("rate") > Profile.current_basal) {
-                                    reason = tick + " and " + temps_data.getInt("rate") + ">" + Profile.current_basal;
+                                if (glucose_status.getDouble("delta") < 0 && temps_data.getDouble("rate") > Profile.current_basal) {
+                                    reason = tick + " and " + temps_data.getDouble("rate") + ">" + Profile.current_basal;
                                     //todo setTempBasal(0, 0); // cancel temp
                                     sysMsg += "Cancel current temp Basal";
                                     Log.i("HAPP: Set temp basal: ", "cancel temp");
-                                } else if (glucose_status.getInt("delta") > 0 && temps_data.getInt("rate") < Profile.current_basal) {
-                                    reason = tick + " and " + temps_data.getInt("rate") + "<" + Profile.current_basal;
+                                } else if (glucose_status.getDouble("delta") > 0 && temps_data.getDouble("rate") < Profile.current_basal) {
+                                    reason = tick + " and " + temps_data.getDouble("rate") + "<" + Profile.current_basal;
                                     //todo setTempBasal(0, 0); // cancel temp
                                     sysMsg += "Cancel current temp Basal";
                                     Log.i("HAPP: Set temp basal: ", "cancel temp");
@@ -218,24 +219,25 @@ public class determine_basal {
                                 // negative insulin required to get up to min:
                                 //var insulinReq = Math.max(0, (target_bg - eventualBG) / profile_data.sens);
                                 // use snoozeBG instead of eventualBG to more gradually ramp in any counteraction of the user's boluses
-                                Integer insulinReq = Math.max(0, (target_bg - snoozeBG) / Profile.sens);
+                                Double insulinReq = Math.max(0, (target_bg - snoozeBG) / Profile.sens);
                                 // rate required to deliver insulinReq less insulin over 30m:
-                                Integer rate = Profile.current_basal - (2 * insulinReq);
+                                Double rate = Profile.current_basal - (2 * insulinReq);
+                                df2.format(rate);
                                 // if required temp < existing temp basal
-                                if (temps_data.getInt("rate") != 0 && (temps_data.getInt("duration") > 0 && rate > temps_data.getInt("rate") - 0.1)) {
+                                if (temps_data.getDouble("rate") != 0 && (temps_data.getDouble("duration") > 0 && rate > (temps_data.getDouble("rate") - 0.1))) {
                                     reason = temps_data.getString("rate") + "<~" + rate.toString();
                                     Log.i("HAPP: basal info: ", reason);
                                 } else {
                                     reason = "Eventual BG " + eventualBG + "<" + Profile.min_bg;
                                     Log.i("HAPP: basal info: ", reason);
-                                    //setTempBasal(rate, 30);
+                                    //todo setTempBasal(rate, 30);
                                     sysMsg += "Temp Basal set for " + rate + " 30mins";
                                     Log.i("HAPP: Set temp basal: ", sysMsg);
                                 }
                             }
                         } else if (eventualBG > Profile.max_bg) { // if eventual BG is above target:
                             // if iob is over max, just cancel any temps
-                            Integer basal_iob = iob_data.getInt("iob") - iob_data.getInt("bolusiob");
+                            Double basal_iob = iob_data.getDouble("iob") - iob_data.getDouble("bolusiob");
                             if (basal_iob > max_iob) {
                                 reason = basal_iob + ">" + max_iob;
                                 //todo setTempBasal(0, 0);
@@ -244,18 +246,19 @@ public class determine_basal {
                             }
                             // calculate 30m high-temp required to get projected BG down to target
                             // additional insulin required to get down to max bg:
-                            Integer insulinReq = (target_bg - eventualBG) / Profile.sens;
+                            Double insulinReq = (target_bg - eventualBG) / Profile.sens;
                             // if that would put us over max_iob, then reduce accordingly
                             insulinReq = Math.min(insulinReq, max_iob-basal_iob);
 
                             // rate required to deliver insulinReq more insulin over 30m:
-                            Integer rate = Profile.current_basal - (2 * insulinReq);
-                            Integer maxSafeBasal = Math.min(2 * Profile.max_daily_basal, 4 * Profile.current_basal);
+                            Double rate = Profile.current_basal - (2 * insulinReq);
+                            df2.format(rate);
+                            Double maxSafeBasal = Math.min(2 * Profile.max_daily_basal, 4 * Profile.current_basal);
                             maxSafeBasal = Math.min(Profile.max_basal, maxSafeBasal);
                             if (rate > maxSafeBasal) {
                                 rate = maxSafeBasal;
                             }
-                            if ( temps_data.getInt("rate") != 0 && (temps_data.getInt("duration") > 0 && rate < temps_data.getInt("rate") + 0.1)) { // if required temp > existing temp basal
+                            if ( temps_data.getDouble("rate") != 0 && (temps_data.getDouble("duration") > 0 && rate < temps_data.getDouble("rate") + 0.1)) { // if required temp > existing temp basal
                                 reason = temps_data.getString("rate") + ">~" + rate.toString();
                                 Log.i("HAPP: basal info: ", reason);
                             } else {
@@ -278,6 +281,7 @@ public class determine_basal {
             }
 
             requestedTemp.put("reason", reason);
+            requestedTemp.put("sysMsg", sysMsg);
             Log.i("HAPP: Reason: ", requestedTemp.toString());
 
         } catch (JSONException e) {

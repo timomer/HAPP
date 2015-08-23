@@ -6,18 +6,19 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.hypodiabetic.happ.ApplicationContextProvider;
-import com.hypodiabetic.happ.DBHelper;
+//import com.hypodiabetic.happ.DBHelper;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Profile;
 import com.hypodiabetic.happ.R;
 import com.hypodiabetic.happ.Treatments;
-import com.hypodiabetic.happ.TreatmentsRepo;
+//import com.hypodiabetic.happ.TreatmentsRepo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -43,10 +44,9 @@ public class iob {
             time = new Date();
         }
 
-        if (treatment.treatment_type.equals("Insulin")) {                               //Im only ever passing Insulin, but anyway whatever
+        if (treatment.type.equals("Insulin")) {                               //Im only ever passing Insulin, but anyway whatever
 
-            long unixSeconds = treatment.treatment_datetime;
-            Date bolusTime = new Date(unixSeconds*1000L);                               // *1000 is to convert seconds to milliseconds
+            Date bolusTime = new Date(treatment.datetime);
             Long minAgo = (time.getTime() - bolusTime.getTime()) /1000/60;
 
             if (minAgo < 0) {
@@ -55,16 +55,16 @@ public class iob {
             }
             if (minAgo < peak) {
                 Double x = (minAgo/5 + 1) * diaratio;
-                iobContrib=treatment.treatment_value*(1-0.001852*x*x+0.001852*x);
+                iobContrib=treatment.value*(1-0.001852*x*x+0.001852*x);
                 //var activityContrib=sens*treatment.insulin*(2/dia/60/peak)*minAgo;
-                activityContrib=treatment.treatment_value*(2/dia/60/peak)*minAgo;
+                activityContrib=treatment.value*(2/dia/60/peak)*minAgo;
 
             }
             else if (minAgo < 180) {
                 Double x = (minAgo-peak)/5 * diaratio;
-                iobContrib=treatment.treatment_value*(0.001323*x*x - .054233*x + .55556);
+                iobContrib=treatment.value*(0.001323*x*x - .054233*x + .55556);
                 //var activityContrib=sens*treatment.insulin*(2/dia/60-(minAgo-peak)*2/dia/60/(60*dia-peak));
-                activityContrib=treatment.treatment_value*(2/dia/60-(minAgo-peak)*2/dia/60/(60*dia-peak));
+                activityContrib=treatment.value*(2/dia/60-(minAgo-peak)*2/dia/60/(60*dia-peak));
             }
             else {
                 iobContrib=0D;
@@ -88,7 +88,7 @@ public class iob {
     }
 
     //gets the total IOB from mutiple Treatments
-    public static JSONObject iobTotal(Treatments[] treatments, Date time) {
+    public static JSONObject iobTotal(List<Treatments> treatments, Date time) {
 
         JSONObject returnValue = new JSONObject();
 
@@ -98,17 +98,17 @@ public class iob {
 
         try {
 
-            for (int i = 0; i < treatments.length; i++) {
-                if (treatments[i].treatment_type.equals("Insulin")) {
-                    if (treatments[i].treatment_datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
+            for (Treatments treatment : treatments) {
+                if (treatment.type.equals("Insulin")) {
+                    if (treatment.datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
                         Double dia = Profile.dia;
-                        JSONObject tIOB = iobCalc(treatments[i], time, dia);
+                        JSONObject tIOB = iobCalc(treatment, time, dia);
                         if (tIOB.getDouble("iobContrib") > 0) iob += tIOB.getDouble("iobContrib");
                         if (tIOB.getDouble("activityContrib") > 0)
                             activity += tIOB.getDouble("activityContrib");
                         // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
-                        if (treatments[i].treatment_value >= 0.2 && treatments[i].treatment_note != null && treatments[i].treatment_note.equals("bolus")) { //Whats going on here?
-                            JSONObject bIOB = iobCalc(treatments[i], time, dia / 2);
+                        if (treatment.value >= 0.2 && treatment.note != null && treatment.note.equals("bolus")) { //Whats going on here?
+                            JSONObject bIOB = iobCalc(treatment, time, dia / 2);
                             //console.log(treatment);
                             //console.log(bIOB);
                             if (bIOB.getDouble("iobContrib") > 0)

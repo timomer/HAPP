@@ -41,14 +41,7 @@
             android:layout_weight="1.5"
             android:orientation="vertical">
 
-            <TextView
-                android:text="openAPS"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:textColor="@android:color/white"
-                android:gravity="center"
-                android:id="@+id/openAPSStatus"/>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -105,6 +98,15 @@
 
                 </LinearLayout>
             </LinearLayout>
+
+            <TextView
+                android:text="openAPS"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:id="@+id/openAPSStatus"/>
         </LinearLayout>
 
 
@@ -114,15 +116,6 @@
             android:layout_height="match_parent"
             android:layout_weight="2"
             android:orientation="vertical">
-
-            <TextView
-                android:text="openAPS"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1.8"
-                android:textColor="@android:color/white"
-                android:gravity="center"
-                android:id="@+id/notices"/>
 
             <TextView
                 android:text="BG"
@@ -140,6 +133,14 @@
                 android:gravity="center"
                 android:id="@+id/bgDelta"
                 android:textColor="@android:color/white"/>
+            <TextView
+                android:text="BG Notices"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.8"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:id="@+id/notices"/>
 
         </LinearLayout>
 

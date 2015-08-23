@@ -26,7 +26,6 @@
             android:name="AA_DB_VERSION"
             android:value="3" />
 
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
@@ -44,7 +43,6 @@
             android:name=".code.nightwatch.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
-
 
         <service
             android:name=".code.nightwatch.DataCollectionService"
@@ -67,9 +65,12 @@
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".openAPSReceiver"></receiver>
+        <receiver android:name=".openAPSReceiver" />
 
-
+        <activity
+            android:name=".pref_basal_layout"
+            android:label="@string/title_activity_pref_basal_layout" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen
+        android:key="button_openaps_category"
+        android:title="OpenAPS Options"
+        android:persistent="false">
+
+        <PreferenceCategory
+            android:title="OpenAPS General"
+            android:key="openAPS">
+
+            <EditTextPreference
+                android:key="target_bg"
+                android:title="Target BG"
+                android:numeric="decimal"
+                android:summary="Your target Blood Sugar."
+                android:defaultValue="100" />
+
+            <PreferenceScreen
+                android:key="button_openaps_basal_profile"
+                android:title="Pump Basal"
+                android:persistent="false">
+
+                <EditTextPreference android:key="basal_00" android:title="Basal 00:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_01" android:title="Basal 01:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_02" android:title="Basal 02:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_03" android:title="Basal 03:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_04" android:title="Basal 04:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_05" android:title="Basal 05:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_06" android:title="Basal 06:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_07" android:title="Basal 07:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_08" android:title="Basal 08:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_09" android:title="Basal 09:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_10" android:title="Basal 10:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_11" android:title="Basal 11:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_12" android:title="Basal 12:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_13" android:title="Basal 13:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_14" android:title="Basal 14:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_15" android:title="Basal 15:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_16" android:title="Basal 16:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_17" android:title="Basal 17:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_18" android:title="Basal 18:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_19" android:title="Basal 19:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_20" android:title="Basal 20:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_21" android:title="Basal 21:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_22" android:title="Basal 22:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_23" android:title="Basal 23:00" android:numeric="decimal" android:defaultValue="1"/>
+
+            </PreferenceScreen>
+
+        </PreferenceCategory>
+
+    </PreferenceScreen>
+</PreferenceScreen>

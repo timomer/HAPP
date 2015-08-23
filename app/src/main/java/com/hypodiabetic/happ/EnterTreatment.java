@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -136,16 +137,26 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
     //enters the last 8 treatments into a list
     public void loadLastTreatments(){
-        TreatmentsRepo repo = new TreatmentsRepo(this);
-        ArrayList<HashMap<String, String>> treatmentsList =  repo.getTreatmentsList(8);
+        List<Treatments> treatments = Treatments.latestTreatments(8,null);
+        ArrayList<HashMap<String, String>> treatmentsList = new ArrayList<>();
+
+        for (Treatments treatment : treatments){                                                    //Convert from a List<Object> Array to ArrayList
+            HashMap<String, String> treatmentItem = new HashMap<String, String>();
+
+            Date treatmentDate = new Date(treatment.datetime);
+            treatmentItem.put("date", treatmentDate.toString());
+            treatmentItem.put("value", treatment.value.toString());
+            treatmentItem.put("type", treatment.type);
+            treatmentsList.add(treatmentItem);
+        }
+
         ListView list = (ListView) findViewById(R.id.treatmentList);
-        ListAdapter adapter = new SimpleAdapter( this,treatmentsList, R.layout.treatments_list_layout, new String[] {Treatments.KEY_datetime, Treatments.KEY_value, Treatments.KEY_TYPE}, new int[] {R.id.treatmentDateTimeLayout,R.id.treatmentAmountLayout,R.id.treatmentTypeLayout});
+        SimpleAdapter adapter = new SimpleAdapter(this, treatmentsList,R.layout.treatments_list_layout, new String[] { "date","value","type" },  new int[] { R.id.treatmentDateTimeLayout,R.id.treatmentAmountLayout,R.id.treatmentTypeLayout});
         list.setAdapter(adapter);
     }
 
     //saves a new Treatment
     public void saveTreatmentToDB(View view){
-        TreatmentsRepo repo = new TreatmentsRepo(this);
         Treatments treatment = new Treatments();
 
         EditText editText_treatment_time;
@@ -166,26 +177,26 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
         treatmentDateTimeString     = editText_treatment_date.getText().toString() + editText_treatment_time.getText().toString();
 
-        treatment.treatment_value   = Double.parseDouble(editText_treatment_value.getText().toString());
-        treatment.treatment_type    = spinner_treatment_type.getSelectedItem().toString();
-        treatment.treatment_note    = spinner_notes.getSelectedItem().toString();
         try {
             treatmentDateTime = sdf.parse(treatmentDateTimeString);
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        Long carbUnixTimeStamp = treatmentDateTime.getTime() / 1000;
-        treatment.treatment_datetime = carbUnixTimeStamp;
+        treatment.datetime          = treatmentDateTime.getTime();
+        treatment.datetime_display  = treatmentDateTime.toString();
+        treatment.note              = spinner_notes.getSelectedItem().toString();
+        treatment.type              = spinner_treatment_type.getSelectedItem().toString();
+        treatment.value             = Double.parseDouble(editText_treatment_value.getText().toString());
 
-        if (treatment.treatment_value == 0){
+        if (treatment.value == 0){
             Toast.makeText(this, "Enter a value", Toast.LENGTH_SHORT).show();
         } else {
 
-            repo.insert(treatment);
-            Toast.makeText(this, treatment.treatment_value + " " + treatment.treatment_type + " entered", Toast.LENGTH_SHORT).show();
+            treatment.save();
+            Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 
-            //Updates the OpenAPS
+            //todo Updates the OpenAPS
 
 
             finish();

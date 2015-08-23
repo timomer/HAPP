@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.R;
 import com.hypodiabetic.happ.Treatments;
-import com.hypodiabetic.happ.TreatmentsRepo;
+//import com.hypodiabetic.happ.TreatmentsRepo;
 import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 

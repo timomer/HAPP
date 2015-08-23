@@ -10,6 +10,7 @@ import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 
 import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,8 +20,6 @@ import java.util.List;
 //get historical IOB and COB from DB
 @Table(name = "historicalIOBCOB", id = BaseColumns._ID)
 public class historicalIOBCOB extends Model {
-
-    public SharedPreferences prefs;
 
     @Expose
     @Column(name = "value")
@@ -37,6 +36,25 @@ public class historicalIOBCOB extends Model {
     @Expose
     @Column(name = "note")
     public String note;
+
+    public String readingAge() {
+        int minutesAgo = (int) Math.floor(timeSince()/(1000*60));
+        if (minutesAgo == 1) {
+            return minutesAgo + " Min";
+        }
+        return minutesAgo + " Mins";
+    }
+
+    public static historicalIOBCOB last() {
+        return new Select()
+                .from(historicalIOBCOB.class)
+                .orderBy("datetime desc")
+                .executeSingle();
+    }
+
+    public double timeSince() {
+        return new Date().getTime() - datetime;
+    }
 
     public static List<historicalIOBCOB> latestForGraphIOB(int number, double startTime) {
         DecimalFormat df = new DecimalFormat("#");
