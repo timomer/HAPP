@@ -38,13 +38,15 @@ public class openAPSReceiver extends BroadcastReceiver{
             Date dateVar = new Date();
             List treatments = Treatments.latestTreatments(20, "Insulin");                   //Get the x most recent Insulin treatments
             List cobtreatments = Treatments.latestTreatments(20,null);
-            Collections.reverse(Arrays.asList(cobtreatments));                              //Sort the Treatments from oldest to newest
+            Collections.reverse(cobtreatments);                                             //Sort the Treatments from oldest to newest
+
+            Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);
 
             for (int v=0; v<=5; v++) {
                 JSONObject iobcobValue = new JSONObject();
 
-                JSONObject iobJSONValue = iob.iobTotal(treatments, dateVar);                //Based on these treatments, get total IOB as of dateVar
-                JSONObject cobJSONValue = cob.cobTotal(cobtreatments, dateVar);
+                JSONObject iobJSONValue = iob.iobTotal(treatments, profileAsOfNow, dateVar);                //Based on these treatments, get total IOB as of dateVar
+                JSONObject cobJSONValue = cob.cobTotal(cobtreatments, profileAsOfNow, dateVar);
 
                 try {
                     iobcobValue.put("iob", iobJSONValue.getDouble("iob"));
@@ -58,6 +60,7 @@ public class openAPSReceiver extends BroadcastReceiver{
 
                     iobcobValues.put(iobcobValue);
                     dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
+                    profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);        //Gets Profile info for the new dateVar
                 } catch (Exception e)  {
                     Toast.makeText(context, "Error getting IOB or COB Value on OpenAPS run", Toast.LENGTH_LONG).show();
                 }

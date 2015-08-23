@@ -88,7 +88,7 @@ public class iob {
     }
 
     //gets the total IOB from mutiple Treatments
-    public static JSONObject iobTotal(List<Treatments> treatments, Date time) {
+    public static JSONObject iobTotal(List<Treatments> treatments, Profile profileNow, Date time) {
 
         JSONObject returnValue = new JSONObject();
 
@@ -101,7 +101,7 @@ public class iob {
             for (Treatments treatment : treatments) {
                 if (treatment.type.equals("Insulin")) {
                     if (treatment.datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
-                        Double dia = Profile.dia;
+                        Double dia = profileNow.dia;
                         JSONObject tIOB = iobCalc(treatment, time, dia);
                         if (tIOB.getDouble("iobContrib") > 0) iob += tIOB.getDouble("iobContrib");
                         if (tIOB.getDouble("activityContrib") > 0)
@@ -132,7 +132,7 @@ public class iob {
 
     // dont get this, appears to retirn two JSON arrays, one with bouls amounts and with the history of them? why?
     //UPDATE: this take the Insulin Boluses and TempBasal and formats them for processing - should not be needed as we log the Insulin treatment direct in App
-    public JSONArray calcTempTreatments(JSONArray pumpHistory) {
+    public JSONArray calcTempTreatments(JSONArray pumpHistory, Profile profileNow) {
         //TODO: var pumphistory: Appears to be a JSON Array of pump insulin delivery history, values: _type (Bolus,TempBasal,TempBasalDuration), timestamp, amount, temp (percent), rate, date, duration (min),
 
         JSONArray tempHistory = new JSONArray();
@@ -200,7 +200,7 @@ public class iob {
             //Date now = new Date();
             for (int i = 0; i < tempHistory.length(); i++) {
                 if (tempHistory.getJSONObject(i).getInt("duration") > 0) {
-                    Double netBasalRate = tempHistory.getJSONObject(i).getDouble("rate") - Profile.current_basal;
+                    Double netBasalRate = tempHistory.getJSONObject(i).getDouble("rate") - profileNow.current_basal;
                     if (netBasalRate < 0) {
                         tempBolusSize = -0.05;
                     } else {

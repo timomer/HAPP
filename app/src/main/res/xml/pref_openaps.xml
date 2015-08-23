@@ -13,24 +13,44 @@
                 android:key="target_bg"
                 android:title="Target BG"
                 android:numeric="decimal"
-                android:summary="Your target Blood Sugar."
+                android:summary="Your target Blood Sugar"
                 android:defaultValue="100" />
+            <EditTextPreference
+                android:key="dia"
+                android:title="dia"
+                android:numeric="decimal"
+                android:summary="Duration of Insulin Action (hours)"
+                android:defaultValue="1.5" />
+            <EditTextPreference
+                android:key="CarbAbsorptionRate"
+                android:title="Carb Absorption Rate"
+                android:numeric="decimal"
+                android:summary="Amount of Carbs digested per hour (grams)"
+                android:defaultValue="20" />
+            <EditTextPreference
+                android:key="max_iob"
+                android:title="Max IOB"
+                android:numeric="decimal"
+                android:summary="Maximum amount of non-bolus IOB OpenAPS can deliver"
+                android:defaultValue="20" />
+
 
             <PreferenceScreen
                 android:key="button_openaps_basal_profile"
                 android:title="Pump Basal"
+                android:summary="Hourly background Insulin your pump provides"
                 android:persistent="false">
 
-                <EditTextPreference android:key="basal_00" android:title="Basal 00:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_01" android:title="Basal 01:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_02" android:title="Basal 02:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_03" android:title="Basal 03:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_04" android:title="Basal 04:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_05" android:title="Basal 05:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_06" android:title="Basal 06:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_07" android:title="Basal 07:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_08" android:title="Basal 08:00" android:numeric="decimal" android:defaultValue="1"/>
-                <EditTextPreference android:key="basal_09" android:title="Basal 09:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_0" android:title="Basal 00:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_1" android:title="Basal 01:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_2" android:title="Basal 02:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_3" android:title="Basal 03:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_4" android:title="Basal 04:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_5" android:title="Basal 05:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_6" android:title="Basal 06:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_7" android:title="Basal 07:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_8" android:title="Basal 08:00" android:numeric="decimal" android:defaultValue="1"/>
+                <EditTextPreference android:key="basal_9" android:title="Basal 09:00" android:numeric="decimal" android:defaultValue="1"/>
                 <EditTextPreference android:key="basal_10" android:title="Basal 10:00" android:numeric="decimal" android:defaultValue="1"/>
                 <EditTextPreference android:key="basal_11" android:title="Basal 11:00" android:numeric="decimal" android:defaultValue="1"/>
                 <EditTextPreference android:key="basal_12" android:title="Basal 12:00" android:numeric="decimal" android:defaultValue="1"/>
@@ -45,6 +65,72 @@
                 <EditTextPreference android:key="basal_21" android:title="Basal 21:00" android:numeric="decimal" android:defaultValue="1"/>
                 <EditTextPreference android:key="basal_22" android:title="Basal 22:00" android:numeric="decimal" android:defaultValue="1"/>
                 <EditTextPreference android:key="basal_23" android:title="Basal 23:00" android:numeric="decimal" android:defaultValue="1"/>
+
+            </PreferenceScreen>
+
+            <PreferenceScreen
+                android:key="button_openaps_isf_profile"
+                android:title="Insulin Sensitivity Factor"
+                android:summary="How much one unit of Insulin will lower your BG"
+                android:persistent="false">
+
+                <EditTextPreference android:key="isf_0" android:title="isf 00:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_1" android:title="isf 01:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_2" android:title="isf 02:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_3" android:title="isf 03:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_4" android:title="isf 04:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_5" android:title="isf 05:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_6" android:title="isf 06:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_7" android:title="isf 07:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_8" android:title="isf 08:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_9" android:title="isf 09:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_10" android:title="isf 10:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_11" android:title="isf 11:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_12" android:title="isf 12:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_13" android:title="isf 13:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_14" android:title="isf 14:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_15" android:title="isf 15:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_16" android:title="isf 16:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_17" android:title="isf 17:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_18" android:title="isf 18:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_19" android:title="isf 19:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_20" android:title="isf 20:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_21" android:title="isf 21:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_22" android:title="isf 22:00" android:numeric="decimal" />
+                <EditTextPreference android:key="isf_23" android:title="isf 23:00" android:numeric="decimal" />
+
+            </PreferenceScreen>
+
+            <PreferenceScreen
+                android:key="button_openaps_carbratio_profile"
+                android:title="Carbohydrate Ratio"
+                android:summary="How many grams of carbohydrate are covered by one unit of insulin"
+                android:persistent="false">
+
+                <EditTextPreference android:key="carbratio_0" android:title="carbratio 00:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_1" android:title="carbratio 01:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_2" android:title="carbratio 02:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_3" android:title="carbratio 03:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_4" android:title="carbratio 04:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_5" android:title="carbratio 05:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_6" android:title="carbratio 06:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_7" android:title="carbratio 07:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_8" android:title="carbratio 08:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_9" android:title="carbratio 09:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_10" android:title="carbratio 10:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_11" android:title="carbratio 11:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_12" android:title="carbratio 12:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_13" android:title="carbratio 13:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_14" android:title="carbratio 14:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_15" android:title="carbratio 15:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_16" android:title="carbratio 16:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_17" android:title="carbratio 17:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_18" android:title="carbratio 18:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_19" android:title="carbratio 19:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_20" android:title="carbratio 20:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_21" android:title="carbratio 21:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_22" android:title="carbratio 22:00" android:numeric="decimal" />
+                <EditTextPreference android:key="carbratio_23" android:title="carbratio 23:00" android:numeric="decimal" />
 
             </PreferenceScreen>
 

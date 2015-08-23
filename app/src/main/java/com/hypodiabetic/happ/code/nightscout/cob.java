@@ -29,7 +29,7 @@ public class cob {
 
 
     //main function
-    public static JSONObject cobTotal(List<Treatments> treatments, Date timeNow) {
+    public static JSONObject cobTotal(List<Treatments> treatments, Profile profileNow, Date timeNow) {
         //Var treatments        - Array of Insulin and Carb treatments over X time period
 
         //Collections.reverse(Arrays.asList(treatments));                                             //Sort the Treatments from oldest to newest **we do this before calling this function, dont do it again**
@@ -54,17 +54,17 @@ public class cob {
 
                         lastCarbs = treatment;
                         JSONObject cCalc = new JSONObject();
-                        cCalc = cobCalc(treatment, lastDecayedBy, timeNow);
+                        cCalc = cobCalc(treatment, lastDecayedBy, profileNow, timeNow);
                         Double decaysin_hr = (cCalc.getDouble("decayedBy") - timeNow.getTime()) / 1000 / 60 / 60;
 
                         if (decaysin_hr > -10) {
-                            Double actStart = iob.iobTotal(treatments, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
+                            Double actStart = iob.iobTotal(treatments, profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
                             Date decayedByDate = new Date(cCalc.getLong("decayedBy"));
-                            Double actEnd = iob.iobTotal(treatments, decayedByDate).getDouble("activity");
+                            Double actEnd = iob.iobTotal(treatments, profileNow, decayedByDate).getDouble("activity");
                             Double avgActivity = (actStart + actEnd) / 2;
 
-                            Double delayedCarbs = avgActivity * liverSensRatio * Profile.getSensitivity / Profile.getCarbRatio;
-                            Long delayMinutes = Math.round(delayedCarbs / Profile.getCarbAbsorptionRate * 60);
+                            Double delayedCarbs = avgActivity * liverSensRatio * profileNow.isf / profileNow.carbRatio;
+                            Long delayMinutes = Math.round(delayedCarbs / profileNow.carbAbsorptionRate * 60);
 
                             if (delayMinutes > 0) {
                                 Date delayed = new Date(cCalc.getLong("decayedBy") + (delayMinutes * 1000));
@@ -82,8 +82,8 @@ public class cob {
 
                         if (decaysin_hr > 0) {
                             //console.info('Adding ' + delayMinutes + ' minutes to decay of ' + treatment.carbs + 'g bolus at ' + treatment.mills);
-                            totalCOB += Math.min(treatment.value, decaysin_hr * Profile.getCarbAbsorptionRate);
-                            //console.log("cob:", Math.min(cCalc.initialCarbs, decaysin_hr * profile.getCarbAbsorptionRate(treatment.mills)),cCalc.initialCarbs,decaysin_hr,profile.getCarbAbsorptionRate(treatment.mills));
+                            totalCOB += Math.min(treatment.value, decaysin_hr * profileNow.carbAbsorptionRate);
+                            //console.log("cob:", Math.min(cCalc.initialCarbs, decaysin_hr * profileNow.carbAbsorptionRate(treatment.mills)),cCalc.initialCarbs,decaysin_hr,profileNow.carbAbsorptionRate(treatment.mills));
                             isDecaying = cCalc.getInt("isDecaying");
                         } else {
                             totalCOB = 0D;
@@ -94,14 +94,15 @@ public class cob {
         } catch (JSONException e){
         }
 
-        Double rawCarbImpact = isDecaying * Profile.getSensitivity / Profile.getCarbRatio * Profile.getCarbAbsorptionRate / 60;
+        Double rawCarbImpact = isDecaying * profileNow.isf / profileNow.carbRatio * profileNow.carbAbsorptionRate / 60;
+        if (Double.isNaN(rawCarbImpact)) rawCarbImpact = 0D;
         Long display = Math.round(totalCOB * 10) / 10;
 
         JSONObject returnObject = new JSONObject();
         try {
             returnObject.put("decayedBy", lastDecayedBy);
             returnObject.put("isDecaying", isDecaying);
-            returnObject.put("carbs_hr", Profile.getCarbAbsorptionRate);
+            returnObject.put("carbs_hr", profileNow.carbAbsorptionRate);
             returnObject.put("rawCarbImpact", rawCarbImpact);
             returnObject.put("cob", totalCOB);
             returnObject.put("display", display);
@@ -133,7 +134,7 @@ public class cob {
         return returnObject;
     }
 
-    public static JSONObject cobCalc(Treatments treatment, Date lastDecayedBy, Date time) {
+    public static JSONObject cobCalc(Treatments treatment, Date lastDecayedBy, Profile profileNow, Date time) {
 
         Integer delay = 20;             //Delay in mins before carbs become active
         Integer isDecaying = 0;
@@ -145,7 +146,7 @@ public class cob {
 
             Date carbTime = new Date(treatment.datetime);
 
-            Double carbs_hr = Profile.getCarbAbsorptionRate;
+            Double carbs_hr = profileNow.carbAbsorptionRate;
             Double carbs_min = carbs_hr / 60;
 
             Long minutesleft = ((lastDecayedBy.getTime() - carbTime.getTime()) ) / 1000 / 60;

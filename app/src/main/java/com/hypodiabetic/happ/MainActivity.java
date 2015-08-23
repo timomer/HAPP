@@ -87,6 +87,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ins = this;
+        PreferenceManager.setDefaultValues(this, R.xml.pref_openaps, false);                        //Sets default OpenAPS Preferences if the user has not
 
         //xdrip start
         //Fabric.with(this, new Crashlytics()); todo not sure what this is for? Fabric is twitter? http://docs.fabric.io/android/twitter/twitter.html
@@ -340,13 +341,17 @@ public class MainActivity extends Activity {
         }catch (Exception e)  {
 
         }
-        //TreatmentsRepo repo = new TreatmentsRepo(this);
+
         Date dateVar = new Date();
+        Profile profileNow = new Profile().ProfileAsOf(dateVar,this);
+
+        //TreatmentsRepo repo = new TreatmentsRepo(this);
+
         List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
-        JSONObject iobJSONValue = iob.iobTotal(treatments, dateVar);
+        JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
 
         JSONObject reply = new JSONObject();
-        reply = determine_basal.runOpenAPS(bgReadings, pumpTemp,iobJSONValue);
+        reply = determine_basal.runOpenAPS(bgReadings, pumpTemp,iobJSONValue, profileNow);
 
         sysMsg = (TextView) findViewById(R.id.sysmsg);
         sysMsg.setText(reply.toString());

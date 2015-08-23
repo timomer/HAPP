@@ -68,8 +68,8 @@
         <receiver android:name=".openAPSReceiver" />
 
         <activity
-            android:name=".pref_basal_layout"
-            android:label="@string/title_activity_pref_basal_layout" >
+            android:name=".isfList"
+            android:label="@string/title_activity_isf_list" >
         </activity>
     </application>
 
