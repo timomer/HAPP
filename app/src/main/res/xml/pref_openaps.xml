@@ -32,7 +32,7 @@
                 android:title="Max IOB"
                 android:numeric="decimal"
                 android:summary="Maximum amount of non-bolus IOB OpenAPS can deliver"
-                android:defaultValue="20" />
+                android:defaultValue="3" />
 
 
             <PreferenceScreen

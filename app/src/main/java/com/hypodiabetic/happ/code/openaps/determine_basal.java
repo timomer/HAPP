@@ -82,7 +82,7 @@ public class determine_basal {
         //};
         DecimalFormat df2 = new DecimalFormat(".##");
 
-        Integer max_iob = profileNow.max_iob; // maximum amount of non-bolus IOB OpenAPS will ever deliver
+        Double max_iob = profileNow.max_iob; // maximum amount of non-bolus IOB OpenAPS will ever deliver
 
         // if target_bg is set, great. otherwise, if min and max are set, then set target to their average
         Double target_bg = 0D;

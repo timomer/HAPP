@@ -8,7 +8,9 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
@@ -19,15 +21,16 @@ import android.text.TextUtils;
 
 import com.hypodiabetic.happ.R;
 
+import java.util.prefs.Preferences;
+
 public class SettingsActivity extends PreferenceActivity {
     public static SharedPreferences prefs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getFragmentManager().beginTransaction().replace(android.R.id.content, new AllPrefsFragment()).commit();
 
-        getFragmentManager().beginTransaction().replace(android.R.id.content,
-                new AllPrefsFragment()).commit();
     }
 
     @Override
@@ -70,6 +73,12 @@ public class SettingsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("dex_collection_method"));
             bindPreferenceSummaryToValue(findPreference("units"));
             bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
+
+            for (int x=0; x<24; x++ ){
+                bindPreferenceSummaryToValue(findPreference("basal_"+x));
+                bindPreferenceSummaryToValue(findPreference("isf_"+x));
+                bindPreferenceSummaryToValue(findPreference("carbratio_"+x));
+            }
 
             final PreferenceCategory dataSource = (PreferenceCategory) findPreference("dataSource");
             final Preference share_poll = findPreference("share_poll");
@@ -160,8 +169,11 @@ public class SettingsActivity extends PreferenceActivity {
                     }
                 }
             } else {
+
                 preference.setSummary(stringValue);
+
             }
+
             return true;
         }
     };

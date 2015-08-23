@@ -21,7 +21,7 @@ public class Profile extends Model{
 
     //OpenAPS expected Profile settings
     public Double   carbAbsorptionRate;             //Carbs Disgested per hour http://diyps.org/2014/05/29/determining-your-carbohydrate-absorption-rate-diyps-lessons-learned/
-    public Integer  max_iob;                        //maximum amount of non-bolus IOB OpenAPS will ever deliver
+    public Double  max_iob;                        //maximum amount of non-bolus IOB OpenAPS will ever deliver
     public Double   dia;                            //Duration of Insulin Action (hours)
     public Double   current_basal;                  //Your current background basal at this moment of time
     public Double   max_bg;                         //high end of BG Target range
@@ -41,20 +41,20 @@ public class Profile extends Model{
         Profile ProfileNow = new Profile();
 
         //OpenAPS expected Profile settings
-        ProfileNow.carbAbsorptionRate  = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
-        ProfileNow.max_iob             = 3;
-        ProfileNow.dia                 = Double.parseDouble(prefs.getString("dia", "1.5"));
-        ProfileNow.current_basal       = getCurrent_basal(thisTime, prefs);
-        ProfileNow.max_bg              = Double.parseDouble(prefs.getString("highValue", "170"));
-        ProfileNow.min_bg              = Double.parseDouble(prefs.getString("lowValue", "70"));
-        ProfileNow.isf                 = getCurrent_isf(thisTime, prefs);
-        ProfileNow.carbRatio           = getCurrent_carbratio(thisTime, prefs);
+        ProfileNow.carbAbsorptionRate   = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
+        ProfileNow.max_iob              = Double.parseDouble(prefs.getString("max_iob", "3"));
+        ProfileNow.dia                  = Double.parseDouble(prefs.getString("dia", "1.5"));
+        ProfileNow.current_basal        = getCurrent_basal(thisTime, prefs);
+        ProfileNow.max_bg               = Double.parseDouble(prefs.getString("highValue", "170"));
+        ProfileNow.min_bg               = Double.parseDouble(prefs.getString("lowValue", "70"));
+        ProfileNow.isf                  = getCurrent_isf(thisTime, prefs);
+        ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
-        ProfileNow.max_basal = 0D;
-        ProfileNow.max_daily_basal = 0D;
-        ProfileNow.type = "current";
+        ProfileNow.max_basal            = 0D;
+        ProfileNow.max_daily_basal      = 0D;
+        ProfileNow.type                 = "current";
 
-        ProfileNow.target_bg           = Double.parseDouble(prefs.getString("target_bg", "100"));
+        ProfileNow.target_bg            = Double.parseDouble(prefs.getString("target_bg", "100"));
 
         return ProfileNow;
     }
