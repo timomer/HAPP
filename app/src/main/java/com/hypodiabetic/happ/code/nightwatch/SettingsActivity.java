@@ -169,11 +169,19 @@ public class SettingsActivity extends PreferenceActivity {
                     }
                 }
             } else {
+                if (preference.getKey().contains("basal_") || preference.getKey().contains("isf_") || preference.getKey().contains("carbratio_")){
+                    //24H Profile info, if preference has no value, get set summary to value of parent (this is what Profile code does)
+                    if (stringValue.equals("")) {
+                        preference.setSummary("<Inherits from parent, or defaults to 0>");
+                    } else {
+                        preference.setSummary(stringValue);
+                    }
 
-                preference.setSummary(stringValue);
-
+                } else {
+                    preference.setSummary(stringValue);
+                }
             }
-
+            //preference.setSummary("Willy");
             return true;
         }
     };

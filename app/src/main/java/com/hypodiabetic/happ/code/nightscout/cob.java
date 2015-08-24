@@ -95,7 +95,7 @@ public class cob {
         }
 
         Double rawCarbImpact = isDecaying * profileNow.isf / profileNow.carbRatio * profileNow.carbAbsorptionRate / 60;
-        if (Double.isNaN(rawCarbImpact)) rawCarbImpact = 0D;
+        if (Double.isNaN(rawCarbImpact) || Double.isInfinite(rawCarbImpact)) rawCarbImpact = 0D;
         Long display = Math.round(totalCOB * 10) / 10;
 
         JSONObject returnObject = new JSONObject();

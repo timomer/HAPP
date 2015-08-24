@@ -21,7 +21,7 @@ public class Profile extends Model{
 
     //OpenAPS expected Profile settings
     public Double   carbAbsorptionRate;             //Carbs Disgested per hour http://diyps.org/2014/05/29/determining-your-carbohydrate-absorption-rate-diyps-lessons-learned/
-    public Double  max_iob;                        //maximum amount of non-bolus IOB OpenAPS will ever deliver
+    public Double   max_iob;                        //maximum amount of non-bolus IOB OpenAPS will ever deliver
     public Double   dia;                            //Duration of Insulin Action (hours)
     public Double   current_basal;                  //Your current background basal at this moment of time
     public Double   max_bg;                         //high end of BG Target range
@@ -33,8 +33,8 @@ public class Profile extends Model{
     public Double max_daily_basal = 0D;             //?
     public String type = "current";                 //? live info from pump?
 
-    //openaps profile.json items
     public Double target_bg;                        //OpenAPS Target BG
+
 
     public static Profile ProfileAsOf(Date thisTime, Context c){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
@@ -66,7 +66,7 @@ public class Profile extends Model{
         Double basalNow;
 
         while (true) {
-            if (prefs.getString("basal_" + hourNow, "empty").equals("empty")) {
+            if (prefs.getString("basal_" + hourNow, "empty").equals("empty") || prefs.getString("basal_" + hourNow, "").equals("")) {
                 hourNow--;
                 if (hourNow < 0){                                                                   //Cannot find a Basal Rate for this time or previous time
                     basalNow = 0D;
@@ -86,7 +86,7 @@ public class Profile extends Model{
         Double isfNow;
 
         while (true) {
-            if (prefs.getString("isf_" + hourNow, "empty").equals("empty")) {
+            if (prefs.getString("isf_" + hourNow, "empty").equals("empty") || prefs.getString("isf_" + hourNow, "").equals("")) {
                 hourNow--;
                 if (hourNow < 0){                                                                   //Cannot find a Basal Rate for this time or previous time
                     isfNow = 0D;
@@ -106,14 +106,14 @@ public class Profile extends Model{
         Integer carbratioNow;
 
         while (true) {
-            if (prefs.getString("carbratio_" + hourNow, "empty").equals("empty")) {
+            if (prefs.getString("carbratio_" + hourNow, "empty").equals("empty") || prefs.getString("carbratio_" + hourNow, "").equals("")) {
                 hourNow--;
                 if (hourNow < 0){                                                                   //Cannot find a Basal Rate for this time or previous time
                     carbratioNow = 0;
                     break;
                 }
             } else {
-                carbratioNow = prefs.getInt("carbratio_" + hourNow, 0);            //Found a Basal rate for this time or a time before
+                carbratioNow = Integer.parseInt(prefs.getString("carbratio_" + hourNow, "0"));            //Found a Basal rate for this time or a time before
                 break;
             }
         }
