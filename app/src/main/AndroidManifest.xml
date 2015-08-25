@@ -71,6 +71,14 @@
             android:name=".isfList"
             android:label="@string/title_activity_isf_list" >
         </activity>
+        <activity
+            android:name=".BolusWizardActivity"
+            android:label="@string/title_activity_bolus_wizard"
+            android:parentActivityName=".EnterTreatment" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hypodiabetic.happ.EnterTreatment" />
+        </activity>
     </application>
 
 </manifest>

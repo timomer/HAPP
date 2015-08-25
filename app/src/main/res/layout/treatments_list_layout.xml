@@ -4,6 +4,13 @@
     android:orientation="horizontal">
 
     <TextView
+        android:layout_width="1dip"
+        android:layout_height="1dip"
+        android:id="@+id/treatmentID"
+        android:visibility="invisible"
+        android:layout_weight="0"/>
+
+    <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="6dip"

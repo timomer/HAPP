@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,11 +15,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -43,6 +46,8 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
     private EditText treatmentValue;
     private DatePickerDialog treatmentDatePickerDialog;
     private TimePickerDialog treatmentTimePicker;
+    private SimpleAdapter adapter;
+    private Integer selectedListItem;
 
 
     @Override
@@ -50,9 +55,10 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_treatment);
 
-
         setupPickers();
         loadLastTreatments();
+
+
 
 
     }
@@ -139,20 +145,100 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
     public void loadLastTreatments(){
         List<Treatments> treatments = Treatments.latestTreatments(8,null);
         ArrayList<HashMap<String, String>> treatmentsList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM HH:mm", getResources().getConfiguration().locale);
 
         for (Treatments treatment : treatments){                                                    //Convert from a List<Object> Array to ArrayList
             HashMap<String, String> treatmentItem = new HashMap<String, String>();
 
+            treatmentItem.put("id", treatment.getId().toString());
             Date treatmentDate = new Date(treatment.datetime);
-            treatmentItem.put("date", treatmentDate.toString());
+            treatmentItem.put("date", sdf.format(treatmentDate));
             treatmentItem.put("value", treatment.value.toString());
             treatmentItem.put("type", treatment.type);
             treatmentsList.add(treatmentItem);
         }
 
         ListView list = (ListView) findViewById(R.id.treatmentList);
-        SimpleAdapter adapter = new SimpleAdapter(this, treatmentsList,R.layout.treatments_list_layout, new String[] { "date","value","type" },  new int[] { R.id.treatmentDateTimeLayout,R.id.treatmentAmountLayout,R.id.treatmentTypeLayout});
+        adapter = new SimpleAdapter(this, treatmentsList,R.layout.treatments_list_layout, new String[] { "id","date","value","type" },  new int[] {R.id.treatmentID, R.id.treatmentDateTimeLayout,R.id.treatmentAmountLayout,R.id.treatmentTypeLayout});
         list.setAdapter(adapter);
+
+        // React to user clicks on item
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //TextView textview = (TextView) view.findViewById(R.id.treatmentID);
+                //String info = textview.getText().toString();
+                Toast.makeText(getBaseContext(), "Long press for options", Toast.LENGTH_SHORT).show();
+            }
+        });
+        registerForContextMenu(list);   //Register popup menu when clicking a ListView item
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo aInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+        // We know that each row in the adapter is a Map
+        HashMap map =  (HashMap) adapter.getItem(aInfo.position);
+
+        selectedListItem = Integer.parseInt(map.get("id").toString());
+
+        menu.setHeaderTitle(map.get("value") + " " + map.get("type"));
+        menu.add(1, 1, 1, "Edit");
+        menu.add(1, 2, 2, "Delete");
+    }
+    // This method is called when user selects an Item in the Context menu
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        Treatments treatment = Treatments.getTreatmentByID(selectedListItem);
+
+        if (itemId == 1){   //Edit - loads the treatment to be edited and deleted the original
+
+            EditText editText_treatment_time;
+            EditText editText_treatment_date;
+            EditText editText_treatment_value;
+            Spinner spinner_treatment_type;
+            Spinner spinner_notes;
+
+            spinner_treatment_type      = (Spinner) findViewById(R.id.treatmentSpinner);
+            spinner_notes               = (Spinner) findViewById(R.id.noteSpinner);
+            editText_treatment_time     = (EditText) findViewById(R.id.treatmentTime);
+            editText_treatment_date     = (EditText) findViewById(R.id.treatmentDate);
+            editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
+
+            spinner_treatment_type.setSelection(getIndex(spinner_treatment_type, treatment.type));
+            spinner_notes.setSelection(getIndex(spinner_notes, treatment.note));
+            Date treatmentDate = new Date(treatment.datetime);
+            SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
+            SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+            editText_treatment_date.setText(sdfDate.format(treatmentDate));
+            editText_treatment_time.setText(sdfTime.format(treatmentDate));
+            editText_treatment_value.setText(treatment.value.toString());
+
+            treatment.delete();
+            loadLastTreatments();
+            Toast.makeText(getBaseContext(), "Original Treatment Deleted, resave to add back", Toast.LENGTH_SHORT).show();
+
+        }else{              //Delete
+            treatment.delete();
+            loadLastTreatments();
+            Toast.makeText(getBaseContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
+        }
+
+        return true;
+    }
+
+    //returns the location of an item in a spinner
+    private int getIndex(Spinner spinner, String myString){
+        int index = 0;
+        for (int i=0;i<spinner.getCount();i++){
+            if (spinner.getItemAtPosition(i).equals(myString)){
+                index = i;
+            }
+        }
+        return index;
     }
 
     //saves a new Treatment
@@ -198,10 +284,17 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
             //todo Updates the OpenAPS
 
-
             finish();
         }
+    }
 
+    public void runBolusWizard(View view){
+        EditText editText_treatment_value;
+        editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
+
+        Intent intent = new Intent(view.getContext(),BolusWizardActivity.class);
+        intent.putExtra("CARB_VALUE", editText_treatment_value.getText().toString());
+        startActivity(intent);
     }
 
     @Override

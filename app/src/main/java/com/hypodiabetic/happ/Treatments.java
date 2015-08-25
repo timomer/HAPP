@@ -59,4 +59,12 @@ public class Treatments extends Model{
         }
     }
 
+    public static Treatments getTreatmentByID(Integer dbid) {
+        Treatments treatment = new Select()
+                .from(Treatments.class)
+                .where("_id = " + dbid)
+                .executeSingle();
+        return treatment;
+    }
+
 }

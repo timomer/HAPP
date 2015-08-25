@@ -7,4 +7,5 @@
     <string name="title_activity_enter_treatment">EnterTreatment</string>
     <string name="title_activity_pref_basal_layout">pref_basal_layout</string>
     <string name="title_activity_isf_list">isfList</string>
+    <string name="title_activity_bolus_wizard">BolusWizardActivity</string>
 </resources>

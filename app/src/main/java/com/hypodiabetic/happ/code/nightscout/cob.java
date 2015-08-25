@@ -1,5 +1,8 @@
 package com.hypodiabetic.happ.code.nightscout;
 
+import android.widget.Toast;
+
+import com.hypodiabetic.happ.ApplicationContextProvider;
 import com.hypodiabetic.happ.Profile;
 import com.hypodiabetic.happ.Treatments;
 import com.hypodiabetic.happ.code.openaps.iob;
@@ -46,53 +49,70 @@ public class cob {
 
         //iob iob = new iob(this);
 
-        try {
+
             for(Treatments treatment : treatments) {
 
-                if (treatment.datetime.longValue() < timeNow.getTime()) {                                         //Treatment is not in the future
+                if (treatment.datetime < timeNow.getTime()) {                                         //Treatment is not in the future
                     if (treatment.type.equals("Carbs")) {                                                         //Crabs only
 
-                        lastCarbs = treatment;
-                        JSONObject cCalc = new JSONObject();
-                        cCalc = cobCalc(treatment, lastDecayedBy, profileNow, timeNow);
-                        Double decaysin_hr = (cCalc.getDouble("decayedBy") - timeNow.getTime()) / 1000 / 60 / 60;
+                            lastCarbs = treatment;
+                            JSONObject cCalc = new JSONObject();
+                            cCalc = cobCalc(treatment, lastDecayedBy, profileNow, timeNow);
+                            Date decayedByDate = new Date();
+                             try {
+                                decayedByDate = new Date(cCalc.getLong("decayedBy"));
+                            } catch (JSONException e){
+                                 Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB decayedByDate " + e.getMessage(), Toast.LENGTH_LONG).show();
+                             }
+                            Long decaysin_hr = (decayedByDate.getTime() - timeNow.getTime()) / 1000 / 60 / 60;
 
-                        if (decaysin_hr > -10) {
-                            Double actStart = iob.iobTotal(treatments, profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
-                            Date decayedByDate = new Date(cCalc.getLong("decayedBy"));
-                            Double actEnd = iob.iobTotal(treatments, profileNow, decayedByDate).getDouble("activity");
-                            Double avgActivity = (actStart + actEnd) / 2;
+                            if (decaysin_hr > -10) {
+                                Double actStart=0D, actEnd=0D;
+                                try {
+                                    actStart = iob.iobTotal(treatments, profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
+                                    actEnd = iob.iobTotal(treatments, profileNow, decayedByDate).getDouble("activity");
+                                } catch (JSONException e){
+                                    Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB activity " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                                Double avgActivity = (actStart + actEnd) / 2;
 
-                            Double delayedCarbs = avgActivity * liverSensRatio * profileNow.isf / profileNow.carbRatio;
-                            Long delayMinutes = Math.round(delayedCarbs / profileNow.carbAbsorptionRate * 60);
+                                Double delayedCarbs = avgActivity * liverSensRatio * profileNow.isf / profileNow.carbRatio;
+                                Long delayMinutes = Math.round(delayedCarbs / profileNow.carbAbsorptionRate * 60);
 
-                            if (delayMinutes > 0) {
-                                Date delayed = new Date(cCalc.getLong("decayedBy") + (delayMinutes * 1000));
-                                cCalc.put("decayedBy", delayed);
-                                //Date decaysin_hr_date = new Date((cCalc.getLong("decayedBy") - timeNow.getTime()) / 1000 / 60 / 60);
-                                //decaysin_hr = (decaysin_hr_date.getTime());
-                                decaysin_hr = (cCalc.getDouble("decayedBy") - timeNow.getTime())  / 1000 / 60 / 60;
+                                if (delayMinutes > 0) {
+                                    Date delayed = new Date(decayedByDate.getTime() + (delayMinutes * 1000));
+                                    try {
+                                        cCalc.put("decayedBy", delayed);
+                                    } catch (JSONException e){
+                                        Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB decayedBy " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                    //Date decaysin_hr_date = new Date((cCalc.getLong("decayedBy") - timeNow.getTime()) / 1000 / 60 / 60);
+                                    //decaysin_hr = (decaysin_hr_date.getTime());
+                                    decaysin_hr = (delayed.getTime() - timeNow.getTime())  / 1000 / 60 / 60;
+                                }
                             }
-                        }
 
-                        if (cCalc != null) {
-                            Date decayedByDate = new Date(cCalc.getLong("decayedBy"));
-                            lastDecayedBy = decayedByDate;
-                        }
+                            if (cCalc != null) {
+                                lastDecayedBy = decayedByDate;
+                            }
 
-                        if (decaysin_hr > 0) {
-                            //console.info('Adding ' + delayMinutes + ' minutes to decay of ' + treatment.carbs + 'g bolus at ' + treatment.mills);
-                            totalCOB += Math.min(treatment.value, decaysin_hr * profileNow.carbAbsorptionRate);
-                            //console.log("cob:", Math.min(cCalc.initialCarbs, decaysin_hr * profileNow.carbAbsorptionRate(treatment.mills)),cCalc.initialCarbs,decaysin_hr,profileNow.carbAbsorptionRate(treatment.mills));
-                            isDecaying = cCalc.getInt("isDecaying");
-                        } else {
-                            totalCOB = 0D;
-                        }
+                            if (decaysin_hr > 0) {
+                                //console.info('Adding ' + delayMinutes + ' minutes to decay of ' + treatment.carbs + 'g bolus at ' + treatment.mills);
+                                totalCOB += Math.min(treatment.value, decaysin_hr * profileNow.carbAbsorptionRate);
+                                //console.log("cob:", Math.min(cCalc.initialCarbs, decaysin_hr * profileNow.carbAbsorptionRate(treatment.mills)),cCalc.initialCarbs,decaysin_hr,profileNow.carbAbsorptionRate(treatment.mills));
+                                try {
+                                    isDecaying = cCalc.getInt("isDecaying");
+                                } catch (JSONException e){
+                                    Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB isDecaying " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            } else {
+                                totalCOB = 0D;
+                            }
+
                     }
                 }
             }
-        } catch (JSONException e){
-        }
+
 
         Double rawCarbImpact = isDecaying * profileNow.isf / profileNow.carbRatio * profileNow.carbAbsorptionRate / 60;
         if (Double.isNaN(rawCarbImpact) || Double.isInfinite(rawCarbImpact)) rawCarbImpact = 0D;
