@@ -38,24 +38,21 @@ public class iob {
         Double activityContrib;
 
         Double diaratio = dia / 3;
-        Double peak = 75 * diaratio;                                                    //Peak of the active insulin?
+        Double peak = 75 * diaratio;                                                                //Peak of the active insulin?
         //var sens = profile_data.sens;
-        if (time == null) {
-            time = new Date();
-        }
 
         if (treatment.type.equals("Insulin")) {                               //Im only ever passing Insulin, but anyway whatever
 
-            Date bolusTime = new Date(treatment.datetime);
-            Long minAgo = (time.getTime() - bolusTime.getTime()) /1000/60;
+            Date bolusTime = new Date(treatment.datetime);                                          //Time the Insulin was taken
+            Double minAgo = (double)(time.getTime() - bolusTime.getTime()) /1000/60;                //Age in Mins of the treatment
 
             if (minAgo < 0) {
                 iobContrib=0D;
                 activityContrib=0D;
             }
-            if (minAgo < peak) {
+            if (minAgo < peak) {                                                                    //Still before the Peak stage of the insulin taken
                 Double x = (minAgo/5 + 1) * diaratio;
-                iobContrib=treatment.value*(1-0.001852*x*x+0.001852*x);
+                iobContrib=treatment.value*(1-0.001852*x*x+0.001852*x);                             //Amount of Insulin active? // TODO: 28/08/2015 getting negative numbers at times, what is this doing? 
                 //var activityContrib=sens*treatment.insulin*(2/dia/60/peak)*minAgo;
                 activityContrib=treatment.value*(2/dia/60/peak)*minAgo;
 
@@ -99,28 +96,30 @@ public class iob {
         try {
 
             for (Treatments treatment : treatments) {
-                if (treatment.type.equals("Insulin")) {
-                    if (treatment.datetime.longValue() < time.getTime()) {                            //Treatment is not in the future
-                        Double dia = profileNow.dia;
+                if (treatment.type.equals("Insulin") && treatment.datetime.longValue() < time.getTime()) {      //Insulin only and Treatment is not in the future
+
+                        Double dia = profileNow.dia;                                                            //How long Insulin stays active in your system
                         JSONObject tIOB = iobCalc(treatment, time, dia);
-                        if (tIOB.getDouble("iobContrib") > 0) iob += tIOB.getDouble("iobContrib");
+                        if (tIOB.getDouble("iobContrib") > 0)
+                            iob += tIOB.getDouble("iobContrib");
                         if (tIOB.getDouble("activityContrib") > 0)
                             activity += tIOB.getDouble("activityContrib");
                         // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
-                        if (treatment.value >= 0.2 && treatment.note != null && treatment.note.equals("bolus")) { //Whats going on here?
+                        if (treatment.value >= 0.2 && treatment.note.equals("bolus")) {             //Checks if its a user entered bolus?
                             JSONObject bIOB = iobCalc(treatment, time, dia / 2);
                             //console.log(treatment);
                             //console.log(bIOB);
                             if (bIOB.getDouble("iobContrib") > 0)
                                 bolusiob += bIOB.getDouble("iobContrib");
                         }
-                    }
+
                 }
             }
 
-            returnValue.put("iob", String.format("%.2f",iob));
-            returnValue.put("activity", String.format("%.2f",activity));
-            returnValue.put("bolusiob", String.format("%.2f",bolusiob));
+            returnValue.put("iob", iob);
+            returnValue.put("activity", activity);
+            returnValue.put("bolusiob", bolusiob);
+            returnValue.put("as_of", time.getTime());
             return returnValue;
 
         } catch (JSONException e) {

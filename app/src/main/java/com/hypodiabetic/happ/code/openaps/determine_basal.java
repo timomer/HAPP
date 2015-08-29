@@ -37,11 +37,11 @@ public class determine_basal {
         try {
 
             //TODO: calculate average using system_time instead of assuming 1 data point every 5m
-            if (data.size() != 3 && data.get(3).sgv_double() > 30) {               //Only 3 objects in data array
+            if (data.size() > 3 && data.get(3).sgv_double() > 30) {                                //4 BG readings, get avg over 4 readings
                 avg = (now.sgv_double() - data.get(3).sgv_double()) / 3;
-            } else if (data.size() != 2 && data.get(2).sgv_double() > 30) {
+            } else if (data.size() > 2 && data.get(2).sgv_double() > 30) {                         //3 BG readings...
                 avg = (now.sgv_double() - data.get(2).sgv_double()) / 2;
-            } else if (data.size() != 1 && data.get(1).sgv_double() > 30) {
+            } else if (data.size() > 1 && data.get(1).sgv_double() > 30) {                         //2 BG readings...
                 avg = now.sgv_double() - data.get(1).sgv_double();
             } else { avg = 0D; }
 

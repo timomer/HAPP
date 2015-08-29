@@ -36,7 +36,7 @@ import lecho.lib.hellocharts.view.Chart;
 //todo adds data to the graph?
 public class BgGraphBuilder {
     public static final double fuzz = (1000 * 30 * 5);
-    public double  end_time = (new Date().getTime() + (60000 * 10))/fuzz;
+    public double  end_time = (new Date().getTime() + (60000 * 130))/fuzz;                          //Added 120 mins to this time for future values
     public double  start_time = (new Date().getTime() - ((60000 * 60 * 24)))/fuzz;
     public Context context;
     public SharedPreferences prefs;
@@ -46,11 +46,11 @@ public class BgGraphBuilder {
     public double defaultMaxY;
     public boolean doMgdl;
     final int pointSize;
-    final int axisTextSize;
+    public int axisTextSize;
     final int previewAxisTextSize;
     final int hoursPreviewStep;
 
-    private double endHour;
+    public double endHour;
     public final int numValues =(60/5)*24;
     private final List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
     private List<PointValue> inRangeValues = new ArrayList<PointValue>();
@@ -249,7 +249,7 @@ public class BgGraphBuilder {
         List<AxisValue> previewXaxisValues = new ArrayList<AxisValue>();
         final java.text.DateFormat timeFormat = hourFormat();
         timeFormat.setTimeZone(TimeZone.getDefault());
-        for(int l=0; l<=24; l+=hoursPreviewStep) {
+        for(int l=0; l<=26; l+=hoursPreviewStep) {                                                  //Added 2 hours for future readings
             double timestamp = (endHour - (60000 * 60 * l));
             previewXaxisValues.add(new AxisValue((long)(timestamp/fuzz), (timeFormat.format(timestamp)).toCharArray()));
         }
@@ -261,7 +261,7 @@ public class BgGraphBuilder {
     }
 
 
-    private SimpleDateFormat hourFormat() {
+    public SimpleDateFormat hourFormat() {
         return new SimpleDateFormat(DateFormat.is24HourFormat(context) ? "HH" : "h a");
     }
 

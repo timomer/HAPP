@@ -145,12 +145,53 @@
         </LinearLayout>
 
     </LinearLayout>
-    <lecho.lib.hellocharts.view.ColumnChartView
-        android:id="@+id/iobcobchart"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2">
-    </lecho.lib.hellocharts.view.ColumnChartView>
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <lecho.lib.hellocharts.view.ColumnChartView
+            android:id="@+id/iobcobchart"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3">
+        </lecho.lib.hellocharts.view.ColumnChartView>
+        <lecho.lib.hellocharts.view.LineChartView
+            android:id="@+id/iobcobPast"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:visibility="gone">
+        </lecho.lib.hellocharts.view.LineChartView>
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight=".5"
+            android:orientation="horizontal"
+            android:id="@+id/iobcobChartsRadioGroup">
+
+            <RadioButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="History"
+                android:layout_weight="1"
+                android:id="@+id/iobcobHistory"/>
+            <RadioButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="Future"
+                android:layout_weight="1"
+                android:checked="true"
+                android:id="@+id/iobcobFuture"/>
+
+        </RadioGroup>
+
+
+    </LinearLayout>
 
     <lecho.lib.hellocharts.view.LineChartView
         android:id="@+id/chart"

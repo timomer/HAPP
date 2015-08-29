@@ -17,6 +17,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +61,7 @@ public class MainActivity extends Activity {
     public ExtendedGraphBuilder extendedGraphBuilder;
 
     private ColumnChartView iobcobChart;
+    private LineChartView iobcobPastChart;
 
     //xdrip start
     private LineChartView chart;
@@ -101,6 +104,25 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
+        //Setup IOB COB Chart Radio buttons
+        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.iobcobChartsRadioGroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                LineChartView iobcobPast        = (LineChartView) findViewById(R.id.iobcobPast);
+                ColumnChartView iobcobFuture    = (ColumnChartView) findViewById(R.id.iobcobchart);
+                if (checkedId == R.id.iobcobHistory){
+                    iobcobPast.setVisibility(View.VISIBLE);
+                    iobcobFuture.setVisibility(View.GONE);
+                } else {
+                    iobcobPast.setVisibility(View.GONE);
+                    iobcobFuture.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
         //starts OpenAPS loop
         startOpenAPSLoop();
     }
@@ -123,14 +145,23 @@ public class MainActivity extends Activity {
         chart.setViewportCalculationEnabled(true);
         previewChart.setViewportChangeListener(new ViewportListener());
         chart.setViewportChangeListener(new ChartViewPortListener());
-        setViewport();
 
-        //IOB and COB chart
-        //iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
-        //iobcobChart.setColumnChartData(extendedGraphBuilder.columnData());
-        //Viewport iobv = new Viewport();
-        //iobv.set(iobcobChart.getWidth() / 4,iobcobChart.getHeight(),0,0);
-        //iobcobChart.setCurrentViewport(iobv);
+
+        //IOB and COB past chart
+        iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
+        iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
+        iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+
+        Viewport iobv   = new Viewport(iobcobPastChart.getMaximumViewport());                       //Sets the min and max for Top and Bottom of the viewpoint
+        iobv.top        = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
+        iobv.bottom     = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+
+        iobcobPastChart.setCurrentViewport(iobv);
+        iobcobPastChart.setMaximumViewport(iobv);
+        iobcobPastChart.setViewportCalculationEnabled(true);
+        //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015  
+
+        setViewport();
     }
 
     //xdrip functions start
@@ -142,6 +173,13 @@ public class MainActivity extends Activity {
                 previewChart.setZoomType(ZoomType.HORIZONTAL);
                 previewChart.setCurrentViewport(newViewport);
                 updatingChartViewport = false;
+
+                Viewport iobv = new Viewport(chart.getMaximumViewport());                 //Update the IOB COB Line Chart Viewport to stay inline with the preview
+                iobv.left = newViewport.left;
+                iobv.right = newViewport.right;
+                iobv.top = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
+                iobv.bottom = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+                iobcobPastChart.setCurrentViewport(iobv);
             }
         }
     }
@@ -152,8 +190,15 @@ public class MainActivity extends Activity {
                 updatingPreviewViewport = true;
                 chart.setZoomType(ZoomType.HORIZONTAL);
                 chart.setCurrentViewport(newViewport);
+                //iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
+                //iobcobPastChart.setCurrentViewport(newViewport);
                 tempViewport = newViewport;
                 updatingPreviewViewport = false;
+
+                Viewport iobv = new Viewport(iobcobPastChart.getMaximumViewport());                 //Update the IOB COB Line Chart Viewport to stay inline with the preview
+                iobv.left = newViewport.left;
+                iobv.right = newViewport.right;
+                iobcobPastChart.setCurrentViewport(iobv);
             }
             if (updateStuff == true) {
                 holdViewport.set(newViewport.left, newViewport.top, newViewport.right, newViewport.bottom);
@@ -287,8 +332,8 @@ public class MainActivity extends Activity {
                 cobValueTextView    = (TextView) findViewById(R.id.cobValue);
 
                 try {
-                    iobValueTextView.setText(iobcobValues.getJSONObject(0).getString("iob"));
-                    cobValueTextView.setText(iobcobValues.getJSONObject(0).getString("cob"));
+                    iobValueTextView.setText(String.format("%.2f",iobcobValues.getJSONObject(0).getDouble("iob")));
+                    cobValueTextView.setText(String.format("%.2f",iobcobValues.getJSONObject(0).getDouble("cob")));
                     sinceLastOpenAPS();
                 } catch (JSONException e) {
 
