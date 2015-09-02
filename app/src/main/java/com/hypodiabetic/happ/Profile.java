@@ -50,8 +50,8 @@ public class Profile extends Model{
         ProfileNow.isf                  = getCurrent_isf(thisTime, prefs);
         ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
-        ProfileNow.max_basal            = 0D;
-        ProfileNow.max_daily_basal      = 0D;
+        ProfileNow.max_basal            = 4D;
+        ProfileNow.max_daily_basal      = 4D;
         ProfileNow.type                 = "current";
 
         ProfileNow.target_bg            = Double.parseDouble(prefs.getString("target_bg", "100"));

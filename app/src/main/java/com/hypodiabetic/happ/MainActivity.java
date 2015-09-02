@@ -379,7 +379,8 @@ public class MainActivity extends Activity {
         double start_time = (new Date().getTime() - ((60000 * 60 * 24)))/fuzz;
 
         List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
-        JSONObject pumpTemp = new JSONObject();
+
+        JSONObject pumpTemp = new JSONObject(); //Current active Extended Bolus // TODO: 29/08/2015  
         try {
             pumpTemp.put("rate", 0);
             pumpTemp.put("duration", 0);
