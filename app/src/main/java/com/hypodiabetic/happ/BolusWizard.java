@@ -5,6 +5,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.code.openaps.iob;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ public class BolusWizard {
         List treatments = Treatments.latestTreatments(20, "Insulin");
 
         JSONObject bwp = bwp_calc(treatments, profile, dateNow);
-        JSONObject reply = pushInfo(bwp);
+        JSONObject reply = pushInfo(bwp, profile);
 
         return reply;
 
@@ -52,14 +53,14 @@ public class BolusWizard {
         //    return results;
         //}
 
-        Double iob=0D;
+        Double iobValue=0D;
         try {
-            iob = com.hypodiabetic.happ.code.openaps.iob.iobTotal(treatments, profile, dateNow).getDouble("iob");
+            iobValue = iob.iobTotal(treatments, profile, dateNow).getDouble("iob");
         } catch (JSONException e) {
             //Toast.makeText(ApplicationContextProvider.getContext(), "Error getting IOB for bwp_calc", Toast.LENGTH_LONG).show();
         }
 
-        Double results_effect = iob * profile.isf;
+        Double results_effect = iobValue * profile.isf;
         Double results_outcome = scaled.sgv_double() - results_effect;
         Double delta = 0D;
 
@@ -108,11 +109,11 @@ public class BolusWizard {
             results.put("aimTarget",results_aimTarget);
             results.put("aimTargetString",results_aimTargetString);
             results.put("scaledSGV",results_scaledSGV);
-            results.put("iob",iob);
+            results.put("iob",iobValue);
 
             results.put("bolusEstimateDisplay", String.format("%.2f",results_bolusEstimate));
             results.put("outcomeDisplay", String.format("%.2f",results_outcome));
-            results.put("displayIOB", String.format("%.2f",iob));
+            results.put("displayIOB", String.format("%.2f",iobValue));
             results.put("effectDisplay", String.format("%.2f",results_effect));
             results.put("displayLine", "BWP: " + String.format("%.2f",results_bolusEstimate) + "U");
         } catch (JSONException e) {
@@ -121,7 +122,7 @@ public class BolusWizard {
         return results;
     }
 
-    public static JSONObject pushInfo(JSONObject prop) {
+    public static JSONObject pushInfo(JSONObject prop, Profile profile) {
         //if (prop && prop.errors) {
         //    info.push({label: 'Notice', value: 'required info missing'});
         //    _.forEach(prop.errors, function pushError (error) {
@@ -129,8 +130,6 @@ public class BolusWizard {
         //    });
         //} else if (prop) {
 
-        Date dateNow = new Date();
-        Profile profile = new Profile().ProfileAsOf(dateNow, ApplicationContextProvider.getContext());
 
         JSONObject results = new JSONObject();
         try {

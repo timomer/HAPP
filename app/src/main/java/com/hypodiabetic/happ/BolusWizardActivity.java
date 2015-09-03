@@ -53,7 +53,7 @@ public class BolusWizardActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void runBW(View view){
+    public void wizardAccept(View view){
         JSONObject reply = BolusWizard.run_bw(view.getContext());
 
         TextView sysMsg;
