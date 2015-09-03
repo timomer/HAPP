@@ -11,11 +11,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class BolusWizardActivity extends Activity {
 
     private EditText treatmentValue;
+    private TextView iobValue;
+    private TextView cobValue;
 
 
     @Override
@@ -54,10 +57,21 @@ public class BolusWizardActivity extends Activity {
     }
 
     public void wizardAccept(View view){
+
+        iobValue = (TextView) findViewById(R.id.wizardIOB);
+        cobValue = (TextView) findViewById(R.id.wizardCOB);
+
         JSONObject reply = BolusWizard.run_bw(view.getContext());
 
         TextView sysMsg;
         sysMsg = (TextView) findViewById(R.id.wizardCalc);
         sysMsg.setText(reply.toString());
+
+        try {
+            iobValue.setText(reply.getString("Insulin on Board"));
+            cobValue.setText(reply.getString("cob"));
+        } catch (JSONException e) {
+        }
+
     }
 }

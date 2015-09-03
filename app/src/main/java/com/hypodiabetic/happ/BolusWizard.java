@@ -4,12 +4,14 @@ package com.hypodiabetic.happ;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.openaps.iob;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +27,14 @@ public class BolusWizard {
 
         JSONObject bwp = bwp_calc(treatments, profile, dateNow);
         JSONObject reply = pushInfo(bwp, profile);
+
+
+        List cobtreatments = Treatments.latestTreatments(20, null);
+        Collections.reverse(cobtreatments);
+        try {
+            reply.put("cob", cob.cobTotal(cobtreatments, profile, dateNow).getDouble("display"));
+        } catch (JSONException e) {
+        }
 
         return reply;
 

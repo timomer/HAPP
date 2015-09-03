@@ -120,14 +120,14 @@ public class cob {
 
         JSONObject returnObject = new JSONObject();
         try {
-            returnObject.put("decayedBy", lastDecayedBy);
-            returnObject.put("isDecaying", isDecaying);
-            returnObject.put("carbs_hr", profileNow.carbAbsorptionRate);
-            returnObject.put("rawCarbImpact", rawCarbImpact);
-            returnObject.put("cob", totalCOB);
+            returnObject.put("decayedBy", lastDecayedBy);                                           //When this treatment will be decayed for calculating the next testament of carbs
+            returnObject.put("isDecaying", isDecaying);                                             //Are these carbs being digested?
+            returnObject.put("carbs_hr", profileNow.carbAbsorptionRate);                            //How many crabs / H are digested
+            returnObject.put("rawCarbImpact", rawCarbImpact);                                       //?
+            returnObject.put("cob", totalCOB);                                                      //Total Carbs on board
             returnObject.put("display", display);
             returnObject.put("displayLine", "COB: " + display + "g");
-            returnObject.put("as_of",timeNow.getTime());
+            returnObject.put("as_of",timeNow.getTime());                                            //Time this was requested
             //returnObject.put("lastCarbs", lastCarbs.toString());                                  //crashes if no last carbs, not used anyway so comment out
             return returnObject;
         } catch (JSONException e) {

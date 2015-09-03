@@ -2,9 +2,11 @@ package com.hypodiabetic.happ;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -17,11 +19,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
@@ -59,6 +64,17 @@ public class MainActivity extends Activity {
     private TextView sysMsg;
     private TextView openAPSStatus;
     public ExtendedGraphBuilder extendedGraphBuilder;
+
+    private TextView apsstatus_eventualBG;
+    private TextView apsstatus_snoozeBG;
+    private TextView apsstatus_reason;
+    private TextView apsstatus_Action;
+    private TextView apsstatus_rate;
+    private TextView apsstatus_duration;
+    private Button apsstatusAcceptButton;
+
+    public TempBasal Active_Temp_Basal = new TempBasal();
+    public TempBasal Suggested_Temp_Basal = new TempBasal();
 
     private ColumnChartView iobcobChart;
     private LineChartView iobcobPastChart;
@@ -113,12 +129,19 @@ public class MainActivity extends Activity {
                 // checkedId is the RadioButton selected
                 LineChartView iobcobPast        = (LineChartView) findViewById(R.id.iobcobPast);
                 ColumnChartView iobcobFuture    = (ColumnChartView) findViewById(R.id.iobcobchart);
+                LinearLayout apsstatus          = (LinearLayout) findViewById(R.id.apsstatus);
                 if (checkedId == R.id.iobcobHistory){
                     iobcobPast.setVisibility(View.VISIBLE);
                     iobcobFuture.setVisibility(View.GONE);
-                } else {
+                    apsstatus.setVisibility(View.GONE);
+                } else if (checkedId == R.id.iobcobFuture) {
                     iobcobPast.setVisibility(View.GONE);
                     iobcobFuture.setVisibility(View.VISIBLE);
+                    apsstatus.setVisibility(View.GONE);
+                } else {
+                    iobcobPast.setVisibility(View.GONE);
+                    iobcobFuture.setVisibility(View.GONE);
+                    apsstatus.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -380,28 +403,86 @@ public class MainActivity extends Activity {
 
         List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
 
-        JSONObject pumpTemp = new JSONObject(); //Current active Extended Bolus // TODO: 29/08/2015  
-        try {
-            pumpTemp.put("rate", 0);
-            pumpTemp.put("duration", 0);
-        }catch (Exception e)  {
-
-        }
-
         Date dateVar = new Date();
-        Profile profileNow = new Profile().ProfileAsOf(dateVar,this);
-
-        //TreatmentsRepo repo = new TreatmentsRepo(this);
+        Profile profileNow = new Profile().ProfileAsOf(dateVar, this);
 
         List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
         JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
 
-        JSONObject reply = new JSONObject();
-        reply = determine_basal.runOpenAPS(bgReadings, pumpTemp,iobJSONValue, profileNow);
+        if (!TempBasal.isactive(Active_Temp_Basal)){                                                //Current Temp Basal has expired, reset
+            Active_Temp_Basal = new TempBasal();
+        }
 
-        sysMsg = (TextView) findViewById(R.id.sysmsg);
-        sysMsg.setText(reply.toString());
+        JSONObject reply = new JSONObject();
+        reply = determine_basal.runOpenAPS(bgReadings, Active_Temp_Basal,iobJSONValue, profileNow);
+
+        //sysMsg = (TextView) findViewById(R.id.sysmsg);
+        //sysMsg.setText(reply.toString());
+
+        apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
+        apsstatus_eventualBG    = (TextView) findViewById(R.id.apsstatus_eventualBG);
+        apsstatus_snoozeBG      = (TextView) findViewById(R.id.apsstatus_snoozeBG);
+        apsstatus_reason        = (TextView) findViewById(R.id.apsstatus_reason);
+        apsstatus_Action        = (TextView) findViewById(R.id.apsstatus_Action);
+        apsstatus_rate          = (TextView) findViewById(R.id.apsstatus_rate);
+        apsstatus_duration      = (TextView) findViewById(R.id.apsstatus_duration);
+        apsstatus_reason.setText("");
+        apsstatus_Action.setText("");
+        apsstatus_rate.setText("");
+        apsstatus_duration.setText("");
+        try {
+            apsstatus_eventualBG.setText("Eventual BG: " + reply.getString("eventualBG"));
+            apsstatus_snoozeBG.setText("Snooze BG: " + reply.getString("snoozeBG"));
+            if (reply.has("reason")) apsstatus_reason.setText(reply.getString("reason"));
+            if (reply.has("action")) apsstatus_Action.setText(reply.getString("action"));
+            if (reply.has("rate")) apsstatus_rate.setText(reply.getDouble("rate") + "U (" + reply.getString("ratePercent") + "%)");
+            if (reply.has("duration")) apsstatus_duration.setText(reply.getString("duration") + "mins");
+
+            if (reply.has("rate")){                                                                 //Temp Basal suggested
+                Suggested_Temp_Basal.rate = reply.getDouble("rate");
+                Suggested_Temp_Basal.ratePercent = reply.getInt("ratePercent");
+                Suggested_Temp_Basal.duration    = reply.getInt("duration");
+                Suggested_Temp_Basal.basal_type  = reply.getString("temp");
+                apsstatusAcceptButton.setEnabled(true);
+            } else {
+                apsstatusAcceptButton.setEnabled(false);
+            }
+        }catch (Exception e)  {
+        }
+
         Log.i("MSG: ", reply.toString());
+
+    }
+
+    public void apsstatusAccept (View view){
+
+        String popUpMsg;
+        apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
+
+        if (Suggested_Temp_Basal.basal_type.equals("percent")){
+            popUpMsg = Suggested_Temp_Basal.ratePercent + "% for " + Suggested_Temp_Basal.duration + "mins";
+        } else {
+            popUpMsg = Suggested_Temp_Basal.rate + "U for " + Suggested_Temp_Basal.duration + "mins";
+        }
+
+        new AlertDialog.Builder(view.getContext())
+                .setTitle("Manually add Temp Basal")
+                .setMessage(popUpMsg)
+                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Date dateNow = new Date();
+                        Active_Temp_Basal = Suggested_Temp_Basal;
+                        Active_Temp_Basal.start_time = dateNow;
+                        apsstatusAcceptButton.setEnabled(false);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .show();
 
     }
 
