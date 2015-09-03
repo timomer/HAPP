@@ -34,6 +34,7 @@ public class Profile extends Model{
     public String type = "current";                 //? live info from pump?
 
     public Double target_bg;                        //OpenAPS Target BG
+    public String basal_mode;                       //Basal Mode for the pump, absolute or percent
 
 
     public static Profile ProfileAsOf(Date thisTime, Context c){
@@ -50,11 +51,12 @@ public class Profile extends Model{
         ProfileNow.isf                  = getCurrent_isf(thisTime, prefs);
         ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
-        ProfileNow.max_basal            = 4D;
-        ProfileNow.max_daily_basal      = 4D;
+        ProfileNow.max_basal            = 490D; //pump max % // TODO: 03/09/2015 change to a setting
+        ProfileNow.max_daily_basal      = 999D;
         ProfileNow.type                 = "current";
 
         ProfileNow.target_bg            = Double.parseDouble(prefs.getString("target_bg", "100"));
+        ProfileNow.basal_mode           = prefs.getString("basal_mode", "percent");
 
         return ProfileNow;
     }

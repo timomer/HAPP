@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="OpenAPS">
+
+        <EditTextPreference
+            android:defaultValue="100"
+            android:key="target_bg"
+            android:numeric="decimal"
+            android:summary="Your target Blood Sugar"
+            android:title="Target BG" />
+
         <PreferenceScreen
             android:key="button_openaps_category"
             android:persistent="false"
@@ -10,12 +18,14 @@
                 android:key="openAPS"
                 android:title="OpenAPS General">
 
-                <EditTextPreference
-                    android:defaultValue="100"
-                    android:key="target_bg"
-                    android:numeric="decimal"
-                    android:summary="Your target Blood Sugar"
-                    android:title="Target BG" />
+                <ListPreference
+                    android:title="Pump Temp Basal Mode"
+                    android:summary="How is a Temp Basal set on the Pump"
+                    android:key="basal_mode"
+                    android:defaultValue="percent"
+                    android:entries="@array/basal_modeArray"
+                    android:entryValues="@array/basal_modeValues" />
+
                 <EditTextPreference
                     android:defaultValue="1.5"
                     android:key="dia"

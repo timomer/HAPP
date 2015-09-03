@@ -73,6 +73,7 @@ public class SettingsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("dex_collection_method"));
             bindPreferenceSummaryToValue(findPreference("units"));
             bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
+            bindPreferenceSummaryToValue(findPreference("target_bg"));
 
             for (int x=0; x<24; x++ ){
                 bindPreferenceSummaryToValue(findPreference("basal_"+x));
