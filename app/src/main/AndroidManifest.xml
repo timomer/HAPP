@@ -21,10 +21,10 @@
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="AA_DB_NAME"
-            android:value="NightWatch.db" />
+            android:value="HAPP.db" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="3" />
+            android:value="4" />
 
         <activity
             android:name=".MainActivity"
@@ -66,6 +66,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".openAPSReceiver" />
+        <receiver android:name=".treatmentsReceiver" />
 
         <activity
             android:name=".isfList"

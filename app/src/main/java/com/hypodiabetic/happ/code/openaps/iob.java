@@ -116,10 +116,10 @@ public class iob {
                 }
             }
 
-            returnValue.put("iob", iob);
-            returnValue.put("activity", activity);
-            returnValue.put("bolusiob", bolusiob);
-            returnValue.put("as_of", time.getTime());
+            returnValue.put("iob", iob);                                                            //Total IOB
+            returnValue.put("activity", activity);                                                  //Total Amount of insulin active at this time
+            returnValue.put("bolusiob", bolusiob);                                                  //Total Bolus IOB (User entered, assumed when eating) DIA is twice as fast
+            returnValue.put("as_of", time.getTime());                                               //Date this request was made
             return returnValue;
 
         } catch (JSONException e) {

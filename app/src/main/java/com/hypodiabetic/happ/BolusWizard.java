@@ -144,8 +144,8 @@ public class BolusWizard {
         JSONObject results = new JSONObject();
         try {
             results.put("Insulin on Board", prop.getString("displayIOB") + "U");
-            results.put("Sensitivity", "-" + profile.isf + " /U");
-            results.put("Expected effect", prop.getString("displayIOB") + " x -" + profile.isf + "= - " + prop.getString("effectDisplay") );
+            results.put("Sensitivity", "-" + profile.isf + "U");
+            results.put("Expected effect", prop.getString("displayIOB") + " x -" + profile.isf + "= -" + prop.getString("effectDisplay") );
             results.put("Expected outcome", prop.getString("scaledSGV") + "-" + prop.getString("effectDisplay") + " = " + prop.getString("outcomeDisplay"));
 
             // TODO: 02/09/2015 these items should be put at the top of the JSON object, poss in reverse order
@@ -153,7 +153,7 @@ public class BolusWizard {
                 //info.unshift({label: '---------', value: ''});
                 Double carbEquivalent = Math.ceil(Math.abs(profile.carbRatio * prop.getDouble("bolusEstimate")));
                 results.put("Carb Equivalent", prop.getString("bolusEstimateDisplay") + "U * " + profile.carbRatio + " = " + carbEquivalent + "g");
-                results.put("Current Carb Ratio", "1U / " + profile.carbRatio + "g");
+                results.put("Current Carb Ratio", "1U for " + profile.carbRatio + "g");
                 results.put("-BWP", prop.getString("bolusEstimateDisplay") + "U, maybe covered by carbs?");
             }
 

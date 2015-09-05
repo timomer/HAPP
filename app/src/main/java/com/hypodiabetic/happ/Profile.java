@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.activeandroid.Model;
+import com.hypodiabetic.happ.Objects.TempBasal;
 
 import org.json.JSONException;
 import org.json.JSONObject;

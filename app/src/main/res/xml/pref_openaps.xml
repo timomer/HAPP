@@ -19,6 +19,13 @@
                 android:title="OpenAPS General">
 
                 <ListPreference
+                    android:title="OpenAPS Loop Time"
+                    android:key="openaps_loop"
+                    android:defaultValue="900000"
+                    android:entries="@array/openaps_loopArray"
+                    android:entryValues="@array/openaps_loopValues"/>
+
+                <ListPreference
                     android:title="Pump Temp Basal Mode"
                     android:summary="How is a Temp Basal set on the Pump"
                     android:key="basal_mode"

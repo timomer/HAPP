@@ -68,8 +68,8 @@ public class BolusWizardActivity extends Activity {
         sysMsg.setText(reply.toString());
 
         try {
-            iobValue.setText(reply.getString("Insulin on Board"));
-            cobValue.setText(reply.getString("cob"));
+            iobValue.setText("IOB: " + reply.getString("Insulin on Board"));
+            cobValue.setText("COB: " + reply.getString("cob"));
         } catch (JSONException e) {
         }
 

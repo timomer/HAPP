@@ -1,29 +1,78 @@
 package com.hypodiabetic.happ.Objects;
 
+import android.provider.BaseColumns;
+
 import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
+import com.google.gson.annotations.Expose;
 
 import java.util.Date;
 
 /**
  * Created by Tim on 03/09/2015.
  */
+@Table(name = "openaps_temp_basals", id = BaseColumns._ID)
 public class TempBasal extends Model {
 
-    public Double   rate=0D;            //Temp Basal Rate for (U/hr) mode
-    public Integer  ratePercent=0;     //Temp Basal Rate for "percent" of normal basal
-    public Integer  duration=0;         //Duration of Temp
-    public String   basal_type;         //Absolute or Percent
-    public Date     start_time;         //When the Temp Basal started
+    @Expose
+    @Column(name = "rate")
+    public Double   rate=0D;                //Temp Basal Rate for (U/hr) mode
+    @Expose
+    @Column(name = "ratePercent")
+    public Integer  ratePercent=0;          //Temp Basal Rate for "percent" of normal basal
+    @Expose
+    @Column(name = "duration")
+    public Integer  duration=0;             //Duration of Temp
+    @Expose
+    @Column(name = "basal_type")
+    public String   basal_type;             //Absolute or Percent
+    @Expose
+    @Column(name = "start_time")
+    public Date     start_time;             //When the Temp Basal started
+    @Expose
+    @Column(name = "basal_adjustemnt")
+    public String   basal_adjustemnt;       //High or Low temp
+    @Expose
+    @Column(name = "current_pump_basal")
+    public Double   current_pump_basal;     //Pumps current basal
 
-    public static boolean isactive(TempBasal tempBasal){
+    public Date     created_time = new Date();
+
+
+    public static TempBasal last() {
+        TempBasal last = new Select()
+                .from(TempBasal.class)
+                .orderBy("start_time desc")
+                .executeSingle();
+
+        if (last != null){
+            return last;
+        } else {
+            return new TempBasal();     //returns an empty TempBasal, other than null
+        }
+    }
+
+    public boolean isactive(){
         Date timeNow = new Date();
 
-        if (tempBasal.start_time == null){ return false;}
+        if (start_time == null){ return false;}
 
-        if ((tempBasal.start_time.getTime() + tempBasal.duration * 60000) > timeNow.getTime()){
+        if ((start_time.getTime() + duration * 60000) > timeNow.getTime()){
             return true;
         } else {
             return false;
         }
+    }
+
+    public int age(){
+        Date timeNow = new Date();
+        return (int)(timeNow.getTime() - created_time.getTime()) /1000/60;                          //Age in Mins
+    }
+
+    public int durationLeft(){
+        Date timeNow = new Date();
+        return (int) (timeNow.getTime() - (start_time.getTime() + duration * 60000) /1000/60);      //Time left to run in Mins
     }
 }

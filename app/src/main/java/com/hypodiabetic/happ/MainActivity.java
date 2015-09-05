@@ -3,6 +3,7 @@ package com.hypodiabetic.happ;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -58,7 +59,9 @@ public class MainActivity extends Activity {
 
     private static MainActivity ins;
     private PendingIntent pendingIntent;
+    private PendingIntent pendingIntentTreatments;
     private AlarmManager manager;
+    private AlarmManager managerTreatments;
     private TextView iobValueTextView;
     private TextView cobValueTextView;
     private TextView sysMsg;
@@ -72,9 +75,9 @@ public class MainActivity extends Activity {
     private TextView apsstatus_rate;
     private TextView apsstatus_duration;
     private Button apsstatusAcceptButton;
+    private TextView apsstatus_age;
 
-    public TempBasal Active_Temp_Basal = new TempBasal();
-    public TempBasal Suggested_Temp_Basal = new TempBasal();
+    private static TempBasal Suggested_Temp_Basal = new TempBasal();
 
     private ColumnChartView iobcobChart;
     private LineChartView iobcobPastChart;
@@ -266,6 +269,29 @@ public class MainActivity extends Activity {
                 currentBgValueText.setTextColor(Color.WHITE);
             }
         }
+
+        //Treatments info update
+        openAPSStatus = (TextView) findViewById(R.id.openAPSStatus);
+        historicalIOBCOB lastRun = historicalIOBCOB.last();
+        if (lastRun != null) openAPSStatus.setText(lastRun.readingAge());
+
+        //Temp Basal update
+        Date timeNow = new Date();
+        sysMsg = (TextView) findViewById(R.id.sysmsg);
+        TempBasal lastTempBasal = TempBasal.last();
+        String appStatus = "";
+        if (lastTempBasal.isactive()){                                                              //Active temp Basal
+            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.ratePercent + "% " + lastTempBasal.duration + "mins (" + lastTempBasal.durationLeft() + "mins left)";
+        } else {                                                                                    //No temp Basal running, show default
+            Double currentBasal = Profile.ProfileAsOf(timeNow, this.getBaseContext()).current_basal;
+            appStatus = "No temp basal, current basal: " + currentBasal + "U";
+        }
+        sysMsg.setText(appStatus);
+
+        //OpenAPS info update
+        apsstatus_age = (TextView) findViewById(R.id.apsstatus_age);
+        apsstatus_age.setText(Suggested_Temp_Basal.age() + " ago");
+
     }
     @Override
     public void onPause() {
@@ -284,7 +310,7 @@ public class MainActivity extends Activity {
     protected void onResume(){
         super.onResume();
 
-        sinceLastOpenAPS(); //Update OpenAPS Last run time
+        //displayCurrentInfo(); //Update OpenAPS Last run time
 
         //xdrip start
         //bgGraphBuilder = new BgGraphBuilder(getApplicationContext());
@@ -346,23 +372,23 @@ public class MainActivity extends Activity {
 
     }
 
-    //Updates the OpenAPS details
-    public void updateOpenAPSDetails(final JSONArray iobcobValues){
+    //Updates the Treatment details
+    public void updateTreatmentDetails(final JSONArray iobcobValues){
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                iobValueTextView    = (TextView) findViewById(R.id.iobValue);              //set value to textbox
-                cobValueTextView    = (TextView) findViewById(R.id.cobValue);
+                iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
+                cobValueTextView = (TextView) findViewById(R.id.cobValue);
 
                 try {
-                    iobValueTextView.setText(String.format("%.2f",iobcobValues.getJSONObject(0).getDouble("iob")));
-                    cobValueTextView.setText(String.format("%.2f",iobcobValues.getJSONObject(0).getDouble("cob")));
-                    sinceLastOpenAPS();
+                    iobValueTextView.setText(String.format("%.2f", iobcobValues.getJSONObject(0).getDouble("iob")));
+                    cobValueTextView.setText(String.format("%.2f", iobcobValues.getJSONObject(0).getDouble("cob")));
+                    displayCurrentInfo();
                 } catch (JSONException e) {
 
                 }
 
-                //reloads charts with OpenAPS data
+                //reloads charts with Treatment data
                 iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
                 iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(iobcobValues));
 
@@ -370,38 +396,86 @@ public class MainActivity extends Activity {
         });
     }
 
-    //Updates OpenAPS time since last reading
-    public void sinceLastOpenAPS(){
-        openAPSStatus       = (TextView) findViewById(R.id.openAPSStatus);
-        historicalIOBCOB lastRun = new historicalIOBCOB();
+    //Updates the OpenAPS details
+    public void updateOpenAPSDetails(final JSONObject openAPSSuggest){
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
-        lastRun = historicalIOBCOB.last();
-        if (lastRun != null) openAPSStatus.setText(lastRun.readingAge());
+                apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
+                apsstatus_eventualBG    = (TextView) findViewById(R.id.apsstatus_eventualBG);
+                apsstatus_snoozeBG      = (TextView) findViewById(R.id.apsstatus_snoozeBG);
+                apsstatus_reason        = (TextView) findViewById(R.id.apsstatus_reason);
+                apsstatus_Action        = (TextView) findViewById(R.id.apsstatus_Action);
+                apsstatus_rate          = (TextView) findViewById(R.id.apsstatus_rate);
+                apsstatus_duration      = (TextView) findViewById(R.id.apsstatus_duration);
+                apsstatus_age           = (TextView) findViewById(R.id.apsstatus_age);
+                apsstatus_reason.setText("");
+                apsstatus_Action.setText("");
+                apsstatus_rate.setText("NA");
+                apsstatus_duration.setText("");
+                apsstatus_age.setText("0 ago");
+                try {
+                    apsstatus_eventualBG.setText("Eventual BG: " + openAPSSuggest.getString("eventualBG"));
+                    apsstatus_snoozeBG.setText("Snooze BG: " + openAPSSuggest.getString("snoozeBG"));
+                    if (openAPSSuggest.has("reason")) apsstatus_reason.setText(openAPSSuggest.getString("reason"));
+                    if (openAPSSuggest.has("action")) apsstatus_Action.setText(openAPSSuggest.getString("action"));
+                    if (openAPSSuggest.has("rate")) apsstatus_rate.setText(openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getString("ratePercent") + "%)");
+                    if (openAPSSuggest.has("duration")) apsstatus_duration.setText(openAPSSuggest.getString("duration") + "mins");
+
+                    Suggested_Temp_Basal = new TempBasal();
+                    if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
+                        Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
+                        Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
+                        Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
+                        Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
+                        Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
+                        apsstatusAcceptButton.setEnabled(true);
+                    } else {
+                        apsstatusAcceptButton.setEnabled(false);
+                    }
+                }catch (Exception e)  {
+                }
+
+            }
+        });
     }
+
+
 
     //setups the OpenAPS Loop
     public void startOpenAPSLoop(){
+        managerTreatments = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
+        //Treatments loop
         // Retrieve a PendingIntent that will perform a broadcast
-        Intent alarmIntent = new Intent(this, openAPSReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+        Intent treatmentsIntent = new Intent(this, treatmentsReceiver.class);
+        pendingIntentTreatments = PendingIntent.getBroadcast(this, 0, treatmentsIntent, 0);
 
-        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         int interval = 300000; //5mins
 
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
-        Toast.makeText(this, "OpenAPS will loop " + interval , Toast.LENGTH_LONG).show();
+        managerTreatments.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntentTreatments);
 
+        //OpenAPS Loop
+        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent openAPSIntent = new Intent(this, openAPSReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, openAPSIntent, 0);
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
+        Integer openAPSInterval = Integer.parseInt(prefs.getString("openaps_loop", "900000"));
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), openAPSInterval, pendingIntent);
+
+        //Toast.makeText(this, "OpenAPS will loop " + interval , Toast.LENGTH_LONG).show();
     }
 
     public void runThis(View view){
 
-        int numValues =5;
+
         double fuzz = (1000 * 30 * 5);
         double start_time = (new Date().getTime() - ((60000 * 60 * 24)))/fuzz;
 
-        List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
+        List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
 
         Date dateVar = new Date();
         Profile profileNow = new Profile().ProfileAsOf(dateVar, this);
@@ -409,12 +483,12 @@ public class MainActivity extends Activity {
         List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
         JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
 
-        if (!TempBasal.isactive(Active_Temp_Basal)){                                                //Current Temp Basal has expired, reset
-            Active_Temp_Basal = new TempBasal();
-        }
+        //if (!Active_Temp_Basal.isactive()){                                                         //Current Temp Basal has expired, reset
+        //    Active_Temp_Basal = new TempBasal();
+        //}
 
         JSONObject reply = new JSONObject();
-        reply = determine_basal.runOpenAPS(bgReadings, Active_Temp_Basal,iobJSONValue, profileNow);
+        reply = determine_basal.runOpenAPS(bgReadings, TempBasal.last(), iobJSONValue, profileNow);
 
         //sysMsg = (TextView) findViewById(R.id.sysmsg);
         //sysMsg.setText(reply.toString());
@@ -428,7 +502,7 @@ public class MainActivity extends Activity {
         apsstatus_duration      = (TextView) findViewById(R.id.apsstatus_duration);
         apsstatus_reason.setText("");
         apsstatus_Action.setText("");
-        apsstatus_rate.setText("");
+        apsstatus_rate.setText("NA");
         apsstatus_duration.setText("");
         try {
             apsstatus_eventualBG.setText("Eventual BG: " + reply.getString("eventualBG"));
@@ -439,10 +513,12 @@ public class MainActivity extends Activity {
             if (reply.has("duration")) apsstatus_duration.setText(reply.getString("duration") + "mins");
 
             if (reply.has("rate")){                                                                 //Temp Basal suggested
-                Suggested_Temp_Basal.rate = reply.getDouble("rate");
-                Suggested_Temp_Basal.ratePercent = reply.getInt("ratePercent");
-                Suggested_Temp_Basal.duration    = reply.getInt("duration");
-                Suggested_Temp_Basal.basal_type  = reply.getString("temp");
+                Suggested_Temp_Basal.rate               = reply.getDouble("rate");
+                Suggested_Temp_Basal.ratePercent        = reply.getInt("ratePercent");
+                Suggested_Temp_Basal.duration           = reply.getInt("duration");
+                Suggested_Temp_Basal.basal_type         = reply.getString("temp");
+                Suggested_Temp_Basal.basal_adjustemnt   = reply.getString("basal_adjustemnt");
+                Suggested_Temp_Basal.current_pump_basal = profileNow.current_basal;
                 apsstatusAcceptButton.setEnabled(true);
             } else {
                 apsstatusAcceptButton.setEnabled(false);
@@ -472,9 +548,12 @@ public class MainActivity extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
 
                         Date dateNow = new Date();
-                        Active_Temp_Basal = Suggested_Temp_Basal;
-                        Active_Temp_Basal.start_time = dateNow;
+                        Suggested_Temp_Basal.start_time = dateNow;
+                        Suggested_Temp_Basal.save();
+
                         apsstatusAcceptButton.setEnabled(false);
+
+                        displayCurrentInfo();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
