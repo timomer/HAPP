@@ -13,12 +13,18 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 public class BolusWizardActivity extends Activity {
 
     private EditText treatmentValue;
-    private TextView iobValue;
+    private TextView biobValue;
     private TextView cobValue;
+    private TextView netBIOB;
+    private EditText carbs;
+    private TextView reqInsulinCarbs;
+    private TextView reqInsulinBg;
+    private TextView sugBolus;
 
 
     @Override
@@ -27,7 +33,7 @@ public class BolusWizardActivity extends Activity {
         setContentView(R.layout.activity_bolus_wizard);
 
         Intent intent = getIntent();
-        treatmentValue = (EditText) findViewById(R.id.wizardValue);
+        treatmentValue = (EditText) findViewById(R.id.wizardCarbValue);
         treatmentValue.setText(intent.getStringExtra("CARB_VALUE"));
 
 
@@ -58,8 +64,7 @@ public class BolusWizardActivity extends Activity {
 
     public void wizardAccept(View view){
 
-        iobValue = (TextView) findViewById(R.id.wizardIOB);
-        cobValue = (TextView) findViewById(R.id.wizardCOB);
+
 
         JSONObject reply = BolusWizard.run_bw(view.getContext());
 
@@ -67,11 +72,32 @@ public class BolusWizardActivity extends Activity {
         sysMsg = (TextView) findViewById(R.id.wizardCalc);
         sysMsg.setText(reply.toString());
 
+
+        biobValue       = (TextView) findViewById(R.id.wizardIOB);
+        cobValue        = (TextView) findViewById(R.id.wizardCOB);
+        netBIOB         = (TextView) findViewById(R.id.wizardNetIOB);
+        carbs           = (EditText) findViewById(R.id.wizardCarbValue);
+        reqInsulinCarbs = (TextView) findViewById(R.id.wizardReqInsulinBg);
+        reqInsulinBg    = (TextView) findViewById(R.id.wizardReqInsulinBg);
+        sugBolus        = (TextView) findViewById(R.id.wizardSugBolus);
+        Integer carbValue = 0;
+
+        if (!carbs.getText().equals("")) carbValue = Integer.getInteger(carbs.getText().toString());
+
+
+        JSONObject bw = BolusWizard.bw(view.getContext(), carbValue);
+
         try {
-            iobValue.setText("IOB: " + reply.getString("Insulin on Board"));
-            cobValue.setText("COB: " + reply.getString("cob"));
+            biobValue.setText("Bolus IOB: " + bw.getString("biob"));
+            cobValue.setText("COB: " + bw.getString("cob"));
+            netBIOB.setText("Net Bolus IOB: " + bw.getString("net_biob"));
+            reqInsulinCarbs.setText("Carbs(" + carbValue + ") / Carb Ratio(" + bw.getString("carbRatio") + ") = " + bw.getString("insulin_correction_carbs"));
+            reqInsulinBg.setText(bw.getString("bg") + " - " + bw.getString("target_bg") + " * " + bw.getString("carbratio") + " = " + bw.getString("insulin_correction_bg"));
+            sugBolus.setText(bw.getString("insulin_correction_carbs") + " + " + bw.getString("insulin_correction_bg") + " - " + bw.getString("net_biob") + " = " + bw.getString("suggested_bolus"));
         } catch (JSONException e) {
         }
+
+
 
     }
 }

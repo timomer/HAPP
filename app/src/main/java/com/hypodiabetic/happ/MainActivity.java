@@ -488,7 +488,7 @@ public class MainActivity extends Activity {
         //}
 
         JSONObject reply = new JSONObject();
-        reply = determine_basal.runOpenAPS(bgReadings, TempBasal.last(), iobJSONValue, profileNow);
+        reply = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(), iobJSONValue, profileNow);
 
         //sysMsg = (TextView) findViewById(R.id.sysmsg);
         //sysMsg.setText(reply.toString());
@@ -500,10 +500,12 @@ public class MainActivity extends Activity {
         apsstatus_Action        = (TextView) findViewById(R.id.apsstatus_Action);
         apsstatus_rate          = (TextView) findViewById(R.id.apsstatus_rate);
         apsstatus_duration      = (TextView) findViewById(R.id.apsstatus_duration);
+        apsstatus_age           = (TextView) findViewById(R.id.apsstatus_age);
         apsstatus_reason.setText("");
         apsstatus_Action.setText("");
         apsstatus_rate.setText("NA");
         apsstatus_duration.setText("");
+        apsstatus_age.setText("0 ago");
         try {
             apsstatus_eventualBG.setText("Eventual BG: " + reply.getString("eventualBG"));
             apsstatus_snoozeBG.setText("Snooze BG: " + reply.getString("snoozeBG"));

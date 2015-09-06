@@ -31,17 +31,14 @@ public class treatmentsReceiver extends BroadcastReceiver {
         // Gets the current and future iob and cob values
         JSONArray iobcobValues = new JSONArray();
         Date dateVar = new Date();
-        List treatments = Treatments.latestTreatments(20, "Insulin");                   //Get the x most recent Insulin treatments
-        List cobtreatments = Treatments.latestTreatments(20,null);
-        Collections.reverse(cobtreatments);                                             //Sort the Treatments from oldest to newest
 
         Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);
 
         for (int v=0; v<=5; v++) {
             JSONObject iobcobValue = new JSONObject();
 
-            JSONObject iobJSONValue = iob.iobTotal(treatments, profileAsOfNow, dateVar);                //Based on these treatments, get total IOB as of dateVar
-            JSONObject cobJSONValue = cob.cobTotal(cobtreatments, profileAsOfNow, dateVar);
+            JSONObject iobJSONValue = historicalIOBCOB.getIOB(profileAsOfNow, dateVar);
+            JSONObject cobJSONValue = historicalIOBCOB.getCOB(profileAsOfNow, dateVar);
 
             try {
                 iobcobValue.put("iob", iobJSONValue.getDouble("iob"));

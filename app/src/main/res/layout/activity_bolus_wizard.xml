@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="IOB:"
+            android:text="Bolus IOB:"
             android:id="@+id/wizardIOB"
             android:layout_weight=".5"/>
         <TextView
@@ -33,23 +33,32 @@
             android:text="NET IOB:"
             android:id="@+id/wizardNetIOB"
             android:layout_weight=".5"/>
-
     </LinearLayout>
-
-
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter Carb Value"
-            android:id="@+id/wizardValue"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/wizardCalc"
-        android:text="Calc"/>
+            android:id="@+id/wizardCarbValue"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="carb correction"
+            android:id="@+id/wizardReqInsulinCarbs"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Bg correction"
+            android:id="@+id/wizardReqInsulinBg"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="suggested bolus"
+            android:id="@+id/wizardSugBolus"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -70,5 +79,12 @@
             android:layout_weight=".5"/>
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/wizardCalc"
+        android:text="Calc"/>
 
 </LinearLayout>

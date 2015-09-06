@@ -50,7 +50,7 @@ public class openAPSReceiver extends BroadcastReceiver{
                 //}
 
                 JSONObject openAPSSuggest = new JSONObject();
-                openAPSSuggest = determine_basal.runOpenAPS(bgReadings, TempBasal.last(), iobJSONValue, profileNow);
+                openAPSSuggest = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(), iobJSONValue, profileNow);
 
                 MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                     //Updates the Main Activity screen
 

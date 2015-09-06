@@ -54,6 +54,19 @@ public class TempBasal extends Model {
         }
     }
 
+    public static TempBasal getCurrentActive() {
+        TempBasal last = new Select()
+                .from(TempBasal.class)
+                .orderBy("start_time desc")
+                .executeSingle();
+
+        if (last.isactive()){
+            return last;
+        } else {
+            return new TempBasal();     //returns an empty TempBasal, other than null or inactive basal
+        }
+    }
+
     public boolean isactive(){
         Date timeNow = new Date();
 
