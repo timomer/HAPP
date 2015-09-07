@@ -19,12 +19,12 @@ public class BolusWizard {
 
 
     //main HAPP function
-    public static JSONObject bw (Context c, Integer carbs){
+    public static JSONObject bw (Context c, Double carbs){
 
         Date dateNow = new Date();
         Profile profile = Profile.ProfileAsOf(dateNow = new Date(), c);
-        JSONObject iobNow = historicalIOBCOB.getIOB(profile, dateNow);
-        JSONObject cobNow = historicalIOBCOB.getCOB(profile, dateNow);
+        JSONObject iobNow = Treatments.getIOB(profile, dateNow);
+        JSONObject cobNow = Treatments.getCOB(profile, dateNow);
         Bg lastBg = Bg.last();
 
         Double cob=0D;
@@ -35,10 +35,10 @@ public class BolusWizard {
         } catch (JSONException e) {
         }
 
-        Double net_biob                 = biob - (cob / profile.carbRatio);                             //Net Bolus IOB after current carbs taken into consideration
-        Double insulin_correction_carbs = (double) carbs / profile.carbRatio;                           //Insulin required for carbs about to be consumed
-        Double insulin_correction_bg    = (lastBg.sgv_double() - profile.target_bg) * profile.carbRatio;//Insulin required for correcting Bg
-        Double suggested_bolus          = insulin_correction_carbs + insulin_correction_bg - net_biob;  //Suggested amount of Bolus Insulin required
+        Double net_biob                 = biob - (cob / profile.carbRatio);                                     //Net Bolus IOB after current carbs taken into consideration
+        Double insulin_correction_carbs = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
+        Double insulin_correction_bg    = (Double.parseDouble(lastBg.sgv) - profile.target_bg) / profile.isf;   //Insulin required for correcting Bg
+        Double suggested_bolus          = insulin_correction_carbs + insulin_correction_bg - net_biob;          //Suggested amount of Bolus Insulin required
 
         JSONObject reply = new JSONObject();
         try {
@@ -47,12 +47,12 @@ public class BolusWizard {
             reply.put("cob",cob);
             reply.put("carbRatio",profile.carbRatio);
             reply.put("bolusiob",biob);
-            reply.put("bg",lastBg.sgv_double());
+            reply.put("bg",lastBg.sgv);
             reply.put("target_bg",profile.target_bg);
             reply.put("net_biob",net_biob);
-            reply.put("insulin_correction_carbs",insulin_correction_carbs);
-            reply.put("insulin_correction_bg",insulin_correction_bg);
-            reply.put("suggested_bolus",suggested_bolus);
+            reply.put("insulin_correction_carbs",   String.format("%.2f", insulin_correction_carbs));
+            reply.put("insulin_correction_bg",      String.format("%.2f", insulin_correction_bg));
+            reply.put("suggested_bolus",            String.format("%.2f", suggested_bolus));
         } catch (JSONException e) {
         }
         return reply;

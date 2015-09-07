@@ -87,14 +87,4 @@ public class historicalIOBCOB extends Model {
                 .execute();
     }
 
-    public static JSONObject getIOB(Profile p, Date t){
-        List treatments = Treatments.latestTreatments(20, "Insulin");                   //Get the x most recent Insulin treatments
-        return iob.iobTotal(treatments, p, t);
-    }
-
-    public static JSONObject getCOB(Profile p, Date t){
-        List cobtreatments = Treatments.latestTreatments(20,null);
-        Collections.reverse(cobtreatments);                                             //Sort the Treatments from oldest to newest
-        return cob.cobTotal(cobtreatments, p, t);
-    }
 }

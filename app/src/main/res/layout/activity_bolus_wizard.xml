@@ -39,7 +39,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter Carb Value"
-            android:id="@+id/wizardCarbValue"/>
+            android:id="@+id/wizardCarbValue"
+            android:inputType="number"/>
 
         <TextView
             android:layout_width="match_parent"

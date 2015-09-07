@@ -86,6 +86,6 @@ public class TempBasal extends Model {
 
     public int durationLeft(){
         Date timeNow = new Date();
-        return (int) (timeNow.getTime() - (start_time.getTime() + duration * 60000) /1000/60);      //Time left to run in Mins
+        return (int) ((start_time.getTime() + duration * 60000) - timeNow.getTime() /1000/60);      //Time left to run in Mins
     }
 }

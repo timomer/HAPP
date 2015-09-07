@@ -37,8 +37,8 @@ public class treatmentsReceiver extends BroadcastReceiver {
         for (int v=0; v<=5; v++) {
             JSONObject iobcobValue = new JSONObject();
 
-            JSONObject iobJSONValue = historicalIOBCOB.getIOB(profileAsOfNow, dateVar);
-            JSONObject cobJSONValue = historicalIOBCOB.getCOB(profileAsOfNow, dateVar);
+            JSONObject iobJSONValue = Treatments.getIOB(profileAsOfNow, dateVar);
+            JSONObject cobJSONValue = Treatments.getCOB(profileAsOfNow, dateVar);
 
             try {
                 iobcobValue.put("iob", iobJSONValue.getDouble("iob"));
