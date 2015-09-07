@@ -81,11 +81,12 @@ public class TempBasal extends Model {
 
     public int age(){
         Date timeNow = new Date();
-        return (int)(timeNow.getTime() - created_time.getTime()) /1000/60;                          //Age in Mins
+        return (int)(timeNow.getTime() - created_time.getTime()) /1000/60;                          //Age in Mins the Temp Basal was suggested
     }
 
-    public int durationLeft(){
+    public Long durationLeft(){
         Date timeNow = new Date();
-        return (int) ((start_time.getTime() + duration * 60000) - timeNow.getTime() /1000/60);      //Time left to run in Mins
+        Long min_left = ((start_time.getTime() + duration * 60000) - timeNow.getTime()) / 60000 ;   //Time left to run in Mins
+        return min_left;
     }
 }

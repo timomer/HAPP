@@ -37,7 +37,7 @@ public class BolusWizard {
 
         Double net_biob                 = biob - (cob / profile.carbRatio);                                     //Net Bolus IOB after current carbs taken into consideration
         Double insulin_correction_carbs = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
-        Double insulin_correction_bg    = (Double.parseDouble(lastBg.sgv) - profile.target_bg) / profile.isf;   //Insulin required for correcting Bg
+        Double insulin_correction_bg    = (Double.parseDouble(lastBg.sgv) - profile.max_bg) / profile.isf;      //Insulin required for correcting Bg // TODO: 07/09/2015 staying with Max Bg for now to be sure we do not over correct with openAPS 
         Double suggested_bolus          = insulin_correction_carbs + insulin_correction_bg - net_biob;          //Suggested amount of Bolus Insulin required
 
         JSONObject reply = new JSONObject();
@@ -48,11 +48,11 @@ public class BolusWizard {
             reply.put("carbRatio",profile.carbRatio);
             reply.put("bolusiob",biob);
             reply.put("bg",lastBg.sgv);
-            reply.put("target_bg",profile.target_bg);
-            reply.put("net_biob",net_biob);
-            reply.put("insulin_correction_carbs",   String.format("%.2f", insulin_correction_carbs));
-            reply.put("insulin_correction_bg",      String.format("%.2f", insulin_correction_bg));
-            reply.put("suggested_bolus",            String.format("%.2f", suggested_bolus));
+            reply.put("max_bg",profile.max_bg);
+            reply.put("net_biob",                   String.format("%.1f", net_biob));
+            reply.put("insulin_correction_carbs",   String.format("%.1f", insulin_correction_carbs));
+            reply.put("insulin_correction_bg",      String.format("%.1f", insulin_correction_bg));
+            reply.put("suggested_bolus",            String.format("%.1f", suggested_bolus));
         } catch (JSONException e) {
         }
         return reply;

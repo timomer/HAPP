@@ -2,6 +2,7 @@ package com.hypodiabetic.happ;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.preference.EditTextPreference;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +32,7 @@ public class BolusWizardActivity extends Activity {
     private TextView reqInsulinCarbs;
     private TextView reqInsulinBg;
     private TextView sugBolus;
+    private Button buttonAccept;
 
     Treatments bolusTreatment = new Treatments();
     Treatments carbTratment = new Treatments();
@@ -37,6 +40,8 @@ public class BolusWizardActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bolus_wizard);
 
@@ -108,9 +113,9 @@ public class BolusWizardActivity extends Activity {
             biobValue.setText("Bolus IOB: " + bw.getString("biob"));
             cobValue.setText("COB: " + bw.getString("cob"));
             netBIOB.setText("Net Bolus IOB: " + bw.getString("net_biob"));
-            reqInsulinCarbs.setText("Carb Correction: Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
-            reqInsulinBg.setText("BG Correction: BG(" + bw.getString("bg") + ") - Traget BG(" + bw.getString("target_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
-            sugBolus.setText("Suggested Bolus: " + bw.getString("insulin_correction_carbs") + " + " + bw.getString("insulin_correction_bg") + " - " + bw.getString("net_biob") + " = " + bw.getString("suggested_bolus"));
+            reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
+            reqInsulinBg.setText("BG(" + bw.getString("bg") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
+            sugBolus.setText("Carb Corr(" + bw.getString("insulin_correction_carbs") + ") + BG Corr(" + bw.getString("insulin_correction_bg") + ") - Net Bolus(" + bw.getString("net_biob") + ") = " + bw.getString("suggested_bolus"));
 
             Date dateNow = new Date();
             if (bw.getDouble("suggested_bolus") > 0){
@@ -128,14 +133,20 @@ public class BolusWizardActivity extends Activity {
                 carbTratment.value            = carbValue;
             }
 
-
         } catch (JSONException e) {
+        }
+
+        buttonAccept = (Button) findViewById(R.id.wizardAccept);
+        if (carbTratment.value == null && bolusTreatment.value == null){
+            buttonAccept.setEnabled(false);
+        } else {
+            buttonAccept.setEnabled(true);
         }
     }
 
     public void wizardAccept(View view){
 
-        String toastMsg="Saved ";
+        String toastMsg="";
 
         if (bolusTreatment.value != null){
             bolusTreatment.save();
@@ -146,7 +157,8 @@ public class BolusWizardActivity extends Activity {
             toastMsg += carbTratment.value + "g ";
         }
 
-        Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
 
+        finish();
     }
 }

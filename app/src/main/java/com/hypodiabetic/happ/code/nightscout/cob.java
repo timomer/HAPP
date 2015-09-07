@@ -124,7 +124,7 @@ public class cob {
             returnObject.put("isDecaying", isDecaying);                                             //Are these carbs being digested?
             returnObject.put("carbs_hr", profileNow.carbAbsorptionRate);                            //How many crabs / H are digested
             returnObject.put("rawCarbImpact", rawCarbImpact);                                       //?
-            returnObject.put("cob", totalCOB);                                                      //Total Carbs on board
+            returnObject.put("cob", String.format("%.2f",totalCOB));                                                      //Total Carbs on board
             returnObject.put("display", display);
             returnObject.put("displayLine", "COB: " + display + "g");
             returnObject.put("as_of",timeNow.getTime());                                            //Time this was requested

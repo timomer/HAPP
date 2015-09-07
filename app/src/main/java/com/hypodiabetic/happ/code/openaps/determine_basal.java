@@ -200,10 +200,10 @@ public class determine_basal {
                             if (temps_data.duration > 0) {                             // if there is currently any temp basal running
                                 // if it's a low-temp and eventualBG < profileNow_data.max_bg, let it run a bit longer
                                 if (temps_data.rate <= profileNow.current_basal && eventualBG < profileNow.max_bg) {
-                                    reason = "Temp basel running & eventual BG will be below Max BG";
+                                    reason = "Low Temp Basel running & eventual BG will be below Max BG, keep it running";
                                     Log.i("HAPP basal info: ", reason);
                                 } else {
-                                    reason = "Temp basel running, we already have enough pump basal AND Eventual BG > Max BG!?";
+                                    reason = "Eventual BG out of range, but BG is moving in the right direction. Cancel temp basel.";
                                     requestedTemp = setTempBasal(0D, 0, profileNow, requestedTemp); // cancel temp
                                     Log.i("HAPP: Set temp basal: ", "cancel temp");
                                 }
@@ -287,7 +287,7 @@ public class determine_basal {
                                 Log.i("HAPP: basal info: ", reason);
                             } else {                                                                // required temp > existing temp basal
                                 requestedTemp = setTempBasal(rate, 30, profileNow, requestedTemp);
-                                reason = "Eventual BG > Max BG, no Temp Basal running";
+                                reason = "Eventual BG > Max BG, no Temp Basal running or current Temp Basal < suggested";
                                 Log.i("HAPP: Set temp basal: ", sysMsg);
                             }
                         } else {
