@@ -332,7 +332,7 @@ public class determine_basal {
         //    canceledTemp = true;
         //}
 
-        Double ratePercent = Math.min(profile_data.max_basal, (rate / profile_data.current_basal) * 100); //Change suggested Basal rate to a percent increase or decrease of current Basal
+        Double ratePercent = (rate / profile_data.current_basal) * 100;                             //Get rate percent increase or decrease based on current Basal
 
         try {
             requestedTemp.put("duration", duration);

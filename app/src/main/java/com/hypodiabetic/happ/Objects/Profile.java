@@ -25,12 +25,13 @@ public class Profile extends Model{
     public Double   isf;                            //Insulin sensitivity factor, how much one unit of Insulin will lower your BG
     public Integer  carbRatio;                      //How many grams of carbohydrate are covered by one unit of insulin
 
-    public Double max_basal = 0D;                   //?
-    public Double max_daily_basal = 0D;             //?
+    public Double max_basal = 0D;                   //Max value a Temp Basal can be set to. This is this value or 4 * the current pump basal
+    public Double max_daily_basal = 0D;             //Hour with the highest basal rate for the day // TODO: 08/09/2015 not used in HAPP right now, set to 999 
     public String type = "current";                 //? live info from pump?
 
     public Double target_bg;                        //OpenAPS Target BG
     public String basal_mode;                       //Basal Mode for the pump, absolute or percent
+    public String openaps_mode;                     //Online ~ send commands to pump OR Offline ~ Notify only
 
 
     public static Profile ProfileAsOf(Date thisTime, Context c){
@@ -47,12 +48,13 @@ public class Profile extends Model{
         ProfileNow.isf                  = getCurrent_isf(thisTime, prefs);
         ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
-        ProfileNow.max_basal            = 490D; //pump max % // TODO: 03/09/2015 change to a setting
+        ProfileNow.max_basal            = Double.parseDouble(prefs.getString("max_basal", "2"));
         ProfileNow.max_daily_basal      = 999D;
         ProfileNow.type                 = "current";
 
         ProfileNow.target_bg            = Double.parseDouble(prefs.getString("target_bg", "100"));
         ProfileNow.basal_mode           = prefs.getString("basal_mode", "percent");
+        ProfileNow.openaps_mode         = prefs.getString("openaps_mode", "offline");
 
         return ProfileNow;
     }

@@ -65,7 +65,12 @@
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Receivers.openAPSReceiver" />
+        <receiver
+            android:name=".Receivers.openAPSReceiver">
+            <intent-filter>
+                <action android:name="RUN_OPENAPS"></action>
+            </intent-filter>
+        </receiver>
         <receiver android:name=".Receivers.statsReceiver" />
 
         <activity

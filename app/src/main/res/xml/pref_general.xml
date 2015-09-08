@@ -14,6 +14,12 @@
             android:numeric="decimal"
             android:summary="The minimum value you consider to be in range."
             android:defaultValue="70" />
+        <EditTextPreference
+            android:defaultValue="100"
+            android:key="target_bg"
+            android:numeric="decimal"
+            android:summary="Your target Blood Sugar"
+            android:title="Target BG" />
         <ListPreference
             android:key="units"
             android:title="Bg Units"

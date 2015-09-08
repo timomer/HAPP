@@ -39,11 +39,6 @@ public class openAPSReceiver extends BroadcastReceiver{
                 List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
                 JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
 
-                //TempBasal last_Temp_Basal = TempBasal.last();
-                //if (!last_Temp_Basal.isactive()){                                                 //Current Temp Basal has expired, reset
-                //    last_Temp_Basal = new TempBasal();
-                //}
-
                 JSONObject openAPSSuggest = new JSONObject();
                 openAPSSuggest = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(null), iobJSONValue, profileNow);
 

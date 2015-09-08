@@ -2,13 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="OpenAPS">
 
-        <EditTextPreference
-            android:defaultValue="100"
-            android:key="target_bg"
-            android:numeric="decimal"
-            android:summary="Your target Blood Sugar"
-            android:title="Target BG" />
-
         <PreferenceScreen
             android:key="button_openaps_category"
             android:persistent="false"
@@ -17,6 +10,13 @@
             <PreferenceCategory
                 android:key="openAPS"
                 android:title="OpenAPS General">
+
+                <ListPreference
+                    android:title="OpenAPS Mode"
+                    android:key="openaps_mode"
+                    android:defaultValue="offline"
+                    android:entries="@array/openaps_modeArray"
+                    android:entryValues="@array/openaps_modeValues"/>
 
                 <ListPreference
                     android:title="OpenAPS Loop Time"
@@ -32,6 +32,13 @@
                     android:defaultValue="percent"
                     android:entries="@array/basal_modeArray"
                     android:entryValues="@array/basal_modeValues" />
+
+                <EditTextPreference
+                    android:defaultValue="2"
+                    android:key="max_basal"
+                    android:numeric="decimal"
+                    android:summary="Max value a Temp Basal can be set to"
+                    android:title="Max Basal" />
 
                 <EditTextPreference
                     android:defaultValue="1.5"

@@ -20,6 +20,15 @@
             <item>percent</item>
         </string-array>
 
+    <string-array name="openaps_modeArray">
+        <item>Offline - Notify only</item>
+        <item>Online - Send to Pump</item>
+    </string-array>
+    <string-array name="openaps_modeValues">
+        <item>offline</item>
+        <item>online</item>
+    </string-array>
+
     <string-array name="openaps_loopArray">
         <item>5mins</item>
         <item>10mins</item>

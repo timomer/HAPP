@@ -145,18 +145,7 @@ public class BolusWizardActivity extends Activity {
 
     public void wizardAccept(View view){
 
-        String toastMsg="";
-
-        if (bolusTreatment.value != null){
-            bolusTreatment.save();
-            toastMsg += bolusTreatment.value + "U ";
-        }
-        if (carbTratment.value != null){
-            carbTratment.save();
-            toastMsg += carbTratment.value + "g ";
-        }
-
-        Toast.makeText(this, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
+        pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                       //Action the suggested Bolus
 
         finish();
     }

@@ -74,6 +74,8 @@ public class SettingsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("units"));
             bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
             bindPreferenceSummaryToValue(findPreference("target_bg"));
+            bindPreferenceSummaryToValue(findPreference("openaps_loop"));
+            bindPreferenceSummaryToValue(findPreference("openaps_mode"));
 
             for (int x=0; x<24; x++ ){
                 bindPreferenceSummaryToValue(findPreference("basal_"+x));

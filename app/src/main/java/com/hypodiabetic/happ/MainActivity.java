@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -467,102 +468,15 @@ public class MainActivity extends Activity {
 
     public void runOpenAPS(View view){
 
-
-        double fuzz = (1000 * 30 * 5);
-        double start_time = (new Date().getTime() - ((60000 * 60 * 24)))/fuzz;
-
-        List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
-
-        Date dateVar = new Date();
-        Profile profileNow = new Profile().ProfileAsOf(dateVar, this);
-
-        List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
-        JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
-
-        //if (!Active_Temp_Basal.isactive()){                                                         //Current Temp Basal has expired, reset
-        //    Active_Temp_Basal = new TempBasal();
-        //}
-
-        JSONObject reply = new JSONObject();
-        reply = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(null), iobJSONValue, profileNow);
-
-        //sysMsg = (TextView) findViewById(R.id.sysmsg);
-        //sysMsg.setText(reply.toString());
-
-        apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
-        apsstatus_eventualBG    = (TextView) findViewById(R.id.apsstatus_eventualBG);
-        apsstatus_snoozeBG      = (TextView) findViewById(R.id.apsstatus_snoozeBG);
-        apsstatus_reason        = (TextView) findViewById(R.id.apsstatus_reason);
-        apsstatus_Action        = (TextView) findViewById(R.id.apsstatus_Action);
-        apsstatus_rate          = (TextView) findViewById(R.id.apsstatus_rate);
-        apsstatus_duration      = (TextView) findViewById(R.id.apsstatus_duration);
-        apsstatus_age           = (TextView) findViewById(R.id.apsstatus_age);
-        apsstatus_reason.setText("");
-        apsstatus_Action.setText("");
-        apsstatus_rate.setText("NA");
-        apsstatus_duration.setText("");
-        apsstatus_age.setText("0 ago");
-        try {
-            apsstatus_eventualBG.setText("Eventual BG: " + reply.getString("eventualBG"));
-            apsstatus_snoozeBG.setText("Snooze BG: " + reply.getString("snoozeBG"));
-            if (reply.has("reason")) apsstatus_reason.setText(reply.getString("reason"));
-            if (reply.has("action")) apsstatus_Action.setText(reply.getString("action"));
-            if (reply.has("rate")) apsstatus_rate.setText(reply.getDouble("rate") + "U (" + reply.getString("ratePercent") + "%)");
-            if (reply.has("duration")) apsstatus_duration.setText(reply.getString("duration") + "mins");
-
-            if (reply.has("rate")){                                                                 //Temp Basal suggested
-                Suggested_Temp_Basal.rate               = reply.getDouble("rate");
-                Suggested_Temp_Basal.ratePercent        = reply.getInt("ratePercent");
-                Suggested_Temp_Basal.duration           = reply.getInt("duration");
-                Suggested_Temp_Basal.basal_type         = reply.getString("temp");
-                Suggested_Temp_Basal.basal_adjustemnt   = reply.getString("basal_adjustemnt");
-                Suggested_Temp_Basal.current_pump_basal = profileNow.current_basal;
-                apsstatusAcceptButton.setEnabled(true);
-            } else {
-                apsstatusAcceptButton.setEnabled(false);
-            }
-        }catch (Exception e)  {
-        }
-
-        Log.i("MSG: ", reply.toString());
-
+        //Run openAPS
+        Intent intent = new Intent("RUN_OPENAPS");
+        sendBroadcast(intent);
     }
 
     public void apsstatusAccept (final View view){
 
-        String popUpMsg;
-        apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
-
-        if (Suggested_Temp_Basal.basal_type.equals("percent")){
-            popUpMsg = Suggested_Temp_Basal.ratePercent + "% for " + Suggested_Temp_Basal.duration + "mins";
-        } else {
-            popUpMsg = Suggested_Temp_Basal.rate + "U for " + Suggested_Temp_Basal.duration + "mins";
-        }
-
-        new AlertDialog.Builder(view.getContext())
-                .setTitle("Manually add Temp Basal")
-                .setMessage(popUpMsg)
-                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        Date dateNow = new Date();
-                        Suggested_Temp_Basal.start_time = dateNow;
-                        Suggested_Temp_Basal.save();
-
-                        apsstatusAcceptButton.setEnabled(false);
-
-                        displayCurrentInfo();
-
-                        runOpenAPS(view);                                                           //Runs openAPS again after accepting the suggest Temp Basal
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .show();
-
+        pumpAction.setTempBasal(Suggested_Temp_Basal, view.getContext());                           //Action the suggested Temp
+        //displayCurrentInfo();
     }
 
 }

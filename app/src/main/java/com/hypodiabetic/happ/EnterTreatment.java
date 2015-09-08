@@ -1,10 +1,13 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -236,8 +239,8 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
     }
 
     //saves a new Treatment
-    public void saveTreatmentToDB(View view){
-        Treatments treatment = new Treatments();
+    public void saveTreatmentToDB(final View view){
+        final Treatments treatment = new Treatments();
 
         EditText editText_treatment_time;
         EditText editText_treatment_date;
@@ -269,16 +272,36 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         treatment.type              = spinner_treatment_type.getSelectedItem().toString();
         treatment.value             = Double.parseDouble(editText_treatment_value.getText().toString());
 
-        if (treatment.value == 0){
+        if (treatment.value == 0) {                                                                 //No value given
             Toast.makeText(this, "Enter a value", Toast.LENGTH_SHORT).show();
+        } else if (treatment.type.equals("Insulin")){                                               //Bolus suggested, send to pump?
+
+            new AlertDialog.Builder(view.getContext())
+                    .setTitle("Send Bolus to pump?")
+                    .setMessage("Save this Bolus or Save & Send to Pump?")
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            treatment.save();
+                            Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
+
+                        }
+                    })
+                    .setNegativeButton("Save & Send", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            pumpAction.setBolus(treatment, null, view.getContext());
+
+                        }
+                    })
+                    .show();
+
         } else {
 
             treatment.save();
             Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 
-            //todo Updates the OpenAPS
-
-            finish();
+            //finish();
         }
     }
 
