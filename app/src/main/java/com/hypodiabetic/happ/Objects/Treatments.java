@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ;
+package com.hypodiabetic.happ.Objects;
 
 import android.provider.BaseColumns;
 

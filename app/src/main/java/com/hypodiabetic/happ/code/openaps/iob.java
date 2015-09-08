@@ -1,16 +1,10 @@
 package com.hypodiabetic.happ.code.openaps;
 
-import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
-import android.widget.TextView;
 
-import com.hypodiabetic.happ.ApplicationContextProvider;
 //import com.hypodiabetic.happ.DBHelper;
-import com.hypodiabetic.happ.MainActivity;
-import com.hypodiabetic.happ.Profile;
-import com.hypodiabetic.happ.R;
-import com.hypodiabetic.happ.Treatments;
+import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Treatments;
 //import com.hypodiabetic.happ.TreatmentsRepo;
 
 import org.json.JSONArray;

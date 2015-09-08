@@ -1,27 +1,18 @@
 package com.hypodiabetic.happ;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.text.format.DateFormat;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
+import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Stats;
+import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
-import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
-import com.hypodiabetic.happ.code.nightwatch.Constants;
 import com.hypodiabetic.happ.code.openaps.iob;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -30,8 +21,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import lecho.lib.hellocharts.formatter.ColumnChartValueFormatter;
-import lecho.lib.hellocharts.formatter.ValueFormatterHelper;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Column;
@@ -40,10 +29,7 @@ import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.SubcolumnValue;
-import lecho.lib.hellocharts.model.ValueShape;
-import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.util.ChartUtils;
-import lecho.lib.hellocharts.view.Chart;
 
 /**
  * Created by tim on 12/08/2015.
@@ -61,33 +47,32 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     public Double yCOBMax = 80D;
     public Double yCOBMin = 0D;
 
-    private final List<historicalIOBCOB> iobReadings = historicalIOBCOB.latestForGraphIOB(numValues, start_time * fuzz);
+    private final List<Stats> statsReadings = Stats.statsList(numValues, start_time * fuzz);
     private List<PointValue> iobValues = new ArrayList<>();
     private ColumnChartData columnData;
 
-    private final List<historicalIOBCOB> cobReadings = historicalIOBCOB.latestForGraphCOB(numValues, start_time * fuzz);
     private List<PointValue> cobValues = new ArrayList<PointValue>();
 
     JSONArray iobFutureValues = new JSONArray();
     JSONArray cobFutureValues = new JSONArray();
 
 
-    public ColumnChartData iobcobFutureChart(JSONArray iobcobValues) { //data*
+    public ColumnChartData iobcobFutureChart(List<Stats> statArray) { //data*
 
         List<Column> columnsData = new ArrayList<>();
         List<SubcolumnValue> values;
         List<AxisValue> xAxisValues = new ArrayList<AxisValue>();
 
         try {
-            for (int v=0; v<=iobcobValues.length(); v++) {
+            for (int v=0; v<=statArray.size(); v++) {
                 //iob now
                 values = new ArrayList<>();
 
-                values.add(new SubcolumnValue((float) (iobcobValues.getJSONObject(v).getDouble("iob")), ChartUtils.COLOR_GREEN));
-                if (iobcobValues.getJSONObject(v).getDouble("cob") > 50){                           //Enter max 50g carbs on the chart
+                values.add(new SubcolumnValue((float) (statArray.get(v).iob), ChartUtils.COLOR_GREEN));
+                if (statArray.get(v).cob > 50){                                                     //Enter max 50g carbs on the chart
                     values.add(new SubcolumnValue((float) (50), ChartUtils.COLOR_ORANGE));
                 } else {
-                    values.add(new SubcolumnValue((float) (iobcobValues.getJSONObject(v).getDouble("cob")), ChartUtils.COLOR_ORANGE));
+                    values.add(new SubcolumnValue((float) (statArray.get(v).cob), ChartUtils.COLOR_ORANGE));
                 }
 
                 Column column = new Column(values);
@@ -95,7 +80,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
                 columnsData.add(column);
 
                 AxisValue axisValue = new AxisValue(v);
-                axisValue.setLabel(iobcobValues.getJSONObject(v).getString("when"));
+                axisValue.setLabel(statArray.get(v).when);
                 xAxisValues.add(axisValue);
                 //xAxisValues.  add(new AxisValue((long)0, iobcobValues.getJSONObject(v).getString("when")));
             }
@@ -221,25 +206,25 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
 
     public void addIOBValues(){
-        for (historicalIOBCOB iobReading : iobReadings) {
-            if (iobReading.value > yIOBMax) {
+        for (Stats iobReading : statsReadings) {
+            if (iobReading.iob > yIOBMax) {
                 iobValues.add(new PointValue((float) (iobReading.datetime/fuzz), (float) fitIOB2COBRange(yIOBMax.floatValue()))); //Do not go above Max IOB
-            } else if (iobReading.value < yIOBMin) {
+            } else if (iobReading.iob < yIOBMin) {
                 iobValues.add(new PointValue((float) (iobReading.datetime/fuzz), (float) fitIOB2COBRange(yIOBMin.floatValue()))); //Do not go below Min IOB
             } else {
                 //iobValues.add(new SubcolumnValue((float) (iobReading.datetime / fuzz), (int)iobReading.value));
-                iobValues.add(new PointValue((float) (iobReading.datetime / fuzz), (float) fitIOB2COBRange(iobReading.value)));
+                iobValues.add(new PointValue((float) (iobReading.datetime / fuzz), (float) fitIOB2COBRange(iobReading.iob)));
             }
         }
     }
     public void addCOBValues(){
-        for (historicalIOBCOB cobReading : cobReadings) {
-            if (cobReading.value > yCOBMax) {
+        for (Stats cobReading : statsReadings) {
+            if (cobReading.cob > yCOBMax) {
                 cobValues.add(new PointValue((float) (cobReading.datetime/fuzz), (float) yCOBMax.floatValue())); //Do not go above Max COB
-            } else if (cobReading.value < yCOBMin) {
+            } else if (cobReading.cob < yCOBMin) {
                 cobValues.add(new PointValue((float) (cobReading.datetime/fuzz), (float) yCOBMin.floatValue())); //Do not go below Min COB
             } else {
-                cobValues.add(new PointValue((float) (cobReading.datetime/fuzz), (float) cobReading.value));
+                cobValues.add(new PointValue((float) (cobReading.datetime/fuzz), (float) cobReading.cob));
             }
         }
     }

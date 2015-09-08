@@ -1,6 +1,5 @@
-package com.hypodiabetic.happ;
+package com.hypodiabetic.happ.Objects;
 
-import android.content.SharedPreferences;
 import android.provider.BaseColumns;
 
 import com.activeandroid.Model;
@@ -8,41 +7,46 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
-import com.hypodiabetic.happ.code.nightscout.cob;
-import com.hypodiabetic.happ.code.openaps.iob;
-
-import org.json.JSONObject;
 
 import java.text.DecimalFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created by tim on 11/08/2015.
+ * Created by Tim on 07/09/2015.
  */
 
-//get historical IOB and COB from DB
-@Table(name = "historicalIOBCOB", id = BaseColumns._ID)
-public class historicalIOBCOB extends Model {
-
-    @Expose
-    @Column(name = "value")
-    public double value;
-
-    @Expose
-    @Column(name = "type")
-    public String type;
+//Captures Stats every 5mins
+@Table(name = "Stats", id = BaseColumns._ID)
+public class Stats extends Model{
 
     @Expose
     @Column(name = "datetime")
     public Long datetime;
 
     @Expose
-    @Column(name = "note")
-    public String note;
+    @Column(name = "iob")
+    public double iob;
 
-    public String readingAge() {
+    @Expose
+    @Column(name = "bolus_iob")
+    public double bolus_iob;
+
+    @Expose
+    @Column(name = "cob")
+    public double cob;
+
+    @Expose
+    @Column(name = "basal")
+    public double basal;
+
+    @Expose
+    @Column(name = "temp_basal")
+    public double temp_basal;
+
+    public String when;
+
+    public String statAge() {
         int minutesAgo = (int) Math.floor(timeSince()/(1000*60));
         if (minutesAgo == 1) {
             return minutesAgo + " Min";
@@ -50,9 +54,9 @@ public class historicalIOBCOB extends Model {
         return minutesAgo + " Mins";
     }
 
-    public static historicalIOBCOB last() {
+    public static Stats last() {
         return new Select()
-                .from(historicalIOBCOB.class)
+                .from(Stats.class)
                 .orderBy("datetime desc")
                 .executeSingle();
     }
@@ -61,25 +65,24 @@ public class historicalIOBCOB extends Model {
         return new Date().getTime() - datetime;
     }
 
-    public static List<historicalIOBCOB> latestForGraphIOB(int number, double startTime) {
+    public static List<Stats> statsList(int number, double startTime) {
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(1);
 
         return new Select()
-                .from(historicalIOBCOB.class)
+                .from(Stats.class)
                 .where("datetime >= " + df.format(startTime))
-                .where("type = 'iob'")
                 .orderBy("datetime desc")
                 .limit(number)
                 .execute();
     }
 
-    public static List<historicalIOBCOB> latestForGraphCOB(int number, double startTime) {
+    public static List<Stats> statsCOB(int number, double startTime) {
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(1);
 
         return new Select()
-                .from(historicalIOBCOB.class)
+                .from(Stats.class)
                 .where("datetime >= " + df.format(startTime))
                 .where("type = 'cob'")
                 .orderBy("datetime desc")
@@ -88,3 +91,4 @@ public class historicalIOBCOB extends Model {
     }
 
 }
+

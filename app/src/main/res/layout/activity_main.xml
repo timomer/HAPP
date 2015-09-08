@@ -246,7 +246,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="Run OpenAPS"
-                    android:onClick="runThis"
+                    android:onClick="runOpenAPS"
                     android:layout_weight=".5"/>
 
             </LinearLayout>
@@ -264,13 +264,13 @@
             <RadioButton
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="Treat Line"
+                android:text="IOB COB Line"
                 android:layout_weight="1"
                 android:id="@+id/iobcobHistory"/>
             <RadioButton
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="Treat Bar"
+                android:text="IOB COB"
                 android:layout_weight="1"
                 android:id="@+id/iobcobFuture"/>
             <RadioButton

@@ -7,9 +7,6 @@ import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 
-import com.hypodiabetic.happ.code.openaps.iob;
-import com.hypodiabetic.happ.historicalIOBCOB;
-
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

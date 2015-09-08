@@ -24,7 +24,7 @@
             android:value="HAPP.db" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="4" />
+            android:value="6" />
 
         <activity
             android:name=".MainActivity"
@@ -65,13 +65,9 @@
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".openAPSReceiver" />
-        <receiver android:name=".treatmentsReceiver" />
+        <receiver android:name=".Receivers.openAPSReceiver" />
+        <receiver android:name=".Receivers.statsReceiver" />
 
-        <activity
-            android:name=".isfList"
-            android:label="@string/title_activity_isf_list" >
-        </activity>
         <activity
             android:name=".BolusWizardActivity"
             android:label="@string/title_activity_bolus_wizard"

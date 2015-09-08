@@ -3,7 +3,6 @@ package com.hypodiabetic.happ;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,30 +22,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
+import com.hypodiabetic.happ.Objects.Treatments;
+import com.hypodiabetic.happ.Receivers.openAPSReceiver;
+import com.hypodiabetic.happ.Receivers.statsReceiver;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.nightwatch.SettingsActivity;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
-import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
-import lecho.lib.hellocharts.model.ColumnChartData;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
@@ -273,17 +270,17 @@ public class MainActivity extends Activity {
             }
         }
 
-        //Treatments info update
+        //Stats age update
         openAPSStatus = (TextView) findViewById(R.id.openAPSStatus);
-        historicalIOBCOB lastRun = historicalIOBCOB.last();
-        if (lastRun != null) openAPSStatus.setText(lastRun.readingAge());
+        Stats lastRun = Stats.last();
+        if (lastRun != null) openAPSStatus.setText(lastRun.statAge());
 
-        //Temp Basal update
+        //Temp Basal running update
         Date timeNow = new Date();
         sysMsg = (TextView) findViewById(R.id.sysmsg);
         TempBasal lastTempBasal = TempBasal.last();
         String appStatus = "";
-        if (lastTempBasal.isactive()){                                                              //Active temp Basal
+        if (lastTempBasal.isactive(null)){                                                              //Active temp Basal
             appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.ratePercent + "% " + lastTempBasal.duration + "mins (" + lastTempBasal.durationLeft() + "mins left)";
         } else {                                                                                    //No temp Basal running, show default
             Double currentBasal = Profile.ProfileAsOf(timeNow, this.getBaseContext()).current_basal;
@@ -375,25 +372,21 @@ public class MainActivity extends Activity {
 
     }
 
-    //Updates the Treatment details
-    public void updateTreatmentDetails(final JSONArray iobcobValues){
+    //Updates Stats
+    public void updateStats(final List<Stats> statArray){
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
                 cobValueTextView = (TextView) findViewById(R.id.cobValue);
 
-                try {
-                    iobValueTextView.setText(String.format("%.2f", iobcobValues.getJSONObject(0).getDouble("iob")));
-                    cobValueTextView.setText(String.format("%.2f", iobcobValues.getJSONObject(0).getDouble("cob")));
+                    iobValueTextView.setText(String.format("%.2f", statArray.get(0).iob));
+                    cobValueTextView.setText(String.format("%.2f", statArray.get(0).cob));
                     displayCurrentInfo();
-                } catch (JSONException e) {
-
-                }
 
                 //reloads charts with Treatment data
                 iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
-                iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(iobcobValues));
+                iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statArray));
 
             }
         });
@@ -452,7 +445,7 @@ public class MainActivity extends Activity {
 
         //Treatments loop
         // Retrieve a PendingIntent that will perform a broadcast
-        Intent treatmentsIntent = new Intent(this, treatmentsReceiver.class);
+        Intent treatmentsIntent = new Intent(this, statsReceiver.class);
         pendingIntentTreatments = PendingIntent.getBroadcast(this, 0, treatmentsIntent, 0);
 
         int interval = 300000; //5mins
@@ -472,7 +465,7 @@ public class MainActivity extends Activity {
         //Toast.makeText(this, "OpenAPS will loop " + interval , Toast.LENGTH_LONG).show();
     }
 
-    public void runThis(View view){
+    public void runOpenAPS(View view){
 
 
         double fuzz = (1000 * 30 * 5);
@@ -491,7 +484,7 @@ public class MainActivity extends Activity {
         //}
 
         JSONObject reply = new JSONObject();
-        reply = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(), iobJSONValue, profileNow);
+        reply = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(null), iobJSONValue, profileNow);
 
         //sysMsg = (TextView) findViewById(R.id.sysmsg);
         //sysMsg.setText(reply.toString());
@@ -535,7 +528,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public void apsstatusAccept (View view){
+    public void apsstatusAccept (final View view){
 
         String popUpMsg;
         apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
@@ -559,6 +552,8 @@ public class MainActivity extends Activity {
                         apsstatusAcceptButton.setEnabled(false);
 
                         displayCurrentInfo();
+
+                        runOpenAPS(view);                                                           //Runs openAPS again after accepting the suggest Temp Basal
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

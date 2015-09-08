@@ -54,25 +54,25 @@ public class TempBasal extends Model {
         }
     }
 
-    public static TempBasal getCurrentActive() {
+    public static TempBasal getCurrentActive(Date atThisDate) {
         TempBasal last = new Select()
                 .from(TempBasal.class)
                 .orderBy("start_time desc")
                 .executeSingle();
 
-        if (last.isactive()){
+        if (last.isactive(atThisDate)){
             return last;
         } else {
             return new TempBasal();     //returns an empty TempBasal, other than null or inactive basal
         }
     }
 
-    public boolean isactive(){
-        Date timeNow = new Date();
+    public boolean isactive(Date atThisDate){
+        if (atThisDate == null) atThisDate = new Date();
 
         if (start_time == null){ return false;}
 
-        if ((start_time.getTime() + duration * 60000) > timeNow.getTime()){
+        if ((start_time.getTime() + duration * 60000) > atThisDate.getTime()){
             return true;
         } else {
             return false;

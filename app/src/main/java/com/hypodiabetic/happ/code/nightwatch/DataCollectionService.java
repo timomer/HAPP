@@ -9,20 +9,12 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.TextView;
 
 //import com.dexdrip.stephenblack.nightwatch.ShareModels.ShareRest;
 //import com.dexdrip.stephenblack.nightwatch.integration.dexdrip.Intents;
 //import retrofit.RetrofitError;
-import com.hypodiabetic.happ.MainActivity;
-import com.hypodiabetic.happ.R;
-import com.hypodiabetic.happ.Treatments;
 //import com.hypodiabetic.happ.TreatmentsRepo;
-import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.Date;

@@ -3,17 +3,13 @@ package com.hypodiabetic.happ.code.nightscout;
 import android.widget.Toast;
 
 import com.hypodiabetic.happ.ApplicationContextProvider;
-import com.hypodiabetic.happ.Profile;
-import com.hypodiabetic.happ.Treatments;
+import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.openaps.iob;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 

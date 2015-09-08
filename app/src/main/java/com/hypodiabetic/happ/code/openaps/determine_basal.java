@@ -3,16 +3,13 @@ package com.hypodiabetic.happ.code.openaps;
 import android.util.Log;
 
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Profile;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.ExtendedGraphBuilder;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;

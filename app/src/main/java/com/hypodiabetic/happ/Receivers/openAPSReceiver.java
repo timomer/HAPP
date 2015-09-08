@@ -1,24 +1,19 @@
-package com.hypodiabetic.happ;
+package com.hypodiabetic.happ.Receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 
+import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.code.nightscout.cob;
+import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
-import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -50,7 +45,7 @@ public class openAPSReceiver extends BroadcastReceiver{
                 //}
 
                 JSONObject openAPSSuggest = new JSONObject();
-                openAPSSuggest = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(), iobJSONValue, profileNow);
+                openAPSSuggest = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(null), iobJSONValue, profileNow);
 
                 MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                     //Updates the Main Activity screen
 

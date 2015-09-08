@@ -1,16 +1,11 @@
-package com.hypodiabetic.happ;
+package com.hypodiabetic.happ.Objects;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.activeandroid.Model;
-import com.hypodiabetic.happ.Objects.TempBasal;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
