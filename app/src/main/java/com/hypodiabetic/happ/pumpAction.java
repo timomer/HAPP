@@ -33,7 +33,7 @@ public class pumpAction {
 
             //Re calculate rate percent
             safeRatePercent     = (safeRate / p.current_basal) * 100;                                   //Get rate percent increase or decrease based on current Basal
-            basal.ratePercent   = safeRatePercent.intValue();
+            basal.ratePercent   = (safeRatePercent.intValue() / 10) * 10;
 
             //Notify or Send command to pump depending on OpenAPS mode
             if (p.openaps_mode.equals("online")){
@@ -63,7 +63,7 @@ public class pumpAction {
 
                                 //Run openAPS again
                                 Intent intent = new Intent("RUN_OPENAPS");
-                                LocalBroadcastManager.getInstance(c).sendBroadcast(intent);
+                                c.sendBroadcast(intent);
 
                             }
                         })
@@ -118,6 +118,11 @@ public class pumpAction {
                             //Run openAPS again
                             Intent intent = new Intent("RUN_OPENAPS");
                             LocalBroadcastManager.getInstance(c).sendBroadcast(intent);
+
+                            //Return to the home screen (if not already on it)
+                            Intent intentHome = new Intent(c, MainActivity.class);
+                            intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            c.startActivity(intentHome);
 
                         }
                     })

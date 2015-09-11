@@ -282,7 +282,7 @@ public class MainActivity extends Activity {
         TempBasal lastTempBasal = TempBasal.last();
         String appStatus = "";
         if (lastTempBasal.isactive(null)){                                                              //Active temp Basal
-            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.ratePercent + "% " + lastTempBasal.duration + "mins (" + lastTempBasal.durationLeft() + "mins left)";
+            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.duration + "mins (" + lastTempBasal.durationLeft() + "mins left)";
         } else {                                                                                    //No temp Basal running, show default
             Double currentBasal = Profile.ProfileAsOf(timeNow, this.getBaseContext()).current_basal;
             appStatus = "No temp basal, current basal: " + currentBasal + "U";
@@ -381,9 +381,9 @@ public class MainActivity extends Activity {
                 iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
                 cobValueTextView = (TextView) findViewById(R.id.cobValue);
 
-                    iobValueTextView.setText(String.format("%.2f", statArray.get(0).iob));
-                    cobValueTextView.setText(String.format("%.2f", statArray.get(0).cob));
-                    displayCurrentInfo();
+                iobValueTextView.setText(String.format("%.2f", statArray.get(0).iob));
+                cobValueTextView.setText(String.format("%.2f", statArray.get(0).cob));
+                displayCurrentInfo();
 
                 //reloads charts with Treatment data
                 iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
@@ -398,6 +398,8 @@ public class MainActivity extends Activity {
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
+                displayCurrentInfo();
 
                 apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
                 apsstatus_eventualBG    = (TextView) findViewById(R.id.apsstatus_eventualBG);

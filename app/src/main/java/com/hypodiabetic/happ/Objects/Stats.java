@@ -25,12 +25,12 @@ public class Stats extends Model{
     public Long datetime;
 
     @Expose
-    @Column(name = "iob")
-    public double iob;
-
-    @Expose
     @Column(name = "bolus_iob")
     public double bolus_iob;
+
+    @Expose
+    @Column(name = "iob")
+    public double iob;
 
     @Expose
     @Column(name = "cob")

@@ -27,6 +27,7 @@ public class BolusWizard {
         JSONObject iobNow = Treatments.getIOB(profile, dateNow);
         JSONObject cobNow = Treatments.getCOB(profile, dateNow);
         Bg lastBg = Bg.last();
+        String bgCorrection="";
 
         Double cob=0D;
         Double biob=0D;
@@ -36,10 +37,21 @@ public class BolusWizard {
         } catch (JSONException e) {
         }
 
+        Double insulin_correction_bg;
+        if (Double.parseDouble(lastBg.sgv) >= profile.max_bg){
+            insulin_correction_bg   = (Double.parseDouble(lastBg.sgv) - profile.max_bg) / profile.isf;         //Insulin required for correcting Bg High
+            bgCorrection            = "High";
+        } else if (Double.parseDouble(lastBg.sgv) <= profile.min_bg){
+            insulin_correction_bg   = (Double.parseDouble(lastBg.sgv) - profile.target_bg) / profile.isf;      //Insulin required for correcting Bg Low
+            bgCorrection            = "Low";
+        } else {
+            insulin_correction_bg   = 0D;
+            bgCorrection            = "Within Target";
+        }
         Double net_biob                 = biob - (cob / profile.carbRatio);                                     //Net Bolus IOB after current carbs taken into consideration
         Double insulin_correction_carbs = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
-        Double insulin_correction_bg    = (Double.parseDouble(lastBg.sgv) - profile.max_bg) / profile.isf;      //Insulin required for correcting Bg // TODO: 07/09/2015 staying with Max Bg for now to be sure we do not over correct with openAPS 
         Double suggested_bolus          = insulin_correction_carbs + insulin_correction_bg - net_biob;          //Suggested amount of Bolus Insulin required
+
 
         JSONObject reply = new JSONObject();
         try {
@@ -50,6 +62,8 @@ public class BolusWizard {
             reply.put("bolusiob",biob);
             reply.put("bg",lastBg.sgv);
             reply.put("max_bg",profile.max_bg);
+            reply.put("target_bg",profile.target_bg);
+            reply.put("bgCorrection",bgCorrection);
             reply.put("net_biob",                   String.format("%.1f", net_biob));
             reply.put("insulin_correction_carbs",   String.format("%.1f", insulin_correction_carbs));
             reply.put("insulin_correction_bg",      String.format("%.1f", insulin_correction_bg));
@@ -83,7 +97,7 @@ public class BolusWizard {
         } catch (JSONException e) {
         }
 
-        return reply;
+        return bwp;
 
     }
 

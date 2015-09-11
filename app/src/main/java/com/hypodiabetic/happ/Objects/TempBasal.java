@@ -60,7 +60,7 @@ public class TempBasal extends Model {
                 .orderBy("start_time desc")
                 .executeSingle();
 
-        if (last.isactive(atThisDate)){
+        if (last != null && last.isactive(atThisDate)){
             return last;
         } else {
             return new TempBasal();     //returns an empty TempBasal, other than null or inactive basal

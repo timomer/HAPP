@@ -24,7 +24,7 @@
             android:value="HAPP.db" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="6" />
+            android:value="10" />
 
         <activity
             android:name=".MainActivity"

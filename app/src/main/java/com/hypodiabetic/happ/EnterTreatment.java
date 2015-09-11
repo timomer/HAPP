@@ -284,6 +284,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
                             treatment.save();
                             Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
+                            loadLastTreatments();
 
                         }
                     })
@@ -291,6 +292,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
                         public void onClick(DialogInterface dialog, int which) {
 
                             pumpAction.setBolus(treatment, null, view.getContext());
+                            loadLastTreatments();
 
                         }
                     })
@@ -301,6 +303,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
             treatment.save();
             Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 
+            loadLastTreatments();
             //finish();
         }
     }

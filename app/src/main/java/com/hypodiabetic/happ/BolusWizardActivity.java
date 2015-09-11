@@ -32,6 +32,7 @@ public class BolusWizardActivity extends Activity {
     private TextView reqInsulinBg;
     private TextView sugBolus;
     private Button buttonAccept;
+    private EditText suggestedBolus;
 
     Treatments bolusTreatment = new Treatments();
     Treatments carbTratment = new Treatments();
@@ -102,6 +103,7 @@ public class BolusWizardActivity extends Activity {
         reqInsulinCarbs = (TextView) findViewById(R.id.wizardReqInsulinCarbs);
         reqInsulinBg    = (TextView) findViewById(R.id.wizardReqInsulinBg);
         sugBolus        = (TextView) findViewById(R.id.wizardSugBolus);
+        suggestedBolus  = (EditText) findViewById(R.id.wizardSuggestedBolus);
         Double carbValue = 0D;
 
         if (!carbs.getText().toString().equals("")) carbValue = Double.parseDouble(carbs.getText().toString());
@@ -113,8 +115,15 @@ public class BolusWizardActivity extends Activity {
             cobValue.setText("COB: " + bw.getString("cob"));
             netBIOB.setText("Net Bolus IOB: " + bw.getString("net_biob"));
             reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
-            reqInsulinBg.setText("BG(" + bw.getString("bg") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
-            sugBolus.setText("Carb Corr(" + bw.getString("insulin_correction_carbs") + ") + BG Corr(" + bw.getString("insulin_correction_bg") + ") - Net Bolus(" + bw.getString("net_biob") + ") = " + bw.getString("suggested_bolus"));
+            if (bw.getString("bgCorrection").equals("High")){
+                reqInsulinBg.setText("BG(" + bw.getString("bg") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
+            } else if (bw.getString("bgCorrection").equals("Low")){
+                reqInsulinBg.setText("BG(" + bw.getString("bg") + ") - Target BG(" + bw.getString("target_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
+            } else {
+                reqInsulinBg.setText("NA - BG within Target");
+            }
+            sugBolus.setText("Carb Corr(" + bw.getString("insulin_correction_carbs") + ") + BG Corr(" + bw.getString("insulin_correction_bg") + ") - Net Bolus(" + bw.getString("net_biob") + ") = ");
+            suggestedBolus.setText(bw.getString("suggested_bolus"));
 
             Date dateNow = new Date();
             if (bw.getDouble("suggested_bolus") > 0){
@@ -145,8 +154,13 @@ public class BolusWizardActivity extends Activity {
 
     public void wizardAccept(View view){
 
+        bolusTreatment.value = Double.parseDouble(suggestedBolus.getText().toString());
         pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                       //Action the suggested Bolus
 
+        //finish();
+    }
+
+    public void wizardCancel(View view){
         finish();
     }
 }

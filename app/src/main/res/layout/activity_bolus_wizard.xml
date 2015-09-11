@@ -18,21 +18,21 @@
             android:layout_gravity="center_horizontal"
             android:text="Bolus IOB:"
             android:id="@+id/wizardIOB"
-            android:layout_weight=".5"/>
+            android:layout_weight=".4"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="COB:"
             android:id="@+id/wizardCOB"
-            android:layout_weight=".5"/>
+            android:layout_weight=".4"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="NET IOB:"
             android:id="@+id/wizardNetIOB"
-            android:layout_weight=".5"/>
+            android:layout_weight=".3"/>
     </LinearLayout>
 
         <EditText
@@ -46,7 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Carb Correction:"/>
+            android:text="Carb Correction:"
+            android:textColor="@android:color/white"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +58,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Bg Correction:"/>
+            android:text="Bg Correction:"
+            android:textColor="@android:color/white"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -68,13 +70,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Suggested Bolus:"/>
+            android:text="Suggested Bolus:"
+            android:textColor="@android:color/white"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="suggested bolus"
             android:id="@+id/wizardSugBolus"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Suggested Bolus"
+            android:id="@+id/wizardSuggestedBolus"
+            android:inputType="number"/>
 
     <LinearLayout
         android:layout_width="match_parent"
