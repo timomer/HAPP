@@ -1,9 +1,11 @@
 package com.hypodiabetic.happ.code.openaps;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 
 import org.json.JSONException;
@@ -21,6 +23,24 @@ import java.util.Locale;
  * source openaps-js https://github.com/openaps/openaps-js/blob/master
  */
 public class determine_basal {
+
+    //HAPP Triggers OpenAPS run
+    public static JSONObject runOpenAPS(Context c){
+
+        double fuzz = (1000 * 30 * 5);
+        double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
+        Date dateVar = new Date();
+        List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
+        Profile profileNow = new Profile().ProfileAsOf(dateVar, c);
+
+        List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
+        JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
+
+        JSONObject openAPSSuggest = determine_basal_run(bgReadings, TempBasal.getCurrentActive(null), iobJSONValue, profileNow);
+
+        return openAPSSuggest;
+    }
+
 
 
     //Takes a JSON array of the last 2 BG values returns JSON object with current BG and delta of change?
@@ -58,7 +78,7 @@ public class determine_basal {
     }
 
     //main function
-    public static JSONObject runOpenAPS (List<Bg> glucose_data, TempBasal temps_data, JSONObject iob_data, Profile profile_data) {
+    public static JSONObject determine_basal_run (List<Bg> glucose_data, TempBasal temps_data, JSONObject iob_data, Profile profile_data) {
 
         //Done: VAR JSONArray glucose_data: Recent glucose readings
         //Done: VAR temps_data:             Current ACTIVE Temp Basal running
@@ -231,7 +251,7 @@ public class determine_basal {
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
                                 } else {
                                     //reason = "bolus snooze: eventual BG range " + eventualBG + "-" + snoozeBG;
-                                    reason = "Eventual BG < Min, no Temp Basal active. Eventual BG Range: " + eventualBG + "-" + snoozeBG + " (EventualBG-SnoozeBG)";
+                                    reason = "Eventual BG < Min, BG moving in the right direction. Eventual BG Range: " + eventualBG + "-" + snoozeBG + " (EventualBG-SnoozeBG)";
                                     sysMsg = "Wait and monitor.";
                                 }
                             } else {
@@ -242,7 +262,8 @@ public class determine_basal {
                                 Double insulinReq = Math.min(0, (snoozeBG - target_bg) / profile_data.isf);
                                 // rate required to deliver insulinReq less insulin over 30m:
                                 Double rate = profile_data.current_basal + (2 * insulinReq);
-                                rate = (double) Math.round( rate * 1000 ) / 1000; //Double.parseDouble(df2.format(rate));/// TODO: 10/09/2015 rounds negative rate to 0?
+                                rate = (double) Math.round( rate * 1000 ) / 1000;
+                                if (rate < 0) rate = 0D;                                            //Negative rate is a 0 rate Temp Basal ##HAPP ADDED##
                                 // if required temp < existing temp basal
                                 if (temps_data.duration > 0 && rate > (temps_data.rate - 0.1)) {
                                     //reason = temps_data.rate + "<~" + rate;
@@ -336,6 +357,7 @@ public class determine_basal {
 
         if (rate < 0) { rate = 0D; } // if >30m @ 0 required, zero temp will be extended to 30m instead
         else if (rate > maxSafeBasal) { rate = maxSafeBasal; }
+        rate = Double.parseDouble(String.format("%.2f", rate));
 
         // rather than canceling temps, always set the current basal as a 30m temp
         // so we can see on the pump that openaps is working
@@ -355,6 +377,8 @@ public class determine_basal {
             if (rate == 0 && duration == 0){
                 requestedTemp.put("action", "Temp Basal Canceled");
                 requestedTemp.put("basal_adjustemnt", "Canceled");
+                requestedTemp.put("rate", profile_data.current_basal);
+                requestedTemp.put("ratePercent", 100);
             } else if (rate > profile_data.current_basal && duration != 0){
                 requestedTemp.put("action", "High Temp Basal set " + rate + "U for " + duration + "mins");
                 requestedTemp.put("basal_adjustemnt", "High");

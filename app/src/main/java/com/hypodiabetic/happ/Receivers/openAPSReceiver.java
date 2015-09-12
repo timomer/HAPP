@@ -27,23 +27,8 @@ public class openAPSReceiver extends BroadcastReceiver{
             // For our recurring task, we'll just display a message
             //Toast.makeText(context, "Running OpenAPS", Toast.LENGTH_LONG).show();
 
-
-            double fuzz = (1000 * 30 * 5);
-            double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
-
-            List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
-
-                Date dateVar = new Date();
-                Profile profileNow = new Profile().ProfileAsOf(dateVar, context);
-
-                List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
-                JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
-
-                JSONObject openAPSSuggest = new JSONObject();
-                openAPSSuggest = determine_basal.runOpenAPS(bgReadings, TempBasal.getCurrentActive(null), iobJSONValue, profileNow);
-
-                MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                     //Updates the Main Activity screen
-
+            JSONObject openAPSSuggest = determine_basal.runOpenAPS(context);                        //Run OpenAPS
+            MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                         //Updates the Main Activity screen with results
 
         }
 }

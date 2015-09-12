@@ -7,33 +7,6 @@
     tools:context="com.hypodiabetic.happ.BolusWizardActivity"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Bolus IOB:"
-            android:id="@+id/wizardIOB"
-            android:layout_weight=".4"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="COB:"
-            android:id="@+id/wizardCOB"
-            android:layout_weight=".4"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="NET IOB:"
-            android:id="@+id/wizardNetIOB"
-            android:layout_weight=".3"/>
-    </LinearLayout>
 
         <EditText
             android:layout_width="match_parent"
@@ -42,6 +15,18 @@
             android:id="@+id/wizardCarbValue"
             android:inputType="number"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Net Bolus IOB:"
+            android:textColor="@android:color/white"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="biob correction"
+            android:id="@+id/wizardNetIOB"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

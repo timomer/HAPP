@@ -52,6 +52,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     private ColumnChartData columnData;
 
     private List<PointValue> cobValues = new ArrayList<PointValue>();
+    private List<PointValue> tempBasalValues = new ArrayList<PointValue>();
 
     JSONArray iobFutureValues = new JSONArray();
     JSONArray cobFutureValues = new JSONArray();
@@ -110,6 +111,39 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         yAxis.setMaxLabelChars(5);
         yAxis.setInside(true);
         return yAxis;
+    }
+
+    //##########Basal vs Temp Basal Chart##########
+    public LineChartData basalvsTempBasalData() {
+        LineChartData lineData = new LineChartData(addBasalvsTempBasaLines());
+        //lineData.setAxisYLeft(iobPastyAxis());
+        //lineData.setAxisYRight(cobPastyAxis());
+        lineData.setAxisXBottom(xAxis());
+        return lineData;
+    }
+    public List<Line> addBasalvsTempBasaLines() {
+        addBasalvsTempBasalValues();
+        List<Line> lines = new ArrayList<Line>();
+        lines.add(basalvsTempBasalLine());
+        return lines;
+    }
+    public Line basalvsTempBasalLine(){
+        Line cobValuesLine = new Line(tempBasalValues);
+        cobValuesLine.setColor(ChartUtils.COLOR_ORANGE);
+        cobValuesLine.setHasLines(true);
+        cobValuesLine.setHasPoints(false);
+        cobValuesLine.setFilled(true);
+        cobValuesLine.setCubic(true);
+        return cobValuesLine;
+    }
+    public void addBasalvsTempBasalValues(){
+        Double basalDelta;
+        for (Stats tempBasalReading : statsReadings) {
+
+            basalDelta = tempBasalReading.basal - tempBasalReading.temp_basal;                      //Delta between normal Basal and Temp Basal set
+            tempBasalValues.add(new PointValue((float) (tempBasalReading.datetime/fuzz), basalDelta.floatValue()));
+
+        }
     }
 
 
@@ -228,6 +262,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             }
         }
     }
+
 
     public double fitIOB2COBRange(double value){                                                        //Converts a IOB value to the COB Chart Range
         Double yBgMax = yCOBMax;

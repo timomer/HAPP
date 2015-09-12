@@ -7,6 +7,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
 
 import org.json.JSONException;
@@ -24,25 +25,28 @@ public class BolusWizard {
 
         Date dateNow = new Date();
         Profile profile = Profile.ProfileAsOf(dateNow = new Date(), c);
-        JSONObject iobNow = Treatments.getIOB(profile, dateNow);
-        JSONObject cobNow = Treatments.getCOB(profile, dateNow);
-        Bg lastBg = Bg.last();
+        JSONObject iobNow       = Treatments.getIOB(profile, dateNow);
+        JSONObject cobNow       = Treatments.getCOB(profile, dateNow);
+        JSONObject openAPSNow   = determine_basal.runOpenAPS(c);
+        //Bg lastBg = Bg.last();
         String bgCorrection="";
 
+        Double eventualBG=0D;
         Double cob=0D;
         Double biob=0D;
         try {
-            cob     = cobNow.getDouble("cob");
-            biob    = iobNow.getDouble("bolusiob");
+            eventualBG  = openAPSNow.getDouble("eventualBG");
+            cob         = cobNow.getDouble("cob");
+            biob        = iobNow.getDouble("bolusiob");
         } catch (JSONException e) {
         }
 
         Double insulin_correction_bg;
-        if (Double.parseDouble(lastBg.sgv) >= profile.max_bg){
-            insulin_correction_bg   = (Double.parseDouble(lastBg.sgv) - profile.max_bg) / profile.isf;         //Insulin required for correcting Bg High
+        if (eventualBG >= profile.max_bg){
+            insulin_correction_bg   = (eventualBG - profile.max_bg) / profile.isf;         //Insulin required for correcting Bg High
             bgCorrection            = "High";
-        } else if (Double.parseDouble(lastBg.sgv) <= profile.min_bg){
-            insulin_correction_bg   = (Double.parseDouble(lastBg.sgv) - profile.target_bg) / profile.isf;      //Insulin required for correcting Bg Low
+        } else if (eventualBG <= profile.min_bg){
+            insulin_correction_bg   = (eventualBG - profile.target_bg) / profile.isf;      //Insulin required for correcting Bg Low
             bgCorrection            = "Low";
         } else {
             insulin_correction_bg   = 0D;
@@ -60,7 +64,7 @@ public class BolusWizard {
             reply.put("cob",cob);
             reply.put("carbRatio",profile.carbRatio);
             reply.put("bolusiob",biob);
-            reply.put("bg",lastBg.sgv);
+            reply.put("eventualBG",eventualBG);
             reply.put("max_bg",profile.max_bg);
             reply.put("target_bg",profile.target_bg);
             reply.put("bgCorrection",bgCorrection);

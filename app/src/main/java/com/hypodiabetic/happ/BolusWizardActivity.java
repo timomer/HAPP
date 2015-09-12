@@ -23,10 +23,8 @@ import java.util.Date;
 
 public class BolusWizardActivity extends Activity {
 
+    private TextView reqInsulinbiob;
     private EditText treatmentValue;
-    private TextView biobValue;
-    private TextView cobValue;
-    private TextView netBIOB;
     private EditText carbs;
     private TextView reqInsulinCarbs;
     private TextView reqInsulinBg;
@@ -96,9 +94,7 @@ public class BolusWizardActivity extends Activity {
         sysMsg = (TextView) findViewById(R.id.wizardCalc);
         sysMsg.setText("NS bwp: " + reply.toString());
 
-        biobValue       = (TextView) findViewById(R.id.wizardIOB);
-        cobValue        = (TextView) findViewById(R.id.wizardCOB);
-        netBIOB         = (TextView) findViewById(R.id.wizardNetIOB);
+        reqInsulinbiob  = (TextView) findViewById(R.id.wizardNetIOB);
         carbs           = (EditText) findViewById(R.id.wizardCarbValue);
         reqInsulinCarbs = (TextView) findViewById(R.id.wizardReqInsulinCarbs);
         reqInsulinBg    = (TextView) findViewById(R.id.wizardReqInsulinBg);
@@ -111,14 +107,12 @@ public class BolusWizardActivity extends Activity {
         JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
 
         try {
-            biobValue.setText("Bolus IOB: " + bw.getString("biob"));
-            cobValue.setText("COB: " + bw.getString("cob"));
-            netBIOB.setText("Net Bolus IOB: " + bw.getString("net_biob"));
+            reqInsulinbiob.setText("BolusIOB(" + bw.getString("biob") + ") - (COB(" + bw.getString("cob") + ") / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("net_biob") + "U");
             reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
             if (bw.getString("bgCorrection").equals("High")){
-                reqInsulinBg.setText("BG(" + bw.getString("bg") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
+                reqInsulinBg.setText("eventualBG(" + bw.getString("eventualBG") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
             } else if (bw.getString("bgCorrection").equals("Low")){
-                reqInsulinBg.setText("BG(" + bw.getString("bg") + ") - Target BG(" + bw.getString("target_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg"));
+                reqInsulinBg.setText("eventualBG(" + bw.getString("eventualBG") + ") - Target BG(" + bw.getString("target_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
             } else {
                 reqInsulinBg.setText("NA - BG within Target");
             }
