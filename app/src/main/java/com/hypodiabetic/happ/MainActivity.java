@@ -15,12 +15,19 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -43,6 +50,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Viewport;
@@ -53,33 +61,28 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 
 
 
-
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
 
     private static MainActivity ins;
     private PendingIntent pendingIntent;
     private PendingIntent pendingIntentTreatments;
     private AlarmManager manager;
     private AlarmManager managerTreatments;
-    private TextView iobValueTextView;
-    private TextView cobValueTextView;
-    private TextView sysMsg;
-    private TextView openAPSStatus;
-    public ExtendedGraphBuilder extendedGraphBuilder;
 
-    private TextView apsstatus_eventualBG;
-    private TextView apsstatus_snoozeBG;
-    private TextView apsstatus_reason;
-    private TextView apsstatus_Action;
-    private TextView apsstatus_rate;
-    private TextView apsstatus_duration;
-    private Button apsstatusAcceptButton;
-    private TextView apsstatus_age;
+    private TextView sysMsg;
+    private TextView statsAge;
+    private ExtendedGraphBuilder extendedGraphBuilder;
+    public static Activity activity;
 
     private static TempBasal Suggested_Temp_Basal = new TempBasal();
 
-    private ColumnChartView iobcobChart;
-    private LineChartView iobcobPastChart;
+    SectionsPagerAdapter mSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
+    ViewPager mViewPager;                                                                           //The {@link ViewPager} that will host the section contents.
+    Fragment openAPSFragmentObject;
+    Fragment iobcobActiveFragmentObject;
+    Fragment iobcobFragmentObject;
+
+
 
     //xdrip start
     private LineChartView chart;
@@ -108,6 +111,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        activity = this;
         super.onCreate(savedInstanceState);
         ins = this;
         PreferenceManager.setDefaultValues(this, R.xml.pref_openaps, false);                        //Sets default OpenAPS Preferences if the user has not
@@ -124,31 +128,17 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
-        //Setup IOB COB Chart Radio buttons
-        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.iobcobChartsRadioGroup);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                // checkedId is the RadioButton selected
-                LineChartView iobcobPast        = (LineChartView) findViewById(R.id.iobcobPast);
-                ColumnChartView iobcobFuture    = (ColumnChartView) findViewById(R.id.iobcobchart);
-                LinearLayout apsstatus          = (LinearLayout) findViewById(R.id.apsstatus);
-                if (checkedId == R.id.iobcobHistory){
-                    iobcobPast.setVisibility(View.VISIBLE);
-                    iobcobFuture.setVisibility(View.GONE);
-                    apsstatus.setVisibility(View.GONE);
-                } else if (checkedId == R.id.iobcobFuture) {
-                    iobcobPast.setVisibility(View.GONE);
-                    iobcobFuture.setVisibility(View.VISIBLE);
-                    apsstatus.setVisibility(View.GONE);
-                } else {
-                    iobcobPast.setVisibility(View.GONE);
-                    iobcobFuture.setVisibility(View.GONE);
-                    apsstatus.setVisibility(View.VISIBLE);
-                }
-            }
-        });
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the app.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) this.findViewById(R.id.pager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        //Build Fragments
+        openAPSFragmentObject       = new openAPSFragment();
+        iobcobActiveFragmentObject  = new iobcobActiveFragment();
+        iobcobFragmentObject        = new iobcobFragment();
+
 
         //starts OpenAPS loop
         startOpenAPSLoop();
@@ -173,21 +163,6 @@ public class MainActivity extends Activity {
         previewChart.setViewportChangeListener(new ViewportListener());
         chart.setViewportChangeListener(new ChartViewPortListener());
 
-
-        //IOB and COB past chart
-        iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
-        iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
-        iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
-
-        Viewport iobv   = new Viewport(iobcobPastChart.getMaximumViewport());                       //Sets the min and max for Top and Bottom of the viewpoint
-        iobv.top        = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
-        iobv.bottom     = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
-
-        iobcobPastChart.setCurrentViewport(iobv);
-        iobcobPastChart.setMaximumViewport(iobv);
-        iobcobPastChart.setViewportCalculationEnabled(true);
-        //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015  
-
         setViewport();
     }
 
@@ -201,12 +176,16 @@ public class MainActivity extends Activity {
                 previewChart.setCurrentViewport(newViewport);
                 updatingChartViewport = false;
 
-                Viewport iobv = new Viewport(chart.getMaximumViewport());                 //Update the IOB COB Line Chart Viewport to stay inline with the preview
-                iobv.left = newViewport.left;
-                iobv.right = newViewport.right;
-                iobv.top = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
-                iobv.bottom = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
-                iobcobPastChart.setCurrentViewport(iobv);
+                if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
+                    LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
+
+                    Viewport iobv = new Viewport(chart.getMaximumViewport());                       //Update the IOB COB Line Chart Viewport to stay inline with the preview
+                    iobv.left = newViewport.left;
+                    iobv.right = newViewport.right;
+                    iobv.top = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
+                    iobv.bottom = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+                    iobcobPastChart.setCurrentViewport(iobv);
+                }
             }
         }
     }
@@ -217,15 +196,19 @@ public class MainActivity extends Activity {
                 updatingPreviewViewport = true;
                 chart.setZoomType(ZoomType.HORIZONTAL);
                 chart.setCurrentViewport(newViewport);
-                //iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
-                //iobcobPastChart.setCurrentViewport(newViewport);
                 tempViewport = newViewport;
                 updatingPreviewViewport = false;
 
-                Viewport iobv = new Viewport(iobcobPastChart.getMaximumViewport());                 //Update the IOB COB Line Chart Viewport to stay inline with the preview
-                iobv.left = newViewport.left;
-                iobv.right = newViewport.right;
-                iobcobPastChart.setCurrentViewport(iobv);
+                if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
+                    LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
+
+                    iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
+                    iobcobPastChart.setCurrentViewport(newViewport);
+                    Viewport iobv = new Viewport(iobcobPastChart.getMaximumViewport());             //Update the IOB COB Line Chart Viewport to stay inline with the preview
+                    iobv.left = newViewport.left;
+                    iobv.right = newViewport.right;
+                    iobcobPastChart.setCurrentViewport(iobv);
+                }
             }
             if (updateStuff == true) {
                 holdViewport.set(newViewport.left, newViewport.top, newViewport.right, newViewport.bottom);
@@ -272,9 +255,12 @@ public class MainActivity extends Activity {
         }
 
         //Stats age update
-        openAPSStatus = (TextView) findViewById(R.id.openAPSStatus);
+        statsAge = (TextView) findViewById(R.id.statsAge);
         Stats lastRun = Stats.last();
-        if (lastRun != null) openAPSStatus.setText(lastRun.statAge());
+        if (lastRun != null) statsAge.setText(lastRun.statAge());
+
+        //OpenAPS age update
+        openAPSFragment.updateAge();
 
         //Temp Basal running update
         Date timeNow = new Date();
@@ -288,10 +274,6 @@ public class MainActivity extends Activity {
             appStatus = "No temp basal, current basal: " + currentBasal + "U";
         }
         sysMsg.setText(appStatus);
-
-        //OpenAPS info update
-        apsstatus_age = (TextView) findViewById(R.id.apsstatus_age);
-        apsstatus_age.setText(Suggested_Temp_Basal.age() + " ago");
 
     }
     @Override
@@ -311,10 +293,7 @@ public class MainActivity extends Activity {
     protected void onResume(){
         super.onResume();
 
-        //displayCurrentInfo(); //Update OpenAPS Last run time
-
         //xdrip start
-        //bgGraphBuilder = new BgGraphBuilder(getApplicationContext());
         extendedGraphBuilder = new ExtendedGraphBuilder(getApplicationContext());
 
 
@@ -373,72 +352,37 @@ public class MainActivity extends Activity {
 
     }
 
-    //Updates Stats
-    public void updateStats(final List<Stats> statArray){
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                iobValueTextView = (TextView) findViewById(R.id.iobValue);              //set value to textbox
-                cobValueTextView = (TextView) findViewById(R.id.cobValue);
 
-                iobValueTextView.setText(String.format("%.2f", statArray.get(0).iob));
-                cobValueTextView.setText(String.format("%.2f", statArray.get(0).cob));
-                displayCurrentInfo();
 
-                //reloads charts with Treatment data
-                iobcobChart = (ColumnChartView) findViewById(R.id.iobcobchart);
-                iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statArray));
-
-            }
-        });
-    }
-
-    //Updates the OpenAPS details
+    //Updates the OpenAPS Fragment
     public void updateOpenAPSDetails(final JSONObject openAPSSuggest){
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                displayCurrentInfo();
-
-                apsstatusAcceptButton   = (Button) findViewById(R.id.apsstatusAcceptButton);
-                apsstatus_eventualBG    = (TextView) findViewById(R.id.apsstatus_eventualBG);
-                apsstatus_snoozeBG      = (TextView) findViewById(R.id.apsstatus_snoozeBG);
-                apsstatus_reason        = (TextView) findViewById(R.id.apsstatus_reason);
-                apsstatus_Action        = (TextView) findViewById(R.id.apsstatus_Action);
-                apsstatus_rate          = (TextView) findViewById(R.id.apsstatus_rate);
-                apsstatus_duration      = (TextView) findViewById(R.id.apsstatus_duration);
-                apsstatus_age           = (TextView) findViewById(R.id.apsstatus_age);
-                apsstatus_reason.setText("");
-                apsstatus_Action.setText("");
-                apsstatus_rate.setText("NA");
-                apsstatus_duration.setText("");
-                apsstatus_age.setText("0 ago");
-                try {
-                    apsstatus_eventualBG.setText("Eventual BG: " + openAPSSuggest.getString("eventualBG"));
-                    apsstatus_snoozeBG.setText("Snooze BG: " + openAPSSuggest.getString("snoozeBG"));
-                    if (openAPSSuggest.has("reason")) apsstatus_reason.setText(openAPSSuggest.getString("reason"));
-                    if (openAPSSuggest.has("action")) apsstatus_Action.setText(openAPSSuggest.getString("action"));
-                    if (openAPSSuggest.has("rate")) apsstatus_rate.setText(openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getString("ratePercent") + "%)");
-                    if (openAPSSuggest.has("duration")) apsstatus_duration.setText(openAPSSuggest.getString("duration") + "mins");
-
-                    Suggested_Temp_Basal = new TempBasal();
-                    if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
-                        Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
-                        Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
-                        Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
-                        Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
-                        Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
-                        apsstatusAcceptButton.setEnabled(true);
-                    } else {
-                        apsstatusAcceptButton.setEnabled(false);
-                    }
-                }catch (Exception e)  {
+                if (openAPSFragmentObject.getView() != null) {                                      //Check the fragment is loaded
+                    openAPSFragment.update(openAPSSuggest);
                 }
-
             }
         });
     }
+    //Updates stats Fragments charts
+    public void updateStats(){
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                if (iobcobActiveFragmentObject.getView() != null) {                                 //Check the fragment is loaded
+                    iobcobActiveFragment.updateChart(MainActivity.activity);
+                }
+                if (iobcobFragmentObject.getView() != null){
+                    iobcobFragment.updateChart();
+                }
+            }
+        });
+    }
+
+
 
 
 
@@ -474,11 +418,194 @@ public class MainActivity extends Activity {
         Intent intent = new Intent("RUN_OPENAPS");
         sendBroadcast(intent);
     }
-
     public void apsstatusAccept (final View view){
 
         pumpAction.setTempBasal(Suggested_Temp_Basal, view.getContext());                           //Action the suggested Temp
         //displayCurrentInfo();
     }
+
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a DummySectionFragment (defined as a static inner class
+            // below) with the page number as its lone argument.
+
+            switch (position){
+                case 0:
+                    return openAPSFragmentObject;
+                case 1:
+                    return iobcobFragmentObject;
+                case 2:
+                    return iobcobActiveFragmentObject;
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            // Show 4 total pages.
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "OpenAPS";
+                case 1:
+                    return "IOB & COB";
+                case 2:
+                    return "Active IOB & COB";
+                case 3:
+                    return "Temp Basal vs Basal";
+            }
+            return null;
+        }
+    }
+
+    public static class openAPSFragment extends Fragment {
+        public openAPSFragment(){}
+        private static TextView apsstatus_age;
+        private static TextView apsstatus_eventualBG;
+        private static TextView apsstatus_snoozeBG;
+        private static TextView apsstatus_reason;
+        private static TextView apsstatus_Action;
+        private static TextView apsstatus_rate;
+        private static TextView apsstatus_duration;
+        private static Button   apsstatusAcceptButton;
+
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_openaps_dash, container, false);
+            apsstatusAcceptButton   = (Button)   rootView.findViewById(R.id.apsstatusAcceptButton);
+            apsstatus_eventualBG    = (TextView) rootView.findViewById(R.id.apsstatus_eventualBG);
+            apsstatus_snoozeBG      = (TextView) rootView.findViewById(R.id.apsstatus_snoozeBG);
+            apsstatus_duration      = (TextView) rootView.findViewById(R.id.apsstatus_duration);
+            apsstatus_reason        = (TextView) rootView.findViewById(R.id.apsstatus_reason);
+            apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
+            apsstatus_rate          = (TextView) rootView.findViewById(R.id.apsstatus_rate);
+            apsstatus_age           = (TextView) rootView.findViewById(R.id.apsstatus_age);
+
+            return rootView;
+        }
+
+        public static void updateAge(){
+            if (apsstatus_age != null) apsstatus_age.setText(Suggested_Temp_Basal.age() + " ago");
+        }
+
+        public static void update(JSONObject openAPSSuggest){
+            //displayCurrentInfo();
+            apsstatus_reason.setText("");
+            apsstatus_Action.setText("");
+            apsstatus_rate.setText("NA");
+            apsstatus_duration.setText("");
+            apsstatus_age.setText("0 ago");
+            try {
+                apsstatus_eventualBG.setText("Eventual BG: " + openAPSSuggest.getString("eventualBG"));
+                apsstatus_snoozeBG.setText("Snooze BG: " + openAPSSuggest.getString("snoozeBG"));
+                if (openAPSSuggest.has("reason")) apsstatus_reason.setText(openAPSSuggest.getString("reason"));
+                if (openAPSSuggest.has("action")) apsstatus_Action.setText(openAPSSuggest.getString("action"));
+                if (openAPSSuggest.has("rate")) apsstatus_rate.setText(openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getString("ratePercent") + "%)");
+                if (openAPSSuggest.has("duration")) apsstatus_duration.setText(openAPSSuggest.getString("duration") + "mins");
+
+                Suggested_Temp_Basal = new TempBasal();
+                if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
+                    Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
+                    Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
+                    Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
+                    Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
+                    Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
+                    apsstatusAcceptButton.setEnabled(true);
+                } else {
+                    apsstatusAcceptButton.setEnabled(false);
+                }
+            }catch (Exception e)  {
+            }
+        }
+
+    }
+    public static class iobcobFragment extends Fragment {
+        public iobcobFragment(){}
+        static LineChartView iobcobPastChart;
+        static ExtendedGraphBuilder extendedGraphBuilder;
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
+            iobcobPastChart = (LineChartView) rootView.findViewById(R.id.iobcobPast);
+            extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
+
+            setupChart();
+
+            return rootView;
+        }
+
+        public void setupChart(){
+
+            iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
+            iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+
+            Viewport iobv   = new Viewport(iobcobPastChart.getMaximumViewport());                       //Sets the min and max for Top and Bottom of the viewpoint
+            iobv.top        = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
+            iobv.bottom     = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+
+            iobcobPastChart.setCurrentViewport(iobv);
+            iobcobPastChart.setMaximumViewport(iobv);
+            iobcobPastChart.setViewportCalculationEnabled(true);
+            //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015
+        }
+
+        public static void updateChart(){
+            iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+        }
+    }
+    public static class iobcobActiveFragment extends Fragment {
+        public iobcobActiveFragment(){}
+
+        static ColumnChartView iobcobChart;
+        static TextView iobValueTextView;
+        static TextView cobValueTextView;
+        static ExtendedGraphBuilder extendedGraphBuilder;
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
+            extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
+            iobValueTextView = (TextView) getActivity().findViewById(R.id.iobValue);
+            cobValueTextView = (TextView) getActivity().findViewById(R.id.cobValue);
+            iobcobChart = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
+
+            updateChart(getActivity());
+
+            return rootView;
+        }
+
+        //Updates Stats
+        public static void updateChart(Activity a){
+
+            List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
+
+            //displayCurrentInfo();
+            iobValueTextView.setText(String.format("%.2f", statList.get(0).iob));
+            cobValueTextView.setText(String.format("%.2f", statList.get(0).cob));
+
+            //reloads charts with Treatment data
+            iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
+        }
+    }
+
 
 }

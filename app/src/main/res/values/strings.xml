@@ -8,4 +8,7 @@
     <string name="title_activity_pref_basal_layout">pref_basal_layout</string>
     <string name="title_activity_isf_list">isfList</string>
     <string name="title_activity_bolus_wizard">BolusWizardActivity</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -3,8 +3,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical"
-    android:background="@android:color/black"
-    >
+    android:background="@android:color/black">
 
     <TextView
         android:text="Sys Msg"
@@ -13,6 +12,10 @@
         android:textColor="@android:color/white"
         android:id="@+id/sysmsg"
         />
+
+
+
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -98,7 +101,7 @@
                 android:layout_weight="3"
                 android:textColor="@android:color/white"
                 android:gravity="center"
-                android:id="@+id/openAPSStatus"/>
+                android:id="@+id/statsAge"/>
         </LinearLayout>
 
 
@@ -138,153 +141,22 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <android.support.v4.view.ViewPager
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        android:orientation="vertical">
-
-        <lecho.lib.hellocharts.view.ColumnChartView
-            android:id="@+id/iobcobchart"
+        android:layout_weight="3"
+        android:id="@+id/pager">
+        
+        <android.support.v4.view.PagerTitleStrip
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:visibility="gone">
-        </lecho.lib.hellocharts.view.ColumnChartView>
-        <lecho.lib.hellocharts.view.LineChartView
-            android:id="@+id/iobcobPast"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:visibility="gone">
-        </lecho.lib.hellocharts.view.LineChartView>
+            android:layout_height="wrap_content"
+            android:id="@+id/pager_title_strip">
+        </android.support.v4.view.PagerTitleStrip>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:orientation="vertical"
-            android:id="@+id/apsstatus">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/apsstatus_eventualBG"
-                    android:text="Eventual BG:"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/apsstatus_snoozeBG"
-                    android:text="Snooze BG:"
-                    android:layout_weight="1"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/apsstatus_age"
-                    android:text="Age:"
-                    android:layout_weight=".5"/>
-            </LinearLayout>
+    </android.support.v4.view.ViewPager>
 
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:id="@+id/apsstatus_reason"
-                android:text="Reason:"
-                android:layout_weight="1.5"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:id="@+id/apsstatus_Action"
-                android:text="Action:"
-                android:layout_weight="1"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="Suggested Temp Basal:"
-                    android:layout_weight="2"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/apsstatus_rate"
-                    android:text=""
-                    android:layout_weight="1"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/apsstatus_duration"
-                    android:text=""
-                    android:layout_weight="1"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="Accept Temp"
-                    android:onClick="apsstatusAccept"
-                    android:layout_weight=".5"
-                    android:id="@+id/apsstatusAcceptButton"
-                    android:enabled="false"/>
-                <Button
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="Run OpenAPS"
-                    android:onClick="runOpenAPS"
-                    android:layout_weight=".5"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <RadioGroup
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight=".5"
-            android:orientation="horizontal"
-            android:id="@+id/iobcobChartsRadioGroup">
-
-            <RadioButton
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:text="IOB COB Line"
-                android:layout_weight="1"
-                android:id="@+id/iobcobHistory"/>
-            <RadioButton
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:text="IOB COB"
-                android:layout_weight="1"
-                android:id="@+id/iobcobFuture"/>
-            <RadioButton
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:text="OpenAPS"
-                android:layout_weight="1"
-                android:checked="true"
-                android:id="@+id/openaps"/>
-
-        </RadioGroup>
-
-
-    </LinearLayout>
 
     <lecho.lib.hellocharts.view.LineChartView
         android:id="@+id/chart"

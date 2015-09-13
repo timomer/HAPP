@@ -27,11 +27,9 @@ public class statsReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent arg1) {
 
 
-        List<Stats> statArray = new ArrayList<Stats>();
         Date dateVar = new Date();
         Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);
 
-        for (int v=0; v<=5; v++) {
             Stats stat = new Stats();
 
             JSONObject iobJSONValue = Treatments.getIOB(profileAsOfNow, dateVar);
@@ -45,25 +43,14 @@ public class statsReceiver extends BroadcastReceiver {
                 stat.basal      = profileAsOfNow.current_basal;
                 stat.temp_basal = TempBasal.getCurrentActive(dateVar).rate;
 
-                if (v==0){
-                    stat.when   = "now";
-                } else {
-                    stat.when   = (v*2) + "0mins";
-                }
-
-                statArray.add(stat);
-
-                dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
-                profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);        //Gets Profile info for the new dateVar
-
             } catch (Exception e)  {
                 Toast.makeText(context, "Error getting Stats", Toast.LENGTH_LONG).show();
             }
-        }
 
-        statArray.get(0).save();                                                                    //Records Stat for now to DB (not future stats)
 
-        MainActivity.getInstace().updateStats(statArray);                                           //Updates the Main Activity screen
+        stat.save();                                                                                //Records Stat for now to DB (not future stats)
+
+        MainActivity.getInstace().updateStats();                                                    //Updates the Main Activity screen
 
     }
 

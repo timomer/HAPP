@@ -1,6 +1,8 @@
 package com.hypodiabetic.happ.Objects;
 
+import android.content.Context;
 import android.provider.BaseColumns;
+import android.widget.Toast;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
@@ -8,7 +10,10 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 
+import org.json.JSONObject;
+
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -88,6 +93,44 @@ public class Stats extends Model{
                 .orderBy("datetime desc")
                 .limit(number)
                 .execute();
+    }
+
+    public static List<Stats> updateActiveBarChart(Context c){
+        List<Stats> statList = new ArrayList<Stats>();
+        Date dateVar = new Date();
+        Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,c);
+
+        for (int v=0; v<=5; v++) {
+            Stats stat = new Stats();
+
+            JSONObject iobJSONValue = Treatments.getIOB(profileAsOfNow, dateVar);
+            JSONObject cobJSONValue = Treatments.getCOB(profileAsOfNow, dateVar);
+
+            try {
+                stat.datetime   = dateVar.getTime();
+                stat.iob        = iobJSONValue.getDouble("iob");
+                stat.bolus_iob  = iobJSONValue.getDouble("bolusiob");
+                stat.cob        = cobJSONValue.getDouble("display");
+                stat.basal      = profileAsOfNow.current_basal;
+                stat.temp_basal = TempBasal.getCurrentActive(dateVar).rate;
+
+                if (v==0){
+                    stat.when   = "now";
+                } else {
+                    stat.when   = (v*2) + "0mins";
+                }
+
+                statList.add(stat);
+
+                dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
+                profileAsOfNow = new Profile().ProfileAsOf(dateVar,c);        //Gets Profile info for the new dateVar
+
+            } catch (Exception e)  {
+                Toast.makeText(c, "Error getting Stats", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        return statList;
     }
 
 }
