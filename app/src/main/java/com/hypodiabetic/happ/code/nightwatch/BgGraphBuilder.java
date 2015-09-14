@@ -55,6 +55,8 @@ public class BgGraphBuilder {
     private List<PointValue> lowValues = new ArrayList<PointValue>();
     public Viewport viewport;
 
+    public Double maxBasal;                                                                         //Added Max user bolus
+
 
     public BgGraphBuilder(Context context){
         this.context = context;
@@ -62,6 +64,7 @@ public class BgGraphBuilder {
         this.highMark = Double.parseDouble(prefs.getString("highValue", "170"));
         this.lowMark = Double.parseDouble(prefs.getString("lowValue", "70"));
         this.doMgdl = (prefs.getString("units", "mgdl").compareTo("mgdl") == 0);
+        this.maxBasal = Double.parseDouble(prefs.getString("max_basal", "4"));
         defaultMinY = unitized(40);
         defaultMaxY = unitized(250);
         pointSize = isXLargeTablet() ? 5 : 3;

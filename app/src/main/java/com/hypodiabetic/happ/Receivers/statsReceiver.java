@@ -34,14 +34,16 @@ public class statsReceiver extends BroadcastReceiver {
 
             JSONObject iobJSONValue = Treatments.getIOB(profileAsOfNow, dateVar);
             JSONObject cobJSONValue = Treatments.getCOB(profileAsOfNow, dateVar);
+            TempBasal currentTempBasal = TempBasal.getCurrentActive(dateVar);
 
             try {
-                stat.datetime   = dateVar.getTime();
-                stat.iob        = iobJSONValue.getDouble("iob");
-                stat.bolus_iob  = iobJSONValue.getDouble("bolusiob");
-                stat.cob        = cobJSONValue.getDouble("display");
-                stat.basal      = profileAsOfNow.current_basal;
-                stat.temp_basal = TempBasal.getCurrentActive(dateVar).rate;
+                stat.datetime           = dateVar.getTime();
+                stat.iob                = iobJSONValue.getDouble("iob");
+                stat.bolus_iob          = iobJSONValue.getDouble("bolusiob");
+                stat.cob                = cobJSONValue.getDouble("display");
+                stat.basal              = profileAsOfNow.current_basal;
+                stat.temp_basal         = currentTempBasal.rate;
+                stat.temp_basal_type    = currentTempBasal.basal_adjustemnt;
 
             } catch (Exception e)  {
                 Toast.makeText(context, "Error getting Stats", Toast.LENGTH_LONG).show();

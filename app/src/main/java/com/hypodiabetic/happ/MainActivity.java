@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -81,6 +82,7 @@ public class MainActivity extends FragmentActivity {
     Fragment openAPSFragmentObject;
     Fragment iobcobActiveFragmentObject;
     Fragment iobcobFragmentObject;
+    Fragment basalvsTempBasalObject;
 
 
 
@@ -128,16 +130,27 @@ public class MainActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_main);
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(),EnterTreatment.class);
+                startActivity(intent);
+            }
+        });
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) this.findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        //mViewPager.setOffscreenPageLimit(4);                                                        //Do not destroy any Fragments, // TODO: 14/09/2015 casues an issue with bvb chart redering, not sure why 
         //Build Fragments
         openAPSFragmentObject       = new openAPSFragment();
         iobcobActiveFragmentObject  = new iobcobActiveFragment();
         iobcobFragmentObject        = new iobcobFragment();
+        basalvsTempBasalObject      = new basalvsTempBasalFragment();
 
 
         //starts OpenAPS loop
@@ -164,6 +177,7 @@ public class MainActivity extends FragmentActivity {
         chart.setViewportChangeListener(new ChartViewPortListener());
 
         setViewport();
+
     }
 
     //xdrip functions start
@@ -178,13 +192,21 @@ public class MainActivity extends FragmentActivity {
 
                 if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
                     LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
-
                     Viewport iobv = new Viewport(chart.getMaximumViewport());                       //Update the IOB COB Line Chart Viewport to stay inline with the preview
                     iobv.left = newViewport.left;
                     iobv.right = newViewport.right;
-                    iobv.top = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
-                    iobv.bottom = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+                    iobv.top = extendedGraphBuilder.yCOBMax.floatValue();
+                    iobv.bottom = extendedGraphBuilder.yCOBMin.floatValue();
                     iobcobPastChart.setCurrentViewport(iobv);
+                }
+                if (basalvsTempBasalObject.getView() != null){
+                    LineChartView bvbChart = (LineChartView) findViewById(R.id.basalvsTempBasal_LineChart);
+                    Viewport bvbv = new Viewport(chart.getMaximumViewport());
+                    bvbv.left = newViewport.left;
+                    bvbv.right = newViewport.right;
+                    bvbv.top = extendedGraphBuilder.maxBasal.floatValue();
+                    bvbv.bottom = -4;                                                               // TODO: 14/09/2015 how to make this negative of maxBolus?
+                    bvbChart.setCurrentViewport(bvbv);
                 }
             }
         }
@@ -201,13 +223,21 @@ public class MainActivity extends FragmentActivity {
 
                 if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
                     LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
-
                     iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
                     iobcobPastChart.setCurrentViewport(newViewport);
                     Viewport iobv = new Viewport(iobcobPastChart.getMaximumViewport());             //Update the IOB COB Line Chart Viewport to stay inline with the preview
                     iobv.left = newViewport.left;
                     iobv.right = newViewport.right;
                     iobcobPastChart.setCurrentViewport(iobv);
+                }
+                if (basalvsTempBasalObject.getView() != null){
+                    LineChartView bvbChart = (LineChartView) findViewById(R.id.basalvsTempBasal_LineChart);
+                    bvbChart.setZoomType(ZoomType.HORIZONTAL);
+                    bvbChart.setCurrentViewport(newViewport);
+                    Viewport bvbv = new Viewport(bvbChart.getMaximumViewport());
+                    bvbv.left = newViewport.left;
+                    bvbv.right = newViewport.right;
+                    bvbChart.setCurrentViewport(bvbv);
                 }
             }
             if (updateStuff == true) {
@@ -345,13 +375,6 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    //loads enter Treatment screen
-    public void enterTreatment(View view) {
-        Intent intent = new Intent(this,EnterTreatment.class);
-        startActivity(intent);
-
-    }
-
 
 
     //Updates the OpenAPS Fragment
@@ -378,6 +401,9 @@ public class MainActivity extends FragmentActivity {
                 if (iobcobFragmentObject.getView() != null){
                     iobcobFragment.updateChart();
                 }
+                if (basalvsTempBasalObject.getView() != null) {
+                    basalvsTempBasalFragment.updateChart();
+                }
             }
         });
     }
@@ -394,19 +420,15 @@ public class MainActivity extends FragmentActivity {
         // Retrieve a PendingIntent that will perform a broadcast
         Intent treatmentsIntent = new Intent(this, statsReceiver.class);
         pendingIntentTreatments = PendingIntent.getBroadcast(this, 0, treatmentsIntent, 0);
-
         int interval = 300000; //5mins
-
         managerTreatments.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntentTreatments);
 
         //OpenAPS Loop
         manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         Intent openAPSIntent = new Intent(this, openAPSReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, openAPSIntent, 0);
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
         Integer openAPSInterval = Integer.parseInt(prefs.getString("openaps_loop", "900000"));
-
         manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), openAPSInterval, pendingIntent);
 
         //Toast.makeText(this, "OpenAPS will loop " + interval , Toast.LENGTH_LONG).show();
@@ -438,9 +460,6 @@ public class MainActivity extends FragmentActivity {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a DummySectionFragment (defined as a static inner class
-            // below) with the page number as its lone argument.
-
             switch (position){
                 case 0:
                     return openAPSFragmentObject;
@@ -448,6 +467,8 @@ public class MainActivity extends FragmentActivity {
                     return iobcobFragmentObject;
                 case 2:
                     return iobcobActiveFragmentObject;
+                case 3:
+                    return basalvsTempBasalObject;
                 default:
                     return null;
             }
@@ -456,7 +477,7 @@ public class MainActivity extends FragmentActivity {
         @Override
         public int getCount() {
             // Show 4 total pages.
-            return 3;
+            return 4;
         }
 
         @Override
@@ -541,29 +562,31 @@ public class MainActivity extends FragmentActivity {
         public iobcobFragment(){}
         static LineChartView iobcobPastChart;
         static ExtendedGraphBuilder extendedGraphBuilder;
+        static PreviewLineChartView previewChart;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
-            iobcobPastChart = (LineChartView) rootView.findViewById(R.id.iobcobPast);
-            extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
+            iobcobPastChart         = (LineChartView) rootView.findViewById(R.id.iobcobPast);
+            extendedGraphBuilder    = new ExtendedGraphBuilder(rootView.getContext());
+            previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
 
             setupChart();
-
             return rootView;
         }
 
         public void setupChart(){
-
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
 
             Viewport iobv   = new Viewport(iobcobPastChart.getMaximumViewport());                       //Sets the min and max for Top and Bottom of the viewpoint
             iobv.top        = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
             iobv.bottom     = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
-
-            iobcobPastChart.setCurrentViewport(iobv);
             iobcobPastChart.setMaximumViewport(iobv);
+            iobv.left       = previewChart.getCurrentViewport().left;
+            iobv.right      = previewChart.getCurrentViewport().right;
+            iobcobPastChart.setCurrentViewport(iobv);
+
             iobcobPastChart.setViewportCalculationEnabled(true);
             //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015
         }
@@ -606,6 +629,45 @@ public class MainActivity extends FragmentActivity {
             iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
         }
     }
+    public static class basalvsTempBasalFragment extends Fragment {
+        public basalvsTempBasalFragment(){}
 
+        static LineChartView basalvsTempBasalChart;
+        static ExtendedGraphBuilder extendedGraphBuilder;
+        static PreviewLineChartView previewChart;
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View rootView = inflater.inflate(R.layout.fragment_basalvstempbasal_linechart, container, false);
+            extendedGraphBuilder    = new ExtendedGraphBuilder(rootView.getContext());
+            basalvsTempBasalChart   = (LineChartView) rootView.findViewById(R.id.basalvsTempBasal_LineChart);
+            previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
+
+            setupChart();
+
+            return rootView;
+        }
+
+        public void setupChart(){
+            basalvsTempBasalChart.setZoomType(ZoomType.HORIZONTAL);
+            basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
+
+            Viewport iobv   = new Viewport(basalvsTempBasalChart.getMaximumViewport());                       //Sets the min and max for Top and Bottom of the viewpoint
+            iobv.top        = extendedGraphBuilder.maxBasal.floatValue();
+            iobv.bottom     = -(extendedGraphBuilder.maxBasal.floatValue() - 1);
+            basalvsTempBasalChart.setMaximumViewport(iobv);
+            iobv.left       = previewChart.getCurrentViewport().left;
+            iobv.right      = previewChart.getCurrentViewport().right;
+            basalvsTempBasalChart.setCurrentViewport(iobv);
+
+            basalvsTempBasalChart.setViewportCalculationEnabled(true);
+            //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015
+        }
+
+        //Updates Stats
+        public static void updateChart(){
+            basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
+        }
+    }
 
 }

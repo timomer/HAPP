@@ -1,174 +1,318 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
+    android:background="@android:color/black"
     android:orientation="vertical"
-    android:background="@android:color/black">
-
-    <TextView
-        android:text="Sys Msg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
-        android:id="@+id/sysmsg"
-        />
-
-
-
-
+    tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <Button
-            android:text="Enter Treatment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1.5"
-            android:gravity="center"
-            android:onClick="enterTreatment"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1.5"
+            android:layout_height="112dp"
             android:orientation="vertical">
 
-
+            <TextView
+                android:id="@+id/sysmsg"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="#00B85C"
+                android:text="Sys Msg"
+                android:textColor="@android:color/white" />
 
             <LinearLayout
+                android:id="@+id/topLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                android:layout_height="92dp"
+                android:background="#00B85C"
+                android:orientation="horizontal"
+                android:paddingBottom="16dp"
+                android:paddingTop="16dp">
+
+
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="72dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:text="IOB"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
+                        android:layout_height="40dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/currentBgValueRealTime"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="-"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="BG"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/bgDelta"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="-"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="Delta"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/notices"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:background="#00B85C"
+                        android:gravity="center"
+                        android:text="0 mins ago"
                         android:textColor="@android:color/white"
-                        android:gravity="center" />
-                    <TextView
-                        android:text="Last:"
-                        android:background="#07000000"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:id="@+id/iobValue"
-                        android:textColor="@android:color/white"/>
-
+                        android:textSize="12sp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="72dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:text="COB"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:textColor="@android:color/white"/>
-                    <TextView
-                        android:text="Last:"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:id="@+id/cobValue"
-                        android:textColor="@android:color/white"/>
+                        android:layout_height="40dp"
+                        android:orientation="horizontal">
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/eventualBGValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="-"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="Eventual"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/snoozeBGValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="-"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="Snooze"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/openapsAge"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:background="#00B85C"
+                        android:gravity="center"
+                        android:text="0 mins ago"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="72dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/iobValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="-"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="IOB"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/cobValue"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="-"
+                                android:textColor="@android:color/white"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:background="#00B85C"
+                                android:gravity="center"
+                                android:text="COB"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/statsAge"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:background="#00B85C"
+                        android:gravity="center"
+                        android:text="0 mins ago"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
             </LinearLayout>
-
-            <TextView
-                android:text=""
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="3"
-                android:textColor="@android:color/white"
-                android:gravity="center"
-                android:id="@+id/statsAge"/>
         </LinearLayout>
-
-
 
         <LinearLayout
+            android:id="@+id/bottomLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_weight="1"
             android:orientation="vertical">
 
-            <TextView
-                android:text="BG"
+            <android.support.v4.view.ViewPager
+                android:id="@+id/pager"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/currentBgValueRealTime"
-                android:layout_weight="1.5"
-                android:gravity="center"
-                android:textColor="@android:color/white"/>
-            <TextView
-                android:text="BG Delta"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1.5"
-                android:gravity="center"
-                android:id="@+id/bgDelta"
-                android:textColor="@android:color/white"/>
-            <TextView
-                android:text="BG Notices"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1.8"
-                android:textColor="@android:color/white"
-                android:gravity="center"
-                android:id="@+id/notices"/>
+                android:layout_height="0dp"
+                android:layout_weight="3">
 
+                <android.support.v4.view.PagerTabStrip
+                    android:id="@+id/pager_title_strip"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="#00B85C"
+                    android:paddingBottom="20dp">
+                </android.support.v4.view.PagerTabStrip>
+
+            </android.support.v4.view.ViewPager>
+
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2">
+            </lecho.lib.hellocharts.view.LineChartView>
+
+            <lecho.lib.hellocharts.view.PreviewLineChartView
+                android:id="@+id/chart_preview"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+            </lecho.lib.hellocharts.view.PreviewLineChartView>
         </LinearLayout>
+
 
     </LinearLayout>
 
-    <android.support.v4.view.ViewPager
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:id="@+id/pager">
-        
-        <android.support.v4.view.PagerTitleStrip
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/pager_title_strip">
-        </android.support.v4.view.PagerTitleStrip>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:src="@mipmap/fab_ic_add"
+        app:fabSize="normal"
+        app:layout_anchor="@id/pager_title_strip"
+        app:layout_anchorGravity="bottom|right|end"
+        app:rippleColor="#F06292" />
 
-    </android.support.v4.view.ViewPager>
-
-
-
-
-    <lecho.lib.hellocharts.view.LineChartView
-        android:id="@+id/chart"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2">
-    </lecho.lib.hellocharts.view.LineChartView>
-    <lecho.lib.hellocharts.view.PreviewLineChartView
-        android:id="@+id/chart_preview"
-        android:layout_width="match_parent"
-        android:layout_weight="1"
-        android:layout_height="0dp">
-    </lecho.lib.hellocharts.view.PreviewLineChartView>
-
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

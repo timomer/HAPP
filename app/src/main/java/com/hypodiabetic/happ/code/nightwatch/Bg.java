@@ -168,9 +168,9 @@ public class Bg extends Model {
     public String readingAge() {
         int minutesAgo = (int) Math.floor(timeSince()/(1000*60));
         if (minutesAgo == 1) {
-            return minutesAgo + " Min";
+            return minutesAgo + " Min ago";
         }
-        return minutesAgo + " Mins";
+        return minutesAgo + " Mins ago";
     }
 
     public double timeSince() {

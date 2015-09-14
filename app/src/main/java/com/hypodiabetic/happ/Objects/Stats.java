@@ -49,14 +49,18 @@ public class Stats extends Model{
     @Column(name = "temp_basal")
     public double temp_basal;
 
+    @Expose
+    @Column(name = "temp_basal_type")
+    public String temp_basal_type;
+
     public String when;
 
     public String statAge() {
         int minutesAgo = (int) Math.floor(timeSince()/(1000*60));
         if (minutesAgo == 1) {
-            return minutesAgo + " Min";
+            return minutesAgo + " Min ago";
         }
-        return minutesAgo + " Mins";
+        return minutesAgo + " Mins ago";
     }
 
     public static Stats last() {

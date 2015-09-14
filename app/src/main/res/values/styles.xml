@@ -1,9 +1,10 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo">
+    <style name="AppTheme" parent="Theme.AppCompat">
 
-        <item name="android:background">#212121</item>
+
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
     </style>
 
