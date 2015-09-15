@@ -388,18 +388,6 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    //Converts BG between US and UK formats
-    public String unitizedBG(Double value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        String unit = prefs.getString("units", "mgdl");
-
-        if(unit.compareTo("mgdl") == 0) {
-            return Integer.toString(value.intValue());
-        } else {
-            return String.format("%.2f", (value * Constants.MGDL_TO_MMOLL));
-        }
-    }
-
 
     //Updates the OpenAPS Fragment
     public void updateOpenAPSDetails(final JSONObject openAPSSuggest){
@@ -413,8 +401,8 @@ public class MainActivity extends FragmentActivity {
                 eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
                 snoozeBGValue   = (TextView) findViewById(R.id.snoozeBGValue);
                 try {
-                    eventualBGValue.setText(unitizedBG(openAPSSuggest.getDouble("eventualBG")));
-                    snoozeBGValue.setText(unitizedBG(openAPSSuggest.getDouble("snoozeBG")));
+                    eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
+                    snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -540,13 +528,10 @@ public class MainActivity extends FragmentActivity {
 
     public static class openAPSFragment extends Fragment {
         public openAPSFragment(){}
-        private static TextView apsstatus_age;
-        private static TextView apsstatus_eventualBG;
-        private static TextView apsstatus_snoozeBG;
+        private static TextView apsstatus_deviation;
         private static TextView apsstatus_reason;
         private static TextView apsstatus_Action;
-        private static TextView apsstatus_rate;
-        private static TextView apsstatus_duration;
+        private static TextView apsstatus_temp;
         private static Button   apsstatusAcceptButton;
         private static TempBasal Suggested_Temp_Basal = new TempBasal();
 
@@ -554,13 +539,10 @@ public class MainActivity extends FragmentActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_openaps_dash, container, false);
             apsstatusAcceptButton   = (Button)   rootView.findViewById(R.id.apsstatusAcceptButton);
-            apsstatus_eventualBG    = (TextView) rootView.findViewById(R.id.apsstatus_eventualBG);
-            apsstatus_snoozeBG      = (TextView) rootView.findViewById(R.id.apsstatus_snoozeBG);
-            apsstatus_duration      = (TextView) rootView.findViewById(R.id.apsstatus_duration);
             apsstatus_reason        = (TextView) rootView.findViewById(R.id.apsstatus_reason);
             apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
-            apsstatus_rate          = (TextView) rootView.findViewById(R.id.apsstatus_rate);
-            apsstatus_age           = (TextView) rootView.findViewById(R.id.apsstatus_age);
+            apsstatus_temp          = (TextView) rootView.findViewById(R.id.apsstatus_Temp);
+            apsstatus_deviation     = (TextView) rootView.findViewById(R.id.apsstatus_deviation);
 
             return rootView;
         }
@@ -582,16 +564,19 @@ public class MainActivity extends FragmentActivity {
             JSONObject reply = new JSONObject();
             apsstatus_reason.setText("");
             apsstatus_Action.setText("");
-            apsstatus_rate.setText("NA");
-            apsstatus_duration.setText("");
-            apsstatus_age.setText("0 ago");
+            apsstatus_temp.setText("None");
+            apsstatus_deviation.setText("");
             try {
-                apsstatus_eventualBG.setText("Eventual BG: " + openAPSSuggest.getString("eventualBG"));
-                apsstatus_snoozeBG.setText("Snooze BG: " + openAPSSuggest.getString("snoozeBG"));
-                if (openAPSSuggest.has("reason")) apsstatus_reason.setText(openAPSSuggest.getString("reason"));
-                if (openAPSSuggest.has("action")) apsstatus_Action.setText(openAPSSuggest.getString("action"));
-                if (openAPSSuggest.has("rate")) apsstatus_rate.setText(openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getString("ratePercent") + "%)");
-                if (openAPSSuggest.has("duration")) apsstatus_duration.setText(openAPSSuggest.getString("duration") + "mins");
+                String deviation;
+                if (openAPSSuggest.getDouble("deviation") > 0) {
+                    deviation = "+" + tools.unitizedBG(openAPSSuggest.getDouble("deviation"), MainActivity.activity);
+                } else {
+                    deviation = tools.unitizedBG(openAPSSuggest.getDouble("deviation"), MainActivity.activity);
+                }
+                apsstatus_deviation.setText("Deviation: " + deviation);
+                if (openAPSSuggest.has("reason"))   apsstatus_reason.setText(openAPSSuggest.getString("reason"));
+                if (openAPSSuggest.has("action"))   apsstatus_Action.setText(openAPSSuggest.getString("action"));
+                if (openAPSSuggest.has("rate"))     apsstatus_temp.setText(openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getString("ratePercent") + "%) " + openAPSSuggest.getString("duration") + "mins");
 
                 Suggested_Temp_Basal = new TempBasal();
                 if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested

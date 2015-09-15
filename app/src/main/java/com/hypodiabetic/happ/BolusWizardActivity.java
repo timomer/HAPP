@@ -33,6 +33,10 @@ public class BolusWizardActivity extends Activity {
     private EditText suggestedBolus;
     private TextView ReqInsulinBgText;
 
+    private TextView bwDisplayIOBCorr;
+    private TextView bwDisplayCarbCorr;
+    private TextView bwDisplayBGCorr;
+
     Treatments bolusTreatment = new Treatments();
     Treatments carbTratment = new Treatments();
 
@@ -102,6 +106,10 @@ public class BolusWizardActivity extends Activity {
         sugBolus        = (TextView) findViewById(R.id.wizardSugBolus);
         suggestedBolus  = (EditText) findViewById(R.id.wizardSuggestedBolus);
         ReqInsulinBgText= (TextView) findViewById(R.id.wizardReqInsulinBgText);
+
+        bwDisplayIOBCorr    = (TextView) findViewById(R.id.bwDisplayIOBCorr);
+        bwDisplayCarbCorr   = (TextView) findViewById(R.id.bwDisplayCarbCorr);
+        bwDisplayBGCorr     = (TextView) findViewById(R.id.bwDisplayBGCorr);
         Double carbValue = 0D;
 
         if (!carbs.getText().toString().equals("")) carbValue = Double.parseDouble(carbs.getText().toString());
@@ -109,6 +117,12 @@ public class BolusWizardActivity extends Activity {
         JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
 
         try {
+            //Bolus Wizard Display
+            bwDisplayIOBCorr.setText(   bw.getString("net_biob") + "U");
+            bwDisplayCarbCorr.setText(  bw.getString("insulin_correction_carbs") + "U");
+            bwDisplayBGCorr.setText(    bw.getString("suggested_bolus") + "U");
+
+            //Bolus Wizard Calculations
             reqInsulinbiob.setText("BolusIOB(" + bw.getString("biob") + ") - (COB(" + bw.getString("cob") + ") / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("net_biob") + "U");
             reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
             ReqInsulinBgText.setText(bw.getString("bgCorrection") + " Bg Correction:");
@@ -119,7 +133,7 @@ public class BolusWizardActivity extends Activity {
             } else {
                 reqInsulinBg.setText("NA - BG within Target");
             }
-            sugBolus.setText("Carb Corr(" + bw.getString("insulin_correction_carbs") + ") + BG Corr(" + bw.getString("insulin_correction_bg") + ") - Net Bolus(" + bw.getString("net_biob") + ") = ");
+            sugBolus.setText("Carb Corr(" + bw.getString("insulin_correction_carbs") + ") + BG Corr(" + bw.getString("insulin_correction_bg") + ") - Net Bolus(" + bw.getString("net_biob") + ") = " + bw.getString("suggested_bolus"));
             suggestedBolus.setText(bw.getString("suggested_bolus"));
 
             Date dateNow = new Date();

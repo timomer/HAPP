@@ -140,7 +140,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
     //enters the last 8 treatments into a list
     public void loadLastTreatments(){
-        List<Treatments> treatments = Treatments.latestTreatments(8,null);
+        List<Treatments> treatments = Treatments.latestTreatments(10,null);
         ArrayList<HashMap<String, String>> treatmentsList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM HH:mm", getResources().getConfiguration().locale);
 

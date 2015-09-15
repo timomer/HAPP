@@ -156,7 +156,8 @@ public class determine_basal {
             //console.error("BG: " + bg + tick + " -> " + eventualBG + "-" + snoozeBG + " (Unadjusted: " + naive_eventualBG + "-" + naive_snoozeBG + ")");
             if (eventualBG == 0) { Log.e("Error eventualBG: ", "could not calculate eventualBG"); }
 
-            requestedTemp.put("temp", profile_data.basal_mode);                                       //"absolute" temp basals (U/hr) mode, "percent" of your normal basal
+            requestedTemp.put("deviation", deviation);
+            requestedTemp.put("temp", profile_data.basal_mode);                                     //"absolute" temp basals (U/hr) mode, "percent" of your normal basal
             requestedTemp.put("bg", bg);                                                            //Current BG level
             requestedTemp.put("tick", tick);                                                        //Delta between now BG and last BG
             requestedTemp.put("eventualBG", eventualBG);                                            //BG in 15mins?
