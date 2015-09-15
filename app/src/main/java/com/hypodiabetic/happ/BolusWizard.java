@@ -46,7 +46,7 @@ public class BolusWizard {
             insulin_correction_bg   = (eventualBG - profile.max_bg) / profile.isf;         //Insulin required for correcting Bg High
             bgCorrection            = "High";
         } else if (eventualBG <= profile.min_bg){
-            insulin_correction_bg   = (eventualBG - profile.target_bg) / profile.isf;      //Insulin required for correcting Bg Low
+            insulin_correction_bg   = (profile.target_bg - eventualBG) / profile.isf;      //Insulin required for correcting Bg Low
             bgCorrection            = "Low";
         } else {
             insulin_correction_bg   = 0D;

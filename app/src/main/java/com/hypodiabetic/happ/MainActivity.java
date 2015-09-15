@@ -41,14 +41,17 @@ import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.Receivers.openAPSReceiver;
 import com.hypodiabetic.happ.Receivers.statsReceiver;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.code.nightwatch.Constants;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.code.nightwatch.SettingsActivity;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -71,11 +74,14 @@ public class MainActivity extends FragmentActivity {
     private AlarmManager managerTreatments;
 
     private TextView sysMsg;
+    private TextView iobValueTextView;
+    private TextView cobValueTextView;
     private TextView statsAge;
+    private TextView eventualBGValue;
+    private TextView snoozeBGValue;
+    private TextView openAPSAgeTextView;
     private ExtendedGraphBuilder extendedGraphBuilder;
     public static Activity activity;
-
-    private static TempBasal Suggested_Temp_Basal = new TempBasal();
 
     SectionsPagerAdapter mSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
     ViewPager mViewPager;                                                                           //The {@link ViewPager} that will host the section contents.
@@ -152,9 +158,14 @@ public class MainActivity extends FragmentActivity {
         iobcobFragmentObject        = new iobcobFragment();
         basalvsTempBasalObject      = new basalvsTempBasalFragment();
 
-
         //starts OpenAPS loop
         startOpenAPSLoop();
+
+        //RunsOpenAPS
+        runOpenAPS(findViewById(android.R.id.content));
+
+        //Get Recent Stats
+        updateStats();
     }
 
     public void setupCharts() {
@@ -290,15 +301,17 @@ public class MainActivity extends FragmentActivity {
         if (lastRun != null) statsAge.setText(lastRun.statAge());
 
         //OpenAPS age update
-        openAPSFragment.updateAge();
+        openAPSAgeTextView = (TextView)findViewById(R.id.openapsAge);
+        openAPSAgeTextView.setText(openAPSFragment.age());
+
 
         //Temp Basal running update
         Date timeNow = new Date();
         sysMsg = (TextView) findViewById(R.id.sysmsg);
         TempBasal lastTempBasal = TempBasal.last();
         String appStatus = "";
-        if (lastTempBasal.isactive(null)){                                                              //Active temp Basal
-            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.duration + "mins (" + lastTempBasal.durationLeft() + "mins left)";
+        if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
+            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
         } else {                                                                                    //No temp Basal running, show default
             Double currentBasal = Profile.ProfileAsOf(timeNow, this.getBaseContext()).current_basal;
             appStatus = "No temp basal, current basal: " + currentBasal + "U";
@@ -375,6 +388,17 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    //Converts BG between US and UK formats
+    public String unitizedBG(Double value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String unit = prefs.getString("units", "mgdl");
+
+        if(unit.compareTo("mgdl") == 0) {
+            return Integer.toString(value.intValue());
+        } else {
+            return String.format("%.2f", (value * Constants.MGDL_TO_MMOLL));
+        }
+    }
 
 
     //Updates the OpenAPS Fragment
@@ -386,6 +410,14 @@ public class MainActivity extends FragmentActivity {
                 if (openAPSFragmentObject.getView() != null) {                                      //Check the fragment is loaded
                     openAPSFragment.update(openAPSSuggest);
                 }
+                eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
+                snoozeBGValue   = (TextView) findViewById(R.id.snoozeBGValue);
+                try {
+                    eventualBGValue.setText(unitizedBG(openAPSSuggest.getDouble("eventualBG")));
+                    snoozeBGValue.setText(unitizedBG(openAPSSuggest.getDouble("snoozeBG")));
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -395,8 +427,19 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void run() {
 
+                JSONObject reply;
                 if (iobcobActiveFragmentObject.getView() != null) {                                 //Check the fragment is loaded
-                    iobcobActiveFragment.updateChart(MainActivity.activity);
+                    reply = iobcobActiveFragment.updateChart(MainActivity.activity);
+                } else {
+                    reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
+                }
+                iobValueTextView = (TextView) findViewById(R.id.iobValue);
+                cobValueTextView = (TextView) findViewById(R.id.cobValue);
+                try {
+                    iobValueTextView.setText(reply.getString("iob"));
+                    cobValueTextView.setText(reply.getString("cob"));
+                }catch (JSONException e) {
+                    e.printStackTrace();
                 }
                 if (iobcobFragmentObject.getView() != null){
                     iobcobFragment.updateChart();
@@ -435,14 +478,13 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void runOpenAPS(View view){
-
         //Run openAPS
         Intent intent = new Intent("RUN_OPENAPS");
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
 
-        pumpAction.setTempBasal(Suggested_Temp_Basal, view.getContext());                           //Action the suggested Temp
+        pumpAction.setTempBasal(openAPSFragment.getSuggestedBasal(), view.getContext());                           //Action the suggested Temp
         //displayCurrentInfo();
     }
 
@@ -506,7 +548,7 @@ public class MainActivity extends FragmentActivity {
         private static TextView apsstatus_rate;
         private static TextView apsstatus_duration;
         private static Button   apsstatusAcceptButton;
-
+        private static TempBasal Suggested_Temp_Basal = new TempBasal();
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -523,12 +565,21 @@ public class MainActivity extends FragmentActivity {
             return rootView;
         }
 
-        public static void updateAge(){
-            if (apsstatus_age != null) apsstatus_age.setText(Suggested_Temp_Basal.age() + " ago");
+        public static TempBasal getSuggestedBasal(){
+            return Suggested_Temp_Basal;
+        }
+
+        public static String age(){
+            if (Suggested_Temp_Basal.age() > 1){
+                return Suggested_Temp_Basal.age() + " mins ago";
+            } else {
+                return Suggested_Temp_Basal.age() + " min ago";
+            }
         }
 
         public static void update(JSONObject openAPSSuggest){
             //displayCurrentInfo();
+            JSONObject reply = new JSONObject();
             apsstatus_reason.setText("");
             apsstatus_Action.setText("");
             apsstatus_rate.setText("NA");
@@ -599,16 +650,12 @@ public class MainActivity extends FragmentActivity {
         public iobcobActiveFragment(){}
 
         static ColumnChartView iobcobChart;
-        static TextView iobValueTextView;
-        static TextView cobValueTextView;
         static ExtendedGraphBuilder extendedGraphBuilder;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
             extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
-            iobValueTextView = (TextView) getActivity().findViewById(R.id.iobValue);
-            cobValueTextView = (TextView) getActivity().findViewById(R.id.cobValue);
             iobcobChart = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
 
             updateChart(getActivity());
@@ -616,17 +663,36 @@ public class MainActivity extends FragmentActivity {
             return rootView;
         }
 
-        //Updates Stats
-        public static void updateChart(Activity a){
+        //Get IOB and COB only, dont update chart
+        public static JSONObject getIOBCOB(Activity a){
 
             List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
+            JSONObject reply = new JSONObject();
 
-            //displayCurrentInfo();
-            iobValueTextView.setText(String.format("%.2f", statList.get(0).iob));
-            cobValueTextView.setText(String.format("%.2f", statList.get(0).cob));
+            try {
+                reply.put("iob", String.format("%.2f", statList.get(0).iob));
+                reply.put("cob", String.format("%.2f", statList.get(0).cob));
+            }catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return reply;
+        }
+
+        //Updates Stats
+        public static JSONObject updateChart(Activity a){
+
+            List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
+            JSONObject reply = new JSONObject();
 
             //reloads charts with Treatment data
             iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
+            try {
+                reply.put("iob", String.format("%.2f", statList.get(0).iob));
+                reply.put("cob", String.format("%.2f", statList.get(0).cob));
+            }catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return reply;
         }
     }
     public static class basalvsTempBasalFragment extends Fragment {

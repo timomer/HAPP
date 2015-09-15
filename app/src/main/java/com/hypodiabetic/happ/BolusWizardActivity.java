@@ -31,6 +31,7 @@ public class BolusWizardActivity extends Activity {
     private TextView sugBolus;
     private Button buttonAccept;
     private EditText suggestedBolus;
+    private TextView ReqInsulinBgText;
 
     Treatments bolusTreatment = new Treatments();
     Treatments carbTratment = new Treatments();
@@ -100,6 +101,7 @@ public class BolusWizardActivity extends Activity {
         reqInsulinBg    = (TextView) findViewById(R.id.wizardReqInsulinBg);
         sugBolus        = (TextView) findViewById(R.id.wizardSugBolus);
         suggestedBolus  = (EditText) findViewById(R.id.wizardSuggestedBolus);
+        ReqInsulinBgText= (TextView) findViewById(R.id.wizardReqInsulinBgText);
         Double carbValue = 0D;
 
         if (!carbs.getText().toString().equals("")) carbValue = Double.parseDouble(carbs.getText().toString());
@@ -109,10 +111,11 @@ public class BolusWizardActivity extends Activity {
         try {
             reqInsulinbiob.setText("BolusIOB(" + bw.getString("biob") + ") - (COB(" + bw.getString("cob") + ") / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("net_biob") + "U");
             reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
+            ReqInsulinBgText.setText(bw.getString("bgCorrection") + " Bg Correction:");
             if (bw.getString("bgCorrection").equals("High")){
                 reqInsulinBg.setText("eventualBG(" + bw.getString("eventualBG") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
             } else if (bw.getString("bgCorrection").equals("Low")){
-                reqInsulinBg.setText("eventualBG(" + bw.getString("eventualBG") + ") - Target BG(" + bw.getString("target_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
+                reqInsulinBg.setText("Target BG(" + bw.getString("target_bg") + ") - " + "eventualBG(" + bw.getString("eventualBG") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
             } else {
                 reqInsulinBg.setText("NA - BG within Target");
             }

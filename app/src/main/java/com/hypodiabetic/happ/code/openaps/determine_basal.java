@@ -317,7 +317,8 @@ public class determine_basal {
                             }
                         } else {
                             //reason = eventualBG + " is in range. No temp required.";
-                            reason = "BG is in range.";
+                            reason = "Eventual BG is in range. Cancel any Temp Basal.";
+                            sysMsg = "Wait and monitor.";
                             if (temps_data.duration > 0) {                                          // if there is currently any temp basal running
                                 requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp);   // cancel temp
                             }

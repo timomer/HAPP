@@ -21,7 +21,7 @@
                 android:id="@+id/sysmsg"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                android:background="#00B85C"
+                android:background="#0099FF"
                 android:text="Sys Msg"
                 android:textColor="@android:color/white" />
 
@@ -29,7 +29,7 @@
                 android:id="@+id/topLayout"
                 android:layout_width="match_parent"
                 android:layout_height="92dp"
-                android:background="#00B85C"
+                android:background="#0099FF"
                 android:orientation="horizontal"
                 android:paddingBottom="16dp"
                 android:paddingTop="16dp">
@@ -57,7 +57,7 @@
                                 android:id="@+id/currentBgValueRealTime"
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
                                 android:textColor="@android:color/white"
@@ -66,7 +66,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="BG"
                                 android:textColor="@android:color/white"
@@ -83,7 +83,7 @@
                                 android:id="@+id/bgDelta"
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
                                 android:textColor="@android:color/white"
@@ -92,7 +92,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="Delta"
                                 android:textColor="@android:color/white"
@@ -104,7 +104,7 @@
                         android:id="@+id/notices"
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:background="#00B85C"
+                        android:background="#0099FF"
                         android:gravity="center"
                         android:text="0 mins ago"
                         android:textColor="@android:color/white"
@@ -132,7 +132,7 @@
                                 android:id="@+id/eventualBGValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
                                 android:textColor="@android:color/white"
@@ -141,7 +141,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="Eventual"
                                 android:textSize="12sp" />
@@ -157,7 +157,7 @@
                                 android:id="@+id/snoozeBGValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
                                 android:textColor="@android:color/white"
@@ -166,7 +166,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="Snooze"
                                 android:textSize="12sp" />
@@ -177,7 +177,7 @@
                         android:id="@+id/openapsAge"
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:background="#00B85C"
+                        android:background="#0099FF"
                         android:gravity="center"
                         android:text="0 mins ago"
                         android:textColor="@android:color/white"
@@ -205,7 +205,7 @@
                                 android:id="@+id/iobValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
                                 android:textColor="@android:color/white"
@@ -214,7 +214,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="IOB"
                                 android:textColor="@android:color/white"
@@ -231,7 +231,7 @@
                                 android:id="@+id/cobValue"
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
                                 android:textColor="@android:color/white"
@@ -240,7 +240,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="20dp"
-                                android:background="#00B85C"
+                                android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="COB"
                                 android:textColor="@android:color/white"
@@ -252,7 +252,7 @@
                         android:id="@+id/statsAge"
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:background="#00B85C"
+                        android:background="#0099FF"
                         android:gravity="center"
                         android:text="0 mins ago"
                         android:textColor="@android:color/white"
@@ -279,7 +279,7 @@
                     android:id="@+id/pager_title_strip"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:background="#00B85C"
+                    android:background="#0099FF"
                     android:paddingBottom="20dp">
                 </android.support.v4.view.PagerTabStrip>
 
