@@ -120,16 +120,16 @@ public class BolusWizardActivity extends Activity {
             //Bolus Wizard Display
             bwDisplayIOBCorr.setText(   bw.getString("net_biob") + "U");
             bwDisplayCarbCorr.setText(  bw.getString("insulin_correction_carbs") + "U");
-            bwDisplayBGCorr.setText(    bw.getString("suggested_bolus") + "U");
+            bwDisplayBGCorr.setText(    bw.getString("insulin_correction_bg") + "U");
 
             //Bolus Wizard Calculations
             reqInsulinbiob.setText("BolusIOB(" + bw.getString("biob") + ") - (COB(" + bw.getString("cob") + ") / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("net_biob") + "U");
             reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
-            ReqInsulinBgText.setText(bw.getString("bgCorrection") + " Bg Correction:");
+            ReqInsulinBgText.setText(bw.getString("bgCorrection") + " bg correction");
             if (bw.getString("bgCorrection").equals("High")){
-                reqInsulinBg.setText("eventualBG(" + bw.getString("eventualBG") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
+                reqInsulinBg.setText("snoozeBG(" + bw.getString("snoozeBG") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
             } else if (bw.getString("bgCorrection").equals("Low")){
-                reqInsulinBg.setText("Target BG(" + bw.getString("target_bg") + ") - " + "eventualBG(" + bw.getString("eventualBG") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
+                reqInsulinBg.setText("Target BG(" + bw.getString("target_bg") + ") - " + "snoozeBG(" + bw.getString("snoozeBG") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
             } else {
                 reqInsulinBg.setText("NA - BG within Target");
             }

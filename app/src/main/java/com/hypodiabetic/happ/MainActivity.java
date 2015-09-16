@@ -398,8 +398,10 @@ public class MainActivity extends FragmentActivity {
                 if (openAPSFragmentObject.getView() != null) {                                      //Check the fragment is loaded
                     openAPSFragment.update(openAPSSuggest);
                 }
-                eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
-                snoozeBGValue   = (TextView) findViewById(R.id.snoozeBGValue);
+                eventualBGValue     = (TextView) findViewById(R.id.eventualBGValue);
+                snoozeBGValue       = (TextView) findViewById(R.id.snoozeBGValue);
+                openAPSAgeTextView  = (TextView)findViewById(R.id.openapsAge);
+                openAPSAgeTextView.setText(openAPSFragment.age());
                 try {
                     eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
                     snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
@@ -533,6 +535,8 @@ public class MainActivity extends FragmentActivity {
         private static TextView apsstatus_Action;
         private static TextView apsstatus_temp;
         private static Button   apsstatusAcceptButton;
+        private static TextView apsstatus_mode;
+        private static TextView apsstatus_loop;
         private static TempBasal Suggested_Temp_Basal = new TempBasal();
 
         @Override
@@ -543,6 +547,8 @@ public class MainActivity extends FragmentActivity {
             apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
             apsstatus_temp          = (TextView) rootView.findViewById(R.id.apsstatus_Temp);
             apsstatus_deviation     = (TextView) rootView.findViewById(R.id.apsstatus_deviation);
+            apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
+            apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
 
             return rootView;
         }
@@ -573,10 +579,12 @@ public class MainActivity extends FragmentActivity {
                 } else {
                     deviation = tools.unitizedBG(openAPSSuggest.getDouble("deviation"), MainActivity.activity);
                 }
-                apsstatus_deviation.setText("Deviation: " + deviation);
+                apsstatus_deviation.setText(deviation);
+                apsstatus_mode.setText(openAPSSuggest.getString("openaps_mode"));
+                apsstatus_loop.setText(openAPSSuggest.getString("openaps_loop") + "mins");
                 if (openAPSSuggest.has("reason"))   apsstatus_reason.setText(openAPSSuggest.getString("reason"));
                 if (openAPSSuggest.has("action"))   apsstatus_Action.setText(openAPSSuggest.getString("action"));
-                if (openAPSSuggest.has("rate"))     apsstatus_temp.setText(openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getString("ratePercent") + "%) " + openAPSSuggest.getString("duration") + "mins");
+                if (openAPSSuggest.has("rate"))     apsstatus_temp.setText(openAPSSuggest.getDouble("rate") + "U " + openAPSSuggest.getString("duration") + "mins");
 
                 Suggested_Temp_Basal = new TempBasal();
                 if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested

@@ -81,6 +81,15 @@ public class pumpAction {
         Date now = new Date();
         Profile p = new Profile().ProfileAsOf(now, c);
 
+        if (insulinTreatment.value > p.max_bolus){                                                  //Wow there, Bolus is > user set limit
+            if (insulinTreatment.value > 15){                                                       //Wow wow, Bolus is > hardcoded safety limit
+                Toast.makeText(c, "Suggested Bolus " + insulinTreatment.value + "U > System Max Bolus 15U. Setting to " + p.max_bolus + "U" , Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(c, "Suggested Bolus " + insulinTreatment.value + "U > User Max Bolus. Setting to " + p.max_bolus + "U" , Toast.LENGTH_LONG).show();
+            }
+            insulinTreatment.value = p.max_basal;
+        }
+
         //Notify or Send command to pump depending on OpenAPS mode
         if (p.openaps_mode.equals("online")){
 

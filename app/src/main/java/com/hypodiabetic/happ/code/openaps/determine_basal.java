@@ -269,7 +269,7 @@ public class determine_basal {
                                 if (temps_data.duration > 0 && rate > (temps_data.rate - 0.1)) {
                                     //reason = temps_data.rate + "<~" + rate;
                                     reason = "Eventual BG < Min BG & Low Temp Basel is already running at a lower rate than suggested";
-                                    sysMsg = "No Action, let current Negative Basal run.";
+                                    sysMsg = "Let current Negative Basal run";
                                 } else {
                                     //reason = "Eventual BG " + eventualBG + "<" + profile_data.min_bg;
                                     reason = "Eventual BG < Min BG & no Temp Basel running or suggested rate lower than current Temp Basel";
@@ -319,7 +319,7 @@ public class determine_basal {
                         } else {
                             //reason = eventualBG + " is in range. No temp required.";
                             reason = "Eventual BG is in range. Cancel any Temp Basal.";
-                            sysMsg = "Wait and monitor.";
+                            sysMsg = "Wait and monitor";
                             if (temps_data.duration > 0) {                                          // if there is currently any temp basal running
                                 requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp);   // cancel temp
                             }
@@ -347,6 +347,13 @@ public class determine_basal {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        //##### HAPP Added #####
+        try {
+            requestedTemp.put("openaps_mode", profile_data.openaps_mode);
+            requestedTemp.put("openaps_loop", profile_data.openaps_loop);
+        } catch (JSONException e) {e.printStackTrace(); }
+        //##### HAPP Added #####
 
         return requestedTemp;
     }

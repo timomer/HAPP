@@ -32,6 +32,8 @@ public class Profile extends Model{
     public Double target_bg;                        //OpenAPS Target BG
     public String basal_mode;                       //Basal Mode for the pump, absolute or percent
     public String openaps_mode;                     //Online ~ send commands to pump OR Offline ~ Notify only
+    public Integer openaps_loop;                    //OpenAPS Loops in mins
+    public Double max_bolus;                        //The maximum Bolus the app can deliver
 
 
     public static Profile ProfileAsOf(Date thisTime, Context c){
@@ -55,6 +57,8 @@ public class Profile extends Model{
         ProfileNow.target_bg            = Double.parseDouble(prefs.getString("target_bg", "100"));
         ProfileNow.basal_mode           = prefs.getString("basal_mode", "percent");
         ProfileNow.openaps_mode         = prefs.getString("openaps_mode", "offline");
+        ProfileNow.openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
+        ProfileNow.max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
 
         return ProfileNow;
     }

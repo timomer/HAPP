@@ -34,19 +34,21 @@ public class BolusWizard {
         Double eventualBG=0D;
         Double cob=0D;
         Double biob=0D;
+        Double snoozeBG=0D;
         try {
             eventualBG  = openAPSNow.getDouble("eventualBG");
+            snoozeBG  = openAPSNow.getDouble("snoozeBG");
             cob         = cobNow.getDouble("cob");
             biob        = iobNow.getDouble("bolusiob");
         } catch (JSONException e) {
         }
 
         Double insulin_correction_bg;
-        if (eventualBG >= profile.max_bg){
-            insulin_correction_bg   = (eventualBG - profile.max_bg) / profile.isf;         //Insulin required for correcting Bg High
+        if (snoozeBG >= profile.max_bg){
+            insulin_correction_bg   = (snoozeBG - profile.max_bg) / profile.isf;         //Insulin required for correcting Bg High
             bgCorrection            = "High";
-        } else if (eventualBG <= profile.min_bg){
-            insulin_correction_bg   = (profile.target_bg - eventualBG) / profile.isf;      //Insulin required for correcting Bg Low
+        } else if (snoozeBG <= profile.min_bg){
+            insulin_correction_bg   = (profile.target_bg - snoozeBG) / profile.isf;      //Insulin required for correcting Bg Low
             bgCorrection            = "Low";
         } else {
             insulin_correction_bg   = 0D;
@@ -65,6 +67,7 @@ public class BolusWizard {
             reply.put("carbRatio",profile.carbRatio);
             reply.put("bolusiob",biob);
             reply.put("eventualBG",eventualBG);
+            reply.put("snoozeBG",snoozeBG);
             reply.put("max_bg",profile.max_bg);
             reply.put("target_bg",profile.target_bg);
             reply.put("bgCorrection",bgCorrection);

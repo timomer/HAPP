@@ -44,42 +44,80 @@
                 android:textColor="#B8B8B8"/>
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="40dp"
                 android:orientation="horizontal">
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:id="@+id/apsstatus_Temp"
-                    android:text="-"
-                    android:textSize="16sp"
-                    android:layout_weight="1.9"/>
-                <TextView
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_Temp"
+                        android:text="-"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:text="suggested temp basal"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
+                <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:id="@+id/apsstatus_deviation"
-                    android:text="-"
-                    android:textSize="16sp"
-                    android:layout_weight="1"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:text="suggested temp basal"
-                    android:textSize="12sp"
-                    android:layout_weight="1.9"
-                    android:textColor="#B8B8B8"/>
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="20dp"
-                    android:text="deviation"
-                    android:textSize="12sp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:textColor="#B8B8B8"/>
-
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_deviation"
+                        android:text="-"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:text="deviation"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_mode"
+                        android:text="-"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:text="mode"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_loop"
+                        android:text="-"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:text="loop"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

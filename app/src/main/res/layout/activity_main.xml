@@ -23,7 +23,8 @@
                 android:layout_height="20dp"
                 android:background="#0099FF"
                 android:text="Sys Msg"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:paddingLeft="8dp"/>
 
             <LinearLayout
                 android:id="@+id/topLayout"

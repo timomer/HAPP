@@ -25,6 +25,13 @@
                     android:entries="@array/openaps_loopArray"
                     android:entryValues="@array/openaps_loopValues"/>
 
+                <EditTextPreference
+                    android:defaultValue="4"
+                    android:key="max_bolus"
+                    android:numeric="decimal"
+                    android:summary="Max Bolus that can be delivered in one go"
+                    android:title="Max Bolus" />
+
                 <ListPreference
                     android:title="Pump Temp Basal Mode"
                     android:summary="How is a Temp Basal set on the Pump"
