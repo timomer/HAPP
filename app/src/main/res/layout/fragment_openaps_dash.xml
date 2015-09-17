@@ -32,9 +32,10 @@
                 android:textColor="#B8B8B8"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:id="@+id/apsstatus_reason"
                 android:text="-"
+                android:gravity="bottom"
                 android:textSize="16sp"/>
             <TextView
                 android:layout_width="match_parent"

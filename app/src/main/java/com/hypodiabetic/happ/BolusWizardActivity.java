@@ -123,17 +123,11 @@ public class BolusWizardActivity extends Activity {
             bwDisplayBGCorr.setText(    bw.getString("insulin_correction_bg") + "U");
 
             //Bolus Wizard Calculations
-            reqInsulinbiob.setText("BolusIOB(" + bw.getString("biob") + ") - (COB(" + bw.getString("cob") + ") / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("net_biob") + "U");
-            reqInsulinCarbs.setText("Carbs(" + carbValue + "g) / Carb Ratio(" + bw.getString("carbRatio") + "g) = " + bw.getString("insulin_correction_carbs") + "U");
+            reqInsulinbiob.setText(bw.getString("net_biob_maths"));
+            reqInsulinCarbs.setText(bw.getString("insulin_correction_carbs_maths"));
             ReqInsulinBgText.setText(bw.getString("bgCorrection") + " bg correction");
-            if (bw.getString("bgCorrection").equals("High")){
-                reqInsulinBg.setText("snoozeBG(" + bw.getString("snoozeBG") + ") - Max BG(" + bw.getString("max_bg") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
-            } else if (bw.getString("bgCorrection").equals("Low")){
-                reqInsulinBg.setText("Target BG(" + bw.getString("target_bg") + ") - " + "snoozeBG(" + bw.getString("snoozeBG") + ") / ISF(" + bw.getString("isf") + ") = " + bw.getString("insulin_correction_bg") + "U");
-            } else {
-                reqInsulinBg.setText("NA - BG within Target");
-            }
-            sugBolus.setText("Carb Corr(" + bw.getString("insulin_correction_carbs") + ") + BG Corr(" + bw.getString("insulin_correction_bg") + ") - Net Bolus(" + bw.getString("net_biob") + ") = " + bw.getString("suggested_bolus"));
+            reqInsulinBg.setText(bw.getString("insulin_correction_bg_maths"));
+            sugBolus.setText(bw.getString("suggested_bolus_maths"));
             suggestedBolus.setText(bw.getString("suggested_bolus"));
 
             Date dateNow = new Date();

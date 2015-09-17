@@ -46,26 +46,6 @@
                     android:text="-"
                     android:textSize="18sp"
                     android:gravity="center"
-                    android:id="@+id/bwDisplayIOBCorr"/>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:text="iob correction"
-                    android:textSize="12sp"
-                    android:gravity="center"
-                    android:textColor="#B8B8B8"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_weight="1">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:text="-"
-                    android:textSize="18sp"
-                    android:gravity="center"
                     android:id="@+id/bwDisplayCarbCorr"/>
                 <TextView
                     android:layout_width="match_parent"
@@ -91,6 +71,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="20dp"
                     android:text="bg correction"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:textColor="#B8B8B8"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    android:text="-"
+                    android:textSize="18sp"
+                    android:gravity="center"
+                    android:id="@+id/bwDisplayIOBCorr"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    android:text="iob correction"
                     android:textSize="12sp"
                     android:gravity="center"
                     android:textColor="#B8B8B8"/>
@@ -154,20 +154,6 @@
         android:layout_height="16dp"
         android:layout_gravity="center_horizontal"
         android:text="-"
-        android:id="@+id/wizardNetIOB"
-        android:textSize="12sp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="18dp"
-        android:layout_gravity="center_horizontal"
-        android:text="net bolus iob"
-        android:textColor="#B8B8B8"
-        android:textSize="10sp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:layout_gravity="center_horizontal"
-        android:text="-"
         android:id="@+id/wizardReqInsulinCarbs"
         android:textSize="12sp"/>
     <TextView
@@ -191,6 +177,20 @@
         android:text="bg correction"
         android:textColor="#B8B8B8"
         android:id="@+id/wizardReqInsulinBgText"
+        android:textSize="10sp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_gravity="center_horizontal"
+        android:text="-"
+        android:id="@+id/wizardNetIOB"
+        android:textSize="12sp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="18dp"
+        android:layout_gravity="center_horizontal"
+        android:text="net bolus iob"
+        android:textColor="#B8B8B8"
         android:textSize="10sp"/>
     <TextView
         android:layout_width="match_parent"

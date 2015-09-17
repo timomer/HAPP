@@ -475,7 +475,7 @@ public class MainActivity extends FragmentActivity {
     public void apsstatusAccept (final View view){
 
         pumpAction.setTempBasal(openAPSFragment.getSuggestedBasal(), view.getContext());                           //Action the suggested Temp
-        //displayCurrentInfo();
+        displayCurrentInfo();
     }
 
 
