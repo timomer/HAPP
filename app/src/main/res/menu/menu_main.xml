@@ -5,4 +5,8 @@
         android:orderInCategory="100"
         app:showAsAction="never"
         />
+    <item android:id="@+id/action_cancel_temp" android:title="Cancel Temp"
+        android:orderInCategory="99"
+        app:showAsAction="never"
+        />
 </menu>

@@ -160,8 +160,9 @@ public class determine_basal {
             requestedTemp.put("temp", profile_data.basal_mode);                                     //"absolute" temp basals (U/hr) mode, "percent" of your normal basal
             requestedTemp.put("bg", bg);                                                            //Current BG level
             requestedTemp.put("tick", tick);                                                        //Delta between now BG and last BG
-            requestedTemp.put("eventualBG", eventualBG);                                            //BG in 15mins?
-            requestedTemp.put("snoozeBG", snoozeBG);                                                //??
+            requestedTemp.put("eventualBG", eventualBG);                                            //BG ignoring any bolus
+            requestedTemp.put("snoozeBG", snoozeBG);                                                //BG including any user bolus
+            requestedTemp.put("openaps_mode", profile_data.openaps_mode);                           //OpenAPS mode HAPP added
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -204,7 +205,7 @@ public class determine_basal {
                             } else {
                                 //reason = bg + "<" + threshold + "; no high-temp to cancel";
                                 reason = "BG is 30 below BG Min, BG is rising";
-                                sysMsg = "Wait and monitor.";
+                                sysMsg = "Wait and monitor";
                             }
                         } else {                                                                    // BG is not yet rising
                             requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp);
@@ -217,7 +218,8 @@ public class determine_basal {
                             if (temps_data.duration > 0) {                                          // if there is currently any temp basal running
                                 // if it's a low-temp and eventualBG < profile_data.max_bg, let it run a bit longer
                                 if (temps_data.rate <= profile_data.current_basal && eventualBG < profile_data.max_bg) {
-                                    reason = "Low Temp Basel running & eventual BG will be below Max BG, keep it running";
+                                    reason = "Low Temp Basal running & eventual BG will be below Max BG, keep it running";
+                                    sysMsg = "Wait and monitor";
                                 } else {
                                     //reason = "BG" + tick + " but " + eventualBG + "<" + profile_data.max_bg;
                                     reason = "Eventual BG out of range, but BG is moving in the right direction. Cancel High Temp Basel."; //// TODO: 10/09/2015 This is not correct
@@ -227,11 +229,11 @@ public class determine_basal {
                                 //reason = glucose_status.delta + " and " + eventualBG;
                                 //##### HAPP added #####
                                 if (eventualBG >= profile_data.min_bg && eventualBG <= profile_data.max_bg){
-                                    reason = "BG is moving and eventual BG in range.";                                                      // TODO: 10/09/2015 need to double check this
-                                    sysMsg = "Wait and monitor.";
+                                    reason = "BG is moving and eventual BG in range";                                                      // TODO: 10/09/2015 need to double check this
+                                    sysMsg = "Wait and monitor";
                                 } else {
                                     reason = "Eventual BG out of range, but BG is moving in the right direction. No temp basel running";    // TODO: 10/09/2015 need to double check this
-                                    sysMsg = "Wait and monitor.";
+                                    sysMsg = "Wait and monitor";
                                     Log.i("HAPP: basal info: ", reason);
                                 }
                                 //##### HAPP added #####
@@ -252,8 +254,8 @@ public class determine_basal {
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
                                 } else {
                                     //reason = "bolus snooze: eventual BG range " + eventualBG + "-" + snoozeBG;
-                                    reason = "Eventual BG < Min, BG moving in the right direction. Eventual BG Range: " + eventualBG + "-" + snoozeBG + " (EventualBG-SnoozeBG)";
-                                    sysMsg = "Wait and monitor.";
+                                    reason = "Eventual BG < Min, BG moving in the right direction. Eventual BG Range " + eventualBG + "-" + snoozeBG;
+                                    sysMsg = "Wait and monitor";
                                 }
                             } else {
                                 // calculate 30m low-temp required to get projected BG up to target
@@ -269,7 +271,7 @@ public class determine_basal {
                                 if (temps_data.duration > 0 && rate > (temps_data.rate - 0.1)) {
                                     //reason = temps_data.rate + "<~" + rate;
                                     reason = "Eventual BG < Min BG & Low Temp Basel is already running at a lower rate than suggested";
-                                    sysMsg = "Let current Negative Basal run";
+                                    sysMsg = "Let current Low Basal run";
                                 } else {
                                     //reason = "Eventual BG " + eventualBG + "<" + profile_data.min_bg;
                                     reason = "Eventual BG < Min BG & no Temp Basel running or suggested rate lower than current Temp Basel";
@@ -310,7 +312,7 @@ public class determine_basal {
                             } else if (temps_data.duration > 0 && rate < temps_data.rate + 0.1) {   // if required temp < existing temp basal
                                 //reason = temps_data.rate + ">~" + rate;
                                 reason = "Eventual BG > Max BG, suggested rate < current Temp Basal";
-                                sysMsg = "Keep current Temp Basal.";
+                                sysMsg = "Keep current Temp Basal";
                             } else {                                                                // required temp > existing temp basal
                                 //reason = temps_data.rate + "<" + rate;
                                 reason = "Eventual BG > Max BG, no Temp Basal running or current Temp Basal < suggested rate";
@@ -322,7 +324,7 @@ public class determine_basal {
                             sysMsg = "Wait and monitor";
                             if (temps_data.duration > 0) {                                          // if there is currently any temp basal running
                                 requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp);   // cancel temp
-                                reason += " Cancel Temp Basal.";
+                                reason += " Cancel Temp Basal";
                             }
                         }
                     }
@@ -386,7 +388,7 @@ public class determine_basal {
             requestedTemp.put("ratePercent", ratePercent.intValue());
             if (rate == 0 && duration == 0){
                 requestedTemp.put("action", "Temp Basal Canceled");
-                requestedTemp.put("basal_adjustemnt", "Canceled");
+                requestedTemp.put("basal_adjustemnt", "Pump Default");
                 requestedTemp.put("rate", profile_data.current_basal);
                 requestedTemp.put("ratePercent", 100);
             } else if (rate > profile_data.current_basal && duration != 0){

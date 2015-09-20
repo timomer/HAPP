@@ -19,6 +19,65 @@ import java.util.Date;
  */
 public class pumpAction {
 
+    public static void cancelTempBasal(final Context c){
+        final TempBasal active_basal = TempBasal.getCurrentActive(null);
+        Date now = new Date();
+        Profile p = new Profile().ProfileAsOf(now, c);
+        TempBasal basal = new TempBasal();
+
+        //The current Pumps Basal
+        basal.ratePercent       = 100;
+        basal.rate              = p.current_basal;
+        basal.basal_adjustemnt  = "Pump Default";
+
+        if (active_basal.isactive(null)) {
+
+            //Notify or Send command to pump depending on OpenAPS mode
+            if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")) {
+
+                //Online mode, send commend to pump
+                // TODO: 08/09/2015 pump interface
+
+            } else {
+
+                //Offline mode, prompt user
+                String popUpMsg;
+                if (p.basal_mode.equals("percent")) {
+                    popUpMsg = basal.ratePercent + "%";
+                } else {
+                    popUpMsg = basal.rate + "U";
+                }
+
+                new AlertDialog.Builder(c)
+                        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
+                        .setMessage("Rate " + popUpMsg)
+                        .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                //Updates the duration of the Active Temp Basal we are stopping
+                                active_basal.duration = active_basal.age();
+                                active_basal.save();
+
+                                //Run openAPS again
+                                Intent intent = new Intent("RUN_OPENAPS");
+                                c.sendBroadcast(intent);
+
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .show();
+            }
+        } else {
+
+            //No temp Basal active
+            Toast.makeText(c, "No Active Temp Basal to Cancel", Toast.LENGTH_LONG).show();
+        }
+    }
+
         public static void setTempBasal(final TempBasal basal, final Context c){
 
             Date now = new Date();
@@ -36,7 +95,7 @@ public class pumpAction {
             basal.ratePercent   = (safeRatePercent.intValue() / 10) * 10;
 
             //Notify or Send command to pump depending on OpenAPS mode
-            if (p.openaps_mode.equals("online")){
+            if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")){
 
                 //Online mode, send commend to pump
                 // TODO: 08/09/2015 pump interface
@@ -63,7 +122,7 @@ public class pumpAction {
 
                                 //Run openAPS again
                                 Intent intent = new Intent("RUN_OPENAPS");
-                                c.sendBroadcast(intent);
+                                    c.sendBroadcast(intent);
 
                             }
                         })
@@ -91,7 +150,7 @@ public class pumpAction {
         }
 
         //Notify or Send command to pump depending on OpenAPS mode
-        if (p.openaps_mode.equals("online")){
+        if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")){
 
             //Online mode, send commend to pump
             // TODO: 08/09/2015 pump interface

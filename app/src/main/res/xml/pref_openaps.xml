@@ -14,7 +14,8 @@
                 <ListPreference
                     android:title="OpenAPS Mode"
                     android:key="openaps_mode"
-                    android:defaultValue="offline"
+                    android:defaultValue="notify"
+                    android:summary="OpenAPS Loop Mode"
                     android:entries="@array/openaps_modeArray"
                     android:entryValues="@array/openaps_modeValues"/>
 

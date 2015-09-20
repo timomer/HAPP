@@ -65,7 +65,7 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     private static MainActivity ins;
     private PendingIntent pendingIntent;
@@ -380,9 +380,9 @@ public class MainActivity extends FragmentActivity {
             case R.id.action_settings:
                 startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
                 return true;
-            //case R.id.action_resend_last_bg: // TODO: 08/08/2015 not useing watch yet 
-            //    startService(new Intent(this, WatchUpdaterService.class).setAction(WatchUpdaterService.ACTION_RESEND));
-            //    return true;
+            case R.id.action_cancel_temp:
+                pumpAction.cancelTempBasal(MainActivity.activity);
+                return true;
             default:
                 return true;
         }
@@ -395,9 +395,13 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void run() {
 
-                if (openAPSFragmentObject.getView() != null) {                                      //Check the fragment is loaded
+                openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest);                            //Set the new suggested Basal
+
+                Fragment f = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":0");
+                if (f != null) {                                                                    //Check OpenAPS fragment is loaded
                     openAPSFragment.update(openAPSSuggest);
                 }
+
                 eventualBGValue     = (TextView) findViewById(R.id.eventualBGValue);
                 snoozeBGValue       = (TextView) findViewById(R.id.snoozeBGValue);
                 openAPSAgeTextView  = (TextView)findViewById(R.id.openapsAge);
@@ -405,9 +409,14 @@ public class MainActivity extends FragmentActivity {
                 try {
                     eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
                     snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
+
+                    if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
+                        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
+                    }
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
+                displayCurrentInfo();
             }
         });
     }
@@ -418,7 +427,8 @@ public class MainActivity extends FragmentActivity {
             public void run() {
 
                 JSONObject reply;
-                if (iobcobActiveFragmentObject.getView() != null) {                                 //Check the fragment is loaded
+                Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":2");
+                if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
                     reply = iobcobActiveFragment.updateChart(MainActivity.activity);
                 } else {
                     reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
@@ -431,10 +441,12 @@ public class MainActivity extends FragmentActivity {
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
-                if (iobcobFragmentObject.getView() != null){
+                Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":1");
+                if (iobcob != null){                                                                //Check IOB COB fragment is loaded
                     iobcobFragment.updateChart();
                 }
-                if (basalvsTempBasalObject.getView() != null) {
+                Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":3");
+                if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
                     basalvsTempBasalFragment.updateChart();
                 }
             }
@@ -474,8 +486,8 @@ public class MainActivity extends FragmentActivity {
     }
     public void apsstatusAccept (final View view){
 
-        pumpAction.setTempBasal(openAPSFragment.getSuggestedBasal(), view.getContext());                           //Action the suggested Temp
-        displayCurrentInfo();
+        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), view.getContext());                           //Action the suggested Temp
+
     }
 
 
@@ -553,7 +565,7 @@ public class MainActivity extends FragmentActivity {
             return rootView;
         }
 
-        public static TempBasal getSuggestedBasal(){
+        public static TempBasal getSuggested_Temp_Basal(){
             return Suggested_Temp_Basal;
         }
 
@@ -565,6 +577,19 @@ public class MainActivity extends FragmentActivity {
             }
         }
 
+        public static void setSuggested_Temp_Basal(JSONObject openAPSSuggest){
+            try {
+                Suggested_Temp_Basal = new TempBasal();
+                if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
+                    Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
+                    Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
+                    Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
+                    Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
+                    Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
+                }
+            }catch (Exception e)  {
+            }
+        }
         public static void update(JSONObject openAPSSuggest){
             //displayCurrentInfo();
             JSONObject reply = new JSONObject();
@@ -586,13 +611,7 @@ public class MainActivity extends FragmentActivity {
                 if (openAPSSuggest.has("action"))   apsstatus_Action.setText(openAPSSuggest.getString("action"));
                 if (openAPSSuggest.has("rate"))     apsstatus_temp.setText(openAPSSuggest.getDouble("rate") + "U " + openAPSSuggest.getString("duration") + "mins");
 
-                Suggested_Temp_Basal = new TempBasal();
                 if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
-                    Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
-                    Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
-                    Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
-                    Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
-                    Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
                     apsstatusAcceptButton.setEnabled(true);
                 } else {
                     apsstatusAcceptButton.setEnabled(false);

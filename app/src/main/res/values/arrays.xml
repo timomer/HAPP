@@ -21,12 +21,14 @@
         </string-array>
 
     <string-array name="openaps_modeArray">
-        <item>Offline - Notify only</item>
-        <item>Online - Send to Pump</item>
+        <item>Closed Loop - full auto</item>
+        <item>Open Loop - notify, then send to pump</item>
+        <item>Notify Only - notify, manually set pump</item>
     </string-array>
     <string-array name="openaps_modeValues">
-        <item>offline</item>
-        <item>online</item>
+        <item>closed</item>
+        <item>open</item>
+        <item>notify</item>
     </string-array>
 
     <string-array name="openaps_loopArray">
