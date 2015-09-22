@@ -602,11 +602,13 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         public static void update(){
 
-            apsstatus_reason.setText("");
-            apsstatus_Action.setText("");
-            apsstatus_temp.setText("None");
-            apsstatus_deviation.setText("");
+
             try {
+                apsstatus_reason.setText("");
+                apsstatus_Action.setText("");
+                apsstatus_temp.setText("None");
+                apsstatus_deviation.setText("");
+
                 String deviation;
                 if (currentOpenAPSSuggest.getDouble("deviation") > 0) {
                     deviation = "+" + tools.unitizedBG(currentOpenAPSSuggest.getDouble("deviation"), MainActivity.activity);
