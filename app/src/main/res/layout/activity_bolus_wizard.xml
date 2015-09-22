@@ -42,14 +42,14 @@
                 android:layout_weight="1">
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_height="22dp"
                     android:text="-"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:gravity="center"
                     android:id="@+id/bwDisplayCarbCorr"/>
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_height="18dp"
                     android:text="carb correction"
                     android:textSize="12sp"
                     android:gravity="center"
@@ -62,14 +62,14 @@
                 android:layout_weight="1">
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_height="22dp"
                     android:text="-"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:gravity="center"
                     android:id="@+id/bwDisplayBGCorr"/>
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_height="18dp"
                     android:text="bg correction"
                     android:textSize="12sp"
                     android:gravity="center"
@@ -82,14 +82,14 @@
                 android:layout_weight="1">
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_height="22dp"
                     android:text="-"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:gravity="center"
                     android:id="@+id/bwDisplayIOBCorr"/>
                 <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
+                    android:layout_height="18dp"
                     android:text="iob correction"
                     android:textSize="12sp"
                     android:gravity="center"

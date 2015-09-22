@@ -111,7 +111,7 @@ public class pumpAction {
                 }
 
                 new AlertDialog.Builder(c)
-                        .setTitle("Manually set " + basal.basal_adjustemnt + " Temp Basal")
+                        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
                         .setMessage(popUpMsg)
                         .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {

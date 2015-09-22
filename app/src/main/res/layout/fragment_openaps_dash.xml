@@ -61,7 +61,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:text="suggested temp basal"
+                        android:text="suggested basal"
                         android:textSize="12sp"
                         android:textColor="#B8B8B8"/>
                 </LinearLayout>

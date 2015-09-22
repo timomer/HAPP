@@ -127,7 +127,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         //xdrip start
         //Fabric.with(this, new Crashlytics()); todo not sure what this is for? Fabric is twitter? http://docs.fabric.io/android/twitter/twitter.html
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        //checkEula(); // TODO: 07/08/2015  dont care about the EULA right now
+        checkEula(); 
 
         startService(new Intent(getApplicationContext(), DataCollectionService.class));
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
@@ -192,6 +192,16 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
     //xdrip functions start
+
+    public void checkEula() {
+        boolean IUnderstand = prefs.getBoolean("I_understand", false);
+        if (!IUnderstand) {
+            Intent intent = new Intent(getApplicationContext(), license_agreement.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
     private class ChartViewPortListener implements ViewportChangeListener {
         @Override
         public void onViewportChanged(Viewport newViewport) {
@@ -397,11 +407,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
                 openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest);                            //Set the new suggested Basal
 
-                Fragment f = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":0");
-                if (f != null) {                                                                    //Check OpenAPS fragment is loaded
-                    openAPSFragment.update(openAPSSuggest);
-                }
-
                 eventualBGValue     = (TextView) findViewById(R.id.eventualBGValue);
                 snoozeBGValue       = (TextView) findViewById(R.id.snoozeBGValue);
                 openAPSAgeTextView  = (TextView)findViewById(R.id.openapsAge);
@@ -550,6 +555,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         private static TextView apsstatus_mode;
         private static TextView apsstatus_loop;
         private static TempBasal Suggested_Temp_Basal = new TempBasal();
+        private static JSONObject currentOpenAPSSuggest;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -562,6 +568,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
             apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
 
+            update();
             return rootView;
         }
 
@@ -589,30 +596,36 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 }
             }catch (Exception e)  {
             }
+            currentOpenAPSSuggest = openAPSSuggest;
+            update();
         }
-        public static void update(JSONObject openAPSSuggest){
-            //displayCurrentInfo();
-            JSONObject reply = new JSONObject();
+
+        public static void update(){
+
             apsstatus_reason.setText("");
             apsstatus_Action.setText("");
             apsstatus_temp.setText("None");
             apsstatus_deviation.setText("");
             try {
                 String deviation;
-                if (openAPSSuggest.getDouble("deviation") > 0) {
-                    deviation = "+" + tools.unitizedBG(openAPSSuggest.getDouble("deviation"), MainActivity.activity);
+                if (currentOpenAPSSuggest.getDouble("deviation") > 0) {
+                    deviation = "+" + tools.unitizedBG(currentOpenAPSSuggest.getDouble("deviation"), MainActivity.activity);
                 } else {
-                    deviation = tools.unitizedBG(openAPSSuggest.getDouble("deviation"), MainActivity.activity);
+                    deviation = tools.unitizedBG(currentOpenAPSSuggest.getDouble("deviation"), MainActivity.activity);
                 }
                 apsstatus_deviation.setText(deviation);
-                apsstatus_mode.setText(openAPSSuggest.getString("openaps_mode"));
-                apsstatus_loop.setText(openAPSSuggest.getString("openaps_loop") + "mins");
-                if (openAPSSuggest.has("reason"))   apsstatus_reason.setText(openAPSSuggest.getString("reason"));
-                if (openAPSSuggest.has("action"))   apsstatus_Action.setText(openAPSSuggest.getString("action"));
-                if (openAPSSuggest.has("rate"))     apsstatus_temp.setText(openAPSSuggest.getDouble("rate") + "U " + openAPSSuggest.getString("duration") + "mins");
+                apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
+                apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
+                if (currentOpenAPSSuggest.has("reason"))   apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
+                if (currentOpenAPSSuggest.has("action"))   apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
 
-                if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
+                if (currentOpenAPSSuggest.has("rate")){
                     apsstatusAcceptButton.setEnabled(true);
+                    if (currentOpenAPSSuggest.getString("basal_adjustemnt").equals("Pump Default")){
+                        apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
+                    } else {
+                        apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U " + currentOpenAPSSuggest.getString("duration") + "mins");
+                    }
                 } else {
                     apsstatusAcceptButton.setEnabled(false);
                 }

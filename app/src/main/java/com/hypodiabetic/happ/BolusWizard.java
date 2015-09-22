@@ -28,13 +28,13 @@ public class BolusWizard {
         JSONObject iobNow       = Treatments.getIOB(profile, dateNow);
         JSONObject cobNow       = Treatments.getCOB(profile, dateNow);
         JSONObject openAPSNow   = determine_basal.runOpenAPS(c);
-        //Bg lastBg = Bg.last();
         String bgCorrection="";
 
-        Double eventualBG=0D;
-        Double cob=0D;
-        Double biob=0D;
-        Double snoozeBG=0D;
+        Double lastBG       = Bg.last().sgv_double();
+        Double eventualBG   = 0D;
+        Double snoozeBG     = 0D;
+        Double cob          = 0D;
+        Double biob         = 0D;
         try {
             eventualBG  = openAPSNow.getDouble("eventualBG");
             snoozeBG  = openAPSNow.getDouble("snoozeBG");
@@ -51,12 +51,12 @@ public class BolusWizard {
         String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + biob + ") = " + String.format("%.1f",net_correction_biob) + "U";
         Double insulin_correction_carbs         = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
         String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + String.format("%.1f",insulin_correction_carbs) + "U";
-        if (snoozeBG >= profile.max_bg){                                                            //HIGH
+        if (snoozeBG >= profile.max_bg || lastBG >= profile.max_bg){                                //HIGH
             insulin_correction_bg       = (snoozeBG - profile.max_bg) / profile.isf;
             bgCorrection                = "High";
-            insulin_correction_bg_maths = "snoozeBG(" + snoozeBG + ") - Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
+            insulin_correction_bg_maths = "snoozeBG(" + snoozeBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f",insulin_correction_bg) + "U";
 
-        } else if (snoozeBG <= profile.min_bg){                                                     //LOW
+        } else if (snoozeBG <= profile.min_bg || lastBG <= profile.min_bg){                         //LOW
             insulin_correction_bg       = (snoozeBG - profile.target_bg) / profile.isf;
             bgCorrection                = "Low";
             insulin_correction_bg_maths = "(snoozeBG(" + snoozeBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";

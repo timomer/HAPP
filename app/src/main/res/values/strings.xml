@@ -9,6 +9,11 @@
     <string name="title_activity_isf_list">isfList</string>
     <string name="title_activity_bolus_wizard">BolusWizardActivity</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <string name="pref_I_understand_title"> I UNDERSTAND AND AGREE</string>
+    <string name="pref_I_understand_summery">HAPP MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
+
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_activity_license_agreement">activity_license_agreement</string>
+    <string name="title_activity_license_agreement">license_agreement</string>
 </resources>

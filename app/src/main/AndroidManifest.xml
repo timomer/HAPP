@@ -65,10 +65,9 @@
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".Receivers.openAPSReceiver">
+        <receiver android:name=".Receivers.openAPSReceiver" >
             <intent-filter>
-                <action android:name="RUN_OPENAPS"></action>
+                <action android:name="RUN_OPENAPS" />
             </intent-filter>
         </receiver>
         <receiver android:name=".Receivers.statsReceiver" />
@@ -80,6 +79,14 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.hypodiabetic.happ.EnterTreatment" />
+        </activity>
+        <activity
+            android:name=".activity_license_agreement"
+            android:label="@string/title_activity_activity_license_agreement" >
+        </activity>
+        <activity
+            android:name=".license_agreement"
+            android:label="@string/title_activity_license_agreement" >
         </activity>
     </application>
 

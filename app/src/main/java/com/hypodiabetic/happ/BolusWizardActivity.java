@@ -159,8 +159,13 @@ public class BolusWizardActivity extends Activity {
 
     public void wizardAccept(View view){
 
-        bolusTreatment.value = Double.parseDouble(suggestedBolus.getText().toString());
-        pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                       //Action the suggested Bolus
+        if (suggestedBolus.getText().toString().trim().length() != 0 && Double.parseDouble(suggestedBolus.getText().toString()) > 0) {
+            bolusTreatment.value = Double.parseDouble(suggestedBolus.getText().toString());
+            pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
+        } else if (carbTratment.value > 0) {
+            carbTratment.save();
+            Toast.makeText(this, carbTratment.value + "g saved, no Bolus suggested", Toast.LENGTH_SHORT).show();
+        }
 
         //finish();
     }

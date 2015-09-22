@@ -6,7 +6,9 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
+import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
+import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
 
 import org.json.JSONArray;
@@ -29,6 +31,7 @@ import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.SubcolumnValue;
+import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.util.ChartUtils;
 
 /**
@@ -57,6 +60,49 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     JSONArray iobFutureValues = new JSONArray();
     JSONArray cobFutureValues = new JSONArray();
 
+    private List<PointValue> openAPSPredictValue = new ArrayList<PointValue>();
+
+    //##### Adds OpenAPS eventualBG to BG chart #####
+    @Override
+    public List<Line> defaultLines() {
+        addBgReadingValues();
+        List<Line> lines = new ArrayList<Line>();
+        lines.add(minShowLine());
+        lines.add(maxShowLine());
+        lines.add(highLine());
+        lines.add(lowLine());
+        lines.add(inRangeValuesLine());
+        lines.add(lowValuesLine());
+        lines.add(highValuesLine());
+        lines.add(openAPSPredictLine());
+        return lines;
+    }
+    public Line openAPSPredictLine() {
+        getOpenAPSPredictValues();
+        Line openAPSPredictLine = new Line(openAPSPredictValue);
+        ValueShape shape = ValueShape.DIAMOND;
+        openAPSPredictLine.setColor(ChartUtils.COLOR_VIOLET);
+        openAPSPredictLine.setHasLines(true);
+        openAPSPredictLine.setPointRadius(3);
+        openAPSPredictLine.setHasPoints(true);
+        openAPSPredictLine.setCubic(true);
+        openAPSPredictLine.setShape(shape);
+        return openAPSPredictLine;
+    }
+    public void getOpenAPSPredictValues() {
+        JSONObject openAPSSuggest = determine_basal.runOpenAPS(context);                            //Run OpenAPS
+        Date timeeNow = new Date();
+        Date in15mins = new Date(timeeNow.getTime() + 15*60000);
+        Double snoozeBG=0D;
+        try {
+            snoozeBG = openAPSSuggest.getDouble("eventualBG");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //openAPSPredictValue.add(new PointValue((float) (timeeNow.getTime() / fuzz), (float) Bg.last().sgv_double()));
+        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz), snoozeBG.floatValue()));
+    }
+    //##### Adds OpenAPS eventualBG to BG chart #####
 
     public ColumnChartData iobcobFutureChart(List<Stats> statArray) { //data*
 
@@ -187,11 +233,10 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         addfutureValues();
         List<Line> lines = new ArrayList<Line>();
         lines.add(minShowLine());
-        //lines.add(maxiobcobShowLine());
-        lines.add(iobValuesLine());
+        //lines.add(iobValuesLine());// TODO: 22/09/2015 debugging
         lines.add(cobValuesLine());
-        lines.add(iobFutureLine());
-        lines.add(cobFutureLine());
+        //lines.add(iobFutureLine());// TODO: 22/09/2015 debugging
+        //lines.add(cobFutureLine());// TODO: 22/09/2015 debugging
         return lines;
     }
     public Line maxiobcobShowLine() {
