@@ -33,6 +33,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
@@ -632,6 +633,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     apsstatusAcceptButton.setEnabled(false);
                 }
             }catch (Exception e)  {
+                Toast.makeText(MainActivity.activity, "Crash updating OpenAPS Fragment", Toast.LENGTH_SHORT).show();
             }
         }
 

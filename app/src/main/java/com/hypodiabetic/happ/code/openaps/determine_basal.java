@@ -244,18 +244,23 @@ public class determine_basal {
                         } else if (eventualBG < profile_data.min_bg) {                              // if eventual BG is below target:
                             // if this is just due to boluses, we can snooze until the bolus IOB decays (at double speed)
                             if (snoozeBG > profile_data.min_bg) {                                     // if adding back in the bolus contribution BG would be above min
-                                // if BG is falling and high-temped, or rising and low-temped, cancel
-                                if (glucose_status.getDouble("delta") < 0 && temps_data.rate > profile_data.current_basal) {
+
+                                if (glucose_status.getDouble("delta") < 0 && temps_data.rate > profile_data.current_basal) {        //BG is falling and high-temped
                                     //reason = tick + " and " + temps_data.rate + ">" + profile_data.current_basal;
-                                    reason = "Eventual BG < Min, SnoozeBG > Min, BG dropping & High Temp basal is active, user bolus still active and we have a High Temp running";
+                                    reason = "Eventual BG < Min, SnoozeBG > Min, BG dropping & High Temp basal is active";
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
-                                } else if (glucose_status.getDouble("delta") > 0 && temps_data.rate < profile_data.current_basal) {
+                                } else if (glucose_status.getDouble("delta") > 0 && temps_data.rate < profile_data.current_basal) { //BG is rising and low-temped
                                     //reason = tick + " and " + temps_data.rate + "<" + profile_data.current_basal;
-                                    reason = "Eventual BG < Min, SnoozeBG > Min & BG rising. Low Temp Basal Canceled if active"; // TODO: 03/09/2015 why cancel low temp if we are below BG target?
+                                    reason = "Eventual BG < Min, SnoozeBG > Min, BG rising & Low Temp Basal is active";
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
+                                    //##### HAPP ADDED #####
+                                } else if (bg < profile_data.max_bg) {                                                               //current BG below min
+                                    reason = "Eventual BG < Min, SnoozeBG > Min & Current BG < Min";
+                                    requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp);
+                                    //##### HAPP ADDED #####
                                 } else {
                                     //reason = "bolus snooze: eventual BG range " + eventualBG + "-" + snoozeBG;
-                                    reason = "Eventual BG < Min, BG moving in the right direction. Eventual BG Range " + eventualBG + "-" + snoozeBG;
+                                    reason = "EventualBG < Min, SnoozeBG > Min. Eventual BG Range: " + eventualBG + "-" + snoozeBG;
                                     action = "Wait and monitor";
                                 }
                             } else {
