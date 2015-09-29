@@ -88,6 +88,37 @@
             android:name=".license_agreement"
             android:label="@string/title_activity_license_agreement" >
         </activity>
+        <activity
+            android:name=".WearStubBroadcastActivity"
+            android:label="WearStubBroadcastActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".WearDisplayActivity"
+            android:allowEmbedded="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.DeviceDefault.Light" >
+        </activity>
+
+        <receiver
+            android:name=".WearPostNotificationReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.hypodiabetic.happ.SHOW_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Receivers.notificationReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.hypodiabetic.happ.NOTIFICATION_RECEIVER" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

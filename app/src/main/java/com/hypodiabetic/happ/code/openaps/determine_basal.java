@@ -24,7 +24,7 @@ import java.util.Locale;
  */
 public class determine_basal {
 
-    //HAPP Triggers OpenAPS run
+    //##### HAPP ##### Triggers OpenAPS run
     public static JSONObject runOpenAPS(Context c){
 
         double fuzz = (1000 * 30 * 5);
@@ -143,7 +143,7 @@ public class determine_basal {
                 tick = glucose_status.getString("delta");
             }
             //console.error("IOB: " + iob_data.iob.toFixed(2) + ", Bolus IOB: " + iob_data.bolusiob.toFixed(2));
-            Double bgi = -iob_data.getDouble("activity") * profile_data.isf * 5;                      //Blood Glucose Impact, rate at which BG "should" be rising or falling, based solely on insulin activity
+            Double bgi = -iob_data.getDouble("activity") * profile_data.isf * 5;                      //Blood Glucose Impact, rate at which BG "should" be rising or falling, based solely on Bolus insulin activity
             //console.error("Avg. Delta: " + glucose_status.avgdelta.toFixed(1) + ", BGI: " + bgi.toFixed(1));
 
             // project deviation over next 15 minutes
@@ -223,7 +223,7 @@ public class determine_basal {
                                     action = "Wait and monitor";
                                 } else {
                                     //reason = "BG" + tick + " but " + eventualBG + "<" + profile_data.max_bg;
-                                    reason = "Eventual BG out of range, but BG is moving in the right direction. Cancel High Temp Basel."; //// TODO: 10/09/2015 This is not correct
+                                    reason = "Eventual BG out of range, but BG is moving in the right direction. Cancel High Temp Basel."; //// TODO: 10/09/2015 need to double check this
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
                                 }
                             } else {
@@ -254,9 +254,9 @@ public class determine_basal {
                                     reason = "Eventual BG < Min, SnoozeBG > Min, BG rising & Low Temp Basal is active";
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
                                     //##### HAPP ADDED #####
-                                } else if (bg < profile_data.max_bg) {                                                               //current BG below min
-                                    reason = "Eventual BG < Min, SnoozeBG > Min & Current BG < Min";
-                                    requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp);
+                                } else if (bg < profile_data.min_bg) {                                                               //current BG below min
+                                    reason = "Eventual BG < Min & Current BG < Min";
+                                    requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp); // cancel temp
                                     //##### HAPP ADDED #####
                                 } else {
                                     //reason = "bolus snooze: eventual BG range " + eventualBG + "-" + snoozeBG;

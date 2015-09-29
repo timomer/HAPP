@@ -24,7 +24,7 @@ public class iob {
 
 
 
-    //Calculates the IOB from only one treatment, called from iobTotal below
+    //Calculates the Bolus IOB from only one treatment, called from iobTotal below
     public static JSONObject iobCalc(Treatments treatment, Date time, Double dia) {
 
         JSONObject returnValue = new JSONObject();

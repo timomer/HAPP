@@ -422,6 +422,15 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                //Make notification (Wear & Phone)
+                Intent i = new Intent();
+                i.setAction("com.hypodiabetic.happ.SHOW_NOTIFICATION");
+                i.putExtra(WearPostNotificationReceiver.CONTENT_KEY, "testing");
+                sendBroadcast(i);
+
+
+
                 displayCurrentInfo();
             }
         });
@@ -624,6 +633,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
                 if (currentOpenAPSSuggest.has("rate")){
                     apsstatusAcceptButton.setEnabled(true);
+                    apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
                     if (currentOpenAPSSuggest.getString("basal_adjustemnt").equals("Pump Default")){
                         apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
                     } else {
@@ -631,6 +641,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     }
                 } else {
                     apsstatusAcceptButton.setEnabled(false);
+                    apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
                 }
             }catch (Exception e)  {
                 Toast.makeText(MainActivity.activity, "Crash updating OpenAPS Fragment", Toast.LENGTH_SHORT).show();

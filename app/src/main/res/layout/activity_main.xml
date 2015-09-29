@@ -227,7 +227,7 @@
                                 android:layout_height="20dp"
                                 android:background="#0099FF"
                                 android:gravity="center"
-                                android:text="IOB"
+                                android:text="bIOB"
                                 android:textColor="@android:color/white"
                                 android:textSize="12sp" />
                         </LinearLayout>

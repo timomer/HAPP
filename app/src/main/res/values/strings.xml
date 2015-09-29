@@ -16,4 +16,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_activity_license_agreement">activity_license_agreement</string>
     <string name="title_activity_license_agreement">license_agreement</string>
+
+    <string name="hello">Hello World!</string>
+    <string name="title">Hello Notification!</string>
+    <string name="notification_posted">Notification posted</string>
 </resources>
