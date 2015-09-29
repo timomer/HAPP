@@ -418,18 +418,21 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
                     if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
                         pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
+                    } else {
+
+                        if (openAPSSuggest.has("rate")) {                                           //Make notification (Wear & Phone)
+                            Intent i = new Intent();
+                            i.setAction("com.hypodiabetic.happ.SHOW_NOTIFICATION");
+                            i.putExtra(WearPostNotificationReceiver.TITLE_KEY, openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)");
+                            i.putExtra(WearPostNotificationReceiver.MSG_KEY, openAPSSuggest.getString("action"));
+                            sendBroadcast(i);
+                        }
+
                     }
+
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                //Make notification (Wear & Phone)
-                Intent i = new Intent();
-                i.setAction("com.hypodiabetic.happ.SHOW_NOTIFICATION");
-                i.putExtra(WearPostNotificationReceiver.CONTENT_KEY, "testing");
-                sendBroadcast(i);
-
-
 
                 displayCurrentInfo();
             }

@@ -9,7 +9,8 @@ import android.content.Intent;
 import android.widget.Toast;
 
 public class WearPostNotificationReceiver extends BroadcastReceiver {
-    public static final String CONTENT_KEY = "contentText";
+    public static final String TITLE_KEY = "contentText";
+    public static final String MSG_KEY = "msgText";
 
     public WearPostNotificationReceiver() {
     }
@@ -19,13 +20,15 @@ public class WearPostNotificationReceiver extends BroadcastReceiver {
 
         Intent i = new Intent();
         i.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
-        PendingIntent pending_intent = PendingIntent.getActivity(MainActivity.activity, 0, i, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,0);
 
         Intent displayIntent = new Intent(context, WearDisplayActivity.class);
-        String text = intent.getStringExtra(CONTENT_KEY);
         Notification notification = new Notification.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(text)
+                .setContentTitle(intent.getStringExtra(TITLE_KEY))
+                .setContentText(intent.getStringExtra(MSG_KEY))
+                .setAutoCancel(true)
+                .setContentIntent(pending_intent)
                 .extend(new Notification.WearableExtender()
                         .setDisplayIntent(PendingIntent.getActivity(context, 0, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))

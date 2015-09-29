@@ -14,7 +14,7 @@ public class WearStubBroadcastActivity extends Activity {
 
         Intent i = new Intent();
         i.setAction("com.hypodiabetic.happ.SHOW_NOTIFICATION");
-        i.putExtra(WearPostNotificationReceiver.CONTENT_KEY, getString(R.string.title));
+        i.putExtra(WearPostNotificationReceiver.TITLE_KEY, getString(R.string.title));
         sendBroadcast(i);
         finish();
     }
