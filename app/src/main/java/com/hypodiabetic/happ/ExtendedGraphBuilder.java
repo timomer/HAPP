@@ -209,7 +209,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     public void addBasalvsTempBasalValues(){
         Double basalDelta;
         for (Stats tempBasalReading : statsReadings) {
-            if (tempBasalReading.temp_basal_type != null) {
+            if (tempBasalReading.temp_basal_type == "High" || tempBasalReading.temp_basal_type == "Low") {  //Has a Temp Basal been set?
                 basalDelta = tempBasalReading.temp_basal - tempBasalReading.basal;                  //Delta between normal Basal and Temp Basal set
             } else {
                 basalDelta = 0D;                                                                    //No Temp Basal set
