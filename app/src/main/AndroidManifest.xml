@@ -97,13 +97,6 @@
         </activity>
 
         <receiver
-            android:name=".WearPostNotificationReceiver"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.hypodiabetic.happ.SHOW_NOTIFICATION" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name=".Receivers.notificationReceiver"
             android:exported="true" >
             <intent-filter>

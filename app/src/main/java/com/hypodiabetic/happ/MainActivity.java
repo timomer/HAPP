@@ -403,7 +403,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
     public void test(View v){
-
+        Notifications.setTemp("test", MainActivity.activity);
 
     }
 
@@ -438,6 +438,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             @Override
             public void run() {
 
+                iobValueTextView = (TextView) findViewById(R.id.iobValue);
+                cobValueTextView = (TextView) findViewById(R.id.cobValue);
+
                 JSONObject reply;
                 Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":2");
                 if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
@@ -445,8 +448,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 } else {
                     reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
                 }
-                iobValueTextView = (TextView) findViewById(R.id.iobValue);
-                cobValueTextView = (TextView) findViewById(R.id.cobValue);
                 try {
                     iobValueTextView.setText(reply.getString("iob"));
                     cobValueTextView.setText(reply.getString("cob"));

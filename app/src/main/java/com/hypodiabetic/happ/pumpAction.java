@@ -110,28 +110,29 @@ public class pumpAction {
                     popUpMsg = basal.rate + "U for " + basal.duration + "mins";
                 }
 
-                new AlertDialog.Builder(c)
-                        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
-                        .setMessage(popUpMsg)
-                        .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                Notifications.setTemp(popUpMsg,c);
+                //new AlertDialog.Builder(c)
+                //        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
+                //        .setMessage(popUpMsg)
+                //        .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                //            public void onClick(DialogInterface dialog, int which) {
 
-                                Date setNow = new Date();
-                                basal.start_time = setNow;
-                                basal.save();
+                 //               Date setNow = new Date();
+                //                basal.start_time = setNow;
+                //                basal.save();
 
                                 //Run openAPS again
-                                Intent intent = new Intent("RUN_OPENAPS");
-                                    c.sendBroadcast(intent);
+                 //               Intent intent = new Intent("RUN_OPENAPS");
+                 //                   c.sendBroadcast(intent);
 
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
+                //            }
+                 //       })
+                //        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                //            public void onClick(DialogInterface dialog, int which) {
 
-                            }
-                        })
-                        .show();
+                //            }
+                 //       })
+                 //       .show();
             }
         }
 

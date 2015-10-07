@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.widget.Toast;
 
 import com.hypodiabetic.happ.MainActivity;
@@ -21,7 +22,8 @@ public class notificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent arg1) {
 
-        switch (arg1.getStringExtra("NOTIFICATION_TYPE")){
+        Bundle bundle = arg1.getExtras();
+        switch (bundle.getString("NOTIFICATION_TYPE")){
             case "newTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
                 pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp

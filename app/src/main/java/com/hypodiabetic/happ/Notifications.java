@@ -29,9 +29,10 @@ public class Notifications {
         Intent i = new Intent();
         i.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
         i.putExtra("NOTIFICATION_TYPE", "newTemp");
-        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,0);
+        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,Intent.FILL_IN_DATA);
 
         Intent displayIntent = new Intent(c, WearDisplayActivity.class);
+        displayIntent.putExtra("NOTIFICATION_TYPE", "newTempsss");
         Notification notification = new Notification.Builder(c)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
@@ -50,19 +51,14 @@ public class Notifications {
     }
 
     //New Temp has been set
-    public static void setTemp(JSONObject openAPSSuggest, Context c){
+    public static void setTemp(String msg, Context c){
 
         String title="New Temp has been set";
-        String msg="";
-        try {
-            msg     = openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)";
-        }catch (Exception e)  {
-        }
 
         Intent i = new Intent();
         i.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
         i.putExtra("NOTIFICATION_TYPE","setTemp");
-        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,0);
+        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,Intent.FILL_IN_DATA);
 
         Intent displayIntent = new Intent(c, WearDisplayActivity.class);
         Notification notification = new Notification.Builder(c)
