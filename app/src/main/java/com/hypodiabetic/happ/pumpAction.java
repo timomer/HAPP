@@ -111,6 +111,14 @@ public class pumpAction {
                 }
 
                 Notifications.setTemp(popUpMsg,c);
+                Date setNow = new Date();
+                basal.start_time = setNow;
+                basal.save();
+
+                //Run openAPS again
+                Intent intent = new Intent("RUN_OPENAPS");
+                c.sendBroadcast(intent);
+
                 //new AlertDialog.Builder(c)
                 //        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
                 //        .setMessage(popUpMsg)

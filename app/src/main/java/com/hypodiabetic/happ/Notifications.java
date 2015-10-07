@@ -29,10 +29,9 @@ public class Notifications {
         Intent i = new Intent();
         i.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
         i.putExtra("NOTIFICATION_TYPE", "newTemp");
-        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,Intent.FILL_IN_DATA);
+        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,1,i,Intent.FILL_IN_DATA);
 
         Intent displayIntent = new Intent(c, WearDisplayActivity.class);
-        displayIntent.putExtra("NOTIFICATION_TYPE", "newTempsss");
         Notification notification = new Notification.Builder(c)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
@@ -43,7 +42,7 @@ public class Notifications {
                 .setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500})
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .extend(new Notification.WearableExtender()
-                        .setDisplayIntent(PendingIntent.getActivity(c, 0, displayIntent,
+                        .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))
                 .addAction(R.drawable.abc_btn_check_material, "Accept Temp",pending_intent)
                 .build();
@@ -58,7 +57,7 @@ public class Notifications {
         Intent i = new Intent();
         i.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
         i.putExtra("NOTIFICATION_TYPE","setTemp");
-        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,0,i,Intent.FILL_IN_DATA);
+        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,2,i,Intent.FILL_IN_DATA);
 
         Intent displayIntent = new Intent(c, WearDisplayActivity.class);
         Notification notification = new Notification.Builder(c)
@@ -71,9 +70,9 @@ public class Notifications {
                 .setVibrate(new long[]{500, 500, 500})
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .extend(new Notification.WearableExtender()
-                        .setDisplayIntent(PendingIntent.getActivity(c, 0, displayIntent,
+                        .setDisplayIntent(PendingIntent.getActivity(c, 2, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))
-                .addAction(R.drawable.abc_btn_check_material, "Done",pending_intent)
+                .addAction(R.drawable.abc_btn_check_material, "OK",pending_intent)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
     }

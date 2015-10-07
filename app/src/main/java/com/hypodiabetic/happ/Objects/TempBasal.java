@@ -27,7 +27,7 @@ public class TempBasal extends Model {
     public Integer  duration=0;             //Duration of Temp
     @Expose
     @Column(name = "basal_type")
-    public String   basal_type="";          //Absolute or Percent
+    public String   basal_type;             //Absolute or Percent (leave blank as used at addBasalvsTempBasalValues() )
     @Expose
     @Column(name = "start_time")
     public Date     start_time;             //When the Temp Basal started
