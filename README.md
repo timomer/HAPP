@@ -1,6 +1,6 @@
 # HAPP ~ Hackabetes Artificial Pancreas Project
 
-Native Android implentaion of the OpenAPS.org algorithm with addiotnbal funcatiniality.
+Native Android implentaion of the OpenAPS.org algorithm with addiotnbal functionality.
 
 Current features:
 * Capture your Bolus and Carb Treatments
@@ -38,3 +38,14 @@ As you can now play with the OpenAPS algorithm with any pump :)
 * Improve code comments
 * Lots and lots of debugging
 * Find a Bluetooth developer to help me hack the Roche Accu-Chek Combo pump
+
+###Repos used
+I am utilising code from the following repos and porting them over to this app.
+* OpenAPS - https://github.com/timomer/openaps-js
+* NightWatch - https://github.com/timomer/NightWatch
+* Nightscout - https://github.com/timomer/cgm-remote-monitor
+
+###Thanks to
+The community for all their code and advice to make this possible. Special thanks to StephenBlackWasAlreadyTaken, jasoncalabrese and scottleibrand.
+
+#WeAreNotWaiting
