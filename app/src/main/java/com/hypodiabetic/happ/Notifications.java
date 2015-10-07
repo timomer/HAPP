@@ -72,7 +72,6 @@ public class Notifications {
                 .extend(new Notification.WearableExtender()
                         .setDisplayIntent(PendingIntent.getActivity(c, 2, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))
-                .addAction(R.drawable.abc_btn_check_material, "OK",pending_intent)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
     }
