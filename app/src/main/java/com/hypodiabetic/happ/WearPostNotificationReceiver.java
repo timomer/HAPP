@@ -27,14 +27,17 @@ public class WearPostNotificationReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(intent.getStringExtra(TITLE_KEY))
                 .setContentText(intent.getStringExtra(MSG_KEY))
-                .setAutoCancel(true)
                 .setContentIntent(pending_intent)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500})
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .extend(new Notification.WearableExtender()
                         .setDisplayIntent(PendingIntent.getActivity(context, 0, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))
                 .addAction(R.drawable.abc_btn_check_material, "Accept Temp",pending_intent)
                 .build();
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, notification);
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
 
         Toast.makeText(context, context.getString(R.string.notification_posted), Toast.LENGTH_SHORT).show();
     }

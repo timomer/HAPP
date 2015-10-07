@@ -89,15 +89,6 @@
             android:label="@string/title_activity_license_agreement" >
         </activity>
         <activity
-            android:name=".WearStubBroadcastActivity"
-            android:label="WearStubBroadcastActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".WearDisplayActivity"
             android:allowEmbedded="true"
             android:exported="true"

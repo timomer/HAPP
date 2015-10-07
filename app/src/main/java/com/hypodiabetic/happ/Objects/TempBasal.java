@@ -27,13 +27,13 @@ public class TempBasal extends Model {
     public Integer  duration=0;             //Duration of Temp
     @Expose
     @Column(name = "basal_type")
-    public String   basal_type;             //Absolute or Percent
+    public String   basal_type="";          //Absolute or Percent
     @Expose
     @Column(name = "start_time")
     public Date     start_time;             //When the Temp Basal started
     @Expose
     @Column(name = "basal_adjustemnt")
-    public String   basal_adjustemnt;       //High or Low temp
+    public String   basal_adjustemnt="";    //High or Low temp
     @Expose
     @Column(name = "current_pump_basal")
     public Double   current_pump_basal;     //Pumps current basal

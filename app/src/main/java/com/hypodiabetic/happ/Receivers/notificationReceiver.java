@@ -1,5 +1,6 @@
 package com.hypodiabetic.happ.Receivers;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.widget.Toast;
 
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
+import com.hypodiabetic.happ.pumpAction;
 
 import org.json.JSONObject;
 
@@ -19,6 +21,16 @@ public class notificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent arg1) {
 
-        Toast.makeText(context, "notificationReceiver", Toast.LENGTH_LONG).show();
+        switch (arg1.getStringExtra("NOTIFICATION_TYPE")){
+            case "newTemp":
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
+                pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp
+                Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
+
+            case "setTemp":
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);  //Kills the notification
+
+        }
+
     }
 }

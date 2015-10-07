@@ -279,6 +279,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical">
+<Button
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:text="test"
+    android:onClick="test"/>
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/pager"

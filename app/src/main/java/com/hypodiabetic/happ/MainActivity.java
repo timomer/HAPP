@@ -3,6 +3,8 @@ package com.hypodiabetic.happ;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -58,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
+import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
@@ -399,6 +402,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
     }
 
+    public void test(View v){
+
+
+    }
+
 
     //Updates the OpenAPS Fragment
     public void updateOpenAPSDetails(final JSONObject openAPSSuggest){
@@ -406,7 +414,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             @Override
             public void run() {
 
-                openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest);                            //Set the new suggested Basal
+                openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest, MainActivity.activity);     //Set the new suggested Basal
 
                 eventualBGValue     = (TextView) findViewById(R.id.eventualBGValue);
                 snoozeBGValue       = (TextView) findViewById(R.id.snoozeBGValue);
@@ -415,20 +423,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 try {
                     eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
                     snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
-
-                    if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
-                        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
-                    } else {
-
-                        if (openAPSSuggest.has("rate")) {                                           //Make notification (Wear & Phone)
-                            Intent i = new Intent();
-                            i.setAction("com.hypodiabetic.happ.SHOW_NOTIFICATION");
-                            i.putExtra(WearPostNotificationReceiver.TITLE_KEY, openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)");
-                            i.putExtra(WearPostNotificationReceiver.MSG_KEY, openAPSSuggest.getString("action"));
-                            sendBroadcast(i);
-                        }
-
-                    }
 
                 }catch (JSONException e) {
                     e.printStackTrace();
@@ -597,15 +591,21 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             }
         }
 
-        public static void setSuggested_Temp_Basal(JSONObject openAPSSuggest){
+        public static void setSuggested_Temp_Basal(JSONObject openAPSSuggest, Context c){
             try {
                 Suggested_Temp_Basal = new TempBasal();
-                if (openAPSSuggest.has("rate")){                                                                 //Temp Basal suggested
+                if (openAPSSuggest.has("rate")){                                                    //Temp Basal suggested
                     Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
                     Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
                     Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
                     Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
                     Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
+
+                    if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
+                        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
+                    } else {                                                                        //Make notification (Wear & Phone)
+                        Notifications.newTemp(openAPSSuggest,c);
+                    }
                 }
             }catch (Exception e)  {
             }
@@ -670,6 +670,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
 
         public void setupChart(){
+            iobcobPastChart.setLineChartData(LineChartData.generateDummyData());                    //// TODO: 07/10/2015 debug, trying to reset data in chart to stop odd issue with lines looping
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
 

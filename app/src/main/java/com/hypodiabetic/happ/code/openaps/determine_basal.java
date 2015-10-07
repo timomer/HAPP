@@ -405,6 +405,11 @@ public class determine_basal {
             } else if (rate < profile_data.current_basal && duration != 0){
                 requestedTemp.put("action", "Low Temp Basal set " + rate + "U for " + duration + "mins");
                 requestedTemp.put("basal_adjustemnt", "Low");
+            } else if (rate == profile_data.current_basal){
+                requestedTemp.put("reason", "Keep current basal");
+                requestedTemp.put("action", "Wait and monitor");
+                requestedTemp.put("basal_adjustemnt", "None");
+                requestedTemp.remove("rate");                                                       //Remove rate, as we do not want to suggest this Temp Basal
             }
         } catch (JSONException e) {
             e.printStackTrace();

@@ -233,10 +233,10 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         addfutureValues();
         List<Line> lines = new ArrayList<Line>();
         lines.add(minShowLine());
-        //lines.add(iobValuesLine());// TODO: 22/09/2015 debugging
+        lines.add(iobValuesLine());// TODO: 22/09/2015 debugging
         lines.add(cobValuesLine());
-        //lines.add(iobFutureLine());// TODO: 22/09/2015 debugging
-        //lines.add(cobFutureLine());// TODO: 22/09/2015 debugging
+        lines.add(iobFutureLine());// TODO: 22/09/2015 debugging
+        lines.add(cobFutureLine());// TODO: 22/09/2015 debugging
         return lines;
     }
     public Line maxiobcobShowLine() {
