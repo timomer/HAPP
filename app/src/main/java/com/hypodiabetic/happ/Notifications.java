@@ -75,4 +75,10 @@ public class Notifications {
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
     }
+
+    //Clear all notifications
+    public static void clear(Context context){
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
+    }
 }

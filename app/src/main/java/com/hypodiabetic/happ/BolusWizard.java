@@ -100,6 +100,7 @@ public class BolusWizard {
                 reply.put("insulin_correction_bg",      String.format("%.1f", insulin_correction_bg));
             }
             reply.put("insulin_correction_bg_maths",    insulin_correction_bg_maths);
+            if (suggested_bolus < 0) suggested_bolus=0D;
             reply.put("suggested_bolus",                String.format("%.1f", suggested_bolus));
             reply.put("suggested_bolus_maths",          suggested_bolus_maths);
         } catch (JSONException e) {

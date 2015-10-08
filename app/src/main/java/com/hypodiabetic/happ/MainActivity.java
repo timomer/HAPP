@@ -595,6 +595,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         public static void setSuggested_Temp_Basal(JSONObject openAPSSuggest, Context c){
             try {
                 Suggested_Temp_Basal = new TempBasal();
+                Notifications.clear(MainActivity.activity);                                         //Clears any open notifications
                 if (openAPSSuggest.has("rate")){                                                    //Temp Basal suggested
                     Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
                     Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
