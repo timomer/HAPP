@@ -1,6 +1,8 @@
-# HAPP ~ Hackabetes Artificial Pancreas Project
+# Hackabetes Artificial Pancreas Project
 
 Native Android implentaion of the OpenAPS.org algorithm with addiotnbal functionality.
+
+![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
 
 Current features:
 * Capture your Bolus and Carb Treatments
@@ -48,4 +50,4 @@ I am utilising code from the following repos and porting them over to this app.
 ###Thanks to
 The community for all their code and advice to make this possible. Special thanks to StephenBlackWasAlreadyTaken, jasoncalabrese and scottleibrand.
 
-#WeAreNotWaiting
+WeAreNotWaiting
