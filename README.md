@@ -1,17 +1,20 @@
 # Hackabetes Artificial Pancreas Project
 
-Native Android implentaion of the OpenAPS.org algorithm with addiotnbal functionality.
+Native Android implementation of the OpenAPS.org algorithm with additional functionality.
+
+Most recent ![apk](https://drive.google.com/file/d/0BxE8lMx4AjLieDEwbHRLcTY2VGc/view?usp=sharing)
 
 ![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
 
 Current features:
+* Open Loop system (requires user to review and enter data into pump)
 * Capture your Bolus and Carb Treatments
 * Bolus Wizard
 * Suggested Temp Basal based on OpenAPS.org algorithm
 * Notifications for Android and Android Wear when a new Temp Basal is suggested
 * Visuals showing Carb and IOB over time and Basal vs Temp Basal adjustments
 
-As of now the App can be used to infom the user at a user set time interval suggested Temp Basal as caculated by the OpenAPS.org algorithm, this can then be manually set on the users pump.
+As of now the App can be used to inform the user at a user set time interval suggested Temp Basal as calculated by the OpenAPS.org algorithm, this can then be manually set on the users pump.
 This allows a Diabetic with any pump to experiment with the OpenAPS algorithm.
 
 Requirements:
