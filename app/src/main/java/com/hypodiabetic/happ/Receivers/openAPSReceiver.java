@@ -11,7 +11,9 @@ import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.tools;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -28,6 +30,20 @@ public class openAPSReceiver extends BroadcastReceiver{
             //Toast.makeText(context, "Running OpenAPS", Toast.LENGTH_LONG).show();
 
             JSONObject openAPSSuggest = determine_basal.runOpenAPS(context);                        //Run OpenAPS
+
+            //formats deviation
+            try {
+                Double deviation = openAPSSuggest.getDouble("deviation");
+                openAPSSuggest.remove("deviation");
+                if (deviation > 0) {
+                    openAPSSuggest.put("deviation", "+" + tools.unitizedBG(deviation, context));
+                } else {
+                    openAPSSuggest.put("deviation", tools.unitizedBG(deviation, context));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                         //Updates the Main Activity screen with results
 
         }

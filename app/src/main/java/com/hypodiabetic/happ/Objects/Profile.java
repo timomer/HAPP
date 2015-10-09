@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.activeandroid.Model;
+import com.hypodiabetic.happ.tools;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -45,8 +46,6 @@ public class Profile extends Model{
         ProfileNow.max_iob              = Double.parseDouble(prefs.getString("max_iob", "3"));
         ProfileNow.dia                  = Double.parseDouble(prefs.getString("dia", "1.5"));
         ProfileNow.current_basal        = getCurrent_basal(thisTime, prefs);
-        ProfileNow.max_bg               = Double.parseDouble(prefs.getString("highValue", "170"));
-        ProfileNow.min_bg               = Double.parseDouble(prefs.getString("lowValue", "70"));
         ProfileNow.isf                  = getCurrent_isf(thisTime, prefs);
         ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
@@ -54,11 +53,14 @@ public class Profile extends Model{
         ProfileNow.max_daily_basal      = 999D;
         //ProfileNow.type                 = "current";
 
-        ProfileNow.target_bg            = Double.parseDouble(prefs.getString("target_bg", "100"));
         ProfileNow.basal_mode           = prefs.getString("basal_mode", "percent");
         ProfileNow.openaps_mode         = prefs.getString("openaps_mode", "offline");
         ProfileNow.openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
         ProfileNow.max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
+
+        ProfileNow.max_bg               = Double.parseDouble(tools.unitizedBG(Double.parseDouble(prefs.getString("highValue", "170")), c));
+        ProfileNow.min_bg               = Double.parseDouble(tools.unitizedBG(Double.parseDouble(prefs.getString("lowValue", "70")), c));
+        ProfileNow.target_bg            = Double.parseDouble(tools.unitizedBG(Double.parseDouble(prefs.getString("target_bg", "100")), c));
 
         return ProfileNow;
     }

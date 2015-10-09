@@ -110,7 +110,7 @@ public class pumpAction {
                     popUpMsg = basal.rate + "U for " + basal.duration + "mins";
                 }
 
-                Notifications.setTemp(popUpMsg,c);
+                Notifications.updateCard(c);
                 Date setNow = new Date();
                 basal.start_time = setNow;
                 basal.save();

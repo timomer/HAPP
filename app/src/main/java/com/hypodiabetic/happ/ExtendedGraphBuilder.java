@@ -220,7 +220,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
 
     //##########IOB COB Past Line Chart##########
-    public LineChartData iobcobPastLineData() {
+    public LineChartData iobcobPastLineData() {                                                     //// TODO: 09/10/2015 frequent null pointer crashes here 
         LineChartData lineData = new LineChartData(iobcobPastdefaultLines());
         lineData.setAxisYLeft(iobPastyAxis());
         lineData.setAxisYRight(cobPastyAxis());

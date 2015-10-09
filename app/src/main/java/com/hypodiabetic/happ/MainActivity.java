@@ -403,7 +403,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
     public void test(View v){
-        Notifications.setTemp("test", MainActivity.activity);
+        //Notifications.setTemp("test", MainActivity.activity);
 
     }
 
@@ -432,7 +432,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             }
         });
     }
-    //Updates stats Fragments charts
+    //Updates stats and stats Fragments charts
     public void updateStats(){
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
@@ -454,7 +454,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 }catch (JSONException e) {
                     e.printStackTrace();
                 }
-                Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":1");
+                Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
                 if (iobcob != null){                                                                //Check IOB COB fragment is loaded
                     iobcobFragment.updateChart();
                 }
@@ -462,6 +462,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
                     basalvsTempBasalFragment.updateChart();
                 }
+
+                Notifications.updateCard(MainActivity.activity);
             }
         });
     }
@@ -584,6 +586,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             return Suggested_Temp_Basal;
         }
 
+        public static JSONObject getcurrentOpenAPSSuggest(){
+            return currentOpenAPSSuggest;
+        }
+
         public static String age(){
             if (Suggested_Temp_Basal.age() > 1){
                 return Suggested_Temp_Basal.age() + " mins ago";
@@ -623,14 +629,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 apsstatus_Action.setText("");
                 apsstatus_temp.setText("None");
                 apsstatus_deviation.setText("");
-
-                String deviation;
-                if (currentOpenAPSSuggest.getDouble("deviation") > 0) {
-                    deviation = "+" + tools.unitizedBG(currentOpenAPSSuggest.getDouble("deviation"), MainActivity.activity);
-                } else {
-                    deviation = tools.unitizedBG(currentOpenAPSSuggest.getDouble("deviation"), MainActivity.activity);
-                }
-                apsstatus_deviation.setText(deviation);
+                apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
                 apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
                 apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
                 if (currentOpenAPSSuggest.has("reason"))   apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
@@ -672,7 +671,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
 
         public void setupChart(){
-            iobcobPastChart.setLineChartData(LineChartData.generateDummyData());                    //// TODO: 07/10/2015 debug, trying to reset data in chart to stop odd issue with lines looping
+
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
 
@@ -689,6 +688,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
 
         public static void updateChart(){
+            iobcobPastChart.setLineChartData(LineChartData.generateDummyData());                    //// TODO: 07/10/2015 debug, trying to reset data in chart to stop odd issue with lines looping
             iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
         }
     }
