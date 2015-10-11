@@ -2,7 +2,7 @@
 
 Native Android implementation of the OpenAPS.org algorithm with additional functionality.
 
-Most recent ![apk](https://drive.google.com/file/d/0BxE8lMx4AjLieDEwbHRLcTY2VGc/view?usp=sharing)
+Most recent ![apk](https://drive.google.com/uc?export=download&id=0BxE8lMx4AjLieDEwbHRLcTY2VGc)
 
 ![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
 
@@ -21,7 +21,7 @@ Requirements:
 * xDrip device and App for capturing blood sugar values
 * Android 5.0
 
-### Whats next?
+### What's next?
 To integrate with the Roche Accu-Chek Combo pump. Any experience hacking Bluetooth? Please contact me.
 
 ### Why would I be interested?
