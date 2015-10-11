@@ -28,7 +28,7 @@ public class Notifications {
         String title="";
         String msg="";
         try {
-            title   = openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)";
+            title   = "Set: " + openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)";
             msg     = openAPSSuggest.getString("action");
         }catch (Exception e)  {
         }
@@ -75,7 +75,7 @@ public class Notifications {
         //try {
             //statSummary = lastBG.sgv + " " + lastBG.bgdelta + " Deviation: " + MainActivity.openAPSFragment.getcurrentOpenAPSSuggest().getString("deviation") + " IOB: " + lastStats.iob + " COB: " + lastStats.cob;
         if (lastBG != null) {
-            statSummary = lastBG.sgv_double() + " Delta: " + String.format("%.2f", lastBG.bgdelta) + " " + lastBG.slopeArrow();
+            statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " Delta: " + tools.unitizedBG(lastBG.bgdelta,c) + " " + lastBG.slopeArrow();
         } else {
             statSummary = "No BG data";
         }

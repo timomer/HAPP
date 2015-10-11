@@ -155,7 +155,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) this.findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        //mViewPager.setOffscreenPageLimit(4);                                                        //Do not destroy any Fragments, // TODO: 14/09/2015 casues an issue with bvb chart redering, not sure why 
+        //mViewPager.setOffscreenPageLimit(4);                                                        //Do not destroy any Fragments, // TODO: 14/09/2015 casues an issue with bvb chart rendering, not sure why
         //Build Fragments
         openAPSFragmentObject       = new openAPSFragment();
         iobcobActiveFragmentObject  = new iobcobActiveFragment();

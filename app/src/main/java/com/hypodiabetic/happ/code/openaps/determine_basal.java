@@ -209,8 +209,17 @@ public class determine_basal {
                                 action = "Wait and monitor";
                             }
                         } else {                                                                    // BG is not yet rising
-                            requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp);
-                            reason = "BG is 30 below BG Min and not rising";
+                            //requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp);
+                            //reason = "BG is 30 below BG Min and not rising";
+                            //##### HAPP Added #####
+                            if (temps_data.duration > 0 && temps_data.rate==0) {                    // if there is currently a zero temp running
+                                reason = "BG is 30 below BG Min and not rising. Zero temp already running";
+                                action = "Leave current Zero temp running";
+                            } else {
+                                requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp);
+                                reason = "BG is 30 below BG Min and not rising. Set zero temp.";
+                            }
+                            //##### HAPP Added #####
                         }
                     } else {
 
@@ -254,9 +263,14 @@ public class determine_basal {
                                     reason = "Eventual BG < Min, SnoozeBG > Min, BG rising & Low Temp Basal is active";
                                     requestedTemp = setTempBasal(0D, 0, profile_data, requestedTemp); // cancel temp
                                     //##### HAPP ADDED #####
-                                } else if (bg < profile_data.min_bg) {                                                               //current BG below min
-                                    reason = "Eventual BG < Min & Current BG < Min";
-                                    requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp); // cancel temp
+                                } else if (bg < profile_data.min_bg) {
+                                    if (temps_data.duration > 0 && temps_data.rate==0) {            // if there is currently a zero temp running//current BG below min
+                                        reason = "Eventual BG < Min & Current BG < Min";
+                                        action = "Leave current Zero temp running";
+                                    } else {
+                                        reason = "Eventual BG < Min & Current BG < Min";
+                                        requestedTemp = setTempBasal(0D, 30, profile_data, requestedTemp); // cancel temp
+                                    }
                                     //##### HAPP ADDED #####
                                 } else {
                                     //reason = "bolus snooze: eventual BG range " + eventualBG + "-" + snoozeBG;
@@ -395,7 +409,7 @@ public class determine_basal {
             requestedTemp.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places
             requestedTemp.put("ratePercent", ratePercent.intValue());
             if (rate == 0 && duration == 0){
-                requestedTemp.put("action", "Temp Basal Canceled");
+                requestedTemp.put("action", "Cancel Temp Basal");
                 requestedTemp.put("basal_adjustemnt", "Pump Default");
                 requestedTemp.put("rate", profile_data.current_basal);
                 requestedTemp.put("ratePercent", 100);

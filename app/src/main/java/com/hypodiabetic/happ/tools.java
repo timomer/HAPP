@@ -23,4 +23,16 @@ public class tools {
             return String.format("%.2f", (value * Constants.MGDL_TO_MMOLL));
         }
     }
+
+    //always returns value in mgdl
+    public static String inmgdl(Double value, Context c) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        String unit = prefs.getString("units", "mgdl");
+
+        if(unit.compareTo("mgdl") == 0) {
+            return Integer.toString(value.intValue());
+        } else {
+            return String.valueOf(value * Constants.MMOLL_TO_MGDL);
+        }
+    }
 }

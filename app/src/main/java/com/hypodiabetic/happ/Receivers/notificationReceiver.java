@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.hypodiabetic.happ.MainActivity;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.pumpAction;
 
@@ -28,6 +29,7 @@ public class notificationReceiver extends BroadcastReceiver {
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
                 pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp
                 Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
+                Notifications.updateCard(context);
                 break;
             case "setTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);  //Kills the notification

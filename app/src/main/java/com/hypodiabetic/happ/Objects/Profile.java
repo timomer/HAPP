@@ -58,9 +58,9 @@ public class Profile extends Model{
         ProfileNow.openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
         ProfileNow.max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
 
-        ProfileNow.max_bg               = Double.parseDouble(tools.unitizedBG(Double.parseDouble(prefs.getString("highValue", "170")), c));
-        ProfileNow.min_bg               = Double.parseDouble(tools.unitizedBG(Double.parseDouble(prefs.getString("lowValue", "70")), c));
-        ProfileNow.target_bg            = Double.parseDouble(tools.unitizedBG(Double.parseDouble(prefs.getString("target_bg", "100")), c));
+        ProfileNow.max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
+        ProfileNow.min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
+        ProfileNow.target_bg            = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
 
         return ProfileNow;
     }
