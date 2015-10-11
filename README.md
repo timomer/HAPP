@@ -1,8 +1,9 @@
 # Hackabetes Artificial Pancreas Project
+**This code is highly experimental, all suggestions by the app must be reviewed**
 
 Native Android implementation of the OpenAPS.org algorithm with additional functionality.
 
-Most recent ![apk](https://drive.google.com/uc?export=download&id=0BxE8lMx4AjLieDEwbHRLcTY2VGc)
+Most recent apk: https://drive.google.com/uc?export=download&id=0BxE8lMx4AjLieDEwbHRLcTY2VGc
 
 ![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
 
