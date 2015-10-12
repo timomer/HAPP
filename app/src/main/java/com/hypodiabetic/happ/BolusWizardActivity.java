@@ -165,9 +165,15 @@ public class BolusWizardActivity extends Activity {
         } else if (carbTratment.value > 0) {
             carbTratment.save();
             Toast.makeText(this, carbTratment.value + "g saved, no Bolus suggested", Toast.LENGTH_SHORT).show();
+
+            //Return to the home screen (if not already on it)
+            Intent intentHome = new Intent(view.getContext(), MainActivity.class);
+            intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            view.getContext().startActivity(intentHome);
         }
 
         //finish();
+
     }
 
     public void wizardCancel(View view){

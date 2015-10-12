@@ -629,11 +629,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 apsstatus_Action.setText("");
                 apsstatus_temp.setText("None");
                 apsstatus_deviation.setText("");
-                apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
-                apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
-                apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
-                if (currentOpenAPSSuggest.has("reason"))   apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
-                if (currentOpenAPSSuggest.has("action"))   apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
+                if (currentOpenAPSSuggest.has("deviation"))     apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
+                if (currentOpenAPSSuggest.has("openaps_mode"))  apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
+                if (currentOpenAPSSuggest.has("openaps_loop"))  apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
+                if (currentOpenAPSSuggest.has("reason"))        apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
+                if (currentOpenAPSSuggest.has("action"))        apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
 
                 if (currentOpenAPSSuggest.has("rate")){
                     apsstatusAcceptButton.setEnabled(true);
