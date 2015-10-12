@@ -12,6 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="112dp"
@@ -311,6 +312,11 @@
             </lecho.lib.hellocharts.view.PreviewLineChartView>
         </LinearLayout>
 
+<Button
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:text="menu"
+    android:onClick="openMenu"/>
 
     </LinearLayout>
 

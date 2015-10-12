@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -170,6 +171,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         //Get Recent Stats
         updateStats();
+
+
+
     }
 
     public void setupCharts() {
@@ -378,6 +382,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         displayCurrentInfo();
         holdViewport.set(0, 0, 0, 0);
         //xdrip end
+    }
+
+    public void openMenu(View v){
+        MainActivity.activity.openOptionsMenu();
     }
 
     @Override

@@ -63,10 +63,10 @@ public class Notifications {
         TempBasal lastTempBasal = TempBasal.last();
         String title;
         if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
-            title = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
+            title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
         } else {                                                                                    //No temp Basal running, show default
             Double currentBasal = Profile.ProfileAsOf(timeNow, c).current_basal;
-            title = "No temp basal, current basal: " + currentBasal + "U";
+            title = "Default Basal " + currentBasal + "U(100%)";
         }
 
         Bg lastBG = Bg.last();
@@ -75,7 +75,7 @@ public class Notifications {
         //try {
             //statSummary = lastBG.sgv + " " + lastBG.bgdelta + " Deviation: " + MainActivity.openAPSFragment.getcurrentOpenAPSSuggest().getString("deviation") + " IOB: " + lastStats.iob + " COB: " + lastStats.cob;
         if (lastBG != null) {
-            statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " Delta: " + tools.unitizedBG(lastBG.bgdelta,c) + " " + lastBG.slopeArrow();
+            statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " " + tools.unitizedBG(lastBG.bgdelta,c) + " " + lastBG.slopeArrow() + ", " + lastBG.readingAge();
         } else {
             statSummary = "No BG data";
         }
@@ -91,6 +91,7 @@ public class Notifications {
                 .setPriority(Notification.PRIORITY_DEFAULT)
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setOngoing(true)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
     }
