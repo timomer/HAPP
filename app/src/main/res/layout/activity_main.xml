@@ -312,12 +312,6 @@
             </lecho.lib.hellocharts.view.PreviewLineChartView>
         </LinearLayout>
 
-<Button
-    android:layout_width="match_parent"
-    android:layout_height="40dp"
-    android:text="menu"
-    android:onClick="openMenu"/>
-
     </LinearLayout>
 
 
@@ -325,14 +319,28 @@
         android:id="@+id/menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
-        android:src="@mipmap/fab_ic_add"
+        fab:menu_icon="@drawable/ic_menu"
         fab:fabSize="normal"
-        fab:layout_anchor="@id/pager_title_strip"
-        fab:layout_anchorGravity="bottom|right|end"
-        fab:rippleColor="#F06292">
+        android:layout_marginTop="120dp"
+        android:layout_gravity="top|end"
+        fab:rippleColor="#F06292"
+        fab:menu_openDirection="down">
 
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/menu_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_settings"
+            fab:fab_size="mini"
+            fab:fab_label="Settings" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/menu_cancel_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_stop"
+            fab:fab_size="mini"
+            fab:fab_label="Cancel Temp" />
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/menu_add_treatment"
             android:layout_width="wrap_content"
@@ -340,20 +348,6 @@
             android:src="@mipmap/fab_ic_add"
             fab:fab_size="mini"
             fab:fab_label="Treatments" />
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/menu_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/fab_ic_add"
-            fab:fab_size="mini"
-            fab:fab_label="Settings" />
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/menu_cancel_temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/fab_ic_add"
-            fab:fab_size="mini"
-            fab:fab_label="Cancel Temp" />
 
     </com.github.clans.fab.FloatingActionMenu>
 

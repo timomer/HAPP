@@ -24,8 +24,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -89,6 +91,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     private TextView openAPSAgeTextView;
     private ExtendedGraphBuilder extendedGraphBuilder;
     public static Activity activity;
+    private FloatingActionMenu menu1;
 
     SectionsPagerAdapter mSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
     ViewPager mViewPager;                                                                           //The {@link ViewPager} that will host the section contents.
@@ -144,23 +147,27 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         setContentView(R.layout.activity_main);
 
         //Setup menu
+        menu1 = (FloatingActionMenu) findViewById(R.id.menu);
         FloatingActionButton menu_add_treatment = (FloatingActionButton) findViewById(R.id.menu_add_treatment);
         menu_add_treatment.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), EnterTreatment.class);
                 startActivity(intent);
+                menu1.close(true);
             }
         });
         FloatingActionButton menu_settings = (FloatingActionButton) findViewById(R.id.menu_settings);
         menu_settings.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                menu1.close(true);
             }
         });
         FloatingActionButton menu_cancel_temp = (FloatingActionButton) findViewById(R.id.menu_cancel_temp);
         menu_cancel_temp.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 pumpAction.cancelTempBasal(MainActivity.activity);
+                menu1.close(true);
             }
         });
 
@@ -401,9 +408,18 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
+        //MenuInflater inflater = getMenuInflater();
+        //inflater.inflate(R.menu.menu_main, menu);
         return true;
+    }
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MENU:
+                menu1.toggle(true);
+                return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override
