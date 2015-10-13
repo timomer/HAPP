@@ -17,7 +17,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
+//import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -38,6 +38,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -141,17 +143,29 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         setContentView(R.layout.activity_main);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
+        //Setup menu
+        FloatingActionButton menu_add_treatment = (FloatingActionButton) findViewById(R.id.menu_add_treatment);
+        menu_add_treatment.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(),EnterTreatment.class);
+                Intent intent = new Intent(v.getContext(), EnterTreatment.class);
                 startActivity(intent);
             }
         });
+        FloatingActionButton menu_settings = (FloatingActionButton) findViewById(R.id.menu_settings);
+        menu_settings.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            }
+        });
+        FloatingActionButton menu_cancel_temp = (FloatingActionButton) findViewById(R.id.menu_cancel_temp);
+        menu_cancel_temp.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                pumpAction.cancelTempBasal(MainActivity.activity);
+            }
+        });
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the app.
+
+        // Create the adapter that will return a fragment for each of the 4 primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) this.findViewById(R.id.pager);
@@ -384,9 +398,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         //xdrip end
     }
 
-    public void openMenu(View v){
-        MainActivity.activity.openOptionsMenu();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

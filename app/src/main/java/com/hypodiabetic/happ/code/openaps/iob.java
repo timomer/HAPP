@@ -90,6 +90,9 @@ public class iob {
         try {
 
             for (Treatments treatment : treatments) {
+
+                if (treatment.type == null) continue;                                               //bad treatment, missing data
+
                 if (treatment.type.equals("Insulin") && treatment.datetime.longValue() < time.getTime()) {      //Insulin only and Treatment is not in the future
 
                         Double dia = profileNow.dia;                                                            //How long Insulin stays active in your system

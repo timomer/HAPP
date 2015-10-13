@@ -48,6 +48,8 @@ public class cob {
 
             for(Treatments treatment : treatments) {
 
+                if (treatment.type == null) continue;                                               //bad treatment, missing data
+
                 if (treatment.type.equals("Carbs") && treatment.datetime < timeNow.getTime()) {                             //Carbs only and Treatment is not in the future
 
 
