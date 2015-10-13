@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Notifications"
+        android:key="notifications">
+        <CheckBoxPreference
+            android:key="summary_notification"
+            android:title="Summary Notification"
+            android:summary="Show summary card with current BG and Temp Basal."
+            android:defaultValue="true" />
+    </PreferenceCategory>
+</PreferenceScreen>

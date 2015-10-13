@@ -61,18 +61,18 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            //addPreferencesFromResource(R.xml.pref_license); todo dont care about licence for now
+            addPreferencesFromResource(R.xml.pref_license);
             addPreferencesFromResource(R.xml.pref_general);
             addPreferencesFromResource(R.xml.pref_openaps);
             addPreferencesFromResource(R.xml.pref_bg_notification);
-            addPreferencesFromResource(R.xml.pref_data_source);
+            //addPreferencesFromResource(R.xml.pref_data_source);
             //addPreferencesFromResource(R.xml.pref_watch_integration); // TODO: 08/08/2015 leaveout watch for now 
 
             bindPreferenceSummaryToValue(findPreference("highValue"));
             bindPreferenceSummaryToValue(findPreference("lowValue"));
-            bindPreferenceSummaryToValue(findPreference("dex_collection_method"));
+            //bindPreferenceSummaryToValue(findPreference("dex_collection_method"));
             bindPreferenceSummaryToValue(findPreference("units"));
-            bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
+            //bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
             bindPreferenceSummaryToValue(findPreference("target_bg"));
             bindPreferenceSummaryToValue(findPreference("openaps_loop"));
             bindPreferenceSummaryToValue(findPreference("openaps_mode"));
@@ -82,65 +82,6 @@ public class SettingsActivity extends PreferenceActivity {
                 bindPreferenceSummaryToValue(findPreference("isf_"+x));
                 bindPreferenceSummaryToValue(findPreference("carbratio_"+x));
             }
-
-            final PreferenceCategory dataSource = (PreferenceCategory) findPreference("dataSource");
-            final Preference share_poll = findPreference("share_poll");
-            final Preference dexcom_account_name = findPreference("dexcom_account_name");
-            final Preference dexcom_account_password = findPreference("dexcom_account_password");
-            final Preference nightscout_poll = findPreference("nightscout_poll");
-            final Preference dex_collection_method = findPreference("dex_collection_method");
-
-            prefs = getPreferenceManager().getDefaultSharedPreferences(getActivity());
-            if (!prefs.getBoolean("nightscout_poll", false)) {
-                dataSource.removePreference(dex_collection_method);
-            }
-            if (!prefs.getBoolean("share_poll", false)) {
-                dataSource.removePreference(dexcom_account_name);
-                dataSource.removePreference(dexcom_account_password);
-            }
-
-            Preference.OnPreferenceChangeListener collectionPrefValueListener = new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object value) {
-                    Context context = preference.getContext();
-                    context.startService(new Intent(context, DataCollectionService.class));
-                    return true;
-                }
-            };
-
-            share_poll.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object value) {
-                    if ((boolean) value) {
-                        dataSource.addPreference(dexcom_account_name);
-                        dataSource.addPreference(dexcom_account_password);
-                    } else {
-                        dataSource.removePreference(dexcom_account_name);
-                        dataSource.removePreference(dexcom_account_password);
-                    }
-                    Context context = preference.getContext();
-                    context.startService(new Intent(context, DataCollectionService.class));
-                    return true;
-                }
-            });
-
-            nightscout_poll.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object value) {
-                    if ((boolean) value) {
-                        dataSource.addPreference(dex_collection_method);
-                    } else {
-                        dataSource.removePreference(dex_collection_method);
-                    }
-                    Context context = preference.getContext();
-                    context.startService(new Intent(context, DataCollectionService.class));
-                    return true;
-                }
-            });
-
-            dexcom_account_name.setOnPreferenceChangeListener(collectionPrefValueListener);
-            dexcom_account_password.setOnPreferenceChangeListener(collectionPrefValueListener);
-            dex_collection_method.setOnPreferenceChangeListener(collectionPrefValueListener);
         }
     }
 

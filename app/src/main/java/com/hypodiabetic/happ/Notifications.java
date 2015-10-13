@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.widget.TextView;
 
 import com.hypodiabetic.happ.Objects.Profile;
@@ -59,41 +61,47 @@ public class Notifications {
     //Update summary heads up card
     public static void updateCard(Context c){
 
-        Date timeNow = new Date();
-        TempBasal lastTempBasal = TempBasal.last();
-        String title;
-        if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
-            title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
-        } else {                                                                                    //No temp Basal running, show default
-            Double currentBasal = Profile.ProfileAsOf(timeNow, c).current_basal;
-            title = "Default Basal " + currentBasal + "U(100%)";
-        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        Bg lastBG = Bg.last();
-        Stats lastStats = Stats.last();
-        String statSummary="";
-        //try {
+        if (prefs.getBoolean("summary_notification", true)) {
+
+            Date timeNow = new Date();
+            TempBasal lastTempBasal = TempBasal.last();
+            String title;
+            if (lastTempBasal.isactive(null)) {                                                          //Active temp Basal
+                title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
+            } else {                                                                                    //No temp Basal running, show default
+                Double currentBasal = Profile.ProfileAsOf(timeNow, c).current_basal;
+                title = "Default Basal " + currentBasal + "U(100%)";
+            }
+
+            Bg lastBG = Bg.last();
+            Stats lastStats = Stats.last();
+            String statSummary = "";
+            //try {
             //statSummary = lastBG.sgv + " " + lastBG.bgdelta + " Deviation: " + MainActivity.openAPSFragment.getcurrentOpenAPSSuggest().getString("deviation") + " IOB: " + lastStats.iob + " COB: " + lastStats.cob;
-        if (lastBG != null) {
-            statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " " + tools.unitizedBG(lastBG.bgdelta,c) + " " + lastBG.slopeArrow() + ", " + lastBG.readingAge();
-        } else {
-            statSummary = "No BG data";
+            if (lastBG != null) {
+
+                statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " " + lastBG.slopeArrow() + " " + tools.unitizedBG(lastBG.bgdelta, c) + ", " + lastBG.readingAge();
+            } else {
+                statSummary = "No BG data";
+            }
+            //} catch (JSONException e) {
+            //    e.printStackTrace();
+            //}
+
+
+            Notification notification = new Notification.Builder(c)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(statSummary)
+                    .setContentText(title)
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setCategory(Notification.CATEGORY_STATUS)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            //.setOngoing(true) Android Wear will not display
+                    .build();
+            ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
         }
-        //} catch (JSONException e) {
-        //    e.printStackTrace();
-        //}
-
-
-        Notification notification = new Notification.Builder(c)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(statSummary)
-                .setContentText(title)
-                .setPriority(Notification.PRIORITY_DEFAULT)
-                .setCategory(Notification.CATEGORY_STATUS)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                //.setOngoing(true) Android Wear will not display
-                .build();
-        ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
     }
 
     //Clear all notifications
