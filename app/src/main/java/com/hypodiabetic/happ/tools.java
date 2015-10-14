@@ -32,7 +32,7 @@ public class tools {
         if(unit.compareTo("mgdl") == 0) {
             return Integer.toString(value.intValue());
         } else {
-            return String.valueOf(value * Constants.MMOLL_TO_MGDL);
+            return String.format("%.2f", (value * Constants.MMOLL_TO_MGDL));
         }
     }
 }

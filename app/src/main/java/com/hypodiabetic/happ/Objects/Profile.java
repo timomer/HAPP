@@ -46,7 +46,6 @@ public class Profile extends Model{
         ProfileNow.max_iob              = Double.parseDouble(prefs.getString("max_iob", "3"));
         ProfileNow.dia                  = Double.parseDouble(prefs.getString("dia", "1.5"));
         ProfileNow.current_basal        = getCurrent_basal(thisTime, prefs);
-        ProfileNow.isf                  = getCurrent_isf(thisTime, prefs);
         ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
         ProfileNow.max_basal            = Double.parseDouble(prefs.getString("max_basal", "2"));
@@ -61,6 +60,7 @@ public class Profile extends Model{
         ProfileNow.max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
         ProfileNow.min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
         ProfileNow.target_bg            = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
+        ProfileNow.isf                  = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs), c));
 
         return ProfileNow;
     }
