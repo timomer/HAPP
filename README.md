@@ -4,6 +4,9 @@
 Native Android implementation of the OpenAPS.org algorithm with additional functionality.
 
 Most recent apk: https://drive.google.com/uc?export=download&id=0BxE8lMx4AjLieDEwbHRLcTY2VGc
+
+App Summary: https://sites.google.com/a/n-omer.co.uk/hackabetes/home/happ-overview
+
 Project blog: http://www.hypodiabetic.co.uk
 
 ![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
