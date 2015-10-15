@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.code.nightwatch;
+package com.hypodiabetic.happ;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -6,6 +6,9 @@ import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+
+import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
+
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.Viewport;

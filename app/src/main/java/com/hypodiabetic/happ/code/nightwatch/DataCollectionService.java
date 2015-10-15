@@ -184,7 +184,7 @@ public class DataCollectionService extends Service {
             Intent updateIntent = new Intent(Intents.ACTION_NEW_BG);
             context.sendBroadcast(updateIntent);
         }
-        Notifications.notificationSetter(context);
+        //Notifications.notificationSetter(context);
     }
     public int requestCount() {
         Bg bg = Bg.last();

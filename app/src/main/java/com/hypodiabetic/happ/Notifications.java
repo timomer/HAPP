@@ -6,15 +6,15 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
-import android.widget.TextView;
 
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -51,9 +51,10 @@ public class Notifications {
                 .setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500})
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .extend(new Notification.WearableExtender()
+                        .setBackground(createWearBitmap(2, c))
                         .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))
-                .addAction(R.drawable.abc_btn_check_material, "Accept Temp", pending_intent)
+                .addAction(R.drawable.ic_input_black, "Accept Temp", pending_intent)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
     }
@@ -99,6 +100,9 @@ public class Notifications {
                     .setPriority(Notification.PRIORITY_DEFAULT)
                     .setCategory(Notification.CATEGORY_STATUS)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .extend(new Notification.WearableExtender()
+                            .setBackground(createWearBitmap(2, c))
+                    )
                             //.setOngoing(true) Android Wear will not display
                     .build();
             ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
@@ -109,5 +113,23 @@ public class Notifications {
     public static void clear(Context context){
         ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
         //((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
+    }
+
+
+    private static Bitmap createWearBitmap(long start, long end, Context mContext) {
+        return new BgSparklineBuilder(mContext)
+                .setBgGraphBuilder(new BgGraphBuilder(mContext))
+                .setStart(start)
+                .setEnd(end)
+                .showHighLine()
+                .showLowLine()
+                .showAxes()
+                .setWidthPx(400)
+                .setHeightPx(400)
+                .setSmallDots()
+                .build();
+    }
+    private static Bitmap createWearBitmap(long hours, Context c) {
+        return createWearBitmap(System.currentTimeMillis() - 60000 * 60 * hours, System.currentTimeMillis(), c);
     }
 }

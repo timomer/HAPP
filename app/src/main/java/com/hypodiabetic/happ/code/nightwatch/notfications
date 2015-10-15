@@ -21,6 +21,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.hypodiabetic.happ.MainActivity;
+import com.hypodiabetic.happ.BgSparklineBuilder;
 
 import java.util.Date;
 import java.util.List;
