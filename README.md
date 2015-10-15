@@ -10,6 +10,10 @@ App Summary: https://sites.google.com/a/n-omer.co.uk/hackabetes/home/happ-overvi
 Project blog: http://www.hypodiabetic.co.uk
 
 ![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
+![](https://github.com/timomer/HAPP/blob/master/wear-screen.png)
+![](https://github.com/timomer/HAPP/blob/master/wear-set-temp.png)
+
+(Phone and Android Wear Notifications)
 
 Current features:
 * Open Loop system (requires user to review and enter data into pump)
