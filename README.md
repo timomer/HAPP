@@ -12,6 +12,7 @@ Project blog: http://www.hypodiabetic.co.uk
 ![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
 ![](https://github.com/timomer/HAPP/blob/master/wear-screen.png)
 ![](https://github.com/timomer/HAPP/blob/master/wear-set-temp.png)
+
 (Phone and Android Wear Notifications)
 
 Current features:
