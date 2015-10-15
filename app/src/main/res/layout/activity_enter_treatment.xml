@@ -23,7 +23,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/noteSpinner"
         android:layout_gravity="center_horizontal"
-        android:layout_weight=".5"/>
+        android:layout_weight=".5"
+        android:visibility="gone"/>
 
 </LinearLayout>
 

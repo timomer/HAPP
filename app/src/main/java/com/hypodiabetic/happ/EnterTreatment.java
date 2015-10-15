@@ -75,7 +75,6 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getSelectedItem().equals("Insulin")){
-                    // TODO: 10/08/2015 treatment duration (for Insulin TempBasal) is being logged in openaps-js, but appears to never be used, not capturing it for now
                     String[] InsulinNotes = {"bolus", "TempBasal"};
                     ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(EnterTreatment.this, android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
                     Spinner notesSpinner= (Spinner)findViewById(R.id.noteSpinner);

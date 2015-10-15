@@ -106,42 +106,48 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
     public ColumnChartData iobcobFutureChart(List<Stats> statArray) { //data*
 
-        List<Column> columnsData = new ArrayList<>();
-        List<SubcolumnValue> values;
-        List<AxisValue> xAxisValues = new ArrayList<AxisValue>();
+        if (!statArray.isEmpty()) {
 
-        try {
-            for (int v=0; v<=statArray.size(); v++) {
-                //iob now
-                values = new ArrayList<>();
+            List<Column> columnsData = new ArrayList<>();
+            List<SubcolumnValue> values;
+            List<AxisValue> xAxisValues = new ArrayList<AxisValue>();
 
-                values.add(new SubcolumnValue((float) (statArray.get(v).iob), ChartUtils.COLOR_GREEN));
-                if (statArray.get(v).cob > 50){                                                     //Enter max 50g carbs on the chart
-                    values.add(new SubcolumnValue((float) (50), ChartUtils.COLOR_ORANGE));
-                } else {
-                    values.add(new SubcolumnValue((float) (statArray.get(v).cob), ChartUtils.COLOR_ORANGE));
+            try {
+                for (int v = 0; v <= statArray.size(); v++) {
+                    //iob now
+                    values = new ArrayList<>();
+
+                    values.add(new SubcolumnValue((float) (statArray.get(v).iob), ChartUtils.COLOR_GREEN));
+                    if (statArray.get(v).cob > 50) {                                                     //Enter max 50g carbs on the chart
+                        values.add(new SubcolumnValue((float) (50), ChartUtils.COLOR_ORANGE));
+                    } else {
+                        values.add(new SubcolumnValue((float) (statArray.get(v).cob), ChartUtils.COLOR_ORANGE));
+                    }
+
+                    Column column = new Column(values);
+                    column.setHasLabels(true);
+                    columnsData.add(column);
+
+                    AxisValue axisValue = new AxisValue(v);
+                    axisValue.setLabel(statArray.get(v).when);
+                    xAxisValues.add(axisValue);
+                    //xAxisValues.  add(new AxisValue((long)0, iobcobValues.getJSONObject(v).getString("when")));
                 }
+            } catch (Exception e) {
 
-                Column column = new Column(values);
-                column.setHasLabels(true);
-                columnsData.add(column);
-
-                AxisValue axisValue = new AxisValue(v);
-                axisValue.setLabel(statArray.get(v).when);
-                xAxisValues.add(axisValue);
-                //xAxisValues.  add(new AxisValue((long)0, iobcobValues.getJSONObject(v).getString("when")));
             }
-        } catch (Exception e)  {
 
+            columnData = new ColumnChartData(columnsData);
+            Axis axisX = new Axis(xAxisValues).setHasLines(true);
+
+            columnData.setAxisYLeft(ycobiobAxis());
+            columnData.setAxisXBottom(axisX);
+
+            return columnData;
+
+        } else{
+            return new ColumnChartData(); //empty
         }
-
-        columnData = new ColumnChartData(columnsData);
-        Axis axisX = new Axis(xAxisValues).setHasLines(true);
-
-        columnData.setAxisYLeft(ycobiobAxis());
-        columnData.setAxisXBottom(axisX);
-
-        return columnData;
     }
     public Axis ycobiobAxis() {
         Axis yAxis = new Axis();

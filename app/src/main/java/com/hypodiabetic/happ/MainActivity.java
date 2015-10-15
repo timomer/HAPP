@@ -184,8 +184,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         iobcobFragmentObject        = new iobcobFragment();
         basalvsTempBasalObject      = new basalvsTempBasalFragment();
 
-        //starts OpenAPS loop
-        startOpenAPSLoop();
+        //starts OpenAPS and Treatments loops
+        startLoops();
 
         //RunsOpenAPS
         runOpenAPS(findViewById(android.R.id.content));
@@ -507,8 +507,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
 
 
-    //setups the OpenAPS Loop
-    public void startOpenAPSLoop(){
+    //setups the OpenAPS and Treatments Loops
+    public void startLoops(){
         managerTreatments = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
         //Treatments loop
@@ -535,9 +535,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
-
         pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), view.getContext());                           //Action the suggested Temp
-
     }
 
 
@@ -658,35 +656,41 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         public static void update(){
 
+            if (currentOpenAPSSuggest != null) {
 
-            try {
-                apsstatus_reason.setText("");
-                apsstatus_Action.setText("");
-                apsstatus_temp.setText("None");
-                apsstatus_deviation.setText("");
-                if (currentOpenAPSSuggest.has("deviation"))     apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
-                if (currentOpenAPSSuggest.has("openaps_mode"))  apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
-                if (currentOpenAPSSuggest.has("openaps_loop"))  apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
-                if (currentOpenAPSSuggest.has("reason"))        apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
-                if (currentOpenAPSSuggest.has("action"))        apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
+                try {
+                    apsstatus_reason.setText("");
+                    apsstatus_Action.setText("");
+                    apsstatus_temp.setText("None");
+                    apsstatus_deviation.setText("");
+                    if (currentOpenAPSSuggest.has("deviation"))
+                        apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
+                    if (currentOpenAPSSuggest.has("openaps_mode"))
+                        apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
+                    if (currentOpenAPSSuggest.has("openaps_loop"))
+                        apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
+                    if (currentOpenAPSSuggest.has("reason"))
+                        apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
+                    if (currentOpenAPSSuggest.has("action"))
+                        apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
 
-                if (currentOpenAPSSuggest.has("rate")){
-                    apsstatusAcceptButton.setEnabled(true);
-                    apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
-                    if (currentOpenAPSSuggest.getString("basal_adjustemnt").equals("Pump Default")){
-                        apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
+                    if (currentOpenAPSSuggest.has("rate")) {
+                        apsstatusAcceptButton.setEnabled(true);
+                        apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
+                        if (currentOpenAPSSuggest.getString("basal_adjustemnt").equals("Pump Default")) {
+                            apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
+                        } else {
+                            apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U " + currentOpenAPSSuggest.getString("duration") + "mins");
+                        }
                     } else {
-                        apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U " + currentOpenAPSSuggest.getString("duration") + "mins");
+                        apsstatusAcceptButton.setEnabled(false);
+                        apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
                     }
-                } else {
-                    apsstatusAcceptButton.setEnabled(false);
-                    apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.activity, "Crash updating OpenAPS Fragment", Toast.LENGTH_SHORT).show();
                 }
-            }catch (Exception e)  {
-                Toast.makeText(MainActivity.activity, "Crash updating OpenAPS Fragment", Toast.LENGTH_SHORT).show();
             }
         }
-
     }
     public static class iobcobFragment extends Fragment {
         public iobcobFragment(){}
