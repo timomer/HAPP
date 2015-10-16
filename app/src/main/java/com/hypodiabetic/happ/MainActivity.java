@@ -348,7 +348,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         Date timeNow = new Date();
         sysMsg = (TextView) findViewById(R.id.sysmsg);
         TempBasal lastTempBasal = TempBasal.last();
-        String appStatus = "";
+        String appStatus;
         if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
             appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
         } else {                                                                                    //No temp Basal running, show default
@@ -472,33 +472,33 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                iobValueTextView = (TextView) findViewById(R.id.iobValue);
-                cobValueTextView = (TextView) findViewById(R.id.cobValue);
-
-                JSONObject reply;
-                Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":2");
-                if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
-                    reply = iobcobActiveFragment.updateChart(MainActivity.activity);
-                } else {
-                    reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
-                }
                 try {
+                    iobValueTextView = (TextView) findViewById(R.id.iobValue);
+                    cobValueTextView = (TextView) findViewById(R.id.cobValue);
+
+                    JSONObject reply;
+                    Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":2");
+                    if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
+                        reply = iobcobActiveFragment.updateChart(MainActivity.activity);
+                    } else {
+                        reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
+                    }
                     iobValueTextView.setText(reply.getString("iob"));
                     cobValueTextView.setText(reply.getString("cob"));
-                }catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
-                if (iobcob != null){                                                                //Check IOB COB fragment is loaded
-                    iobcobFragment.updateChart();
-                }
-                Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":3");
-                if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
-                    basalvsTempBasalFragment.updateChart();
-                }
 
-                Notifications.updateCard(MainActivity.activity);
+                    Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
+                    if (iobcob != null){                                                                //Check IOB COB fragment is loaded
+                        iobcobFragment.updateChart();
+                    }
+                    Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":3");
+                    if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
+                        basalvsTempBasalFragment.updateChart();
+                    }
+
+                    Notifications.updateCard(MainActivity.activity);
+                }catch (JSONException e) {
+                    Toast.makeText(MainActivity.activity, "Crash running updateStats()", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -649,6 +649,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     }
                 }
             }catch (Exception e)  {
+                Toast.makeText(MainActivity.activity, "Crash in setSuggested_Temp_Basal", Toast.LENGTH_SHORT).show();
             }
             currentOpenAPSSuggest = openAPSSuggest;
             update();
@@ -656,7 +657,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         public static void update(){
 
-            if (currentOpenAPSSuggest != null) {
+            if (currentOpenAPSSuggest != null & apsstatus_reason != null) {
 
                 try {
                     apsstatus_reason.setText("");
