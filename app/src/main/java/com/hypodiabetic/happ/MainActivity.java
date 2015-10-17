@@ -750,18 +750,28 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
 
         //Get IOB and COB only, dont update chart
-        public static JSONObject getIOBCOB(Activity a){
+        public static JSONObject getIOBCOB(Activity a) {
 
             List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
             JSONObject reply = new JSONObject();
 
-            try {
-                reply.put("iob", String.format("%.2f", statList.get(0).iob));
-                reply.put("cob", String.format("%.2f", statList.get(0).cob));
-            }catch (JSONException e) {
-                e.printStackTrace();
+            if (statList.size() > 0) {
+                try {
+                    reply.put("iob", String.format("%.2f", statList.get(0).iob));
+                    reply.put("cob", String.format("%.2f", statList.get(0).cob));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return reply;
+            } else {
+                try {
+                    reply.put("iob", String.format("%.2f", 0.00));
+                    reply.put("cob", String.format("%.2f", 0.00));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return reply;
             }
-            return reply;
         }
 
         //Updates Stats

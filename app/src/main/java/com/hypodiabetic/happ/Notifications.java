@@ -83,7 +83,7 @@ public class Notifications {
             //statSummary = lastBG.sgv + " " + lastBG.bgdelta + " Deviation: " + MainActivity.openAPSFragment.getcurrentOpenAPSSuggest().getString("deviation") + " IOB: " + lastStats.iob + " COB: " + lastStats.cob;
             if (lastBG != null) {
                 String bgDelta = String.valueOf(tools.unitizedBG(lastBG.bgdelta, c));
-                if (lastBG.bgdelta > 0) bgDelta +="+";
+                if (lastBG.bgdelta > 0) bgDelta = "+"+bgDelta;
                 statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " " + lastBG.slopeArrow() + " " + bgDelta + ", " + lastBG.readingAge();
             } else {
                 statSummary = "No BG data";
