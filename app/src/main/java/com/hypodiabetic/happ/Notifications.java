@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -33,6 +34,7 @@ public class Notifications {
             title   = "Set: " + openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)";
             msg     = openAPSSuggest.getString("action");
         }catch (Exception e)  {
+            Crashlytics.logException(e);
         }
 
         Intent i = new Intent();

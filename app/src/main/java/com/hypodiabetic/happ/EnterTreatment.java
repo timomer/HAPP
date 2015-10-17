@@ -23,6 +23,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Treatments;
 
 import java.text.ParseException;
@@ -262,7 +263,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         try {
             treatmentDateTime = sdf.parse(treatmentDateTimeString);
         } catch (ParseException e) {
-            e.printStackTrace();
+            Crashlytics.logException(e);
         }
 
         treatment.datetime          = treatmentDateTime.getTime();

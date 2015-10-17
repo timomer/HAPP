@@ -2,6 +2,7 @@ package com.hypodiabetic.happ;
 
 import android.content.Context;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
@@ -97,6 +98,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         try {
             snoozeBG = openAPSSuggest.getDouble("eventualBG");
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
         //openAPSPredictValue.add(new PointValue((float) (timeeNow.getTime() / fuzz), (float) Bg.last().sgv_double()));
@@ -134,7 +136,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
                     //xAxisValues.  add(new AxisValue((long)0, iobcobValues.getJSONObject(v).getString("when")));
                 }
             } catch (Exception e) {
-
+                Crashlytics.logException(e);
             }
 
             columnData = new ColumnChartData(columnsData);
@@ -373,6 +375,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+                Crashlytics.logException(e);
             }
         }
         Line cobValuesLine = new Line(listValues);
@@ -396,6 +399,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
                     listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) iobFutureValues.getJSONObject(c).getDouble("iob")));
                 }
             } catch (JSONException e) {
+                Crashlytics.logException(e);
                 e.printStackTrace();
             }
         }

@@ -103,6 +103,9 @@
                 <action android:name="com.hypodiabetic.happ.NOTIFICATION_RECEIVER" />
             </intent-filter>
         </receiver>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="be254c8585dff3174ce74dd5e856b96909f9f8c1" />
     </application>
 
 </manifest>

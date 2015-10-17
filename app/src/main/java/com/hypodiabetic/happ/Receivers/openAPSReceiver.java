@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
@@ -41,6 +42,7 @@ public class openAPSReceiver extends BroadcastReceiver{
                     openAPSSuggest.put("deviation", tools.unitizedBG(deviation, context));
                 }
             } catch (JSONException e) {
+                Crashlytics.logException(e);
                 e.printStackTrace();
             }
 

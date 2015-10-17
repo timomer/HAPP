@@ -3,6 +3,7 @@ package com.hypodiabetic.happ;
 
 import android.content.Context;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
@@ -41,6 +42,7 @@ public class BolusWizard {
             cob         = cobNow.getDouble("cob");
             biob        = iobNow.getDouble("bolusiob");
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
 
         Double insulin_correction_bg;
@@ -114,6 +116,7 @@ public class BolusWizard {
             reply.put("suggested_bolus",                String.format("%.1f", suggested_bolus));
             reply.put("suggested_bolus_maths",          suggested_bolus_maths);
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
         return reply;
 
@@ -140,6 +143,7 @@ public class BolusWizard {
         try {
             reply.put("cob", cob.cobTotal(cobtreatments, profile, dateNow).getDouble("display"));
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
 
         return bwp;
@@ -156,6 +160,7 @@ public class BolusWizard {
             results.put("outcome",0);
             results.put("bolusEstimate",0.0);
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
 
         Bg scaled = Bg.last();
@@ -174,6 +179,7 @@ public class BolusWizard {
             iobValue = iob.iobTotal(treatments, profile, dateNow).getDouble("bolusiob");
         } catch (JSONException e) {
             //Toast.makeText(ApplicationContextProvider.getContext(), "Error getting IOB for bwp_calc", Toast.LENGTH_LONG).show();
+            Crashlytics.logException(e);
         }
 
         Double results_effect = iobValue * profile.isf;
@@ -215,6 +221,7 @@ public class BolusWizard {
                 results.put("tempBasalAdjustment-thirtymin",thirtyMinAdjustment);
                 results.put("tempBasalAdjustment-onehour",oneHourAdjustment);
             } catch (JSONException e) {
+                Crashlytics.logException(e);
             }
         }
 
@@ -233,6 +240,7 @@ public class BolusWizard {
             results.put("effectDisplay", String.format("%.2f",results_effect));
             results.put("displayLine", "BWP: " + String.format("%.2f",results_bolusEstimate) + "U");
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
 
         return results;
@@ -264,6 +272,7 @@ public class BolusWizard {
             }
 
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
 
         return results;
