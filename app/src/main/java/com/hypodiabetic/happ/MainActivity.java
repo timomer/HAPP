@@ -40,6 +40,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.hypodiabetic.happ.Objects.Profile;
@@ -56,6 +57,7 @@ import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
+import io.fabric.sdk.android.Fabric;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -131,11 +133,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         activity = this;
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         ins = this;
         PreferenceManager.setDefaultValues(this, R.xml.pref_openaps, false);                        //Sets default OpenAPS Preferences if the user has not
 
         //xdrip start
-        //Fabric.with(this, new Crashlytics()); todo not sure what this is for? Fabric is twitter? http://docs.fabric.io/android/twitter/twitter.html
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         checkEula(); 
 
@@ -460,6 +462,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
 
                 }catch (JSONException e) {
+                    Crashlytics.logException(e);
                     e.printStackTrace();
                 }
 
@@ -497,6 +500,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
                     Notifications.updateCard(MainActivity.activity);
                 }catch (JSONException e) {
+                    Crashlytics.logException(e);
                     Toast.makeText(MainActivity.activity, "Crash running updateStats()", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -649,6 +653,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     }
                 }
             }catch (Exception e)  {
+                Crashlytics.logException(e);
                 Toast.makeText(MainActivity.activity, "Crash in setSuggested_Temp_Basal", Toast.LENGTH_SHORT).show();
             }
             currentOpenAPSSuggest = openAPSSuggest;
@@ -688,6 +693,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                         apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
                     }
                 } catch (Exception e) {
+                    Crashlytics.logException(e);
                     Toast.makeText(MainActivity.activity, "Crash updating OpenAPS Fragment", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -760,6 +766,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     reply.put("iob", String.format("%.2f", statList.get(0).iob));
                     reply.put("cob", String.format("%.2f", statList.get(0).cob));
                 } catch (JSONException e) {
+                    Crashlytics.logException(e);
                     e.printStackTrace();
                 }
                 return reply;
@@ -768,6 +775,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     reply.put("iob", String.format("%.2f", 0.00));
                     reply.put("cob", String.format("%.2f", 0.00));
                 } catch (JSONException e) {
+                    Crashlytics.logException(e);
                     e.printStackTrace();
                 }
                 return reply;
@@ -786,6 +794,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 reply.put("iob", String.format("%.2f", statList.get(0).iob));
                 reply.put("cob", String.format("%.2f", statList.get(0).cob));
             }catch (JSONException e) {
+                Crashlytics.logException(e);
                 e.printStackTrace();
             }
             return reply;

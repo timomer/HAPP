@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Treatments;
 
 import org.json.JSONException;
@@ -147,6 +148,7 @@ public class BolusWizardActivity extends Activity {
             }
 
         } catch (JSONException e) {
+            Crashlytics.logException(e);
         }
 
         buttonAccept = (Button) findViewById(R.id.wizardAccept);

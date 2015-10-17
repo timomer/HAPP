@@ -3,6 +3,7 @@ package com.hypodiabetic.happ.code.openaps;
 import android.util.Log;
 
 //import com.hypodiabetic.happ.DBHelper;
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 //import com.hypodiabetic.happ.TreatmentsRepo;
@@ -68,6 +69,7 @@ public class iob {
                 return returnValue;
 
             } catch (JSONException e) {
+                Crashlytics.logException(e);
                 e.printStackTrace();
                 return returnValue;
             }
@@ -120,6 +122,7 @@ public class iob {
             return returnValue;
 
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
             return returnValue;
         }
@@ -178,6 +181,7 @@ public class iob {
                 //}
             }
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
@@ -188,6 +192,7 @@ public class iob {
                 }
             }
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
@@ -222,6 +227,7 @@ public class iob {
             return tempBoluses;
 
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
             return tempBoluses;
         }

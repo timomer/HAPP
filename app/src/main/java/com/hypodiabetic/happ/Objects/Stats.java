@@ -8,6 +8,7 @@ import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.annotations.Expose;
 
 import org.json.JSONObject;
@@ -130,6 +131,7 @@ public class Stats extends Model{
                 profileAsOfNow = new Profile().ProfileAsOf(dateVar,c);        //Gets Profile info for the new dateVar
 
             } catch (Exception e)  {
+                Crashlytics.logException(e);
                 Toast.makeText(c, "Error getting Stats", Toast.LENGTH_LONG).show();
             }
         }

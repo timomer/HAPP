@@ -3,6 +3,7 @@ package com.hypodiabetic.happ.code.openaps;
 import android.content.Context;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
@@ -70,7 +71,7 @@ public class determine_basal {
             return o;
 
         } catch (JSONException e) {
-
+            Crashlytics.logException(e);
             e.printStackTrace();
             return o;
         }
@@ -93,6 +94,7 @@ public class determine_basal {
                 requestedTemp.put("snoozeBG", "NA");
                 requestedTemp.put("reason", "Need min 2 BG readings to run OpenAPS");
             } catch (JSONException e) {
+                Crashlytics.logException(e);
                 e.printStackTrace();
             }
             return requestedTemp;
@@ -166,6 +168,7 @@ public class determine_basal {
             requestedTemp.put("openaps_mode", profile_data.openaps_mode);                           //OpenAPS mode ####HAPP added####
 
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
@@ -370,6 +373,7 @@ public class determine_basal {
             if (!requestedTemp.has("action") && !action.equals("")){ requestedTemp.put("action", action);} //Only if setTempBasal has not provided a reason and we have logged something in action
 
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
@@ -377,7 +381,10 @@ public class determine_basal {
         try {
             requestedTemp.put("openaps_mode", profile_data.openaps_mode);
             requestedTemp.put("openaps_loop", profile_data.openaps_loop);
-        } catch (JSONException e) {e.printStackTrace(); }
+        } catch (JSONException e) {
+            Crashlytics.logException(e);
+            e.printStackTrace();
+        }
         //##### HAPP Added #####
 
         return requestedTemp;
@@ -426,6 +433,7 @@ public class determine_basal {
                 requestedTemp.remove("rate");                                                       //Remove rate, as we do not want to suggest this Temp Basal
             }
         } catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
