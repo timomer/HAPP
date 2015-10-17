@@ -56,15 +56,16 @@ public class BolusWizard {
             bgCorrection                = "High";
             insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f",insulin_correction_bg) + "U";
 
+        } else if (lastBG <= profile.min_bg){                                                       //True LOW
+            insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;
+            bgCorrection                = "Low";
+            insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
+
         } else if (snoozeBG >= profile.max_bg){                                                     //Snooze HIGH
             insulin_correction_bg       = (snoozeBG - profile.max_bg) / profile.isf;
             bgCorrection                = "High";
             insulin_correction_bg_maths = "snoozeBG(" + snoozeBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f",insulin_correction_bg) + "U";
 
-        } else if (lastBG <= profile.min_bg){                                                       //True LOW
-            insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;
-            bgCorrection                = "Low";
-            insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
         } else if (snoozeBG <= profile.min_bg){                                                     //Snooze LOW
             insulin_correction_bg       = (snoozeBG - profile.target_bg) / profile.isf;
             bgCorrection                = "Low";
