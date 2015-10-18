@@ -28,26 +28,34 @@ public class Notifications {
     //New Temp has been suggested
     public static void newTemp(JSONObject openAPSSuggest, Context c){
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         String title="";
         String msg="";
         try {
-            title   = "Set: " + openAPSSuggest.getDouble("rate") + "U (" + openAPSSuggest.getInt("ratePercent") + "%)";
-            msg     = openAPSSuggest.getString("action");
+            if (prefs.getString("basal_mode","percent").equals("percent")) {
+                title = "Set Temp Basal: " + openAPSSuggest.getInt("ratePercent") + "%";
+            } else {
+                title = "Set Temp Basal: " + openAPSSuggest.getDouble("rate") + "U";
+            }
+            msg = openAPSSuggest.getString("action");
         }catch (Exception e)  {
             Crashlytics.logException(e);
         }
 
-        Intent i = new Intent();
-        i.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
-        i.putExtra("NOTIFICATION_TYPE", "newTemp");
-        PendingIntent pending_intent = PendingIntent.getBroadcast(MainActivity.activity,1,i,Intent.FILL_IN_DATA);
+        Intent intent_accept_temp = new Intent();
+        intent_accept_temp.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
+        intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
+        PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(MainActivity.activity,1,intent_accept_temp,Intent.FILL_IN_DATA);
+
+        Intent intent_open_activity = new Intent(c,MainActivity.class);
+        PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 2, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent displayIntent = new Intent(c, WearDisplayActivity.class);
         Notification notification = new Notification.Builder(c)
                 .setSmallIcon(R.drawable.ic_input_black)
                 .setContentTitle(title)
                 .setContentText(msg)
-                .setContentIntent(pending_intent)
+                .setContentIntent(pending_intent_open_activity)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500})
@@ -56,7 +64,7 @@ public class Notifications {
                         .setBackground(createWearBitmap(2, c))
                         .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT)))
-                .addAction(R.drawable.ic_input_black, "Accept Temp", pending_intent)
+                .addAction(R.drawable.ic_input_black, "Accept Temp", pending_intent_accept_temp)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
     }
@@ -71,11 +79,19 @@ public class Notifications {
             Date timeNow = new Date();
             TempBasal lastTempBasal = TempBasal.last();
             String title;
-            if (lastTempBasal.isactive(null)) {                                                          //Active temp Basal
-                title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
-            } else {                                                                                    //No temp Basal running, show default
+            if (lastTempBasal.isactive(null)) {                                                     //Active temp Basal
+                if (prefs.getString("basal_mode","percent").equals("percent")) {
+                    title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.ratePercent + "% " + lastTempBasal.durationLeft() + "mins left";
+                } else {
+                    title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U " + lastTempBasal.durationLeft() + "mins left";
+                }
+            } else {                                                                                //No temp Basal running, show default
                 Double currentBasal = Profile.ProfileAsOf(timeNow, c).current_basal;
-                title = "Default Basal " + currentBasal + "U(100%)";
+                if (prefs.getString("basal_mode","percent").equals("percent")) {
+                    title = "Default Basal 100%";
+                } else {
+                    title = "Default Basal " + currentBasal + "U";
+                }
             }
 
             Bg lastBG = Bg.last();
@@ -94,11 +110,14 @@ public class Notifications {
             //    e.printStackTrace();
             //}
 
+            Intent intent_open_activity = new Intent(c,MainActivity.class);
+            PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 3, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification notification = new Notification.Builder(c)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle(statSummary)
                     .setContentText(title)
+                    .setContentIntent(pending_intent_open_activity)
                     .setPriority(Notification.PRIORITY_DEFAULT)
                     .setCategory(Notification.CATEGORY_STATUS)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)

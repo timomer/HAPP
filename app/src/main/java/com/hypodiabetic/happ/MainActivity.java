@@ -788,10 +788,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         public static JSONObject updateChart(Activity a){
 
             JSONObject reply = new JSONObject();
-            if (iobcobChart != null) {
-                List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
+            List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
 
-                //reloads charts with Treatment data
+            if (iobcobChart != null || !statList.isEmpty()) {
+                                //reloads charts with Treatment data
                 iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
                 try {
                     reply.put("iob", String.format("%.2f", statList.get(0).iob));
@@ -850,7 +850,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         //Updates Stats
         public static void updateChart(){
-            basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
+            if (basalvsTempBasalChart != null) {
+                basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
+            }
         }
     }
 
