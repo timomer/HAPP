@@ -790,8 +790,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             JSONObject reply = new JSONObject();
             List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
 
-            if (iobcobChart != null || !statList.isEmpty()) {
-                                //reloads charts with Treatment data
+            if (iobcobChart != null || statList.size() > 0) {
+                //reloads charts with Treatment data
                 iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
                 try {
                     reply.put("iob", String.format("%.2f", statList.get(0).iob));
