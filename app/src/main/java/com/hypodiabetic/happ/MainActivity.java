@@ -734,8 +734,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
 
         public static void updateChart(){
-            iobcobPastChart.setLineChartData(LineChartData.generateDummyData());                    //// TODO: 07/10/2015 debug, trying to reset data in chart to stop odd issue with lines looping
-            iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+            if (iobcobPastChart != null) {
+                iobcobPastChart.setLineChartData(LineChartData.generateDummyData());                    //// TODO: 07/10/2015 debug, trying to reset data in chart to stop odd issue with lines looping
+                iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+            }
         }
     }
     public static class iobcobActiveFragment extends Fragment {
