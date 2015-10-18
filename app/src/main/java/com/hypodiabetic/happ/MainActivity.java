@@ -785,19 +785,30 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         //Updates Stats
         public static JSONObject updateChart(Activity a){
 
-            List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
             JSONObject reply = new JSONObject();
+            if (iobcobChart != null) {
+                List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
 
-            //reloads charts with Treatment data
-            iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
-            try {
-                reply.put("iob", String.format("%.2f", statList.get(0).iob));
-                reply.put("cob", String.format("%.2f", statList.get(0).cob));
-            }catch (JSONException e) {
-                Crashlytics.logException(e);
-                e.printStackTrace();
+                //reloads charts with Treatment data
+                iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
+                try {
+                    reply.put("iob", String.format("%.2f", statList.get(0).iob));
+                    reply.put("cob", String.format("%.2f", statList.get(0).cob));
+                } catch (JSONException e) {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+                return reply;
+            } else {
+                try {
+                    reply.put("iob", String.format("%.2f", 0.00));
+                    reply.put("cob", String.format("%.2f", 0.00));
+                } catch (JSONException e) {
+                    Crashlytics.logException(e);
+                    e.printStackTrace();
+                }
+                return reply;
             }
-            return reply;
         }
     }
     public static class basalvsTempBasalFragment extends Fragment {
