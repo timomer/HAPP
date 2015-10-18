@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class BolusWizard {
 
@@ -234,11 +235,11 @@ public class BolusWizard {
             results.put("scaledSGV",results_scaledSGV);
             results.put("iob",iobValue);
 
-            results.put("bolusEstimateDisplay", String.format("%.2f",results_bolusEstimate));
-            results.put("outcomeDisplay", String.format("%.2f",results_outcome));
-            results.put("displayIOB", String.format("%.2f",iobValue));
-            results.put("effectDisplay", String.format("%.2f",results_effect));
-            results.put("displayLine", "BWP: " + String.format("%.2f",results_bolusEstimate) + "U");
+            results.put("bolusEstimateDisplay", String.format(Locale.ENGLISH, "%.2f",results_bolusEstimate));
+            results.put("outcomeDisplay",       String.format(Locale.ENGLISH, "%.2f",results_outcome));
+            results.put("displayIOB",           String.format(Locale.ENGLISH, "%.2f",iobValue));
+            results.put("effectDisplay", String.format(Locale.ENGLISH, "%.2f",results_effect));
+            results.put("displayLine", "BWP: " + String.format(Locale.ENGLISH, "%.2f",results_bolusEstimate) + "U");
         } catch (JSONException e) {
             Crashlytics.logException(e);
         }

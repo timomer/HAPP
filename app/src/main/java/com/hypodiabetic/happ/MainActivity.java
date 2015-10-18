@@ -315,7 +315,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         if (lastBgreading != null) {
             notificationText.setText(lastBgreading.readingAge());
-            String bgDelta = new String(String.format("%.2f", lastBgreading.bgdelta));
+            String bgDelta = new String(String.format(Locale.ENGLISH, "%.2f", lastBgreading.bgdelta));
             if (lastBgreading.bgdelta >= 0) bgDelta = "+" + bgDelta;
             deltaText.setText(bgDelta);
             currentBgValueText.setText(extendedGraphBuilder.unitized_string(lastBgreading.sgv_double()) + " " + lastBgreading.slopeArrow());
@@ -765,8 +765,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
             if (statList.size() > 0) {
                 try {
-                    reply.put("iob", String.format("%.2f", statList.get(0).iob));
-                    reply.put("cob", String.format("%.2f", statList.get(0).cob));
+                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).iob));
+                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).cob));
                 } catch (JSONException e) {
                     Crashlytics.logException(e);
                     e.printStackTrace();
@@ -774,8 +774,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 return reply;
             } else {
                 try {
-                    reply.put("iob", String.format("%.2f", 0.00));
-                    reply.put("cob", String.format("%.2f", 0.00));
+                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", 0.00));
+                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", 0.00));
                 } catch (JSONException e) {
                     Crashlytics.logException(e);
                     e.printStackTrace();
@@ -794,8 +794,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 //reloads charts with Treatment data
                 iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
                 try {
-                    reply.put("iob", String.format("%.2f", statList.get(0).iob));
-                    reply.put("cob", String.format("%.2f", statList.get(0).cob));
+                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).iob));
+                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).cob));
                 } catch (JSONException e) {
                     Crashlytics.logException(e);
                     e.printStackTrace();
@@ -803,8 +803,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 return reply;
             } else {
                 try {
-                    reply.put("iob", String.format("%.2f", 0.00));
-                    reply.put("cob", String.format("%.2f", 0.00));
+                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", 0.00));
+                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", 0.00));
                 } catch (JSONException e) {
                     Crashlytics.logException(e);
                     e.printStackTrace();
