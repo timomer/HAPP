@@ -398,7 +398,7 @@ public class determine_basal {
 
         if (rate < 0) { rate = 0D; } // if >30m @ 0 required, zero temp will be extended to 30m instead
         else if (rate > maxSafeBasal) { rate = maxSafeBasal; }
-        rate = Double.parseDouble(String.format("%.2f", rate));
+        rate = Double.parseDouble(String.format(Locale.ENGLISH, "%.2f", rate));
 
         // rather than canceling temps, always set the current basal as a 30m temp
         // so we can see on the pump that openaps is working

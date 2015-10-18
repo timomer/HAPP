@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -115,9 +116,9 @@ public class iob {
                 }
             }
 
-            returnValue.put("iob", String.format("%.2f", iob));                          //Total IOB
+            returnValue.put("iob", String.format(Locale.ENGLISH, "%.2f", iob));                          //Total IOB
             returnValue.put("activity", activity);                                                  //Total Amount of insulin active at this time
-            returnValue.put("bolusiob", String.format("%.2f", bolusiob));                                                  //Total Bolus IOB (User entered, assumed when eating) DIA is twice as fast
+            returnValue.put("bolusiob", String.format(Locale.ENGLISH, "%.2f", bolusiob));                                                  //Total Bolus IOB (User entered, assumed when eating) DIA is twice as fast
             returnValue.put("as_of", time.getTime());                                               //Date this request was made
             return returnValue;
 

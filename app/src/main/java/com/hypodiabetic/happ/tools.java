@@ -6,6 +6,8 @@ import android.preference.PreferenceManager;
 
 import com.hypodiabetic.happ.code.nightwatch.Constants;
 
+import java.util.Locale;
+
 /**
  * Created by Tim on 15/09/2015.
  */
@@ -20,7 +22,7 @@ public class tools {
         if(unit.compareTo("mgdl") == 0) {
             return Integer.toString(value.intValue());
         } else {
-            return String.format("%.2f", (value * Constants.MGDL_TO_MMOLL));
+            return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MGDL_TO_MMOLL));
         }
     }
 
@@ -32,7 +34,7 @@ public class tools {
         if(unit.compareTo("mgdl") == 0) {
             return Integer.toString(value.intValue());
         } else {
-            return String.format("%.2f", (value * Constants.MMOLL_TO_MGDL));
+            return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MMOLL_TO_MGDL));
         }
     }
 }
