@@ -30,7 +30,7 @@ import lecho.lib.hellocharts.view.Chart;
  * Cloned from https://github.com/StephenBlackWasAlreadyTaken/NightWatch
  */
 
-//todo adds data to the graph?
+
 public class BgGraphBuilder {
     public static final double fuzz = (1000 * 30 * 5);
     public double  end_time = (new Date().getTime() + (60000 * 130))/fuzz;                          //Added 120 mins to this time for future values
