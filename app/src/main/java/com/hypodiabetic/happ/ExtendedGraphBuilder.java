@@ -96,7 +96,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         Date in15mins = new Date(timeeNow.getTime() + 15*60000);
         Double snoozeBG=0D;
         try {
-            snoozeBG = openAPSSuggest.getDouble("eventualBG");
+            if (!openAPSSuggest.isNull("eventualBG")) snoozeBG = openAPSSuggest.getDouble("eventualBG");
         } catch (JSONException e) {
             Crashlytics.logException(e);
             e.printStackTrace();
@@ -217,12 +217,14 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     public void addBasalvsTempBasalValues(){
         Double basalDelta;
         for (Stats tempBasalReading : statsReadings) {
-            if (tempBasalReading.temp_basal_type.equals("High") || tempBasalReading.temp_basal_type.equals("Low")) {  //Has a Temp Basal been set?
-                basalDelta = tempBasalReading.temp_basal - tempBasalReading.basal;                  //Delta between normal Basal and Temp Basal set
-            } else {
-                basalDelta = 0D;                                                                    //No Temp Basal set
+            if (tempBasalReading != null) {
+                if (tempBasalReading.temp_basal_type.equals("High") || tempBasalReading.temp_basal_type.equals("Low")) {  //Has a Temp Basal been set?
+                    basalDelta = tempBasalReading.temp_basal - tempBasalReading.basal;                  //Delta between normal Basal and Temp Basal set
+                } else {
+                    basalDelta = 0D;                                                                    //No Temp Basal set
+                }
+                tempBasalValues.add(new PointValue((float) (tempBasalReading.datetime / fuzz), basalDelta.floatValue()));
             }
-            tempBasalValues.add(new PointValue((float) (tempBasalReading.datetime/fuzz), basalDelta.floatValue()));
         }
     }
 

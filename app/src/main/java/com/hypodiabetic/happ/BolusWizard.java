@@ -165,8 +165,12 @@ public class BolusWizard {
         }
 
         Bg scaled = Bg.last();
-
-        Double results_scaledSGV = scaled.sgv_double();
+        Double results_scaledSGV;
+        if (scaled == null) {
+            results_scaledSGV = scaled.sgv_double();
+        } else {
+            results_scaledSGV = 0D;
+        }
 
         //var errors = checkMissingInfo(sbx);
 

@@ -421,10 +421,18 @@ public class determine_basal {
                 requestedTemp.put("rate", profile_data.current_basal);
                 requestedTemp.put("ratePercent", 100);
             } else if (rate > profile_data.current_basal && duration != 0){
-                requestedTemp.put("action", "High Temp Basal set " + rate + "U for " + duration + "mins");
+                if (profile_data.basal_mode.equals("percent")){
+                    requestedTemp.put("action", "High Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
+                } else {
+                    requestedTemp.put("action", "High Temp Basal set " + rate + "U for " + duration + "mins");
+                }
                 requestedTemp.put("basal_adjustemnt", "High");
             } else if (rate < profile_data.current_basal && duration != 0){
-                requestedTemp.put("action", "Low Temp Basal set " + rate + "U for " + duration + "mins");
+                if (profile_data.basal_mode.equals("percent")){
+                    requestedTemp.put("action", "Low Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
+                } else {
+                    requestedTemp.put("action", "Low Temp Basal set " + rate + "U for " + duration + "mins");
+                }
                 requestedTemp.put("basal_adjustemnt", "Low");
             } else if (rate == profile_data.current_basal){
                 requestedTemp.put("reason", "Keep current basal");
