@@ -139,7 +139,7 @@ public class Notifications {
 
     private static Bitmap createWearBitmap(long start, long end, Context mContext) {
         return new BgSparklineBuilder(mContext)
-                .setBgGraphBuilder(new BgGraphBuilder(mContext))
+                .setBgGraphBuilder(new ExtendedGraphBuilder(mContext))
                 .setStart(start)
                 .setEnd(end)
                 .showHighLine()

@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 import java.util.TimeZone;
 
 import lecho.lib.hellocharts.model.Axis;
@@ -91,12 +92,14 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         return openAPSPredictLine;
     }
     public void getOpenAPSPredictValues() {
+        openAPSPredictValue.clear();                                                                //clears past values
         JSONObject openAPSSuggest = determine_basal.runOpenAPS(context);                            //Run OpenAPS
         Date timeeNow = new Date();
         Date in15mins = new Date(timeeNow.getTime() + 15*60000);
         Double snoozeBG=0D;
+
         try {
-            snoozeBG = openAPSSuggest.getDouble("eventualBG");
+            if (!openAPSSuggest.isNull("eventualBG")) snoozeBG = openAPSSuggest.getDouble("eventualBG");
         } catch (JSONException e) {
             Crashlytics.logException(e);
             e.printStackTrace();
@@ -215,14 +218,17 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         return cobValuesLine;
     }
     public void addBasalvsTempBasalValues(){
+        tempBasalValues.clear();                                                                    //clears past data
         Double basalDelta;
         for (Stats tempBasalReading : statsReadings) {
-            if (tempBasalReading.temp_basal_type.equals("High") || tempBasalReading.temp_basal_type.equals("Low")) {  //Has a Temp Basal been set?
-                basalDelta = tempBasalReading.temp_basal - tempBasalReading.basal;                  //Delta between normal Basal and Temp Basal set
-            } else {
-                basalDelta = 0D;                                                                    //No Temp Basal set
+            if (tempBasalReading != null) {
+                if (tempBasalReading.temp_basal_type.equals("High") || tempBasalReading.temp_basal_type.equals("Low")) {  //Has a Temp Basal been set?
+                    basalDelta = tempBasalReading.temp_basal - tempBasalReading.basal;                  //Delta between normal Basal and Temp Basal set
+                } else {
+                    basalDelta = 0D;                                                                    //No Temp Basal set
+                }
+                tempBasalValues.add(new PointValue((float) (tempBasalReading.datetime / fuzz), basalDelta.floatValue()));
             }
-            tempBasalValues.add(new PointValue((float) (tempBasalReading.datetime/fuzz), basalDelta.floatValue()));
         }
     }
 
@@ -311,6 +317,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
 
     public void addIOBValues(){
+        iobValues.clear();                                                                          //clears past data
         for (Stats iobReading : statsReadings) {
             if (iobReading.iob > yIOBMax) {
                 iobValues.add(new PointValue((float) (iobReading.datetime/fuzz), (float) fitIOB2COBRange(yIOBMax.floatValue()))); //Do not go above Max IOB
@@ -323,6 +330,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         }
     }
     public void addCOBValues(){
+        cobValues.clear();                                                                          //clear past data
         for (Stats cobReading : statsReadings) {
             if (cobReading.cob > yCOBMax) {
                 cobValues.add(new PointValue((float) (cobReading.datetime/fuzz), (float) yCOBMax.floatValue())); //Do not go above Max COB

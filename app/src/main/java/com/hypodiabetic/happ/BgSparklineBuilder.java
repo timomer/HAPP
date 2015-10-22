@@ -32,7 +32,7 @@ public class BgSparklineBuilder {
 
     private int width;
     private int height;
-    private BgGraphBuilder bgGraphBuilder;
+    private ExtendedGraphBuilder bgGraphBuilder;
     private LineChartView chart;
     private float end = new Date().getTime() / (float) BgGraphBuilder.fuzz;
     private float start = end - (60000*180 / (float) BgGraphBuilder.fuzz); // 3h
@@ -107,10 +107,11 @@ public class BgSparklineBuilder {
         return this.setSmallDots(true);
     }
 
-    public BgSparklineBuilder setBgGraphBuilder(BgGraphBuilder bgGraphBuilder) {
+    public BgSparklineBuilder setBgGraphBuilder(ExtendedGraphBuilder bgGraphBuilder) {
         this.bgGraphBuilder = bgGraphBuilder;
         return this;
     }
+
 
     BgSparklineBuilder(Context context) {
         mContext = context;

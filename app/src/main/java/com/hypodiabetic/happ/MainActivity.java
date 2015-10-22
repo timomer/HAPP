@@ -222,6 +222,17 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     }
 
+    public void test(View view){
+        //Notifications.setTemp("test", MainActivity.activity);
+        //JSONObject openAPSSuggest = determine_basal.runOpenAPS(v.getContext());                        //Run OpenAPS
+        //updateOpenAPSDetails(openAPSSuggest);
+        //setViewport();
+        //setupCharts();
+        //chart = (LineChartView) findViewById(R.id.chart);
+
+        setupCharts();
+    }
+
     //xdrip functions start
 
     public void checkEula() {
@@ -439,10 +450,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
     }
 
-    public void test(View v){
-        //Notifications.setTemp("test", MainActivity.activity);
 
-    }
 
 
     //Updates the OpenAPS Fragment
@@ -467,6 +475,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 }
 
                 displayCurrentInfo();
+                setupCharts();
             }
         });
     }
@@ -790,7 +799,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             JSONObject reply = new JSONObject();
             List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
 
-            if (iobcobChart != null || statList.size() > 0) {
+            if (iobcobChart != null || statList != null || statList.size() > 0) {
                 //reloads charts with Treatment data
                 iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
                 try {
