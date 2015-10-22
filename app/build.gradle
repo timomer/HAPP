@@ -46,7 +46,7 @@ dependencies {
     compile 'com.android.support:support-v4:22.0'
     compile 'com.github.clans:fab:1.6.1'
     //compile 'com.android.support:support-v4:22.2.1'
-    compile files('volley.jar')
+    compile files('src/main/java/com/hypodiabetic/happ/code/volley.jar')
     compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;
     }
