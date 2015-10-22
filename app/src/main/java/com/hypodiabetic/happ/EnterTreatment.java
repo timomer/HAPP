@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Treatments;
+import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -301,6 +302,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         } else {
 
             treatment.save();
+            NSUploader.addTreatment(treatment,this);
             Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 
             loadLastTreatments();

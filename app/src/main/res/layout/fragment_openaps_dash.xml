@@ -141,6 +141,12 @@
                 android:text="Run OpenAPS"
                 android:onClick="runOpenAPS"
                 android:layout_weight=".5"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="TEST"
+                android:onClick="test"
+                android:layout_weight=".2"/>
 
         </LinearLayout>
 
