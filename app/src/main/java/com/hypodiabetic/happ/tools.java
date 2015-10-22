@@ -37,4 +37,10 @@ public class tools {
             return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MMOLL_TO_MGDL));
         }
     }
+
+    //returns the bg units in use for the app right now
+    public static String bgUnitsFormat(Context c){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        return prefs.getString("units", "mgdl");
+    }
 }

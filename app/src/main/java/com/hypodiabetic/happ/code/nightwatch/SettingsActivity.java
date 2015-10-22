@@ -65,6 +65,7 @@ public class SettingsActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             addPreferencesFromResource(R.xml.pref_openaps);
             addPreferencesFromResource(R.xml.pref_bg_notification);
+            addPreferencesFromResource(R.xml.pref_nightscout);
             //addPreferencesFromResource(R.xml.pref_data_source);
             //addPreferencesFromResource(R.xml.pref_watch_integration); // TODO: 08/08/2015 leaveout watch for now 
 
