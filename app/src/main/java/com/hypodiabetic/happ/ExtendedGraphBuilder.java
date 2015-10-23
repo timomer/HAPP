@@ -118,7 +118,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             List<AxisValue> xAxisValues = new ArrayList<AxisValue>();
 
             try {
-                for (int v = 0; v <= statArray.size(); v++) {
+                for (int v = 0; v < statArray.size(); v++) {
                     //iob now
                     values = new ArrayList<>();
 
