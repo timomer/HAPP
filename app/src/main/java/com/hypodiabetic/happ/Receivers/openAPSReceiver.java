@@ -34,8 +34,12 @@ public class openAPSReceiver extends BroadcastReceiver{
 
             //formats deviation
             try {
-                Double deviation = openAPSSuggest.getDouble("deviation");
-                openAPSSuggest.remove("deviation");
+                Double deviation = 0D;
+                if (openAPSSuggest.has("deviation")){
+                    deviation = openAPSSuggest.getDouble("deviation");
+                    openAPSSuggest.remove("deviation");
+                }
+
                 if (deviation > 0) {
                     openAPSSuggest.put("deviation", "+" + tools.unitizedBG(deviation, context));
                 } else {
