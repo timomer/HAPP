@@ -32,7 +32,9 @@ public class BolusWizard {
         JSONObject openAPSNow   = determine_basal.runOpenAPS(c);
         String bgCorrection="";
 
-        Double lastBG       = Bg.last().sgv_double();
+        Bg bg = Bg.last();
+        Double lastBG = 0D;
+        if (bg != null) lastBG = bg.sgv_double();
         Double eventualBG   = 0D;
         Double snoozeBG     = 0D;
         Double cob          = 0D;
@@ -129,7 +131,7 @@ public class BolusWizard {
 
 
     //main NS functiuon
-    public static JSONObject run_bw(Context context) {
+    public static JSONObject run_NS_BW(Context context) {
 
         Date dateNow = new Date();
         Profile profile = new Profile().ProfileAsOf(dateNow, context);
@@ -167,7 +169,8 @@ public class BolusWizard {
         Bg scaled = Bg.last();
         Double results_scaledSGV;
         if (scaled == null) {
-            results_scaledSGV = scaled.sgv_double();
+            return results;                                                                         //exit, as no last BG
+            //results_scaledSGV = scaled.sgv_double();
         } else {
             results_scaledSGV = 0D;
         }
