@@ -95,7 +95,7 @@ public class BolusWizardActivity extends Activity {
     }
 
     public void run_bw(){
-        JSONObject reply = BolusWizard.run_bw(this.getBaseContext());
+        JSONObject reply = BolusWizard.run_NS_BW(this.getBaseContext());
         TextView sysMsg;
         sysMsg = (TextView) findViewById(R.id.wizardCalc);
         sysMsg.setText("NS bwp: " + reply.toString());
