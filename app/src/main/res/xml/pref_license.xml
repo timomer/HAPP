@@ -7,7 +7,7 @@
             <intent
                 android:action="android.intent.action.MAIN"
                 android:targetPackage="com.hypodiabetic.happ"
-                android:targetClass="com.hypodiabetic.happ.LicenseAgreementActivity"
+                android:targetClass="com.hypodiabetic.happ.license_agreement"
                 />
         </Preference>
     </PreferenceCategory>

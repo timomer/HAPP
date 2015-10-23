@@ -799,27 +799,29 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             JSONObject reply = new JSONObject();
             List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
 
-            if (iobcobChart != null || statList != null || statList.size() > 0) {
-                //reloads charts with Treatment data
-                iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
-                try {
-                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).iob));
-                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).cob));
-                } catch (JSONException e) {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-                return reply;
-            } else {
-                try {
-                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", 0.00));
-                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", 0.00));
-                } catch (JSONException e) {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-                return reply;
+            //enter blank data if there are no stats or the chart is not loaded so below is ignored
+            try {
+                reply.put("iob", String.format(Locale.ENGLISH, "%.2f", 0.00));
+                reply.put("cob", String.format(Locale.ENGLISH, "%.2f", 0.00));
+            } catch (JSONException e) {
+                Crashlytics.logException(e);
+                e.printStackTrace();
             }
+
+            if (iobcobChart != null || statList != null) {
+                if (statList.size() > 0) {
+                    //reloads charts with Treatment data
+                    iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
+                    try {
+                        reply.put("iob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).iob));
+                        reply.put("cob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).cob));
+                    } catch (JSONException e) {
+                        Crashlytics.logException(e);
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return reply;
         }
     }
     public static class basalvsTempBasalFragment extends Fragment {
