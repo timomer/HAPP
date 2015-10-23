@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
+import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
 import java.util.Date;
 
@@ -183,10 +184,12 @@ public class pumpAction {
                             String toastMsg = "";
                             if (insulinTreatment.value != null) {
                                 insulinTreatment.save();
+                                NSUploader.addTreatment(insulinTreatment, MainActivity.activity);
                                 toastMsg += insulinTreatment.value + "U ";
                             }
                             if (carbTreatment.value != null) {
                                 carbTreatment.save();
+                                NSUploader.addTreatment(carbTreatment, MainActivity.activity);
                                 toastMsg += carbTreatment.value + "g ";
                             }
 

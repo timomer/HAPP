@@ -284,6 +284,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
                         public void onClick(DialogInterface dialog, int which) {
 
                             treatment.save();
+                            NSUploader.addTreatment(treatment, MainActivity.activity);
                             Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
                             loadLastTreatments();
 

@@ -41,7 +41,7 @@ public class NSUploader {
             try {
                 treatmentJSON.put("enterdBy", "HAPP");
                 treatmentJSON.put("eventType", "HAPP_Treatment");
-                treatmentJSON.put("created_at", treatment.datetime);
+                treatmentJSON.put("created_at", treatment.datetime_display);
 
                 switch (treatment.type) {
                     case "Insulin":
@@ -56,7 +56,9 @@ public class NSUploader {
                         return;
                 }
 
-                jsonPost(treatmentJSON, prefs.getString("nightscout_url", ""));
+                String url = prefs.getString("nightscout_url", "") + "/treatments/";
+
+                jsonPost(treatmentJSON, url);
 
             } catch (JSONException e) {
                 Crashlytics.logException(e);
