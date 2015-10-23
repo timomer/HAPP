@@ -147,6 +147,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         //xdrip end
 
         setContentView(R.layout.activity_main);
+        extendedGraphBuilder = new ExtendedGraphBuilder(this);
 
         //Setup menu
         menu1 = (FloatingActionMenu) findViewById(R.id.menu);

@@ -284,8 +284,7 @@
             <android.support.v4.view.ViewPager
                 android:id="@+id/pager"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="3">
+                android:layout_height="200dp">
 
                 <android.support.v4.view.PagerTabStrip
                     android:id="@+id/pager_title_strip"
