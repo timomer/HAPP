@@ -20,6 +20,7 @@ import android.preference.RingtonePreference;
 import android.text.TextUtils;
 
 import com.hypodiabetic.happ.R;
+import com.hypodiabetic.happ.tools;
 
 import java.util.prefs.Preferences;
 
@@ -66,6 +67,7 @@ public class SettingsActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_openaps);
             addPreferencesFromResource(R.xml.pref_bg_notification);
             addPreferencesFromResource(R.xml.pref_nightscout);
+            addPreferencesFromResource(R.xml.pref_export_import);
             //addPreferencesFromResource(R.xml.pref_data_source);
             //addPreferencesFromResource(R.xml.pref_watch_integration); // TODO: 08/08/2015 leaveout watch for now 
 
@@ -83,6 +85,23 @@ public class SettingsActivity extends PreferenceActivity {
                 bindPreferenceSummaryToValue(findPreference("isf_"+x));
                 bindPreferenceSummaryToValue(findPreference("carbratio_"+x));
             }
+
+            Preference preference_export = findPreference("export");
+            preference_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    tools.exportSharedPreferences(preference.getContext());
+                    return true;
+                }
+            });
+            Preference preference_import = findPreference("import");
+            preference_import.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    tools.importSharedPreferences(preference.getContext());
+                    return true;
+                }
+            });
         }
     }
 

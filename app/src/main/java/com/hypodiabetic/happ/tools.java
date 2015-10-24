@@ -2,11 +2,22 @@ package com.hypodiabetic.happ;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.code.nightwatch.Constants;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by Tim on 15/09/2015.
@@ -42,5 +53,76 @@ public class tools {
     public static String bgUnitsFormat(Context c){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         return prefs.getString("units", "mgdl");
+    }
+
+    //exports shared Preferences
+    public static void exportSharedPreferences(Context c){
+
+        File path = new File(Environment.getExternalStorageDirectory().toString());
+        File file = new File(path, "HAPPSharedPreferences");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+
+        try
+        {
+            FileWriter fw = new FileWriter(file);
+            PrintWriter pw = new PrintWriter(fw);
+            Map<String,?> prefsMap = prefs.getAll();
+            for(Map.Entry<String,?> entry : prefsMap.entrySet())
+            {
+                pw.println(entry.getKey() + "::" + entry.getValue().toString());
+            }
+            pw.close();
+            fw.close();
+            Toast.makeText(c, "Settings Exported to " + path, Toast.LENGTH_LONG).show();
+        }
+        catch (Exception e){
+            Crashlytics.logException(e);
+        }
+    }
+    //imports shared Preferences
+    public static void importSharedPreferences(Context c){
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        SharedPreferences.Editor editor = prefs.edit();
+
+
+        File path = new File(Environment.getExternalStorageDirectory().toString());
+        File file = new File(path, "HAPPSharedPreferences");
+        String line;
+        String[] lineParts;
+
+        try {
+
+            //Clears all prefs before importing
+            editor.clear();
+            editor.commit();
+
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+
+            while( ( line = reader.readLine() ) != null)
+            {
+                lineParts = line.split("::");
+                if (lineParts.length == 2) {
+                    if (lineParts[1].equals("true") || lineParts[1].equals("false")){
+                        editor.putBoolean(lineParts[0], Boolean.parseBoolean(lineParts[1]));
+                    } else {
+                        editor.putString(lineParts[0], lineParts[1]);
+                    }
+                }
+            }
+            reader.close();
+            editor.commit();
+            Toast.makeText(c, "Settings Imported", Toast.LENGTH_LONG).show();
+
+        } catch (FileNotFoundException e2) {
+            // TODO Auto-generated catch block
+            Toast.makeText(c, "File not found " + file, Toast.LENGTH_LONG).show();
+            e2.printStackTrace();
+
+        } catch (IOException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+
+        }
     }
 }

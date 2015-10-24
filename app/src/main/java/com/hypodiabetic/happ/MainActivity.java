@@ -139,7 +139,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         //xdrip start
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        checkEula(); 
+        checkEula();
 
         startService(new Intent(getApplicationContext(), DataCollectionService.class));
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
@@ -225,13 +225,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     public void test(View view){
         //Notifications.setTemp("test", MainActivity.activity);
-        //JSONObject openAPSSuggest = determine_basal.runOpenAPS(v.getContext());                        //Run OpenAPS
-        //updateOpenAPSDetails(openAPSSuggest);
-        //setViewport();
-        //setupCharts();
-        //chart = (LineChartView) findViewById(R.id.chart);
 
-        setupCharts();
+        //tools.exportSharedPreferences(view.getContext());
+        //tools.importSharedPreferences(view.getContext());
     }
 
     //xdrip functions start
