@@ -132,12 +132,14 @@ public class BolusWizardActivity extends Activity {
             suggestedBolus.setText(bw.getString("suggested_bolus"));
 
             Date dateNow = new Date();
-            if (bw.getDouble("suggested_bolus") > 0){
-                bolusTreatment.datetime         = dateNow.getTime();
-                bolusTreatment.datetime_display = dateNow.toString();
-                bolusTreatment.note             = "bolus";
-                bolusTreatment.type             = "Insulin";
-                bolusTreatment.value            = bw.getDouble("suggested_bolus");
+            if (bw.has("suggested_bolus")) {
+                if (bw.getDouble("suggested_bolus") > 0) {
+                    bolusTreatment.datetime = dateNow.getTime();
+                    bolusTreatment.datetime_display = dateNow.toString();
+                    bolusTreatment.note = "bolus";
+                    bolusTreatment.type = "Insulin";
+                    bolusTreatment.value = bw.getDouble("suggested_bolus");
+                }
             }
             if (carbValue > 0){
                 carbTratment.datetime         = dateNow.getTime();

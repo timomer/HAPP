@@ -169,7 +169,7 @@ public class pumpAction {
 
             //Offline mode, prompt user
             String popUpMsg;
-            if (carbTreatment.value != null){
+            if (carbTreatment != null){
                 popUpMsg = insulinTreatment.value + "U Bolus to set & " + carbTreatment.value + "g Carbs to save";
             } else {
                 popUpMsg = insulinTreatment.value + "U Bolus to set";
@@ -187,7 +187,7 @@ public class pumpAction {
                                 NSUploader.addTreatment(insulinTreatment, MainActivity.activity);
                                 toastMsg += insulinTreatment.value + "U ";
                             }
-                            if (carbTreatment.value != null) {
+                            if (carbTreatment != null) {
                                 carbTreatment.save();
                                 NSUploader.addTreatment(carbTreatment, MainActivity.activity);
                                 toastMsg += carbTreatment.value + "g ";
