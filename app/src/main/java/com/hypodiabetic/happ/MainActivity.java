@@ -463,8 +463,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 openAPSAgeTextView  = (TextView)findViewById(R.id.openapsAge);
                 openAPSAgeTextView.setText(openAPSFragment.age());
                 try {
-                    eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
-                    snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
+                    if (!openAPSSuggest.isNull("eventualBG") && !openAPSSuggest.getString("eventualBG").equals("NA")) eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
+                    if (!openAPSSuggest.isNull("snoozeBG") && !openAPSSuggest.getString("snoozeBG").equals("NA")) snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
 
                 }catch (JSONException e) {
                     Crashlytics.logException(e);

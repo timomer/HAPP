@@ -109,21 +109,21 @@ public class Profile extends Model{
         Calendar calendarNow = GregorianCalendar.getInstance();
         calendarNow.setTime(dateNow);
         Integer hourNow = calendarNow.get(Calendar.HOUR_OF_DAY);
-        Integer carbratioNow;
+        Double carbratioNow;
 
         while (true) {
             if (prefs.getString("carbratio_" + hourNow, "empty").equals("empty") || prefs.getString("carbratio_" + hourNow, "").equals("")) {
                 hourNow--;
                 if (hourNow < 0){                                                                   //Cannot find a Basal Rate for this time or previous time
-                    carbratioNow = 0;
+                    carbratioNow = 0D;
                     break;
                 }
             } else {
-                carbratioNow = Integer.parseInt(prefs.getString("carbratio_" + hourNow, "0"));            //Found a Basal rate for this time or a time before
+                carbratioNow = Double.parseDouble(prefs.getString("carbratio_" + hourNow, "0"));      //Found a Basal rate for this time or a time before
                 break;
             }
         }
-        return carbratioNow;
+        return carbratioNow.intValue();                                                             //This converts Double values entered by the user into a Int, as expected
     }
 
 
