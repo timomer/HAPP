@@ -120,6 +120,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     BroadcastReceiver _broadcastReceiver;
     BroadcastReceiver newDataReceiver;
     //xdrip end
+    BroadcastReceiver newStatsReceiver;
+    BroadcastReceiver newOpenAPSReceiver;
+    BroadcastReceiver updateEvery60Seconds;
 
 
 
@@ -142,6 +145,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         checkEula();
 
         startService(new Intent(getApplicationContext(), DataCollectionService.class));
+        
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         PreferenceManager.setDefaultValues(this, R.xml.pref_bg_notification, false);
         //xdrip end
@@ -187,20 +191,37 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         iobcobFragmentObject        = new iobcobFragment();
         basalvsTempBasalObject      = new basalvsTempBasalFragment();
 
-        //starts OpenAPS and Treatments loops
-        startLoops();
 
-        //RunsOpenAPS
+        //listens out for openAPS updates
+        newOpenAPSReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                JSONObject openAPSSuggest = new JSONObject();
+                try {
+                    openAPSSuggest = new JSONObject(intent.getStringExtra("openAPSSuggest"));
+                }  catch (JSONException e) {
+                    Crashlytics.logException(e);
+                } finally {
+                    updateOpenAPSDetails(openAPSSuggest);
+                    displayCurrentInfo();
+                }
+            }
+        };
+        registerReceiver(newOpenAPSReceiver, new IntentFilter("ACTION_UPDATE_OPENAPS"));
         runOpenAPS(findViewById(android.R.id.content));
 
-        //Get Recent Stats
-        updateStats();
-
-
+        //Updates notifications every 60 seconds
+        updateEvery60Seconds = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Notifications.updateCard(context);
+            }
+        };
+        registerReceiver(updateEvery60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
 
     }
 
-    public void setupCharts() {
+    public void setupBGCharts() {
 
         //BG charts
         updateStuff = false;
@@ -377,6 +398,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if(newDataReceiver != null) {
             unregisterReceiver(newDataReceiver);
         }
+        if (newStatsReceiver != null){
+            unregisterReceiver(newStatsReceiver);
+        }
     }
     //xdrip functions ends
 
@@ -388,12 +412,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         //xdrip start
         extendedGraphBuilder = new ExtendedGraphBuilder(getApplicationContext());
 
-
         _broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
                 if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                    setupCharts();
+                    setupBGCharts();
                     displayCurrentInfo();
                     holdViewport.set(0, 0, 0, 0);
                 }
@@ -402,17 +425,29 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         newDataReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context ctx, Intent intent) {
-                setupCharts();
+                setupBGCharts();
                 displayCurrentInfo();
                 holdViewport.set(0, 0, 0, 0);
             }
         };
         registerReceiver(_broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
         registerReceiver(newDataReceiver, new IntentFilter(Intents.ACTION_NEW_BG));
-        setupCharts();
+        setupBGCharts();
         displayCurrentInfo();
         holdViewport.set(0, 0, 0, 0);
         //xdrip end
+
+        //listens out for new Stats
+        newStatsReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateStats();
+                displayCurrentInfo();
+            }
+        };
+        registerReceiver(newStatsReceiver, new IntentFilter("ACTION_UPDATE_STATS"));
+        updateStats();
+
     }
 
 
@@ -451,66 +486,58 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
 
     //Updates the OpenAPS Fragment
-    public void updateOpenAPSDetails(final JSONObject openAPSSuggest){
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+    public void updateOpenAPSDetails(final JSONObject openAPSSuggest) {
 
-                openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest, MainActivity.activity);     //Set the new suggested Basal
+        openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest, MainActivity.activity);     //Set the new suggested Basal
 
-                eventualBGValue     = (TextView) findViewById(R.id.eventualBGValue);
-                snoozeBGValue       = (TextView) findViewById(R.id.snoozeBGValue);
-                openAPSAgeTextView  = (TextView)findViewById(R.id.openapsAge);
-                openAPSAgeTextView.setText(openAPSFragment.age());
-                try {
-                    if (!openAPSSuggest.isNull("eventualBG") && !openAPSSuggest.getString("eventualBG").equals("NA")) eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
-                    if (!openAPSSuggest.isNull("snoozeBG") && !openAPSSuggest.getString("snoozeBG").equals("NA")) snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
+        eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
+        snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
+        openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
+        openAPSAgeTextView.setText(openAPSFragment.age());
+        try {
+            if (!openAPSSuggest.isNull("eventualBG") && !openAPSSuggest.getString("eventualBG").equals("NA"))
+                eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
+            if (!openAPSSuggest.isNull("snoozeBG") && !openAPSSuggest.getString("snoozeBG").equals("NA"))
+                snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
 
-                }catch (JSONException e) {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
+        } catch (JSONException e) {
+            Crashlytics.logException(e);
+        }
 
-                displayCurrentInfo();
-                setupCharts();
-            }
-        });
+        //displayCurrentInfo();
+        //setupBGCharts();
     }
     //Updates stats and stats Fragments charts
-    public void updateStats(){
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    iobValueTextView = (TextView) findViewById(R.id.iobValue);
-                    cobValueTextView = (TextView) findViewById(R.id.cobValue);
+    public void updateStats() {
 
-                    JSONObject reply;
-                    Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":2");
-                    if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
-                        reply = iobcobActiveFragment.updateChart(MainActivity.activity);
-                    } else {
-                        reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
-                    }
-                    iobValueTextView.setText(reply.getString("iob"));
-                    cobValueTextView.setText(reply.getString("cob"));
+        try {
+            iobValueTextView = (TextView) findViewById(R.id.iobValue);
+            cobValueTextView = (TextView) findViewById(R.id.cobValue);
 
-                    Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
-                    if (iobcob != null){                                                                //Check IOB COB fragment is loaded
-                        iobcobFragment.updateChart();
-                    }
-                    Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:"+R.id.pager+":3");
-                    if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
-                        basalvsTempBasalFragment.updateChart();
-                    }
-
-                    Notifications.updateCard(MainActivity.activity);
-                }catch (JSONException e) {
-                    Crashlytics.logException(e);
-                    Toast.makeText(MainActivity.activity, "Crash running updateStats()", Toast.LENGTH_SHORT).show();
-                }
+            JSONObject reply;
+            Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":2");
+            if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
+                reply = iobcobActiveFragment.updateChart(MainActivity.activity);
+            } else {
+                reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
             }
-        });
+            iobValueTextView.setText(reply.getString("iob"));
+            cobValueTextView.setText(reply.getString("cob"));
+
+            Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
+            if (iobcob != null) {                                                                //Check IOB COB fragment is loaded
+                iobcobFragment.updateChart();
+            }
+            Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":3");
+            if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
+                basalvsTempBasalFragment.updateChart();
+            }
+
+        } catch (JSONException e) {
+            Crashlytics.logException(e);
+            Toast.makeText(MainActivity.activity, "Crash running updateStats()", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
@@ -546,6 +573,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
     public void apsstatusAccept (final View view){
         pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), view.getContext());                           //Action the suggested Temp
+        displayCurrentInfo();
     }
 
 

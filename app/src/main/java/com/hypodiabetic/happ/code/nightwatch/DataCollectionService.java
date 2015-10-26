@@ -14,6 +14,8 @@ import android.util.Log;
 //import com.dexdrip.stephenblack.nightwatch.integration.dexdrip.Intents;
 //import retrofit.RetrofitError;
 //import com.hypodiabetic.happ.TreatmentsRepo;
+import com.hypodiabetic.happ.Receivers.openAPSReceiver;
+import com.hypodiabetic.happ.Receivers.statsReceiver;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
 import java.util.Calendar;
@@ -35,6 +37,10 @@ public class DataCollectionService extends Service {
     boolean pebble_integration  = false;
     boolean endpoint_set = false;
 
+    Integer statsInterval = 300000; //5mins
+    Integer openAPSInterval;
+    AlarmManager managerOpenAPS;
+    PendingIntent pendingIntentOpenAPS;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -46,16 +52,15 @@ public class DataCollectionService extends Service {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setSettings();
         listenForChangeInSettings();
+
+        setStatsAlarm();
+        setOpenAPSAlarm();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         setFailoverTimer();
         setSettings();
-
-        //Updates the OpenAPS
-        //Intent updateOpenAPS = new Intent(Intents.ACTION_UPDATE_OPENAPS);
-        //this.sendBroadcast(updateOpenAPS);
 
 
         if(endpoint_set) { doService(); }
@@ -72,7 +77,25 @@ public class DataCollectionService extends Service {
         setFailoverTimer();
     }
 
+    public void setStatsAlarm(){
+        //Stats Loop
+        AlarmManager managerStats = (AlarmManager)getSystemService(ALARM_SERVICE);
+        Intent statsIntent = new Intent(this, statsReceiver.class);
+        PendingIntent pendingIntentTreatments = PendingIntent.getBroadcast(this, 0, statsIntent, 0);
+        managerStats.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), statsInterval, pendingIntentTreatments);
+    }
+
+    public void setOpenAPSAlarm(){
+        //OpenAPS Loop
+        managerOpenAPS = (AlarmManager)getSystemService(ALARM_SERVICE);
+        Intent openAPSIntent = new Intent(this, openAPSReceiver.class);
+        pendingIntentOpenAPS = PendingIntent.getBroadcast(this, 0, openAPSIntent, 0);
+        managerOpenAPS.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), openAPSInterval, pendingIntentOpenAPS);
+    }
+
     public void setSettings() {
+        openAPSInterval = Integer.parseInt(mPrefs.getString("openaps_loop", "900000"));
+
         wear_integration = mPrefs.getBoolean("watch_sync", false);
         pebble_integration = mPrefs.getBoolean("pebble_sync", false);
         if (mPrefs.getBoolean("nightscout_poll", false) || mPrefs.getBoolean("share_poll", false)) {
@@ -97,7 +120,14 @@ public class DataCollectionService extends Service {
     public void listenForChangeInSettings() {
         mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                setSettings();
+
+                if (Integer.parseInt(mPrefs.getString("openaps_loop", "900000")) != openAPSInterval) {
+                    setSettings();
+                    managerOpenAPS.cancel(pendingIntentOpenAPS);                                        //kills the current alarm
+                    setOpenAPSAlarm();                                                                  //and rebuilds it
+                } else {
+                    setSettings();
+                }
             }
         };
         mPrefs.registerOnSharedPreferenceChangeListener(mPreferencesListener);

@@ -16,5 +16,4 @@ public interface Intents {
 
     String ACTION_NEW_BG = "com.dexdrip.stephenblack.nightwatch.bg";
 
-    String ACTION_UPDATE_OPENAPS = "com.hypodiabetic.happ.updateopenaps";
 }

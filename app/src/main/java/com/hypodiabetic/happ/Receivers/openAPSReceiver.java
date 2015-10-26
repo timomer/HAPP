@@ -50,7 +50,10 @@ public class openAPSReceiver extends BroadcastReceiver{
                 e.printStackTrace();
             }
 
-            MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                         //Updates the Main Activity screen with results
+            Intent intent = new Intent("ACTION_UPDATE_OPENAPS");
+            intent.putExtra("openAPSSuggest", openAPSSuggest.toString());
+            context.sendBroadcast(intent);
+            //MainActivity.getInstace().updateOpenAPSDetails(openAPSSuggest);                         //Updates the Main Activity screen with results
 
         }
 }

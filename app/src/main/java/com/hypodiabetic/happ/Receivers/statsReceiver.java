@@ -54,7 +54,9 @@ public class statsReceiver extends BroadcastReceiver {
 
         stat.save();                                                                                //Records Stat for now to DB (not future stats)
 
-        MainActivity.getInstace().updateStats();                                                    //Updates the Main Activity screen
+        Intent intent = new Intent("ACTION_UPDATE_STATS");
+        context.sendBroadcast(intent);
+        //MainActivity.getInstace().updateStats();                                                    //Updates the Main Activity screen
 
     }
 

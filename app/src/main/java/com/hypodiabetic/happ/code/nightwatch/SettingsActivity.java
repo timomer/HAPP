@@ -3,6 +3,8 @@ package com.hypodiabetic.happ.code.nightwatch;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -19,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 
+import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.R;
 import com.hypodiabetic.happ.tools;
 
@@ -102,6 +105,16 @@ public class SettingsActivity extends PreferenceActivity {
                     return true;
                 }
             });
+
+            PackageManager manager = MainActivity.activity.getPackageManager();
+            try {
+                PackageInfo info = manager.getPackageInfo(MainActivity.activity.getPackageName(), 0);
+                Preference preference_version = findPreference("version");
+                preference_version.setSummary("Code:" + info.versionCode + " Name:" + info.versionName);
+            } catch (PackageManager.NameNotFoundException n){
+
+            }
+
         }
     }
 

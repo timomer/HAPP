@@ -50,6 +50,7 @@
             android:enabled="true"
             android:exported="true" >
         </service>
+
         <service
             android:name=".integration.dexdrip.IntentService"
             android:exported="false" />
