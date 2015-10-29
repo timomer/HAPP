@@ -184,14 +184,13 @@ public class pumpAction {
                             String toastMsg = "";
                             if (insulinTreatment.value != null) {
                                 insulinTreatment.save();
-                                NSUploader.addTreatment(insulinTreatment, MainActivity.activity);
                                 toastMsg += insulinTreatment.value + "U ";
                             }
                             if (carbTreatment != null) {
                                 carbTreatment.save();
-                                NSUploader.addTreatment(carbTreatment, MainActivity.activity);
                                 toastMsg += carbTreatment.value + "g ";
                             }
+                            NSUploader.uploadTreatments(MainActivity.activity);
 
                             Toast.makeText(c, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
 

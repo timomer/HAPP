@@ -284,7 +284,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
                         public void onClick(DialogInterface dialog, int which) {
 
                             treatment.save();
-                            NSUploader.addTreatment(treatment, MainActivity.activity);
+                            NSUploader.uploadTreatments(MainActivity.activity);
                             Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
                             loadLastTreatments();
 
@@ -303,7 +303,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         } else {
 
             treatment.save();
-            NSUploader.addTreatment(treatment,this);
+            NSUploader.uploadTreatments(this);
             Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 
             loadLastTreatments();

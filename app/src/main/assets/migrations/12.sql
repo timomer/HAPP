@@ -1,0 +1,1 @@
+ALTER TABLE Treatments ADD COLUMN ns_upload_id TEXT;

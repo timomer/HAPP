@@ -34,7 +34,7 @@ public class Treatments extends Model{
     public Double value;
 
     @Expose
-    @Column(name = "datetime_display")              //used for debugging display
+    @Column(name = "datetime_display")              //used for debugging display + NS integration
     public String datetime_display;
 
     @Expose
@@ -44,6 +44,10 @@ public class Treatments extends Model{
     @Expose
     @Column(name = "note")                          //Could be: bolus
     public String note;
+
+    @Expose
+    @Column(name = "ns_upload_id")                  //NS integration successful upload ID
+    public String ns_upload_id;
 
     public static List<Treatments> latestTreatments(int limit, String where) {
         DecimalFormat df = new DecimalFormat("#");
