@@ -27,6 +27,7 @@ import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -149,7 +150,12 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
             HashMap<String, String> treatmentItem = new HashMap<String, String>();
 
             treatmentItem.put("id", treatment.getId().toString());
-            Date treatmentDate = new Date(treatment.datetime);
+            Date treatmentDate;
+            if (treatment.datetime != null){
+                treatmentDate = new Date(treatment.datetime);
+            } else {
+                treatmentDate = new Date(0);
+            }
             treatmentItem.put("date", sdf.format(treatmentDate));
             treatmentItem.put("value", treatment.value.toString());
             treatmentItem.put("type", treatment.type);
@@ -271,7 +277,12 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         treatment.datetime_display  = treatmentDateTime.toString();
         treatment.note              = spinner_notes.getSelectedItem().toString();
         treatment.type              = spinner_treatment_type.getSelectedItem().toString();
-        treatment.value             = Double.parseDouble(editText_treatment_value.getText().toString());
+        try {
+            treatment.value = NumberFormat.getNumberInstance(java.util.Locale.UK).parse(editText_treatment_value.getText().toString()).doubleValue();
+        } catch (ParseException e){
+            Crashlytics.logException(e);
+        }
+
 
         if (treatment.value == 0) {                                                                 //No value given
             Toast.makeText(this, "Enter a value", Toast.LENGTH_SHORT).show();

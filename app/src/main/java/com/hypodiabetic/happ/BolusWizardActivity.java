@@ -20,6 +20,8 @@ import com.hypodiabetic.happ.Objects.Treatments;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 public class BolusWizardActivity extends Activity {
@@ -113,7 +115,13 @@ public class BolusWizardActivity extends Activity {
         bwDisplayBGCorr     = (TextView) findViewById(R.id.bwDisplayBGCorr);
         Double carbValue = 0D;
 
-        if (!carbs.getText().toString().equals("")) carbValue = Double.parseDouble(carbs.getText().toString());
+        if (!carbs.getText().toString().equals("")){
+            try {
+                carbValue = NumberFormat.getNumberInstance(java.util.Locale.UK).parse(carbs.getText().toString()).doubleValue();
+            } catch (ParseException e){
+                Crashlytics.logException(e);
+            }
+        }
 
         JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
 
@@ -164,7 +172,11 @@ public class BolusWizardActivity extends Activity {
     public void wizardAccept(View view){
 
         if (suggestedBolus.getText().toString().trim().length() != 0 && Double.parseDouble(suggestedBolus.getText().toString()) > 0) {
-            bolusTreatment.value = Double.parseDouble(suggestedBolus.getText().toString());
+            try {
+                bolusTreatment.value = NumberFormat.getNumberInstance(java.util.Locale.UK).parse(suggestedBolus.getText().toString()).doubleValue();
+            } catch (ParseException e){
+                Crashlytics.logException(e);
+            }
             pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
         } else if (carbTratment.value > 0) {
             carbTratment.save();

@@ -35,18 +35,13 @@ public class BolusWizard {
         Bg bg = Bg.last();
         Double lastBG = 0D;
         if (bg != null) lastBG = bg.sgv_double();
-        Double eventualBG   = 0D;
-        Double snoozeBG     = 0D;
-        Double cob          = 0D;
-        Double biob         = 0D;
-        try {
-            eventualBG  = openAPSNow.getDouble("eventualBG");
-            snoozeBG  = openAPSNow.getDouble("snoozeBG");
-            cob         = cobNow.getDouble("cob");
-            biob        = iobNow.getDouble("bolusiob");
-        } catch (JSONException e) {
-            Crashlytics.logException(e);
-        }
+
+        Double eventualBG, snoozeBG, cob, biob;
+        eventualBG  = openAPSNow.optDouble("eventualBG",0D);
+        snoozeBG    = openAPSNow.optDouble("snoozeBG",0D);
+        cob         = cobNow.optDouble("cob",0D);
+        biob        = iobNow.optDouble("bolusiob",0D);
+
 
         Double insulin_correction_bg;
         String insulin_correction_bg_maths;
@@ -267,7 +262,7 @@ public class BolusWizard {
         try {
             results.put("BOLUS Insulin on Board", prop.getString("displayIOB") + "U");
             results.put("Sensitivity", "-" + profile.isf + "U");
-            results.put("Expected effect", prop.getString("displayIOB") + " x -" + profile.isf + "= -" + prop.getString("effectDisplay") );
+            results.put("Expected effect", prop.optString("displayIOB","0") + " x -" + profile.isf + "= -" + prop.getString("effectDisplay") );
             results.put("Expected outcome", prop.getString("scaledSGV") + "-" + prop.getString("effectDisplay") + " = " + prop.getString("outcomeDisplay"));
 
             // TODO: 02/09/2015 these items should be put at the top of the JSON object, poss in reverse order
