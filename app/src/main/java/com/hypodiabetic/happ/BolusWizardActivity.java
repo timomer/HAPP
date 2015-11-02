@@ -125,28 +125,32 @@ public class BolusWizardActivity extends Activity {
 
         JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
 
-        try {
+
             //Bolus Wizard Display
-            bwDisplayIOBCorr.setText(   bw.getString("net_biob") + "U");
-            bwDisplayCarbCorr.setText(  bw.getString("insulin_correction_carbs") + "U");
-            bwDisplayBGCorr.setText(    bw.getString("insulin_correction_bg") + "U");
+            bwDisplayIOBCorr.setText(   bw.optString("net_biob", "") + "U");
+            bwDisplayCarbCorr.setText(  bw.optString("insulin_correction_carbs", "") + "U");
+            bwDisplayBGCorr.setText(    bw.optString("insulin_correction_bg", "") + "U");
 
             //Bolus Wizard Calculations
-            reqInsulinbiob.setText(bw.getString("net_biob_maths"));
-            reqInsulinCarbs.setText(bw.getString("insulin_correction_carbs_maths"));
-            ReqInsulinBgText.setText(bw.getString("bgCorrection") + " bg correction");
-            reqInsulinBg.setText(bw.getString("insulin_correction_bg_maths"));
-            sugBolus.setText(bw.getString("suggested_bolus_maths"));
-            suggestedBolus.setText(bw.getString("suggested_bolus"));
+            reqInsulinbiob.setText(bw.optString("net_biob_maths", ""));
+            reqInsulinCarbs.setText(bw.optString("insulin_correction_carbs_maths", ""));
+            ReqInsulinBgText.setText(bw.optString("bgCorrection", "") + " bg correction");
+            reqInsulinBg.setText(bw.optString("insulin_correction_bg_maths", ""));
+            sugBolus.setText(bw.optString("suggested_bolus_maths", ""));
+            suggestedBolus.setText(bw.optString("suggested_bolus", ""));
 
             Date dateNow = new Date();
             if (bw.has("suggested_bolus")) {
-                if (bw.getDouble("suggested_bolus") > 0) {
-                    bolusTreatment.datetime = dateNow.getTime();
-                    bolusTreatment.datetime_display = dateNow.toString();
-                    bolusTreatment.note = "bolus";
-                    bolusTreatment.type = "Insulin";
-                    bolusTreatment.value = bw.getDouble("suggested_bolus");
+                try {
+                    if (NumberFormat.getNumberInstance(java.util.Locale.UK).parse(bw.optString("suggested_bolus", "")).doubleValue() > 0) {
+                        bolusTreatment.datetime = dateNow.getTime();
+                        bolusTreatment.datetime_display = dateNow.toString();
+                        bolusTreatment.note = "bolus";
+                        bolusTreatment.type = "Insulin";
+                        bolusTreatment.value = bw.optDouble("suggested_bolus", 0D);
+                    }
+                } catch (ParseException e){
+                    Crashlytics.logException(e);
                 }
             }
             if (carbValue > 0){
@@ -157,9 +161,7 @@ public class BolusWizardActivity extends Activity {
                 carbTratment.value            = carbValue;
             }
 
-        } catch (JSONException e) {
-            Crashlytics.logException(e);
-        }
+
 
         buttonAccept = (Button) findViewById(R.id.wizardAccept);
         if (carbTratment.value == null && bolusTreatment.value == null){

@@ -260,18 +260,18 @@ public class BolusWizard {
 
         JSONObject results = new JSONObject();
         try {
-            results.put("BOLUS Insulin on Board", prop.getString("displayIOB") + "U");
+            results.put("BOLUS Insulin on Board", prop.optString("displayIOB", "0") + "U");
             results.put("Sensitivity", "-" + profile.isf + "U");
-            results.put("Expected effect", prop.optString("displayIOB","0") + " x -" + profile.isf + "= -" + prop.getString("effectDisplay") );
-            results.put("Expected outcome", prop.getString("scaledSGV") + "-" + prop.getString("effectDisplay") + " = " + prop.getString("outcomeDisplay"));
+            results.put("Expected effect", prop.optString("displayIOB","0") + " x -" + profile.isf + "= -" + prop.optString("effectDisplay", "0") );
+            results.put("Expected outcome", prop.optString("scaledSGV", "0") + "-" + prop.optString("effectDisplay", "0") + " = " + prop.optString("outcomeDisplay", "0"));
 
             // TODO: 02/09/2015 these items should be put at the top of the JSON object, poss in reverse order
-            if (prop.getDouble("bolusEstimate") < 0) {
+            if (prop.optDouble("bolusEstimate", 0D) < 0) {
                 //info.unshift({label: '---------', value: ''});
-                Double carbEquivalent = Math.ceil(Math.abs(profile.carbRatio * prop.getDouble("bolusEstimate")));
-                results.put("Carb Equivalent", prop.getString("bolusEstimateDisplay") + "U * " + profile.carbRatio + " = " + carbEquivalent + "g");
+                Double carbEquivalent = Math.ceil(Math.abs(profile.carbRatio * prop.optDouble("bolusEstimate", 0D)));
+                results.put("Carb Equivalent", prop.optString("bolusEstimateDisplay", "0") + "U * " + profile.carbRatio + " = " + carbEquivalent + "g");
                 results.put("Current Carb Ratio", "1U for " + profile.carbRatio + "g");
-                results.put("-BWP", prop.getString("bolusEstimateDisplay") + "U, maybe covered by carbs?");
+                results.put("-BWP", prop.optString("bolusEstimateDisplay", "0") + "U, maybe covered by carbs?");
             }
 
         } catch (JSONException e) {

@@ -3,6 +3,7 @@ package com.hypodiabetic.happ.integration.nightscout;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.widget.Switch;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -12,6 +13,7 @@ import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.JSONArrayPOST;
 import com.hypodiabetic.happ.MainActivity;
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.tools;
 
@@ -28,8 +30,48 @@ import java.util.List;
  */
 public class NSUploader {
 
+    public static void uploadTempBasals(Context c){
+        //Will grab the last 10 suggested TempBasals and check they have all been uploaded to NS
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+
+        List<TempBasal> tempBasals = TempBasal.latestTempBasals(10);
+        JSONArray tempBasalsJSONArray = new JSONArray();
+        String url = prefs.getString("nightscout_url", "") + "/treatments/";
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        String dateAsISO8601;
+
+        for (TempBasal tempBasal : tempBasals){
+            JSONObject tempBasalJSON = new JSONObject();
+
+            if (tempBasal.ns_upload_id == null){
+                try {
+                    tempBasalJSON.put("happ_id", tempBasal.getId());
+                    tempBasalJSON.put("enterdBy", "HAPP_APP");
+                    dateAsISO8601 = df.format(tempBasal.start_time);
+                    tempBasalJSON.put("created_at", dateAsISO8601);
+                    tempBasalJSON.put("eventType", "Temp Basal");
+                    tempBasalJSON.put("duration", tempBasal.duration);
+
+                    if (tempBasal.basal_type.equals("percent")){
+                        tempBasalJSON.put("percent", tempBasal.ratePercent);
+                    } else {
+                        tempBasalJSON.put("absolute", tempBasal.rate);
+                    }
+
+                    tempBasalsJSONArray.put(tempBasalJSON);
+
+                } catch (JSONException e) {
+                    Crashlytics.logException(e);
+                }
+            }
+        }
+        if (tempBasalsJSONArray.length() > 0){
+            jsonPost(tempBasalsJSONArray, url);
+        }
+    }
+
     public static void uploadTreatments(Context c){
-        //Will grab the last 30 treatments and check they have all been uploaded to NS
+        //Will grab the last 10 treatments and check they have all been uploaded to NS
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
@@ -42,14 +84,12 @@ public class NSUploader {
             String dateAsISO8601;
 
             for (Treatments treatment : treatments) {
-
                 JSONObject treatmentJSON = new JSONObject();
 
                 if (treatment.ns_upload_id == null) {
                     try {
                         treatmentJSON.put("happ_id", treatment.getId());
-                        treatmentJSON.put("enterdBy", "HAPP");
-                        treatmentJSON.put("eventType", "HAPP_Treatment");
+                        treatmentJSON.put("enterdBy", "HAPP_APP");
                         treatmentJSON.put("display_date", treatment.datetime_display);
                         dateAsISO8601 = df.format(treatment.datetime);
                         treatmentJSON.put("created_at", dateAsISO8601);
@@ -58,9 +98,11 @@ public class NSUploader {
                             case "Insulin":
                                 treatmentJSON.put("insulin", treatment.value);
                                 treatmentJSON.put("units", tools.bgUnitsFormat(c));
+                                treatmentJSON.put("eventType", "Bolus");
                                 break;
                             case "Carbs":
                                 treatmentJSON.put("carbs", treatment.value);
+                                treatmentJSON.put("eventType", "Carbs");
                                 break;
                             default:
                                 //no idea what this treatment is, exit
@@ -71,7 +113,6 @@ public class NSUploader {
                     } catch (JSONException e) {
                         Crashlytics.logException(e);
                     }
-
                 }
             }
 
@@ -101,10 +142,20 @@ public class NSUploader {
                         if (reply_ops.getJSONObject(i).has("_id"))
                             ns_id = reply_ops.getJSONObject(i).getString("_id");
 
-                        if (happ_id != "" && ns_id != "") {                                         //Updates the Treatment with the NS ID
-                            Treatments treatment = Treatments.load(Treatments.class, Long.parseLong(happ_id));
-                            treatment.ns_upload_id = ns_id;
-                            treatment.save();
+                        if (happ_id != "" && ns_id != "") {                                         //Updates the Object with the NS ID
+                            switch (reply_ops.getJSONObject(i).getString("eventType")){
+                                case "Carbs":
+                                case "Bolus":
+                                    Treatments treatment = Treatments.load(Treatments.class, Long.parseLong(happ_id));
+                                    treatment.ns_upload_id = ns_id;
+                                    treatment.save();
+                                    break;
+                                case "Temp Basal":
+                                    TempBasal tempBasal = TempBasal.load(TempBasal.class, Long.parseLong(happ_id));
+                                    tempBasal.ns_upload_id = ns_id;
+                                    tempBasal.save();
+                                    break;
+                            }
                         }
                     }
 

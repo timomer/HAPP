@@ -131,9 +131,17 @@ public class Notifications {
     }
 
     //Clear all notifications
-    public static void clear(Context context){
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
-        //((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
+    public static void clear(String what, Context context){
+
+        switch (what){
+            case "updateCard":
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
+                break;
+            case "newTemp":
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
+                break;
+        }
+
     }
 
 

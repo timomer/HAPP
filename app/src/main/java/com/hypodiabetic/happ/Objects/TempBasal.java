@@ -8,7 +8,9 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 
+import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Tim on 03/09/2015.
@@ -37,6 +39,9 @@ public class TempBasal extends Model {
     @Expose
     @Column(name = "current_pump_basal")
     public Double   current_pump_basal;     //Pumps current basal
+    @Expose
+    @Column(name = "ns_upload_id")          //NS integration successful upload ID
+    public String ns_upload_id;
 
     public Date     created_time = new Date();
 
@@ -88,5 +93,16 @@ public class TempBasal extends Model {
         Date timeNow = new Date();
         Long min_left = ((start_time.getTime() + duration * 60000) - timeNow.getTime()) / 60000 ;   //Time left to run in Mins
         return min_left;
+    }
+
+    public static List<TempBasal> latestTempBasals(int limit) {
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(1);
+
+        return new Select()
+                .from(TempBasal.class)
+                .orderBy("start_time desc")
+                .limit(limit)
+                .execute();
     }
 }

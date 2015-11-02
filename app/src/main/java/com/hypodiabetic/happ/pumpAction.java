@@ -115,6 +115,7 @@ public class pumpAction {
                 Date setNow = new Date();
                 basal.start_time = setNow;
                 basal.save();
+                NSUploader.uploadTempBasals(c);
 
                 //Run openAPS again
                 Intent intent = new Intent("RUN_OPENAPS");
