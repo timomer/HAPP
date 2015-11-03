@@ -1,0 +1,36 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Integration">
+
+        <PreferenceScreen
+            android:key="button_nighscout_category"
+            android:persistent="false"
+            android:title="NightScout Integration">
+
+            <PreferenceCategory
+                android:title="NightScout Integration"
+                android:key="ns">
+                <CheckBoxPreference
+                    android:key="nightscout_integration"
+                    android:title="Integrate with NightScout"
+                    android:summary="Send - Read data from your NightScout site."
+                    android:defaultValue="false" />
+                <EditTextPreference
+                    android:dependency="nightscout_integration"
+                    android:key="nightscout_url"
+                    android:title="Nightscout URL"
+                    android:summary="URL for your nightscout site"
+                    android:defaultValue="https://{yoursecret}@{yoursite}/api/v1"/>
+                <CheckBoxPreference
+                    android:dependency="nightscout_integration"
+                    android:key="nightscout_treatments"
+                    android:title="Upload Treatments"
+                    android:defaultValue="false" />
+                <CheckBoxPreference
+                    android:dependency="nightscout_integration"
+                    android:key="nightscout_tempbasal"
+                    android:title="Upload Temp Basal"
+                    android:defaultValue="false" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

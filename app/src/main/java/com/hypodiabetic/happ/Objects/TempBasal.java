@@ -40,8 +40,8 @@ public class TempBasal extends Model {
     @Column(name = "current_pump_basal")
     public Double   current_pump_basal;     //Pumps current basal
     @Expose
-    @Column(name = "ns_upload_id")          //NS integration successful upload ID
-    public String ns_upload_id;
+    @Column(name = "integration")           //JSON String holding details of integration made with this record, NS upload, etc
+    public String integration;
 
     public Date     created_time = new Date();
 
@@ -87,6 +87,11 @@ public class TempBasal extends Model {
     public int age(){
         Date timeNow = new Date();
         return (int)(timeNow.getTime() - created_time.getTime()) /1000/60;                          //Age in Mins the Temp Basal was suggested
+    }
+
+    public Date endDate(){
+        Date endedAt = new Date(created_time.getTime() + (duration * 1000 * 60));                   //The date this Temp Basal ended
+        return endedAt;
     }
 
     public Long durationLeft(){

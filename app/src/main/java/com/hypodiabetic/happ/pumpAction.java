@@ -7,10 +7,14 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -21,6 +25,8 @@ import java.util.Date;
 public class pumpAction {
 
     public static void cancelTempBasal(final Context c){
+        //Cancels a Running Temp Basal and updates the DB with the Temp Basal new duration
+
         final TempBasal active_basal = TempBasal.getCurrentActive(null);
         Date now = new Date();
         Profile p = new Profile().ProfileAsOf(now, c);
@@ -56,8 +62,16 @@ public class pumpAction {
                             public void onClick(DialogInterface dialog, int which) {
 
                                 //Updates the duration of the Active Temp Basal we are stopping
+                                JSONObject tempBasalIntegration = tools.getJSONO(active_basal.integration);
+                                try {
+                                    tempBasalIntegration.put("ns_temp_basal_stop", "dirty");        //Tells NSUploader that this Temp Basal needs to be updated
+                                } catch (JSONException e){
+                                    Crashlytics.logException(e);
+                                }
+                                active_basal.integration = tempBasalIntegration.toString();
                                 active_basal.duration = active_basal.age();
                                 active_basal.save();
+                                NSUploader.uploadTempBasals(c);
 
                                 //Run openAPS again
                                 Intent intent = new Intent("RUN_OPENAPS");

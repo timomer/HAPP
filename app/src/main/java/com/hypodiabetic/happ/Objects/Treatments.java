@@ -46,8 +46,8 @@ public class Treatments extends Model{
     public String note;
 
     @Expose
-    @Column(name = "ns_upload_id")                  //NS integration successful upload ID
-    public String ns_upload_id;
+    @Column(name = "integration")                   //JSON String holding details of integration made with this record, NS upload, etc
+    public String integration;
 
     public static List<Treatments> latestTreatments(int limit, String where) {
         DecimalFormat df = new DecimalFormat("#");

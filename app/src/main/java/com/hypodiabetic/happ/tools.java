@@ -9,6 +9,9 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.code.nightwatch.Constants;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,6 +27,22 @@ import java.util.Map;
  */
 public class tools {
 
+    //Returns a JSON Object from String
+    public static JSONObject getJSONO(String stringJSON){
+        JSONObject returnJSON;
+        if (stringJSON == null || stringJSON.isEmpty()){
+            returnJSON = new JSONObject();
+            return returnJSON;                                              //Returns empty JSON Object
+        } else {
+            try {
+                returnJSON = new JSONObject(stringJSON);
+                return returnJSON;                                          //Returns a JSON Object from string
+            } catch (JSONException e){
+                returnJSON = new JSONObject();
+                return returnJSON;                                          //Did not like that string, return empty JSON Object
+            }
+        }
+    }
 
     //Converts BG between US and UK formats
     public static String unitizedBG(Double value, Context c) {

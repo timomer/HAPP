@@ -34,39 +34,64 @@ public class NSUploader {
         //Will grab the last 10 suggested TempBasals and check they have all been uploaded to NS
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        List<TempBasal> tempBasals = TempBasal.latestTempBasals(10);
-        JSONArray tempBasalsJSONArray = new JSONArray();
-        String url = prefs.getString("nightscout_url", "") + "/treatments/";
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-        String dateAsISO8601;
+        if (isNSIntergrationActive("nightscout_tempbasal", prefs)) {
 
-        for (TempBasal tempBasal : tempBasals){
-            JSONObject tempBasalJSON = new JSONObject();
+            List<TempBasal> tempBasals = TempBasal.latestTempBasals(10);
+            JSONArray tempBasalsJSONArray = new JSONArray();
+            String url = prefs.getString("nightscout_url", "") + "/treatments/";
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+            String dateAsISO8601;
 
-            if (tempBasal.ns_upload_id == null){
+            for (TempBasal tempBasal : tempBasals) {
                 try {
-                    tempBasalJSON.put("happ_id", tempBasal.getId());
-                    tempBasalJSON.put("enterdBy", "HAPP_APP");
-                    dateAsISO8601 = df.format(tempBasal.start_time);
-                    tempBasalJSON.put("created_at", dateAsISO8601);
-                    tempBasalJSON.put("eventType", "Temp Basal");
-                    tempBasalJSON.put("duration", tempBasal.duration);
+                    JSONObject tempBasalJSON = new JSONObject();
+                    JSONObject tempBasalIntegration = tools.getJSONO(tempBasal.integration);
 
-                    if (tempBasal.basal_type.equals("percent")){
-                        tempBasalJSON.put("percent", tempBasal.ratePercent);
-                    } else {
-                        tempBasalJSON.put("absolute", tempBasal.rate);
+                    if (!tempBasalIntegration.has("ns_upload_id")) {
+
+                        tempBasalJSON.put("happ_id", tempBasal.getId());
+                        tempBasalJSON.put("enterdBy", "HAPP_APP");
+                        dateAsISO8601 = df.format(tempBasal.start_time);
+                        tempBasalJSON.put("created_at", dateAsISO8601);
+                        tempBasalJSON.put("eventType", "Temp Basal");
+                        tempBasalJSON.put("duration", tempBasal.duration);
+
+                        if (tempBasal.basal_type.equals("percent")) {
+                            tempBasalJSON.put("percent", tempBasal.ratePercent);
+                        } else {
+                            tempBasalJSON.put("absolute", tempBasal.rate);
+                        }
+
+                        tempBasalsJSONArray.put(tempBasalJSON);
+                    } else if (tempBasalIntegration.has("ns_temp_basal_stop")) {
+                        //This Temp Basal has been stopped, insert a record to NS so it knows
+                        if (tempBasalIntegration.getString("ns_temp_basal_stop").equals("dirty")) {
+                            tempBasalJSON.put("happ_id", tempBasal.getId());
+                            tempBasalJSON.put("enterdBy", "HAPP_APP");
+                            dateAsISO8601 = df.format(tempBasal.endDate());
+                            tempBasalJSON.put("created_at", dateAsISO8601);
+                            tempBasalJSON.put("eventType", "Temp Basal");
+                            //tempBasalJSON.put("happ_note", "temp_basal_stop");
+
+                            tempBasalsJSONArray.put(tempBasalJSON);
+                        }
                     }
-
-                    tempBasalsJSONArray.put(tempBasalJSON);
-
                 } catch (JSONException e) {
                     Crashlytics.logException(e);
                 }
+
+            }
+            if (tempBasalsJSONArray.length() > 0) {
+                jsonPost(tempBasalsJSONArray, url);
             }
         }
-        if (tempBasalsJSONArray.length() > 0){
-            jsonPost(tempBasalsJSONArray, url);
+    }
+
+    public static boolean isNSIntergrationActive(String integrationItem, SharedPreferences prefs){
+        if (prefs.getBoolean("nightscout_integration", false)==true && prefs.getBoolean(integrationItem, false)==true && !prefs.getString("nightscout_url", "missing").equals("missing")){
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -75,7 +100,7 @@ public class NSUploader {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        if (prefs.getBoolean("nightscout_integration", false)==true && prefs.getBoolean("nightscout_treatments", false)==true && !prefs.getString("nightscout_url", "missing").equals("missing")) {
+        if (isNSIntergrationActive("nightscout_treatments", prefs)) {
 
             List<Treatments> treatments = Treatments.latestTreatments(10, null);
             JSONArray treatmentsJSONArray = new JSONArray();
@@ -84,10 +109,12 @@ public class NSUploader {
             String dateAsISO8601;
 
             for (Treatments treatment : treatments) {
-                JSONObject treatmentJSON = new JSONObject();
+                try {
+                    JSONObject treatmentJSON = new JSONObject();
+                    JSONObject treatmentIntegration = tools.getJSONO(treatment.integration);
 
-                if (treatment.ns_upload_id == null) {
-                    try {
+                    if (!treatmentIntegration.has("ns_upload_id")) {
+
                         treatmentJSON.put("happ_id", treatment.getId());
                         treatmentJSON.put("enterdBy", "HAPP_APP");
                         treatmentJSON.put("display_date", treatment.datetime_display);
@@ -109,10 +136,9 @@ public class NSUploader {
                                 return;
                         }
                         treatmentsJSONArray.put(treatmentJSON);
-
-                    } catch (JSONException e) {
-                        Crashlytics.logException(e);
                     }
+                } catch (JSONException e) {
+                    Crashlytics.logException(e);
                 }
             }
 
@@ -143,16 +169,28 @@ public class NSUploader {
                             ns_id = reply_ops.getJSONObject(i).getString("_id");
 
                         if (happ_id != "" && ns_id != "") {                                         //Updates the Object with the NS ID
+                            JSONObject integrationJSON;
                             switch (reply_ops.getJSONObject(i).getString("eventType")){
                                 case "Carbs":
                                 case "Bolus":
                                     Treatments treatment = Treatments.load(Treatments.class, Long.parseLong(happ_id));
-                                    treatment.ns_upload_id = ns_id;
+                                    integrationJSON = tools.getJSONO(treatment.integration);
+                                    integrationJSON.put("ns_upload_id", ns_id);
+                                    treatment.integration = integrationJSON.toString();
                                     treatment.save();
                                     break;
                                 case "Temp Basal":
                                     TempBasal tempBasal = TempBasal.load(TempBasal.class, Long.parseLong(happ_id));
-                                    tempBasal.ns_upload_id = ns_id;
+                                    integrationJSON = tools.getJSONO(tempBasal.integration);
+                                    if (integrationJSON.has("ns_temp_basal_stop")){
+                                        if (integrationJSON.getString("ns_temp_basal_stop").equals("dirty")) {
+                                            integrationJSON.remove("ns_temp_basal_stop");
+                                            integrationJSON.put("ns_temp_basal_stop", ns_id);
+                                        }
+                                    } else {
+                                        integrationJSON.put("ns_upload_id", ns_id);
+                                    }
+                                    tempBasal.integration = integrationJSON.toString();
                                     tempBasal.save();
                                     break;
                             }
