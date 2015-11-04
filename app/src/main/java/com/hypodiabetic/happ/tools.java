@@ -56,6 +56,11 @@ public class tools {
         }
     }
 
+    //Clears all Integration data stored for all records
+    public static void clearIntegrationData(){
+
+    }
+
     //always returns value in mgdl
     public static String inmgdl(Double value, Context c) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);

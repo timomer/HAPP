@@ -3,7 +3,6 @@ package com.hypodiabetic.happ.integration.nightscout;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.widget.Switch;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -31,12 +30,12 @@ import java.util.List;
 public class NSUploader {
 
     public static void uploadTempBasals(Context c){
-        //Will grab the last 10 suggested TempBasals and check they have all been uploaded to NS
+        //Will grab the last 20 suggested TempBasals and check they have all been uploaded to NS
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        if (isNSIntergrationActive("nightscout_tempbasal", prefs)) {
+        if (isNSIntegrationActive("nightscout_tempbasal", prefs)) {
 
-            List<TempBasal> tempBasals = TempBasal.latestTempBasals(10);
+            List<TempBasal> tempBasals = TempBasal.latestTempBasals(20);
             JSONArray tempBasalsJSONArray = new JSONArray();
             String url = prefs.getString("nightscout_url", "") + "/treatments/";
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
@@ -87,7 +86,7 @@ public class NSUploader {
         }
     }
 
-    public static boolean isNSIntergrationActive(String integrationItem, SharedPreferences prefs){
+    public static boolean isNSIntegrationActive(String integrationItem, SharedPreferences prefs){
         if (prefs.getBoolean("nightscout_integration", false)==true && prefs.getBoolean(integrationItem, false)==true && !prefs.getString("nightscout_url", "missing").equals("missing")){
             return true;
         } else {
@@ -100,7 +99,7 @@ public class NSUploader {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        if (isNSIntergrationActive("nightscout_treatments", prefs)) {
+        if (isNSIntegrationActive("nightscout_treatments", prefs)) {
 
             List<Treatments> treatments = Treatments.latestTreatments(10, null);
             JSONArray treatmentsJSONArray = new JSONArray();
