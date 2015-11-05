@@ -100,6 +100,11 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
         try {
             if (!openAPSSuggest.isNull("eventualBG") && !openAPSSuggest.getString("eventualBG").equals("NA")) snoozeBG = openAPSSuggest.getDouble("eventualBG");
+            if (snoozeBG >= 400){
+                snoozeBG = 400D;
+            } if (snoozeBG < 0D){
+                snoozeBG = 0D;
+            }
         } catch (JSONException e) {
             Crashlytics.logException(e);
             e.printStackTrace();
