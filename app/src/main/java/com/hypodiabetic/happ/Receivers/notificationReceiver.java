@@ -24,7 +24,7 @@ public class notificationReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent arg1) {
 
         Bundle bundle = arg1.getExtras();
-        switch (bundle.getString("NOTIFICATION_TYPE")){
+        switch (bundle.getString("NOTIFICATION_TYPE","")){
             case "newTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
                 pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp

@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class NSUploader {
 
-    public static void uploadTempBasals(Context c){
+    public static void uploadTempBasals(Context c) {
         //Will grab the last 20 suggested TempBasals and check they have all been uploaded to NS
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
@@ -43,6 +43,7 @@ public class NSUploader {
 
             for (TempBasal tempBasal : tempBasals) {
                 try {
+
                     JSONObject tempBasalJSON = new JSONObject();
                     JSONObject tempBasalIntegration = tools.getJSONO(tempBasal.integration);
 
@@ -75,13 +76,14 @@ public class NSUploader {
                             tempBasalsJSONArray.put(tempBasalJSON);
                         }
                     }
-                } catch (JSONException e) {
+
+                } catch (JSONException | NullPointerException e) {
                     Crashlytics.logException(e);
                 }
 
-            }
-            if (tempBasalsJSONArray.length() > 0) {
-                jsonPost(tempBasalsJSONArray, url);
+                if (tempBasalsJSONArray.length() > 0) {
+                    jsonPost(tempBasalsJSONArray, url);
+                }
             }
         }
     }

@@ -135,10 +135,10 @@ public class Notifications {
 
         switch (what){
             case "updateCard":
-                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
                 break;
             case "newTemp":
-                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
                 break;
         }
 

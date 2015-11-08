@@ -251,10 +251,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
     public void test(View view){
-        //Notifications.setTemp("test", MainActivity.activity);
-
-        //tools.exportSharedPreferences(view.getContext());
-        //tools.importSharedPreferences(view.getContext());
+        Notifications.clear("newTemp",view.getContext());
     }
 
     //xdrip functions start
@@ -280,19 +277,21 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
                     LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
                     Viewport iobv = new Viewport(chart.getMaximumViewport());                       //Update the IOB COB Line Chart Viewport to stay inline with the preview
-                    iobv.left = newViewport.left;
-                    iobv.right = newViewport.right;
-                    iobv.top = extendedGraphBuilder.yCOBMax.floatValue();
-                    iobv.bottom = extendedGraphBuilder.yCOBMin.floatValue();
+                    iobv.left   = newViewport.left;
+                    iobv.right  = newViewport.right;
+                    iobv.top    = iobcobPastChart.getMaximumViewport().top;
+                    iobv.bottom = iobcobPastChart.getMaximumViewport().bottom;
+                    iobcobPastChart.setMaximumViewport(iobv);
                     iobcobPastChart.setCurrentViewport(iobv);
                 }
                 if (basalvsTempBasalObject.getView() != null){
                     LineChartView bvbChart = (LineChartView) findViewById(R.id.basalvsTempBasal_LineChart);
                     Viewport bvbv = new Viewport(chart.getMaximumViewport());
-                    bvbv.left = newViewport.left;
-                    bvbv.right = newViewport.right;
-                    bvbv.top = extendedGraphBuilder.maxBasal.floatValue();
-                    bvbv.bottom = -4;                                                               // TODO: 14/09/2015 how to make this negative of maxBolus?
+                    bvbv.left   = newViewport.left;
+                    bvbv.right  = newViewport.right;
+                    bvbv.top    = bvbChart.getMaximumViewport().top;
+                    bvbv.bottom = bvbChart.getMaximumViewport().bottom;
+                    bvbChart.setMaximumViewport(bvbv);
                     bvbChart.setCurrentViewport(bvbv);
                 }
             }
@@ -310,11 +309,13 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
                 if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
                     LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
-                    iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
                     iobcobPastChart.setCurrentViewport(newViewport);
                     Viewport iobv = new Viewport(iobcobPastChart.getMaximumViewport());             //Update the IOB COB Line Chart Viewport to stay inline with the preview
-                    iobv.left = newViewport.left;
-                    iobv.right = newViewport.right;
+                    iobv.left   = newViewport.left;
+                    iobv.right  = newViewport.right;
+                    iobv.top    = iobcobPastChart.getMaximumViewport().top;
+                    iobv.bottom = iobcobPastChart.getMaximumViewport().bottom;
+                    iobcobPastChart.setMaximumViewport(iobv);
                     iobcobPastChart.setCurrentViewport(iobv);
                 }
                 if (basalvsTempBasalObject.getView() != null){
@@ -322,21 +323,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     Viewport bvbv = new Viewport(chart.getMaximumViewport());
                     bvbv.left = newViewport.left;
                     bvbv.right = newViewport.right;
-                    bvbv.top        = extendedGraphBuilder.maxBasal.floatValue();
-                    bvbv.bottom     = -(extendedGraphBuilder.maxBasal.floatValue() - 1);
-                    //bvbv.top = extendedGraphBuilder.maxBasal.floatValue();
-                    //bvbv.bottom = -4;                                                               // TODO: 14/09/2015 how to make this negative of maxBolus?
+                    bvbv.top    = bvbChart.getMaximumViewport().top;
+                    bvbv.bottom = bvbChart.getMaximumViewport().bottom;
+                    bvbChart.setMaximumViewport(bvbv);
                     bvbChart.setCurrentViewport(bvbv);
 
-
-
-                    //LineChartView bvbChart = (LineChartView) findViewById(R.id.basalvsTempBasal_LineChart);
-                    //bvbChart.setZoomType(ZoomType.HORIZONTAL);
-                    //bvbChart.setCurrentViewport(newViewport);
-                    //Viewport bvbv = new Viewport(bvbChart.getMaximumViewport());
-                    //bvbv.left = newViewport.left;
-                    //bvbv.right = newViewport.right;
-                    //bvbChart.setCurrentViewport(bvbv);
                 }
             }
             if (updateStuff == true) {
@@ -773,11 +764,17 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             //Setup the chart and Viewpoint
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setViewportCalculationEnabled(false);
+
+            iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+
             iobv            = new Viewport(iobcobPastChart.getMaximumViewport());                   //Sets the min and max for Top and Bottom of the viewpoint
             iobv.top        = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
             iobv.bottom     = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+            iobv.left       = previewChart.getCurrentViewport().left;
+            iobv.right      = previewChart.getCurrentViewport().right;
+            iobcobPastChart.setMaximumViewport(iobv);
+            iobcobPastChart.setCurrentViewport(iobv);
 
-            updateChart();
         }
 
         public static void updateChart(){
@@ -786,12 +783,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 //refreshes data and sets viewpoint
                 iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
 
-                iobcobPastChart.setMaximumViewport(iobv);
                 iobv.left       = previewChart.getCurrentViewport().left;
                 iobv.right      = previewChart.getCurrentViewport().right;
+                iobcobPastChart.setMaximumViewport(iobv);
                 iobcobPastChart.setCurrentViewport(iobv);
 
-                //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015
             }
         }
     }
@@ -892,14 +888,18 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         public void setupChart(){
             basalvsTempBasalChart.setZoomType(ZoomType.HORIZONTAL);
-            basalvsTempBasalChart.setViewportCalculationEnabled(true);
+            basalvsTempBasalChart.setViewportCalculationEnabled(false);
+
+            basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
 
             iobv            = new Viewport(basalvsTempBasalChart.getMaximumViewport());             //Sets the min and max for Top and Bottom of the viewpoint
             iobv.top        = extendedGraphBuilder.maxBasal.floatValue();
             iobv.bottom     = -(extendedGraphBuilder.maxBasal.floatValue() - 1);
+            iobv.left       = previewChart.getCurrentViewport().left;
+            iobv.right      = previewChart.getCurrentViewport().right;
+            basalvsTempBasalChart.setMaximumViewport(iobv);
+            basalvsTempBasalChart.setCurrentViewport(iobv);
 
-            updateChart();
-            //iobcobPastChart.setViewportChangeListener(new ChartViewPortListener());                   //causes a crash, no idea why #// TODO: 28/08/2015
         }
 
         //Updates Stats
@@ -907,9 +907,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             if (basalvsTempBasalChart != null) {
                 basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
 
-                //basalvsTempBasalChart.setMaximumViewport(iobv);
                 iobv.left       = previewChart.getCurrentViewport().left;
                 iobv.right      = previewChart.getCurrentViewport().right;
+                basalvsTempBasalChart.setMaximumViewport(iobv);
                 basalvsTempBasalChart.setCurrentViewport(iobv);
             }
         }

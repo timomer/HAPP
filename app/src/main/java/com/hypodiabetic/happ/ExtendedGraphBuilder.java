@@ -110,7 +110,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             e.printStackTrace();
         }
         //openAPSPredictValue.add(new PointValue((float) (timeeNow.getTime() / fuzz), (float) Bg.last().sgv_double()));
-        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz),(float) unitized(snoozeBG.floatValue())));
+        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz), (float) unitized(snoozeBG.floatValue())));
     }
     //##### Adds OpenAPS eventualBG to BG chart #####
 
@@ -215,7 +215,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
     public Line basalvsTempBasalLine(){
         Line cobValuesLine = new Line(tempBasalValues);
-        cobValuesLine.setColor(ChartUtils.COLOR_ORANGE);
+        cobValuesLine.setColor(ChartUtils.COLOR_BLUE);
         cobValuesLine.setHasLines(true);
         cobValuesLine.setHasPoints(false);
         cobValuesLine.setFilled(true);
@@ -252,10 +252,10 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         addfutureValues();
         List<Line> lines = new ArrayList<Line>();
         lines.add(minShowLine());
-        lines.add(iobValuesLine());// TODO: 22/09/2015 debugging
         lines.add(cobValuesLine());
-        lines.add(iobFutureLine());// TODO: 22/09/2015 debugging
-        lines.add(cobFutureLine());// TODO: 22/09/2015 debugging
+        lines.add(cobFutureLine());
+        lines.add(iobValuesLine());
+        lines.add(iobFutureLine());
         return lines;
     }
     public Line maxiobcobShowLine() {
@@ -279,6 +279,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             value.setLabel(String.valueOf(j*2) + "u");
             axisValues.add(value);
         }
+        yAxis.setTextColor(ChartUtils.COLOR_BLUE);
         yAxis.setValues(axisValues);
         yAxis.setHasLines(true);
         yAxis.setMaxLabelChars(5);
@@ -295,6 +296,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             value.setLabel(String.valueOf(j*10) + "g");
             axisValues.add(value);
         }
+        yAxis.setTextColor(ChartUtils.COLOR_ORANGE);
         yAxis.setValues(axisValues);
         yAxis.setHasLines(true);
         yAxis.setMaxLabelChars(5);
@@ -304,7 +306,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
     public Line iobValuesLine(){
         Line iobValuesLine = new Line(iobValues);
-        iobValuesLine.setColor(ChartUtils.COLOR_GREEN);
+        iobValuesLine.setColor(ChartUtils.COLOR_BLUE);
         iobValuesLine.setHasLines(true);
         iobValuesLine.setHasPoints(false);
         iobValuesLine.setFilled(true);
@@ -417,7 +419,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             }
         }
         Line cobValuesLine = new Line(listValues);
-        cobValuesLine.setColor(ChartUtils.COLOR_GREEN);
+        cobValuesLine.setColor(ChartUtils.COLOR_BLUE);
         cobValuesLine.setHasLines(false);
         cobValuesLine.setHasPoints(true);
         cobValuesLine.setFilled(false);
