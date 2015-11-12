@@ -56,11 +56,11 @@ public class NSUploader {
                         tempBasalJSON.put("eventType", "Temp Basal");
                         tempBasalJSON.put("duration", tempBasal.duration);
 
-                        if (tempBasal.basal_type.equals("percent")) {
-                            tempBasalJSON.put("percent", tempBasal.ratePercent);
-                        } else {
+                        //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
+                        //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
+                        //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
                             tempBasalJSON.put("absolute", tempBasal.rate);
-                        }
+                        //}
 
                         tempBasalsJSONArray.put(tempBasalJSON);
                     } else if (tempBasalIntegration.has("ns_temp_basal_stop")) {

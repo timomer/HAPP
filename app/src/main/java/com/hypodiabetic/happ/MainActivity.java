@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
@@ -34,17 +35,23 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.Configuration;
 import com.crashlytics.android.Crashlytics;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -59,14 +66,24 @@ import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
+
+
 import io.fabric.sdk.android.Fabric;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.LineChartData;
@@ -142,9 +159,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         ins = this;
         PreferenceManager.setDefaultValues(this, R.xml.pref_openaps, false);                        //Sets default OpenAPS Preferences if the user has not
 
-        // TODO: 05/11/2015 appears to be a bug in Active Andorid where DB version is ignored in Manifest, must be added here as well: http://stackoverflow.com/questions/33164456/update-existing-database-table-with-new-column-not-working-in-active-android 
-        Configuration configuration = new Configuration.Builder(this).setDatabaseVersion(15).create();
+        // TODO: 05/11/2015 appears to be a bug in Active Andorid where DB version is ignored in Manifest, must be added here as well
+        // http://stackoverflow.com/questions/33164456/update-existing-database-table-with-new-column-not-working-in-active-android
+        Configuration configuration = new Configuration.Builder(this).setDatabaseVersion(20).create();
         ActiveAndroid.initialize(configuration);
+
 
         //xdrip start
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -209,6 +228,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     Crashlytics.logException(e);
                 } finally {
                     updateOpenAPSDetails(openAPSSuggest);
+                    setupBGCharts();
                     displayCurrentInfo();
                 }
             }
@@ -251,8 +271,100 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
     public void test(View view){
-        Notifications.clear("newTemp",view.getContext());
+
+        //#### Gets BG Readings and formats to JSON ####
+        double fuzz = (1000 * 30 * 5);
+        double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
+        List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
+        JSONArray bgJSON = new JSONArray();
+        for (Bg bgReading : bgReadings) {
+            try {
+                JSONObject aBg = new JSONObject();
+                aBg.put("glucose", bgReading.sgv_double());
+                //aBg.put("display_time", bgReading.datetime); Dont think is needed
+                aBg.put("dateString", bgReading.datetime);
+                bgJSON.put(aBg);
+            } catch (JSONException e){}
+        }
+        //#### Gets current Temp Basal and formats to JSON ####
+        TempBasal activeTemp = TempBasal.getCurrentActive(null);
+        JSONObject activeTempJSON = new JSONObject();
+        try {
+            activeTempJSON.put("rate", activeTemp.rate);
+            activeTempJSON.put("duration", activeTemp.duration);
+        } catch (JSONException e){}
+        //#### IOB ####
+        Date dateVar = new Date();
+        Profile profileNow = new Profile().ProfileAsOf(dateVar, view.getContext());
+        List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
+        JSONObject iobJSON = iob.iobTotal(treatments, profileNow, dateVar);
+        //#### Profile ####
+        JSONObject profileJSON = new JSONObject();
+        try {
+            profileJSON.put("max_iob", profileNow.max_iob);
+            profileJSON.put("target_bg", profileNow.target_bg);
+            profileJSON.put("max_bg", profileNow.max_bg);
+            profileJSON.put("sens", profileNow.isf);
+            profileJSON.put("min_bg", profileNow.min_bg);
+            profileJSON.put("current_basal", profileNow.current_basal);
+            profileJSON.put("max_basal", profileNow.max_basal);
+            profileJSON.put("max_daily_basal", profileNow.max_daily_basal);
+        } catch (JSONException e){}
+        //#### Mode ####
+        String mode = "online";
+
+
+
+        //#### Reads in the JS ####
+        AssetManager assetManager = getAssets();
+        InputStream input;
+        String text="";
+        try {
+            input = assetManager.open("openaps/determine-basal.js");
+            //input = assetManager.open("openaps/test.js");
+
+            int size = input.available();
+            byte[] buffer = new byte[size];
+            input.read(buffer);
+            input.close();
+
+            // byte buffer into a string
+            text = new String(buffer);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        //#### Runs the JavaScript ####
+        Object[] params = new Object[] { bgJSON.toString(), activeTempJSON.toString(), iobJSON.toString(), profileJSON.toString(), mode };
+
+        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
+        rhino.setOptimizationLevel(-1);
+
+        try {
+            Scriptable scope = rhino.initStandardObjects();
+
+            rhino.evaluateString(scope, text, "JavaScript",0,null);
+            Object obj = scope.get("run", scope);
+
+            if (obj instanceof Function) {
+                Function jsFunction = (Function) obj;
+
+                // Call the function with params
+                Object jsResult = jsFunction.call(rhino, scope, scope, params);
+                // Parse the jsResult object to a String
+                String result = org.mozilla.javascript.Context.toString(jsResult);
+
+                Toast.makeText(MainActivity.activity, result, Toast.LENGTH_LONG).show();
+            }
+        } finally {
+            org.mozilla.javascript.Context.exit();
+        }
     }
+
+
+
+
 
     //xdrip functions start
 
@@ -581,7 +693,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
-        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), view.getContext());                           //Action the suggested Temp
+        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), view.getContext());      //Action the suggested Temp
         displayCurrentInfo();
     }
 
@@ -797,11 +909,13 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         static ColumnChartView iobcobChart;
         static ExtendedGraphBuilder extendedGraphBuilder;
 
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
             extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
             iobcobChart = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
+            iobcobChart.setViewportCalculationEnabled(true);
 
             updateChart(getActivity());
 

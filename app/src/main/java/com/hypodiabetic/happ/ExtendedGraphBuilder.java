@@ -114,6 +114,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
     //##### Adds OpenAPS eventualBG to BG chart #####
 
+    //##### IOB & COB Future Chart #####
     public ColumnChartData iobcobFutureChart(List<Stats> statArray) { //data*
 
         if (!statArray.isEmpty()) {
@@ -124,18 +125,26 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
             try {
                 for (int v = 0; v < statArray.size(); v++) {
-                    //iob now
+
                     values = new ArrayList<>();
 
-                    values.add(new SubcolumnValue((float) (statArray.get(v).iob), ChartUtils.COLOR_GREEN));
-                    if (statArray.get(v).cob > 50) {                                                     //Enter max 50g carbs on the chart
-                        values.add(new SubcolumnValue((float) (50), ChartUtils.COLOR_ORANGE));
+                    //IOB
+                    if (statArray.get(v).iob > yIOBMax) {
+                        values.add(new SubcolumnValue((float) (fitIOB2COBRange(yIOBMax.floatValue())), ChartUtils.COLOR_BLUE));
+                    } else if (statArray.get(v).iob < yIOBMin) {
+                        values.add(new SubcolumnValue((float) (fitIOB2COBRange(yIOBMin.floatValue())), ChartUtils.COLOR_BLUE));
+                    } else {
+                        values.add(new SubcolumnValue((float) (fitIOB2COBRange(statArray.get(v).iob)), ChartUtils.COLOR_BLUE));
+                    }
+                    //COB
+                    if (statArray.get(v).cob > yCOBMax) {
+                        values.add(new SubcolumnValue((float) (yCOBMax.floatValue()), ChartUtils.COLOR_ORANGE));
                     } else {
                         values.add(new SubcolumnValue((float) (statArray.get(v).cob), ChartUtils.COLOR_ORANGE));
                     }
 
                     Column column = new Column(values);
-                    column.setHasLabels(true);
+                    column.setHasLabels(false);
                     columnsData.add(column);
 
                     AxisValue axisValue = new AxisValue(v);
@@ -150,7 +159,9 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             columnData = new ColumnChartData(columnsData);
             Axis axisX = new Axis(xAxisValues).setHasLines(true);
 
-            columnData.setAxisYLeft(ycobiobAxis());
+            //columnData.setAxisYLeft(ycobiobAxis());
+            columnData.setAxisYLeft(iobPastyAxis());
+            columnData.setAxisYRight(cobPastyAxis());
             columnData.setAxisXBottom(axisX);
 
             return columnData;
@@ -350,7 +361,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
 
 
-    public double fitIOB2COBRange(double value){                                                        //Converts a IOB value to the COB Chart Range
+    public double fitIOB2COBRange(double value){                                                    //Converts a IOB value to the COB Chart Range
         Double yBgMax = yCOBMax;
         Double yBgMin = yCOBMin;
 
@@ -359,6 +370,8 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
 
     public void addfutureValues(){
+        iobFutureValues = new JSONArray();
+        cobFutureValues = new JSONArray();
         Date dateVar = new Date();
         List treatments = Treatments.latestTreatments(20, "Insulin");                   //Get the x most recent Insulin treatments
         List cobtreatments = Treatments.latestTreatments(20,null);

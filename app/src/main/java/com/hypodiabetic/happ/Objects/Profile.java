@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.activeandroid.Model;
 import com.hypodiabetic.happ.tools;
 
 import java.util.Calendar;
@@ -14,7 +13,7 @@ import java.util.GregorianCalendar;
 /**
  * Created by tim on 03/08/2015.
  */
-public class Profile extends Model{
+public class Profile {
 
     //OpenAPS expected Profile settings
     public Double   carbAbsorptionRate;             //Carbs Disgested per hour http://diyps.org/2014/05/29/determining-your-carbohydrate-absorption-rate-diyps-lessons-learned/
@@ -35,7 +34,6 @@ public class Profile extends Model{
     public String openaps_mode;                     //Online ~ send commands to pump OR Offline ~ Notify only
     public Integer openaps_loop;                    //OpenAPS Loops in mins
     public Double max_bolus;                        //The maximum Bolus the app can deliver
-
 
     public static Profile ProfileAsOf(Date thisTime, Context c){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);

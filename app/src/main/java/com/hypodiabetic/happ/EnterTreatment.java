@@ -251,7 +251,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
         EditText editText_treatment_time;
         EditText editText_treatment_date;
-        EditText editText_treatment_value;
+        final EditText editText_treatment_value;
         Spinner spinner_treatment_type;
         Spinner spinner_notes;
 
@@ -295,6 +295,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
                         public void onClick(DialogInterface dialog, int which) {
 
                             treatment.save();
+                            editText_treatment_value.setText("");
                             NSUploader.uploadTreatments(MainActivity.activity);
                             Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
                             loadLastTreatments();
@@ -314,6 +315,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         } else {
 
             treatment.save();
+            editText_treatment_value.setText("");
             NSUploader.uploadTreatments(this);
             Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 

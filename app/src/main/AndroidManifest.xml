@@ -21,11 +21,18 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <meta-data
+            android:name="AA_MODELS"
+            android:value="com.hypodiabetic.happ.Objects.Stats,
+                            com.hypodiabetic.happ.Objects.Treatments,
+                            com.hypodiabetic.happ.Objects.TempBasal,
+                            com.hypodiabetic.happ.code.nightwatch.Bg,
+                            com.hypodiabetic.happ.code.nightwatch.UserNotification" />
+        <meta-data
             android:name="AA_DB_NAME"
             android:value="HAPP.db" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="15" />
+            android:value="20" />
 
         <activity
             android:name=".MainActivity"
