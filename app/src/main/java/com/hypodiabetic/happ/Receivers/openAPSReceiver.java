@@ -12,6 +12,7 @@ import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.code.openaps.openAPS_Support;
 import com.hypodiabetic.happ.tools;
 
 import org.json.JSONException;
@@ -30,7 +31,14 @@ public class openAPSReceiver extends BroadcastReceiver{
             // For our recurring task, we'll just display a message
             //Toast.makeText(context, "Running OpenAPS", Toast.LENGTH_LONG).show();
 
-            JSONObject openAPSSuggest = determine_basal.runOpenAPS(context);                        //Run OpenAPS
+            Date dateVar = new Date();
+            JSONObject openAPSSuggest;
+            if (Profile.ProfileAsOf(dateVar,context).openaps_algorithm.equals("android")){
+                openAPSSuggest = determine_basal.runOpenAPS(context);                        //Run OpenAPS
+            } else {
+                openAPSSuggest =  openAPS_Support.runDetermine_Basal(context);
+            }
+
 
             //formats deviation
             try {

@@ -20,6 +20,14 @@
                     android:entryValues="@array/openaps_modeValues"/>
 
                 <ListPreference
+                    android:title="OpenAPS Algorithm "
+                    android:key="openaps_algorithm"
+                    android:defaultValue="android"
+                    android:summary=""
+                    android:entries="@array/openaps_algorithmArray"
+                    android:entryValues="@array/openaps_algorithmValues"/>
+
+                <ListPreference
                     android:title="OpenAPS Loop Time"
                     android:key="openaps_loop"
                     android:defaultValue="900000"

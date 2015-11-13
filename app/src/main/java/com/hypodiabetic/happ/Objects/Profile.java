@@ -34,6 +34,7 @@ public class Profile {
     public String openaps_mode;                     //Online ~ send commands to pump OR Offline ~ Notify only
     public Integer openaps_loop;                    //OpenAPS Loops in mins
     public Double max_bolus;                        //The maximum Bolus the app can deliver
+    public String openaps_algorithm;
 
     public static Profile ProfileAsOf(Date thisTime, Context c){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
@@ -54,6 +55,7 @@ public class Profile {
         ProfileNow.openaps_mode         = prefs.getString("openaps_mode", "offline");
         ProfileNow.openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
         ProfileNow.max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
+        ProfileNow.openaps_algorithm    = prefs.getString("openaps_algorithm", "android");
 
         ProfileNow.max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
         ProfileNow.min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));

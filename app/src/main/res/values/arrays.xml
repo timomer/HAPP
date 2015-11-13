@@ -31,6 +31,16 @@
         <item>notify</item>
     </string-array>
 
+    <string-array name="openaps_algorithmArray">
+        <item>OpenAPS Android</item>
+        <item>OpenAPS Javascript</item>
+    </string-array>
+    <string-array name="openaps_algorithmValues">
+        <item>android</item>
+        <item>js</item>
+    </string-array>
+
+
     <string-array name="openaps_loopArray">
         <item>5mins</item>
         <item>10mins</item>

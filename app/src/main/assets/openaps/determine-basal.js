@@ -38,7 +38,7 @@ function getLastGlucose(data) {
 
 }
 
-function setTempBasal(rate, duration) {
+function setTempBasal(rate, duration) { //TODO Tim: profile_data added, as not passed to function
 
     maxSafeBasal = Math.min(profile_data.max_basal, 3 * profile_data.max_daily_basal, 4 * profile_data.current_basal);
 
@@ -56,6 +56,10 @@ function setTempBasal(rate, duration) {
     requestedTemp.rate = Math.round((Math.round(rate / 0.05) * 0.05)*100)/100;
 };
 
+//TODO Tim: Made Global Vars
+var requestedTemp
+var profile_data
+
 function run(glucose_input,temps_input,iob_input,profile_input,offline_input) {
 
     //TODO Tim: Based on 823a5fc on 14 Sep
@@ -66,7 +70,7 @@ function run(glucose_input,temps_input,iob_input,profile_input,offline_input) {
     var glucose_data    = JSON.parse(glucose_input);
     var temps_data      = JSON.parse(temps_input);
     var iob_data        = JSON.parse(iob_input);
-    var profile_data    = JSON.parse(profile_input);
+    profile_data    = JSON.parse(profile_input);
 
     //return JSON.stringify(profile_input);
 
@@ -131,7 +135,7 @@ function run(glucose_input,temps_input,iob_input,profile_input,offline_input) {
     var snoozeBG = naive_snoozeBG + deviation;
     java.lang.System.out.println("BG: " + bg + tick + " -> " + eventualBG + "-" + snoozeBG + " (Unadjusted: " + naive_eventualBG + "-" + naive_snoozeBG + ")");
     if (typeof eventualBG === 'undefined') { java.lang.System.out.println('Error: could not calculate eventualBG'); }
-    var requestedTemp = {
+    requestedTemp = {
         'temp': 'absolute'
         , 'bg': bg
         , 'tick': tick
