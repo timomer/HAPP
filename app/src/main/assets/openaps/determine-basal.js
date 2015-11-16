@@ -38,7 +38,7 @@ function getLastGlucose(data) {
 
 }
 
-function setTempBasal(rate, duration) { //TODO Tim: profile_data added, as not passed to function
+function setTempBasal(rate, duration) {
 
     maxSafeBasal = Math.min(profile_data.max_basal, 3 * profile_data.max_daily_basal, 4 * profile_data.current_basal);
 
@@ -66,7 +66,7 @@ function run(glucose_input,temps_input,iob_input,profile_input,offline_value) {
     //TODO Tim: Based on 823a5fc on 14 Sep
     //TODO Tim: Changed to function with Params
     //TODO Tim: Console replaced with java.lang.System.out.println
-    //TODO Tim: .toFixed() replaced with Math.round
+
 
     var glucose_data    = JSON.parse(glucose_input);
     var temps_data      = JSON.parse(temps_input);
@@ -74,7 +74,7 @@ function run(glucose_input,temps_input,iob_input,profile_input,offline_value) {
     profile_data        = JSON.parse(profile_input);
     offline_input       = offline_value;
 
-    //return JSON.stringify(profile_input);
+    //return JSON.stringify(iob_data.iob.toFixed(2));
 
     //var iob_input = process.argv.slice(2, 3).pop()
     //var temps_input = process.argv.slice(3, 4).pop()
@@ -118,13 +118,13 @@ function run(glucose_input,temps_input,iob_input,profile_input,offline_value) {
     var tick;
     if (glucose_status.delta >= 0) { tick = "+" + glucose_status.delta; }
     else { tick = glucose_status.delta; }
-    java.lang.System.out.println("IOB: " + Math.round(iob_data.iob) + ", Bolus IOB: " + Math.round(iob_data.bolusiob));
+    java.lang.System.out.println("IOB: " + iob_data.iob.toFixed(2) + ", Bolus IOB: " + iob_data.bolusiob.toFixed(2));
     //calculate BG impact: the amount BG "should" be rising or falling based on insulin activity alone
     var bgi = -iob_data.activity * profile_data.sens * 5;
-    java.lang.System.out.println("Avg. Delta: " + Math.round(glucose_status.avgdelta) + ", BGI: " + Math.round(bgi));
+    java.lang.System.out.println("Avg. Delta: " + glucose_status.avgdelta.toFixed(1) + ", BGI: " + bgi.toFixed(1));
     // project deviation over next 15 minutes
     var deviation = Math.round( 15 / 5 * ( glucose_status.avgdelta - bgi ) );
-    java.lang.System.out.println("15m deviation: " + Math.round(deviation));
+    java.lang.System.out.println("15m deviation: " + deviation.toFixed(0));
     // calculate the naive (bolus calculator math) eventual BG based on net IOB and sensitivity
     var naive_eventualBG = Math.round( bg - (iob_data.iob * profile_data.sens) );
     // and adjust it for the deviation above
