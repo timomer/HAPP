@@ -3,16 +3,16 @@
     <PreferenceCategory
         android:title="Misc"
         android:key="misc">
-            <PreferenceScreen
-                android:key="export_import"
-                android:title="Export \\ Import Settings">
+        <PreferenceScreen
+            android:key="export_import"
+            android:title="Export \\ Import Settings">
             <Preference
                 android:title="Export"
-                android:key="export"/>
+                android:key="export" />
             <Preference
                 android:title="Import"
                 android:key="import"
-                android:summary="Be sure to exit and reenter Settings menu to see changes"/>
+                android:summary="Be sure to exit and re-enter Settings menu to see changes"/>
         </PreferenceScreen>
         <Preference
             android:title="Version"

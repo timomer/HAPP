@@ -55,7 +55,7 @@ public class Profile {
         ProfileNow.openaps_mode         = prefs.getString("openaps_mode", "offline");
         ProfileNow.openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
         ProfileNow.max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
-        ProfileNow.openaps_algorithm    = prefs.getString("openaps_algorithm", "android");
+        ProfileNow.openaps_algorithm    = prefs.getString("openaps_algorithm", "openaps_android");
 
         ProfileNow.max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
         ProfileNow.min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));

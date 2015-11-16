@@ -5,11 +5,11 @@
         <PreferenceScreen
             android:key="button_openaps_category"
             android:persistent="false"
-            android:title="OpenAPS Options">
+            android:title="OpenAPS Settings">
 
             <PreferenceCategory
-                android:key="openAPS"
-                android:title="OpenAPS General">
+                android:key="openAPS_general"
+                android:title="General">
 
                 <ListPreference
                     android:title="OpenAPS Mode"
@@ -18,198 +18,65 @@
                     android:summary="OpenAPS Loop Mode"
                     android:entries="@array/openaps_modeArray"
                     android:entryValues="@array/openaps_modeValues"/>
-
                 <ListPreference
-                    android:title="OpenAPS Algorithm "
+                    android:title="OpenAPS Algorithm"
                     android:key="openaps_algorithm"
-                    android:defaultValue="android"
-                    android:summary=""
+                    android:defaultValue="openaps_android"
                     android:entries="@array/openaps_algorithmArray"
                     android:entryValues="@array/openaps_algorithmValues"/>
-
                 <ListPreference
                     android:title="OpenAPS Loop Time"
                     android:key="openaps_loop"
                     android:defaultValue="900000"
                     android:entries="@array/openaps_loopArray"
                     android:entryValues="@array/openaps_loopValues"/>
+                </PreferenceCategory>
+
+            <PreferenceCategory
+                android:key="openAPS_limits"
+                android:title="Limits">
 
                 <EditTextPreference
-                    android:defaultValue="4"
-                    android:key="max_bolus"
-                    android:numeric="decimal"
-                    android:summary="Max Bolus that can be delivered in one go"
-                    android:title="Max Bolus" />
-
-                <ListPreference
-                    android:title="Pump Temp Basal Mode"
-                    android:summary="How is a Temp Basal set on the Pump"
-                    android:key="basal_mode"
-                    android:defaultValue="percent"
-                    android:entries="@array/basal_modeArray"
-                    android:entryValues="@array/basal_modeValues" />
-
-                <EditTextPreference
+                    android:title="Max Basal"
                     android:defaultValue="2"
                     android:key="max_basal"
                     android:numeric="decimal"
-                    android:summary="Max value a Temp Basal can be set to"
-                    android:title="Max Basal" />
-
+                    android:summary="Max U/hr a Temp Basal can be set to" />
                 <EditTextPreference
-                    android:defaultValue="1.5"
-                    android:key="dia"
-                    android:numeric="decimal"
-                    android:summary="Duration of Insulin Action (hours)"
-                    android:title="dia" />
-                <EditTextPreference
-                    android:defaultValue="20"
-                    android:key="CarbAbsorptionRate"
-                    android:numeric="decimal"
-                    android:summary="Amount of Carbs digested per hour (grams)"
-                    android:title="Carb Absorption Rate" />
-                <EditTextPreference
+                    android:title="Max Basal IOB"
                     android:defaultValue="3"
                     android:key="max_iob"
                     android:numeric="decimal"
-                    android:summary="Maximum amount of non-bolus IOB OpenAPS can deliver"
-                    android:title="Max IOB" />
+                    android:summary="Maximum amount of non-bolus IOB OpenAPS can deliver"/>
+            </PreferenceCategory>
 
+            <PreferenceCategory
+                android:key="openAPS_patient_prefs"
+                android:title="Patient Preferences">
 
-                    <PreferenceScreen
-                        android:key="button_openaps_basal_profile"
-                        android:persistent="false"
-                        android:summary="Hourly background Insulin your pump provides"
-                        android:title="Pump Basal">
+                <EditTextPreference
+                    android:title="DIA"
+                    android:defaultValue="1.5"
+                    android:key="dia"
+                    android:numeric="decimal"
+                    android:summary="Duration of Insulin Action (hours)"/>
+                <EditTextPreference
+                    android:title="Carb Absorption Rate"
+                    android:defaultValue="20"
+                    android:key="CarbAbsorptionRate"
+                    android:numeric="decimal"
+                    android:summary="Amount of Carbs digested per hour (grams)"/>
+            </PreferenceCategory>
 
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_0"
-                            android:numeric="decimal"
-                            android:title="Basal 00:00-00:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_1"
-                            android:numeric="decimal"
-                            android:title="Basal 01:00-01:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_2"
-                            android:numeric="decimal"
-                            android:title="Basal 02:00-02:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_3"
-                            android:numeric="decimal"
-                            android:title="Basal 03:00-03:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_4"
-                            android:numeric="decimal"
-                            android:title="Basal 04:00-04:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_5"
-                            android:numeric="decimal"
-                            android:title="Basal 05:00-05:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_6"
-                            android:numeric="decimal"
-                            android:title="Basal 06:00-06:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_7"
-                            android:numeric="decimal"
-                            android:title="Basal 07:00-07:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_8"
-                            android:numeric="decimal"
-                            android:title="Basal 08:00-08:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_9"
-                            android:numeric="decimal"
-                            android:title="Basal 09:00-09:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_10"
-                            android:numeric="decimal"
-                            android:title="Basal 10:00-10:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_11"
-                            android:numeric="decimal"
-                            android:title="Basal 11:00-11:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_12"
-                            android:numeric="decimal"
-                            android:title="Basal 12:00-12:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_13"
-                            android:numeric="decimal"
-                            android:title="Basal 13:00-13:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_14"
-                            android:numeric="decimal"
-                            android:title="Basal 14:00-14:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_15"
-                            android:numeric="decimal"
-                            android:title="Basal 15:00-15:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_16"
-                            android:numeric="decimal"
-                            android:title="Basal 16:00-16:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_17"
-                            android:numeric="decimal"
-                            android:title="Basal 17:00-17:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_18"
-                            android:numeric="decimal"
-                            android:title="Basal 18:00-18:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_19"
-                            android:numeric="decimal"
-                            android:title="Basal 19:00-19:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_20"
-                            android:numeric="decimal"
-                            android:title="Basal 20:00-20:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_21"
-                            android:numeric="decimal"
-                            android:title="Basal 21:00-21:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_22"
-                            android:numeric="decimal"
-                            android:title="Basal 22:00-22:59" />
-                        <EditTextPreference
-                            android:defaultValue="1"
-                            android:key="basal_23"
-                            android:numeric="decimal"
-                            android:title="Basal 23:00-23:59" />
-
-                    </PreferenceScreen>
+            <PreferenceCategory
+                android:key="openAPS_profiles"
+                android:title="Profiles">
 
                     <PreferenceScreen
+                        android:title="Insulin Sensitivity Factor"
                         android:key="button_openaps_isf_profile"
                         android:persistent="false"
-                        android:summary="How much one unit of Insulin will lower your BG"
-                        android:title="Insulin Sensitivity Factor">
+                        android:summary="How much 1U of Insulin will lower your Blood Glucose">
 
                         <EditTextPreference
                             android:key="isf_0"
@@ -311,10 +178,10 @@
                     </PreferenceScreen>
 
                     <PreferenceScreen
+                        android:title="Carbohydrate Ratio"
                         android:key="button_openaps_carbratio_profile"
                         android:persistent="false"
-                        android:summary="How many grams of carbohydrate are covered by one unit of insulin"
-                        android:title="Carbohydrate Ratio">
+                        android:summary="How many grams of Carbohydrate are covered by 1U of Insulin">
 
                         <EditTextPreference
                             android:key="carbratio_0"

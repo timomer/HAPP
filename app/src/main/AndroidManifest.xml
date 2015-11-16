@@ -48,7 +48,7 @@
             android:label="@string/title_activity_enter_treatment" >
         </activity>
         <activity
-            android:name=".code.nightwatch.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
 

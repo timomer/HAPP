@@ -2,13 +2,13 @@
 
     <!-- These settings headers are only used on tablets. -->
 
-    <header android:fragment="com.hypodiabetic.happ.code.nightwatch.SettingsActivity$GeneralPreferenceFragment"
+    <header android:fragment="com.hypodiabetic.happ.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
-    <header android:fragment="com.hypodiabetic.happ.code.nightwatch.SettingsActivity$NotificationPreferenceFragment"
+    <header android:fragment="com.hypodiabetic.happ.SettingsActivity$NotificationPreferenceFragment"
         android:title="@string/pref_header_notifications" />
 
-    <header android:fragment="com.hypodiabetic.happ.code.nightwatch.SettingsActivity$DataSyncPreferenceFragment"
+    <header android:fragment="com.hypodiabetic.happ.SettingsActivity$DataSyncPreferenceFragment"
         android:title="@string/pref_header_data_sync" />
 
 </preference-headers>

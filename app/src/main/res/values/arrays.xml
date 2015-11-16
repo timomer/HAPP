@@ -36,8 +36,8 @@
         <item>OpenAPS Javascript</item>
     </string-array>
     <string-array name="openaps_algorithmValues">
-        <item>android</item>
-        <item>js</item>
+        <item>openaps_android</item>
+        <item>openaps_js</item>
     </string-array>
 
 

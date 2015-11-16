@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.code.nightwatch;
+package com.hypodiabetic.happ;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -65,12 +66,13 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_license);
             addPreferencesFromResource(R.xml.pref_general);
             addPreferencesFromResource(R.xml.pref_openaps);
+            addPreferencesFromResource(R.xml.pref_pump);
             addPreferencesFromResource(R.xml.pref_bg_notification);
             addPreferencesFromResource(R.xml.pref_integration);
-            addPreferencesFromResource(R.xml.pref_export_import);
+            addPreferencesFromResource(R.xml.pref_license);
+            addPreferencesFromResource(R.xml.pref_misc);
             //addPreferencesFromResource(R.xml.pref_data_source);
             //addPreferencesFromResource(R.xml.pref_watch_integration); // TODO: 08/08/2015 leaveout watch for now 
 
@@ -82,6 +84,8 @@ public class SettingsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("target_bg"));
             bindPreferenceSummaryToValue(findPreference("openaps_loop"));
             bindPreferenceSummaryToValue(findPreference("openaps_mode"));
+            bindPreferenceSummaryToValue(findPreference("openaps_algorithm"));
+            findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory().toString());
 
             for (int x=0; x<24; x++ ){
                 bindPreferenceSummaryToValue(findPreference("basal_"+x));
@@ -158,7 +162,6 @@ public class SettingsActivity extends PreferenceActivity {
                     preference.setSummary(stringValue);
                 }
             }
-            //preference.setSummary("Willy");
             return true;
         }
     };

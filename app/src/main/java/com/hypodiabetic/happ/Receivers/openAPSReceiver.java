@@ -33,15 +33,34 @@ public class openAPSReceiver extends BroadcastReceiver{
 
             Date dateVar = new Date();
             JSONObject openAPSSuggest;
-            if (Profile.ProfileAsOf(dateVar,context).openaps_algorithm.equals("android")){
-                openAPSSuggest = determine_basal.runOpenAPS(context);                        //Run OpenAPS
+            Profile profileNow = Profile.ProfileAsOf(dateVar,context);
+            if (profileNow.openaps_algorithm.equals("openaps_js")){
+                openAPSSuggest =  openAPS_Support.runDetermine_Basal(profileNow, context);          //Run OpenAPS native js
+                if (openAPSSuggest.has("rate")) {
+                    openAPSSuggest = openAPS_Support.setTempBasal(profileNow, openAPSSuggest);
+                } else {
+                    try {
+                        openAPSSuggest.put("action", "Wait and monitor");
+                    } catch (JSONException e){}
+                }
             } else {
-                openAPSSuggest =  openAPS_Support.runDetermine_Basal(context);
+                openAPSSuggest = determine_basal.runOpenAPS(context);                               //Run OpenAPS android port
             }
 
 
-            //formats deviation
             try {
+                openAPSSuggest.put("openaps_mode", profileNow.openaps_mode);
+                openAPSSuggest.put("openaps_loop", profileNow.openaps_loop);
+                switch (profileNow.openaps_algorithm){
+                    case "openaps_android":
+                        openAPSSuggest.put("algorithm", "OpenAPS Android");
+                        break;
+                    case "openaps_js":
+                        openAPSSuggest.put("algorithm", "OpenAPS Javascript");
+                        break;
+                }
+
+                //formats deviation
                 Double deviation = 0D;
                 if (openAPSSuggest.has("deviation")){
                     deviation = openAPSSuggest.getDouble("deviation");

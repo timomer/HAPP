@@ -2,43 +2,29 @@ package com.hypodiabetic.happ;
 
 import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 //import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,22 +34,13 @@ import com.activeandroid.Configuration;
 import com.crashlytics.android.Crashlytics;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.Receivers.openAPSReceiver;
 import com.hypodiabetic.happ.Receivers.statsReceiver;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.code.nightwatch.Constants;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
-import com.hypodiabetic.happ.code.nightwatch.SettingsActivity;
-import com.hypodiabetic.happ.code.openaps.determine_basal;
-import com.hypodiabetic.happ.code.openaps.iob;
 import com.hypodiabetic.happ.code.openaps.openAPS_Support;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
@@ -71,23 +48,14 @@ import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
 import io.fabric.sdk.android.Fabric;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
-import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
@@ -273,7 +241,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     public void test(View view){
 
-        JSONObject openAPSSuggest =  openAPS_Support.runDetermine_Basal(view.getContext());
+        Date dateVar = new Date();
+        JSONObject openAPSSuggest =  openAPS_Support.runDetermine_Basal(Profile.ProfileAsOf(dateVar, view.getContext()) ,view.getContext());
         Toast.makeText(MainActivity.activity, openAPSSuggest.toString(), Toast.LENGTH_LONG).show();
     }
 
@@ -668,6 +637,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         private static TextView apsstatus_reason;
         private static TextView apsstatus_Action;
         private static TextView apsstatus_temp;
+        private static TextView apsstatus_algorithm;
         private static Button   apsstatusAcceptButton;
         private static TextView apsstatus_mode;
         private static TextView apsstatus_loop;
@@ -680,6 +650,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             apsstatusAcceptButton   = (Button)   rootView.findViewById(R.id.apsstatusAcceptButton);
             apsstatus_reason        = (TextView) rootView.findViewById(R.id.apsstatus_reason);
             apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
+            apsstatus_algorithm     = (TextView) rootView.findViewById(R.id.apsstatus_algorithm);
             apsstatus_temp          = (TextView) rootView.findViewById(R.id.apsstatus_Temp);
             apsstatus_deviation     = (TextView) rootView.findViewById(R.id.apsstatus_deviation);
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
@@ -749,6 +720,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                         apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
                     if (currentOpenAPSSuggest.has("action"))
                         apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
+                    if (currentOpenAPSSuggest.has("algorithm"))
+                        apsstatus_algorithm.setText(currentOpenAPSSuggest.getString("algorithm"));
 
                     if (currentOpenAPSSuggest.has("rate")) {
                         apsstatusAcceptButton.setEnabled(true);

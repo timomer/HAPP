@@ -57,10 +57,11 @@ function setTempBasal(rate, duration) { //TODO Tim: profile_data added, as not p
 };
 
 //TODO Tim: Made Global Vars
-var requestedTemp
-var profile_data
+var requestedTemp;
+var profile_data;
+var offline_input;
 
-function run(glucose_input,temps_input,iob_input,profile_input,offline_input) {
+function run(glucose_input,temps_input,iob_input,profile_input,offline_value) {
 
     //TODO Tim: Based on 823a5fc on 14 Sep
     //TODO Tim: Changed to function with Params
@@ -70,7 +71,8 @@ function run(glucose_input,temps_input,iob_input,profile_input,offline_input) {
     var glucose_data    = JSON.parse(glucose_input);
     var temps_data      = JSON.parse(temps_input);
     var iob_data        = JSON.parse(iob_input);
-    profile_data    = JSON.parse(profile_input);
+    profile_data        = JSON.parse(profile_input);
+    offline_input       = offline_value;
 
     //return JSON.stringify(profile_input);
 

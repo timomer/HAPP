@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Tim on 13/11/2015.
@@ -56,43 +58,40 @@ public class openAPS_Support {
     }
 
 
-    public static JSONObject getIOB(Context c){
+    public static JSONObject getIOB(Profile p,Context c){
         //#### IOB ####
         Date dateVar = new Date();
-        Profile profileNow = new Profile().ProfileAsOf(dateVar, c);
         List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
-        JSONObject iobJSON = iob.iobTotal(treatments, profileNow, dateVar);
+        JSONObject iobJSON = iob.iobTotal(treatments, p, dateVar);
 
         return iobJSON;
     }
 
-    public static JSONObject getProfile(Context c){
+    public static JSONObject getProfile(Profile p){
         //#### Profile ####
-        Date dateVar = new Date();
-        Profile profileNow = new Profile().ProfileAsOf(dateVar, c);
         JSONObject profileJSON = new JSONObject();
         try {
-            profileJSON.put("max_iob", profileNow.max_iob);
-            profileJSON.put("target_bg", profileNow.target_bg);
-            profileJSON.put("max_bg", profileNow.max_bg);
-            profileJSON.put("sens", profileNow.isf);
-            profileJSON.put("min_bg", profileNow.min_bg);
-            profileJSON.put("current_basal", profileNow.current_basal);
-            profileJSON.put("max_basal", profileNow.max_basal);
-            profileJSON.put("max_daily_basal", profileNow.max_daily_basal);
+            profileJSON.put("max_iob", p.max_iob);
+            profileJSON.put("target_bg", p.target_bg);
+            profileJSON.put("max_bg", p.max_bg);
+            profileJSON.put("sens", p.isf);
+            profileJSON.put("min_bg", p.min_bg);
+            profileJSON.put("current_basal", p.current_basal);
+            profileJSON.put("max_basal", p.max_basal);
+            profileJSON.put("max_daily_basal", p.max_daily_basal);
         } catch (JSONException e){}
 
         return profileJSON;
     }
 
-    public static JSONObject runDetermine_Basal(Context c) {
+    public static JSONObject runDetermine_Basal(Profile p, Context c) {
         //#### Mode ####
         String mode = "online";
 
         //#### Reads in the JS ####
         AssetManager assetManager = c.getAssets();
         InputStream input;
-        String text="";
+        String text = "";
         try {
             input = assetManager.open("openaps/determine-basal.js");
             //input = assetManager.open("openaps/test.js");
@@ -109,43 +108,119 @@ public class openAPS_Support {
             e.printStackTrace();
         }
 
-        //#### Runs the JavaScript ####
-        Object[] params = new Object[] {openAPS_Support.getBG().toString(),
-                openAPS_Support.getTempBasal().toString(),
-                openAPS_Support.getIOB(c).toString(),
-                openAPS_Support.getProfile(c).toString(),
-                mode };
-
-        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
-        rhino.setOptimizationLevel(-1);
-        String result="";
-
-        try {
-            Scriptable scope = rhino.initStandardObjects();
-
-            rhino.evaluateString(scope, text, "JavaScript",0,null);
-            Object obj = scope.get("run", scope);
-
-            if (obj instanceof Function) {
-                Function jsFunction = (Function) obj;
-
-                // Call the function with params
-                Object jsResult = jsFunction.call(rhino, scope, scope, params);
-                // Parse the jsResult object to a String
-                result = org.mozilla.javascript.Context.toString(jsResult);
-
-                //Toast.makeText(MainActivity.activity, result, Toast.LENGTH_LONG).show();
-
-
+        String result = "";
+        JSONArray BG = openAPS_Support.getBG();
+        if (BG.length() < 1) {
+            JSONObject nobg = new JSONObject();
+            try {
+                nobg.put("reason", "At least one BG value is required to run OpenAPS");
+                nobg.put("rate", 0);
+                nobg.put("action", "none");
+            } catch (JSONException e) {
             }
-        } finally {
-            org.mozilla.javascript.Context.exit();
+            return nobg;
+        } else {
+
+            //#### Runs the JavaScript ####
+            Object[] params = new Object[]{BG.toString(),
+                    openAPS_Support.getTempBasal().toString(),
+                    openAPS_Support.getIOB(p,c).toString(),
+                    openAPS_Support.getProfile(p).toString(),
+                    mode};
+
+            org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
+            rhino.setOptimizationLevel(-1);
+
+            try {
+                Scriptable scope = rhino.initStandardObjects();
+
+                rhino.evaluateString(scope, text, "JavaScript", 0, null);
+                Object obj = scope.get("run", scope);
+
+                if (obj instanceof Function) {
+                    Function jsFunction = (Function) obj;
+
+                    // Call the function with params
+                    Object jsResult = jsFunction.call(rhino, scope, scope, params);
+                    // Parse the jsResult object to a String
+                    result = org.mozilla.javascript.Context.toString(jsResult);
+
+                    //Toast.makeText(MainActivity.activity, result, Toast.LENGTH_LONG).show();
+
+
+                }
+            } finally {
+                org.mozilla.javascript.Context.exit();
+            }
+
+            try {
+                return new JSONObject(result);
+            } catch (JSONException e) {
+                return new JSONObject();
+            }
         }
+    }
+
+    //Returns the calculated duration and rate of a temp basal adjustment
+    public static JSONObject setTempBasal(Profile profile_data, JSONObject openAPSSuggest) {
+
+        Double rate     = openAPSSuggest.optDouble("rate",0);
+        Integer duration= openAPSSuggest.optInt("duration",0);
+
+        Double maxSafeBasal = Math.min(profile_data.max_basal, 3 * profile_data.max_daily_basal);
+        maxSafeBasal = Math.min(maxSafeBasal, 4 * profile_data.current_basal);
+
+        if (rate < 0) { rate = 0D; } // if >30m @ 0 required, zero temp will be extended to 30m instead
+        else if (rate > maxSafeBasal) { rate = maxSafeBasal; }
+        rate = Double.parseDouble(String.format(Locale.ENGLISH, "%.2f", rate));
+
+        // rather than canceling temps, always set the current basal as a 30m temp
+        // so we can see on the pump that openaps is working
+        //if (duration == 0) {                          // TODO: 03/09/2015 this cannot be done with Roche pumps as 100% basal = no temp basal
+        //    rate = profile_data.current_basal;
+        //    duration  = 30;
+        //    canceledTemp = true;
+        //}
+
+        Double ratePercent = (rate / profile_data.current_basal) * 100;                             //Get rate percent increase or decrease based on current Basal
+        ratePercent = (double) (ratePercent.intValue() / 10) * 10;
 
         try {
-            return new JSONObject(result);
-        } catch (JSONException e){
-            return new JSONObject();
+            //requestedTemp.put("duration", duration);
+            openAPSSuggest.remove("rate");
+            openAPSSuggest.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places
+            openAPSSuggest.put("ratePercent", ratePercent.intValue());
+            if (rate == 0 && duration == 0){
+                openAPSSuggest.put("action", "Cancel Temp Basal");
+                openAPSSuggest.put("basal_adjustemnt", "Pump Default");
+                openAPSSuggest.remove("rate");
+                openAPSSuggest.put("rate", profile_data.current_basal);
+                openAPSSuggest.put("ratePercent", 100);
+            } else if (rate > profile_data.current_basal && duration != 0){
+                if (profile_data.basal_mode.equals("percent")){
+                    openAPSSuggest.put("action", "High Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
+                } else {
+                    openAPSSuggest.put("action", "High Temp Basal set " + rate + "U for " + duration + "mins");
+                }
+                openAPSSuggest.put("basal_adjustemnt", "High");
+            } else if (rate < profile_data.current_basal && duration != 0){
+                if (profile_data.basal_mode.equals("percent")){
+                    openAPSSuggest.put("action", "Low Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
+                } else {
+                    openAPSSuggest.put("action", "Low Temp Basal set " + rate + "U for " + duration + "mins");
+                }
+                openAPSSuggest.put("basal_adjustemnt", "Low");
+            } else if (rate == profile_data.current_basal){
+                openAPSSuggest.put("reason", "Keep current basal");
+                openAPSSuggest.put("action", "Wait and monitor");
+                openAPSSuggest.put("basal_adjustemnt", "None");
+                openAPSSuggest.remove("rate");                                                       //Remove rate, as we do not want to suggest this Temp Basal
+            }
+        } catch (JSONException e) {
+            Crashlytics.logException(e);
+            e.printStackTrace();
         }
+
+        return openAPSSuggest;
     }
 }

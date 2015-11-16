@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Pump">
+
+        <PreferenceScreen
+            android:key="button_pump_category"
+            android:persistent="false"
+            android:title="Pump Settings">
+
+            <PreferenceCategory
+                android:key="pump_general"
+                android:title="Pump General">
+
+                <ListPreference
+                    android:title="Temp Basal Mode"
+                    android:summary="How is a Temp Basal set on the Pump"
+                    android:key="basal_mode"
+                    android:defaultValue="percent"
+                    android:entries="@array/basal_modeArray"
+                    android:entryValues="@array/basal_modeValues" />
+                <EditTextPreference
+                    android:title="Max Bolus"
+                    android:defaultValue="4"
+                    android:key="max_bolus"
+                    android:numeric="decimal"
+                    android:summary="Maximum Bolus Insulin Units that can be delivered in one go"/>
+
+            </PreferenceCategory>
+            <PreferenceCategory
+                android:key="pump_profiles"
+                android:title="Pump Profiles">
+
+                <PreferenceScreen
+                    android:key="button_pump_basal_profile"
+                    android:persistent="false"
+                    android:summary="Hourly background Insulin Units your pump provides"
+                    android:title="Pump Basal">
+
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_0"
+                        android:numeric="decimal"
+                        android:title="Basal 00:00-00:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_1"
+                        android:numeric="decimal"
+                        android:title="Basal 01:00-01:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_2"
+                        android:numeric="decimal"
+                        android:title="Basal 02:00-02:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_3"
+                        android:numeric="decimal"
+                        android:title="Basal 03:00-03:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_4"
+                        android:numeric="decimal"
+                        android:title="Basal 04:00-04:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_5"
+                        android:numeric="decimal"
+                        android:title="Basal 05:00-05:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_6"
+                        android:numeric="decimal"
+                        android:title="Basal 06:00-06:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_7"
+                        android:numeric="decimal"
+                        android:title="Basal 07:00-07:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_8"
+                        android:numeric="decimal"
+                        android:title="Basal 08:00-08:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_9"
+                        android:numeric="decimal"
+                        android:title="Basal 09:00-09:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_10"
+                        android:numeric="decimal"
+                        android:title="Basal 10:00-10:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_11"
+                        android:numeric="decimal"
+                        android:title="Basal 11:00-11:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_12"
+                        android:numeric="decimal"
+                        android:title="Basal 12:00-12:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_13"
+                        android:numeric="decimal"
+                        android:title="Basal 13:00-13:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_14"
+                        android:numeric="decimal"
+                        android:title="Basal 14:00-14:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_15"
+                        android:numeric="decimal"
+                        android:title="Basal 15:00-15:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_16"
+                        android:numeric="decimal"
+                        android:title="Basal 16:00-16:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_17"
+                        android:numeric="decimal"
+                        android:title="Basal 17:00-17:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_18"
+                        android:numeric="decimal"
+                        android:title="Basal 18:00-18:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_19"
+                        android:numeric="decimal"
+                        android:title="Basal 19:00-19:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_20"
+                        android:numeric="decimal"
+                        android:title="Basal 20:00-20:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_21"
+                        android:numeric="decimal"
+                        android:title="Basal 21:00-21:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_22"
+                        android:numeric="decimal"
+                        android:title="Basal 22:00-22:59" />
+                    <EditTextPreference
+                        android:defaultValue="1"
+                        android:key="basal_23"
+                        android:numeric="decimal"
+                        android:title="Basal 23:00-23:59" />
+
+                </PreferenceScreen>
+
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

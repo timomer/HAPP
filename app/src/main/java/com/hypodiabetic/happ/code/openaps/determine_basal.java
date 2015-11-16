@@ -377,16 +377,6 @@ public class determine_basal {
             e.printStackTrace();
         }
 
-        //##### HAPP Added #####
-        try {
-            requestedTemp.put("openaps_mode", profile_data.openaps_mode);
-            requestedTemp.put("openaps_loop", profile_data.openaps_loop);
-        } catch (JSONException e) {
-            Crashlytics.logException(e);
-            e.printStackTrace();
-        }
-        //##### HAPP Added #####
-
         return requestedTemp;
     }
 

@@ -16,18 +16,51 @@
             android:layout_height="140dp"
             android:orientation="vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:id="@+id/apsstatus_Action"
-                android:text="-"
-                android:textSize="16sp"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:text="action"
-                android:textSize="12sp"
-                android:textColor="#B8B8B8"/>
+                android:layout_height="40dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_Action"
+                        android:text="-"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:text="action"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_algorithm"
+                        android:text="-"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:text="algorithm"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
+            </LinearLayout>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
