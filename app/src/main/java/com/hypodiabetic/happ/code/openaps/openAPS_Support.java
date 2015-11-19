@@ -203,14 +203,14 @@ public class openAPS_Support {
                     openAPSSuggest.put("action", "High Temp Basal set " + rate + "U for " + duration + "mins");
                 }
                 openAPSSuggest.put("basal_adjustemnt", "High");
-            } else if (rate < profile_data.current_basal && duration != 0){
+            } else if (rate < profile_data.current_basal && duration != 0 && rate < TempBasal.getCurrentActive(new Date()).rate){
                 if (profile_data.basal_mode.equals("percent")){
                     openAPSSuggest.put("action", "Low Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
                 } else {
                     openAPSSuggest.put("action", "Low Temp Basal set " + rate + "U for " + duration + "mins");
                 }
                 openAPSSuggest.put("basal_adjustemnt", "Low");
-            } else if (rate == profile_data.current_basal){
+            } else {
                 openAPSSuggest.put("reason", "Keep current basal");
                 openAPSSuggest.put("action", "Wait and monitor");
                 openAPSSuggest.put("basal_adjustemnt", "None");
@@ -223,4 +223,6 @@ public class openAPS_Support {
 
         return openAPSSuggest;
     }
+
+
 }

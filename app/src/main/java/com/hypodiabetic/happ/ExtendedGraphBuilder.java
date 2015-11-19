@@ -52,7 +52,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     public Double yCOBMax = 80D;
     public Double yCOBMin = 0D;
 
-    private final List<Stats> statsReadings = Stats.statsList(numValues, start_time * fuzz);
+    private List<Stats> statsReadings;
     private List<PointValue> iobValues = new ArrayList<>();
     private ColumnChartData columnData;
 
@@ -188,6 +188,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
     //##########Basal vs Temp Basal Chart##########
     public LineChartData basalvsTempBasalData() {
+        statsReadings = Stats.statsList(numValues, start_time * fuzz);
         LineChartData lineData = new LineChartData(addBasalvsTempBasaLines());
         lineData.setAxisYLeft(basalVsTempBasalyAxis());
         //lineData.setAxisYRight(cobPastyAxis());
@@ -251,6 +252,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
 
     //##########IOB COB Past Line Chart##########
     public LineChartData iobcobPastLineData() {                                                     //// TODO: 09/10/2015 frequent null pointer crashes here 
+        statsReadings = Stats.statsList(numValues, start_time * fuzz);
         LineChartData lineData = new LineChartData(iobcobPastdefaultLines());
         lineData.setAxisYLeft(iobPastyAxis());
         lineData.setAxisYRight(cobPastyAxis());

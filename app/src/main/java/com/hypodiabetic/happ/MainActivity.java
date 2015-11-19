@@ -803,7 +803,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             View rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
             extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
             iobcobChart = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
-            iobcobChart.setViewportCalculationEnabled(true);
+            iobcobChart.setViewportCalculationEnabled(false);
+            Viewport view = iobcobChart.getMaximumViewport();
+            view.top = 80;
+            iobcobChart.setCurrentViewport(view);
 
             updateChart(getActivity());
 

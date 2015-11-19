@@ -18,8 +18,8 @@ android {
         applicationId "com.hypodiabetic.happ"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 17
-        versionName "1.1.8"
+        versionCode 18
+        versionName "1.1.9"
     }
     buildTypes {
         release {
@@ -47,6 +47,7 @@ dependencies {
     compile 'com.android.support:support-v4:22.0'
     compile 'com.github.clans:fab:1.6.1'
     //compile files('src/main/java/com/hypodiabetic/happ/code/rhino.jar')
+    compile 'com.eclipsesource.j2v8:j2v8:3.1.0-SNAPSHOT@aar'
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;

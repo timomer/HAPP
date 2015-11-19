@@ -29,7 +29,7 @@ public class notificationReceiver extends BroadcastReceiver {
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
                 pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp
                 Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
-                Notifications.updateCard(context);
+                Notifications.updateCard(context);                                                          //Updates info card on current Basal
                 break;
             case "setTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);  //Kills the notification
