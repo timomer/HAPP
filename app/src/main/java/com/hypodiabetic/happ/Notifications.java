@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.gson.Gson;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -26,25 +27,22 @@ import java.util.Date;
 public class Notifications {
 
     //New Temp has been suggested
-    public static void newTemp(JSONObject openAPSSuggest, Context c){
+    public static void newTemp(TempBasal basal, Context c){
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-        String title="";
-        String msg="";
-        try {
-            if (prefs.getString("basal_mode","percent").equals("percent")) {
-                title = "Set Temp Basal: " + openAPSSuggest.getInt("ratePercent") + "%";
-            } else {
-                title = "Set Temp Basal: " + openAPSSuggest.getDouble("rate") + "U";
-            }
-            msg = openAPSSuggest.getString("action");
-        }catch (Exception e)  {
-            Crashlytics.logException(e);
+        String title, msg;
+
+        title = basal.basal_adjustemnt + " Temp Basal";
+        if (prefs.getString("basal_mode","percent").equals("percent")) {
+            msg = "Set: " + basal.ratePercent + "%";
+        } else {
+            msg = "Set: " + basal.rate + "U";
         }
 
         Intent intent_accept_temp = new Intent();
         intent_accept_temp.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
         intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
+        intent_accept_temp.putExtra("SUGGESTED_BASAL", new Gson().toJson(basal));
         PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(MainActivity.activity,1,intent_accept_temp,Intent.FILL_IN_DATA);
 
         Intent intent_open_activity = new Intent(c,MainActivity.class);

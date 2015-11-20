@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Notifications;
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.pumpAction;
 
@@ -27,6 +29,10 @@ public class notificationReceiver extends BroadcastReceiver {
         switch (bundle.getString("NOTIFICATION_TYPE","")){
             case "newTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
+
+                TempBasal suggestedTemp = new TempBasal( new Gson().fromJson(bundle.getString("SUGGESTED_BASAL","") ));
+
+
                 pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp
                 Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
                 Notifications.updateCard(context);                                                          //Updates info card on current Basal

@@ -24,6 +24,55 @@ import java.util.Date;
  */
 public class pumpAction {
 
+
+    public static void newTempBasal(TempBasal basal, Context c){
+        //A new Temp Basal has been suggested
+
+        Date now = new Date();
+        Profile profile = new Profile().ProfileAsOf(now, c);
+
+        if (profile.openaps_mode.equals("closed")){                                                 //Send Direct to pump
+            setTempBasal(basal,c);
+
+        } else {
+            Notifications.newTemp(basal,c);                                                         //Notify user
+        }
+    }
+
+
+    public static void setTempBasal(final TempBasal basal, final Context c){
+
+        Date now = new Date();
+        Profile p = new Profile().ProfileAsOf(now, c);
+        Double safeRate = 0D;
+        Double safeRatePercent = 0D;
+
+        //Sanity check the suggested rate is safe
+        safeRate = Math.min(basal.rate  , p.max_basal);                                             //Not above Max Basal
+        safeRate = Math.min(safeRate    , 4 * p.current_basal);                                     //Not above 4 * Current Basal
+        basal.rate = safeRate;
+
+        //Re calculate rate percent
+        safeRatePercent     = (safeRate / p.current_basal) * 100;                                   //Get rate percent increase or decrease based on current Basal
+        basal.ratePercent   = (safeRatePercent.intValue() / 10) * 10;
+
+        //Save
+        basal.start_time = now;
+        basal.save();
+
+        if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")){                      //Send the new Basal to the pump
+            // TODO: 08/09/2015 pump interface
+
+        }
+
+        Notifications.updateCard(c);
+        NSUploader.uploadTempBasals(c);
+
+        //Run openAPS again
+        Intent intent = new Intent("RUN_OPENAPS");
+        c.sendBroadcast(intent);
+    }
+
     public static void cancelTempBasal(final Context c){
         //Cancels a Running Temp Basal and updates the DB with the Temp Basal new duration
 
@@ -92,73 +141,6 @@ public class pumpAction {
             Toast.makeText(c, "No Active Temp Basal to Cancel", Toast.LENGTH_LONG).show();
         }
     }
-
-        public static void setTempBasal(final TempBasal basal, final Context c){
-
-            Date now = new Date();
-            Profile p = new Profile().ProfileAsOf(now, c);
-            Double safeRate = 0D;
-            Double safeRatePercent = 0D;
-
-            //Sanity check the suggested rate is safe
-            safeRate = Math.min(basal.rate  , p.max_basal);                                             //Not above Max Basal
-            safeRate = Math.min(safeRate    , 4 * p.current_basal);                                     //Not above 4 * Current Basal
-            basal.rate = safeRate;
-
-            //Re calculate rate percent
-            safeRatePercent     = (safeRate / p.current_basal) * 100;                                   //Get rate percent increase or decrease based on current Basal
-            basal.ratePercent   = (safeRatePercent.intValue() / 10) * 10;
-
-            //Notify or Send command to pump depending on OpenAPS mode
-            if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")){
-
-                //Online mode, send commend to pump
-                // TODO: 08/09/2015 pump interface
-
-            } else {
-
-                //Offline mode, prompt user
-                String popUpMsg;
-                if (p.basal_mode.equals("percent")){
-                    popUpMsg = basal.ratePercent + "% for " + basal.duration + "mins";
-                } else {
-                    popUpMsg = basal.rate + "U for " + basal.duration + "mins";
-                }
-
-                Notifications.updateCard(c);
-                Date setNow = new Date();
-                basal.start_time = setNow;
-                basal.save();
-                NSUploader.uploadTempBasals(c);
-
-                //Run openAPS again
-                Intent intent = new Intent("RUN_OPENAPS");
-                c.sendBroadcast(intent);
-
-                //new AlertDialog.Builder(c)
-                //        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
-                //        .setMessage(popUpMsg)
-                //        .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                //            public void onClick(DialogInterface dialog, int which) {
-
-                 //               Date setNow = new Date();
-                //                basal.start_time = setNow;
-                //                basal.save();
-
-                                //Run openAPS again
-                 //               Intent intent = new Intent("RUN_OPENAPS");
-                 //                   c.sendBroadcast(intent);
-
-                //            }
-                 //       })
-                //        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                //            public void onClick(DialogInterface dialog, int which) {
-
-                //            }
-                 //       })
-                 //       .show();
-            }
-        }
 
     public static void setBolus(final Treatments insulinTreatment, final Treatments carbTreatment, final Context c){
 

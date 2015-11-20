@@ -687,11 +687,12 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                     Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
                     Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
 
-                    if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
-                        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
-                    } else {                                                                        //Make notification (Wear & Phone)
-                        Notifications.newTemp(openAPSSuggest,c);
-                    }
+                    pumpAction.newTempBasal(Suggested_Temp_Basal, c);
+                    //if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
+                    //    pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
+                    //} else {                                                                        //Make notification (Wear & Phone)
+                    //    Notifications.newTemp(openAPSSuggest,c);
+                    //}
                 }
             }catch (Exception e)  {
                 Crashlytics.logException(e);
