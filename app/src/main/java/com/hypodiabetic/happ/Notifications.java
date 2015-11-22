@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -19,6 +20,7 @@ import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Modifier;
 import java.util.Date;
 
 /**
@@ -41,10 +43,15 @@ public class Notifications {
 
         Intent intent_accept_temp = new Intent();
         intent_accept_temp.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
-        intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
-        intent_accept_temp.putExtra("SUGGESTED_BASAL", new Gson().toJson(basal));
-        PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(MainActivity.activity,1,intent_accept_temp,Intent.FILL_IN_DATA);
 
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
+                .serializeNulls()
+                .create();
+        intent_accept_temp.putExtra("SUGGESTED_BASAL", gson.toJson(basal, TempBasal.class));
+        intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
+
+        PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(MainActivity.activity,1,intent_accept_temp,PendingIntent.FLAG_CANCEL_CURRENT);
         Intent intent_open_activity = new Intent(c,MainActivity.class);
         PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 2, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 

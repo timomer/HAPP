@@ -18,14 +18,8 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:orientation="vertical"
-                    android:visibility="gone">
+                android:layout_height="40dp"
+                android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -39,27 +33,7 @@
                         android:text="action"
                         android:textSize="12sp"
                         android:textColor="#B8B8B8"/>
-                </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="2"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp"
-                        android:id="@+id/apsstatus_algorithm"
-                        android:text="-"
-                        android:textSize="16sp"/>
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="20dp"
-                        android:text="algorithm"
-                        android:textSize="12sp"
-                        android:textColor="#B8B8B8"/>
-                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -83,17 +57,18 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="2"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:onClick="showAlgorithmJSON">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:id="@+id/apsstatus_Temp"
+                        android:id="@+id/apsstatus_algorithm"
                         android:text="-"
                         android:textSize="16sp"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
-                        android:text="suggested basal"
+                        android:text="algorithm"
                         android:textSize="12sp"
                         android:textColor="#B8B8B8"/>
                 </LinearLayout>

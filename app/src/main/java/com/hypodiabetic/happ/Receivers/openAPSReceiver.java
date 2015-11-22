@@ -32,34 +32,35 @@ public class openAPSReceiver extends BroadcastReceiver{
             //Toast.makeText(context, "Running OpenAPS", Toast.LENGTH_LONG).show();
 
             Date dateVar = new Date();
-            JSONObject openAPSSuggest;
+            JSONObject openAPSSuggest = tools.openapsAlgorithmJSON(context);
             Profile profileNow = Profile.ProfileAsOf(dateVar,context);
-            if (profileNow.openaps_algorithm.equals("openaps_js")){
-                openAPSSuggest =  openAPS_Support.runDetermine_Basal(profileNow, context);          //Run OpenAPS native js
-                if (openAPSSuggest.has("rate")) {
-                    openAPSSuggest = openAPS_Support.setTempBasal(profileNow, openAPSSuggest);
-                } else {
-                    try {
-                        openAPSSuggest.put("action", "Wait and monitor");
-                    } catch (JSONException e){}
-                }
-            } else {
-                openAPSSuggest = determine_basal.runOpenAPS(context);                               //Run OpenAPS android port
-            }
-
 
             try {
-                openAPSSuggest.put("openaps_mode", profileNow.openaps_mode);
-                openAPSSuggest.put("openaps_loop", profileNow.openaps_loop);
-                switch (profileNow.openaps_algorithm){
-                    case "openaps_android":
-                        openAPSSuggest.put("algorithm", "OpenAPS Android");
-                        break;
+                switch (profileNow.openaps_algorithm) {
                     case "openaps_js":
-                        openAPSSuggest.put("algorithm", "OpenAPS Javascript");
+                        if (openAPSSuggest.has("rate")) {
+                            openAPSSuggest = openAPS_Support.setTempBasal(profileNow, openAPSSuggest);
+                        } else {
+                            openAPSSuggest.put("action", "Wait and monitor");
+                        }
+                        openAPSSuggest.put("algorithm", "OpenAPS js");
+                        break;
+                    case "openaps_js_v8":
+                        if (openAPSSuggest.has("rate")) {
+                            openAPSSuggest = openAPS_Support.setTempBasal(profileNow, openAPSSuggest);
+                        } else {
+                            openAPSSuggest.put("action", "Wait and monitor");
+                        }
+                        openAPSSuggest.put("algorithm", "OpenAPS oref0");
+                        break;
+                    default:    // "openaps_android"
+                        openAPSSuggest.put("algorithm", "OpenAPS Android");
                         break;
                 }
 
+                openAPSSuggest.put("temp", profileNow.basal_mode);                                  //"absolute" temp basel (U/hr) mode, "percent" of your normal basal
+                openAPSSuggest.put("openaps_mode", profileNow.openaps_mode);                        //Closed, Open, etc
+                openAPSSuggest.put("openaps_loop", profileNow.openaps_loop);                        //Loop in mins
                 //formats deviation
                 Double deviation = 0D;
                 if (openAPSSuggest.has("deviation")){
@@ -72,6 +73,7 @@ public class openAPSReceiver extends BroadcastReceiver{
                 } else {
                     openAPSSuggest.put("deviation", tools.unitizedBG(deviation, context));
                 }
+
             } catch (JSONException e) {
                 Crashlytics.logException(e);
                 e.printStackTrace();

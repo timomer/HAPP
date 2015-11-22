@@ -19,7 +19,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 22
         versionCode 18
-        versionName "1.1.9"
+        versionName "1.2.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -37,18 +38,22 @@ repositories {
 
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
     compile 'org.mozilla:rhino:1.7.7'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.github.lecho:hellocharts-library:1.5.5@aar'
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.google.android.gms:play-services:7.5.0'
-    compile 'com.android.support:design:22.2.0'
+    compile 'com.android.support:design:22.2.1'
     compile 'com.android.support:support-v4:22.0'
     compile 'com.github.clans:fab:1.6.1'
-    //compile files('src/main/java/com/hypodiabetic/happ/code/rhino.jar')
-    compile 'com.eclipsesource.j2v8:j2v8:3.1.0-SNAPSHOT@aar'
     compile 'com.mcxiaoke.volley:library:1.0.19'
+
+    compile 'com.eclipsesource.j2v8:j2v8:3.1.0-SNAPSHOT@aar'
+    compile 'com.github.tony19:logback-android-classic:1.1.1-4'
+    compile 'org.slf4j:slf4j-api:1.7.12'
+
     compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;
     }

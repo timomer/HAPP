@@ -421,12 +421,12 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         List<PointValue> listValues = new ArrayList<>();
         for (int c = 0; c < iobFutureValues.length(); c++) {
             try {
-                if (iobFutureValues.getJSONObject(c).getDouble("iob") > yCOBMax) {
-                    listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) yCOBMax.floatValue())); //Do not go above Max COB
-                } else if (iobFutureValues.getJSONObject(c).getDouble("iob") < yCOBMin) {
-                    listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) yCOBMin.floatValue())); //Do not go below Min COB
+                if (iobFutureValues.getJSONObject(c).getDouble("iob") > yIOBMax) {
+                    listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) fitIOB2COBRange(yIOBMax))); //Do not go above Max IOB
+                } else if (iobFutureValues.getJSONObject(c).getDouble("iob") < yIOBMin) {
+                    listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) fitIOB2COBRange(yIOBMin))); //Do not go below Min IOB
                 } else {
-                    listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) iobFutureValues.getJSONObject(c).getDouble("iob")));
+                    listValues.add(new PointValue((float) (iobFutureValues.getJSONObject(c).getDouble("as_of") / fuzz), (float) fitIOB2COBRange(iobFutureValues.getJSONObject(c).getDouble("iob"))));
                 }
             } catch (JSONException e) {
                 Crashlytics.logException(e);

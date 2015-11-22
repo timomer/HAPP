@@ -30,10 +30,9 @@ public class notificationReceiver extends BroadcastReceiver {
             case "newTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
 
-                TempBasal suggestedTemp = new TempBasal( new Gson().fromJson(bundle.getString("SUGGESTED_BASAL","") ));
+                TempBasal suggestedTemp = new Gson().fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
 
-
-                pumpAction.setTempBasal(MainActivity.openAPSFragment.getSuggested_Temp_Basal(), context);   //Action the suggested Temp
+                pumpAction.setTempBasal(suggestedTemp, context);   //Action the suggested Temp
                 Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
                 Notifications.updateCard(context);                                                          //Updates info card on current Basal
                 break;

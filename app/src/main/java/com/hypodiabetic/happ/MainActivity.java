@@ -14,6 +14,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 //import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -247,7 +248,17 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
 
+    public void showAlgorithmJSON(View view){
+        //Shows the JSON output of the selected Algorithm
+        Snackbar snackbar = Snackbar
+                .make(view, "RAW JSON: " + tools.openapsAlgorithmJSON(view.getContext()).toString(), Snackbar.LENGTH_INDEFINITE);
 
+        View snackbarView = snackbar.getView();
+        TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setMaxLines(5);  //set the max lines for textview to show multiple lines
+
+        snackbar.show();
+    }
 
 
     //xdrip functions start
@@ -546,31 +557,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
 
-
-
-
-    //setups the OpenAPS and Treatments Loops
-    public void startLoops(){
-        managerTreatments = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-
-        //Treatments loop
-        // Retrieve a PendingIntent that will perform a broadcast
-        Intent treatmentsIntent = new Intent(this, statsReceiver.class);
-        pendingIntentTreatments = PendingIntent.getBroadcast(this, 0, treatmentsIntent, 0);
-        int interval = 300000; //5mins
-        managerTreatments.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntentTreatments);
-
-        //OpenAPS Loop
-        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        Intent openAPSIntent = new Intent(this, openAPSReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0, openAPSIntent, 0);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.getBaseContext());
-        Integer openAPSInterval = Integer.parseInt(prefs.getString("openaps_loop", "900000"));
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), openAPSInterval, pendingIntent);
-
-        //Toast.makeText(this, "OpenAPS will loop " + interval , Toast.LENGTH_LONG).show();
-    }
-
     public void runOpenAPS(View view){
         //Run openAPS
         Intent intent = new Intent("RUN_OPENAPS");
@@ -636,7 +622,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         private static TextView apsstatus_deviation;
         private static TextView apsstatus_reason;
         private static TextView apsstatus_Action;
-        private static TextView apsstatus_temp;
+        //private static TextView apsstatus_temp;
         private static TextView apsstatus_algorithm;
         private static Button   apsstatusAcceptButton;
         private static TextView apsstatus_mode;
@@ -651,7 +637,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             apsstatus_reason        = (TextView) rootView.findViewById(R.id.apsstatus_reason);
             apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
             apsstatus_algorithm     = (TextView) rootView.findViewById(R.id.apsstatus_algorithm);
-            apsstatus_temp          = (TextView) rootView.findViewById(R.id.apsstatus_Temp);
+            //apsstatus_temp          = (TextView) rootView.findViewById(R.id.apsstatus_Temp);
             apsstatus_deviation     = (TextView) rootView.findViewById(R.id.apsstatus_deviation);
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
             apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
@@ -709,7 +695,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 try {
                     apsstatus_reason.setText("");
                     apsstatus_Action.setText("");
-                    apsstatus_temp.setText("None");
+                    //apsstatus_temp.setText("None");
                     apsstatus_deviation.setText("");
                     if (currentOpenAPSSuggest.has("deviation"))
                         apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
@@ -728,9 +714,9 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                         apsstatusAcceptButton.setEnabled(true);
                         apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
                         if (currentOpenAPSSuggest.getString("basal_adjustemnt").equals("Pump Default")) {
-                            apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
+                            //apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
                         } else {
-                            apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U " + currentOpenAPSSuggest.getString("duration") + "mins");
+                            //apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U " + currentOpenAPSSuggest.getString("duration") + "mins");
                         }
                     } else {
                         apsstatusAcceptButton.setEnabled(false);
@@ -807,6 +793,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             iobcobChart.setViewportCalculationEnabled(false);
             Viewport view = iobcobChart.getMaximumViewport();
             view.top = 80;
+            view.left = -1;
+            view.right = 6;
             iobcobChart.setCurrentViewport(view);
 
             updateChart(getActivity());

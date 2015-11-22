@@ -33,11 +33,13 @@
 
     <string-array name="openaps_algorithmArray">
         <item>OpenAPS Android</item>
-        <item>OpenAPS Javascript</item>
+        <item>OpenAPS openaps-js (ran in Rhino)</item>
+        <item>OpenAPS oref0 - open reference implementation (ran in V8)</item>
     </string-array>
     <string-array name="openaps_algorithmValues">
         <item>openaps_android</item>
         <item>openaps_js</item>
+        <item>openaps_js_v8</item>
     </string-array>
 
 

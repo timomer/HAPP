@@ -123,9 +123,9 @@ public class openAPS_Support {
 
             //#### Runs the JavaScript ####
             Object[] params = new Object[]{BG.toString(),
-                    openAPS_Support.getTempBasal().toString(),
-                    openAPS_Support.getIOB(p,c).toString(),
-                    openAPS_Support.getProfile(p).toString(),
+                    getTempBasal().toString(),
+                    getIOB(p,c).toString(),
+                    getProfile(p).toString(),
                     mode};
 
             org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
@@ -185,36 +185,50 @@ public class openAPS_Support {
         Double ratePercent = (rate / profile_data.current_basal) * 100;                             //Get rate percent increase or decrease based on current Basal
         ratePercent = (double) (ratePercent.intValue() / 10) * 10;
 
+        TempBasal currentTemp = TempBasal.getCurrentActive(null);
+        String pumpAction;
+        if (profile_data.basal_mode.equals("percent")){
+            pumpAction = ratePercent.intValue() + "%";
+        } else {
+            pumpAction = rate + "U";
+        }
+
         try {
             //requestedTemp.put("duration", duration);
-            openAPSSuggest.remove("rate");
             openAPSSuggest.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places
             openAPSSuggest.put("ratePercent", ratePercent.intValue());
-            if (rate == 0 && duration == 0){
+            if (rate == 0 && duration == 0) {
                 openAPSSuggest.put("action", "Cancel Temp Basal");
                 openAPSSuggest.put("basal_adjustemnt", "Pump Default");
-                openAPSSuggest.remove("rate");
                 openAPSSuggest.put("rate", profile_data.current_basal);
                 openAPSSuggest.put("ratePercent", 100);
-            } else if (rate > profile_data.current_basal && duration != 0){
-                if (profile_data.basal_mode.equals("percent")){
-                    openAPSSuggest.put("action", "High Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
+
+            } else if (currentTemp.isactive(null)) {                                                 //There is an Active Temp
+                if (rate > currentTemp.rate) {
+                    openAPSSuggest.put("action", "High Temp Basal set " + pumpAction + " for " + duration + "mins");
+                    openAPSSuggest.put("basal_adjustemnt", "High");
+                } else if (rate < currentTemp.rate) {
+                    openAPSSuggest.put("action", "Low Temp Basal set " + pumpAction + " for " + duration + "mins");
+                    openAPSSuggest.put("basal_adjustemnt", "Low");
                 } else {
-                    openAPSSuggest.put("action", "High Temp Basal set " + rate + "U for " + duration + "mins");
+                    openAPSSuggest.put("action", "Keep Current " + currentTemp.basal_adjustemnt + " Temp Basal");
+                    openAPSSuggest.put("basal_adjustemnt", "None");
+                    openAPSSuggest.remove("rate");                                                  //Remove rate, as we do not want to suggest this Temp Basal
                 }
-                openAPSSuggest.put("basal_adjustemnt", "High");
-            } else if (rate < profile_data.current_basal && duration != 0 && rate < TempBasal.getCurrentActive(new Date()).rate){
-                if (profile_data.basal_mode.equals("percent")){
-                    openAPSSuggest.put("action", "Low Temp Basal set " + ratePercent.intValue() + "% for " + duration + "mins");
-                } else {
-                    openAPSSuggest.put("action", "Low Temp Basal set " + rate + "U for " + duration + "mins");
-                }
-                openAPSSuggest.put("basal_adjustemnt", "Low");
+
             } else {
-                openAPSSuggest.put("reason", "Keep current basal");
-                openAPSSuggest.put("action", "Wait and monitor");
-                openAPSSuggest.put("basal_adjustemnt", "None");
-                openAPSSuggest.remove("rate");                                                       //Remove rate, as we do not want to suggest this Temp Basal
+                if (rate > profile_data.current_basal && duration != 0) {
+                    openAPSSuggest.put("action", "High Temp Basal set " + pumpAction + " for " + duration + "mins");
+                    openAPSSuggest.put("basal_adjustemnt", "High");
+                } else if (rate < profile_data.current_basal && duration != 0) {
+                    openAPSSuggest.put("action", "Low Temp Basal set " + pumpAction + " for " + duration + "mins");
+                    openAPSSuggest.put("basal_adjustemnt", "Low");
+                } else {
+                    //openAPSSuggest.put("reason", "Keep current basal");
+                    openAPSSuggest.put("action", "Keep Current Pump Basal");
+                    openAPSSuggest.put("basal_adjustemnt", "None");
+                    openAPSSuggest.remove("rate");                                                       //Remove rate, as we do not want to suggest this Temp Basal
+                }
             }
         } catch (JSONException e) {
             Crashlytics.logException(e);
