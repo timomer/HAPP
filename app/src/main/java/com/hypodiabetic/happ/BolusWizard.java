@@ -48,7 +48,7 @@ public class BolusWizard {
         String suggested_bolus_maths;
         Double suggested_bolus;
         Double net_correction_biob              = (cob / profile.carbRatio) - biob;                                     //Net Bolus IOB after current carbs taken into consideration
-        String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + biob + ") = " + String.format("%.1f",net_correction_biob) + "U";
+        String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + String.format("%.1f",biob) + ") = " + String.format("%.1f",net_correction_biob) + "U";
         Double insulin_correction_carbs         = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
         String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + String.format("%.1f",insulin_correction_carbs) + "U";
         if (lastBG >= profile.max_bg){                                                              //True HIGH

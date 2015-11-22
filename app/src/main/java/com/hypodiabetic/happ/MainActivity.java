@@ -242,9 +242,12 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     public void test(View view){
 
-        Date dateVar = new Date();
-        JSONObject openAPSSuggest =  openAPS_Support.runDetermine_Basal(Profile.ProfileAsOf(dateVar, view.getContext()) ,view.getContext());
-        Toast.makeText(MainActivity.activity, openAPSSuggest.toString(), Toast.LENGTH_LONG).show();
+        TempBasal example = new TempBasal();
+        example.rate = 5D;
+        example.duration = 30;
+
+        pumpAction.newTempBasal(example,view.getContext());
+
     }
 
 

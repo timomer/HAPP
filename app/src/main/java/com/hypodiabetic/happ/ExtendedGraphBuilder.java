@@ -93,7 +93,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
     public void getOpenAPSPredictValues() {
         openAPSPredictValue.clear();                                                                //clears past values
-        JSONObject openAPSSuggest = determine_basal.runOpenAPS(context);                            //Run OpenAPS
+        JSONObject openAPSSuggest = tools.openapsAlgorithmJSON(context);                            //Run OpenAPS
         Date timeeNow = new Date();
         Date in15mins = new Date(timeeNow.getTime() + 15*60000);
         Double snoozeBG=0D;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -15,6 +16,7 @@ import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.tools;
+import com.hypodiabetic.happ.volleyQ;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,9 +83,10 @@ public class NSUploader {
                     Crashlytics.logException(e);
                 }
 
-                if (tempBasalsJSONArray.length() > 0) {
-                    jsonPost(tempBasalsJSONArray, url);
-                }
+            }
+
+            if (tempBasalsJSONArray.length() > 0) {
+                jsonPost(tempBasalsJSONArray, url, c);
             }
         }
     }
@@ -144,14 +147,14 @@ public class NSUploader {
             }
 
             if (treatmentsJSONArray.length() > 0){
-                jsonPost(treatmentsJSONArray, url);
+                jsonPost(treatmentsJSONArray, url, c);
             }
         }
     }
 
-    public static void jsonPost(JSONArray treatmentsJSONArray, String url) {
+    public static void jsonPost(JSONArray treatmentsJSONArray, String url, Context c) {
 
-        RequestQueue queue = Volley.newRequestQueue(MainActivity.activity);
+        RequestQueue queue = volleyQ.getInstance(c.getApplicationContext()).getRequestQueue();
 
         JSONArrayPOST jsonArrayRequest = new JSONArrayPOST(Request.Method.POST, url, treatmentsJSONArray, new Response.Listener<JSONArray>() {
 
@@ -210,8 +213,8 @@ public class NSUploader {
            }
         });
 
-
-        queue.add(jsonArrayRequest);
+        //jsonArrayRequest.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 4, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        volleyQ.getInstance(c.getApplicationContext()).addToRequestQueue(jsonArrayRequest);
 
 
     }
