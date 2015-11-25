@@ -1,7 +1,7 @@
 # Hackabetes Artificial Pancreas Project
 **This code is highly experimental, all suggestions by the app must be reviewed**
 
-Native Android implementation of the OpenAPS.org algorithm with additional functionality.
+Native Android & JS implementation of the OpenAPS.org algorithm with additional functionality.
 
 * Most recent apk: https://drive.google.com/uc?export=download&id=0BxE8lMx4AjLieDEwbHRLcTY2VGc
 * App Summary: https://sites.google.com/a/n-omer.co.uk/hackabetes/home/happ-overview
@@ -21,12 +21,14 @@ Current features:
 * Suggested Temp Basal based on OpenAPS.org algorithm
 * Notifications for Android and Android Wear when a new Temp Basal is suggested
 * Visuals showing Carb and IOB over time and Basal vs Temp Basal adjustments
+* Multiple algorithm support OpenAPS.org Android port, openaps-js & OpenAPS oref0 
+* Nightscout integration, Treatments & Temp Basal
 
 As of now the App can be used to inform the user at a user set time interval suggested Temp Basal as calculated by the OpenAPS.org algorithm, this can then be manually set on the users pump.
 This allows a Diabetic with any pump to experiment with the OpenAPS algorithm.
 
 Requirements:
-* xDrip device and App for capturing blood sugar values
+* xDrip App for capturing blood sugar values
 * Android 5.0
 
 ### What's next?
@@ -46,8 +48,8 @@ As you can now play with the OpenAPS algorithm with any pump :)
 * A: I am not a developer and have been only working on Android development for the last 2 months, if there is a better way to do something please do let me know
 
 ###To do
-* Fix UI bug in line charts where lines appear to loop back on themselves
-* Write up the core functions of the App
+* Fix UI bug in line charts where lines appear to loop back on themselves - done
+* Write up the core functions of the App 
 * Improve code comments
 * Lots and lots of debugging
 * Find a Bluetooth developer to help me hack the Roche Accu-Chek Combo pump
@@ -55,6 +57,7 @@ As you can now play with the OpenAPS algorithm with any pump :)
 ###Repos used
 I am utilising code from the following repos and porting them over to this app.
 * OpenAPS - https://github.com/timomer/openaps-js
+* OpenAPS oref0 - https://github.com/timomer/oref0
 * NightWatch - https://github.com/timomer/NightWatch
 * Nightscout - https://github.com/timomer/cgm-remote-monitor
 
