@@ -65,7 +65,7 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     private static MainActivity ins;
-    private static APSResult currentAPSResult;
+    //private static APSResult currentAPSResult;
 
     private TextView sysMsg;
     private TextView iobValueTextView;
@@ -187,7 +187,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         updateEvery60Seconds = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Notifications.updateCard(context,currentAPSResult);
+                APSResult apsResult = APSResult.last();
+                Notifications.updateCard(context,apsResult);
             }
         };
         registerReceiver(updateEvery60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -370,15 +371,16 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if (lastRun != null) statsAge.setText(lastRun.statAge());
 
         //OpenAPS age update
-        if (currentAPSResult == null) currentAPSResult = APSResult.last();
-        if (currentAPSResult != null) {
+        APSResult apsResult = APSResult.last();
+        //if (currentAPSResult == null) currentAPSResult = APSResult.last();
+        if (apsResult != null) {
             eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
             snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
             openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
             //Updates main UI with last APS run
-            openAPSAgeTextView.setText(currentAPSResult.ageFormatted());
-            eventualBGValue.setText(tools.unitizedBG(currentAPSResult.eventualBG, getApplicationContext()));
-            snoozeBGValue.setText(tools.unitizedBG(currentAPSResult.snoozeBG, getApplicationContext()));
+            openAPSAgeTextView.setText(apsResult.ageFormatted());
+            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, getApplicationContext()));
+            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, getApplicationContext()));
         }
 
         //Temp Basal running update
@@ -513,7 +515,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     public void updateOpenAPSDetails(APSResult apsResult) {
 
         //Updates fragment UI with APS suggestion
-        currentAPSResult = apsResult;
+        //currentAPSResult = apsResult;
         openAPSFragment.update(apsResult);
 
         eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
@@ -569,7 +571,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
-        pumpAction.setTempBasal(currentAPSResult.getBasal(), view.getContext());      //Action the suggested Temp
+        pumpAction.setTempBasal(APSResult.last().getBasal(), view.getContext());      //Action the suggested Temp
         displayCurrentInfo();
     }
 
@@ -648,7 +650,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
             apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
 
-            update(currentAPSResult);
+            update(null);
             return rootView;
         }
 
