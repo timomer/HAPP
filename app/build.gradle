@@ -18,8 +18,8 @@ android {
         applicationId "com.hypodiabetic.happ"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 18
-        versionName "1.2.1"
+        versionCode 19
+        versionName "1.2.2"
         multiDexEnabled true
     }
     buildTypes {

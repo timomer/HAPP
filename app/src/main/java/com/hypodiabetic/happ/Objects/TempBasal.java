@@ -44,7 +44,7 @@ public class TempBasal extends Model {
     public String integration;
 
     public Date     created_time = new Date();
-
+    public String   openaps_mode;
 
     public static TempBasal last() {
         TempBasal last = new Select()
@@ -77,10 +77,21 @@ public class TempBasal extends Model {
 
         if (start_time == null){ return false;}
 
-        if ((start_time.getTime() + duration * 60000) > atThisDate.getTime()){
+        Date fur = new Date(start_time.getTime() + duration * 60000);
+        boolean boo = fur.after(atThisDate);
+        if (fur.after(atThisDate)){
             return true;
         } else {
             return false;
+        }
+    }
+
+    public String ageFormattted(){
+        Integer minsOld = age();
+        if (minsOld > 1){
+            return minsOld + " mins ago";
+        } else {
+            return minsOld + " min ago";
         }
     }
 

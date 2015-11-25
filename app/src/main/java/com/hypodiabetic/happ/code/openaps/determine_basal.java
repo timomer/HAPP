@@ -32,7 +32,7 @@ public class determine_basal {
         double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
         Date dateVar = new Date();
         List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
-        Profile profileNow = new Profile().ProfileAsOf(dateVar, c);
+        Profile profileNow = new Profile(dateVar, c);
 
         List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
         JSONObject iobJSONValue = iob.iobTotal(treatments, profileNow, dateVar);
@@ -90,8 +90,8 @@ public class determine_basal {
 
         if (glucose_data.size() < 2) {
             try {
-                requestedTemp.put("eventualBG", "NA");
-                requestedTemp.put("snoozeBG", "NA");
+                requestedTemp.put("eventualBG", 0);
+                requestedTemp.put("snoozeBG", 0);
                 requestedTemp.put("reason", "Need min 2 BG readings to run OpenAPS");
             } catch (JSONException e) {
                 Crashlytics.logException(e);

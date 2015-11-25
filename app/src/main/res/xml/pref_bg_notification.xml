@@ -7,5 +7,10 @@
             android:title="Summary Notification"
             android:summary="Show summary card with current BG and Temp Basal."
             android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="debug_notification"
+            android:title="Debug Notification"
+            android:summary="Show summary card when APS is ran with details."
+            android:defaultValue="false" />
     </PreferenceCategory>
 </PreferenceScreen>

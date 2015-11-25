@@ -55,7 +55,7 @@ public class DetermineBasalAdapterJS {
         mScriptReader  = scriptReader;
 
         Date dateVar = new Date();
-        Profile profile = Profile.ProfileAsOf(dateVar, c);
+        Profile profile = new Profile(dateVar, c);
 
         initProfile(profile);
         initGlucoseStatus();

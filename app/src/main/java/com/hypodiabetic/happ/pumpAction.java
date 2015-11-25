@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
@@ -28,10 +29,7 @@ public class pumpAction {
     public static void newTempBasal(TempBasal basal, Context c){
         //A new Temp Basal has been suggested
 
-        Date now = new Date();
-        Profile profile = new Profile().ProfileAsOf(now, c);
-
-        if (profile.openaps_mode.equals("closed")){                                                 //Send Direct to pump
+        if (basal.openaps_mode.equals("closed")){                                                   //Send Direct to pump
             setTempBasal(basal,c);
 
         } else {
@@ -40,10 +38,12 @@ public class pumpAction {
     }
 
 
-    public static void setTempBasal(final TempBasal basal, final Context c){
+    public static void setTempBasal(TempBasal basal, Context c){
+
+        if (basal == null) basal = APSResult.last().getBasal();
 
         Date now = new Date();
-        Profile p = new Profile().ProfileAsOf(now, c);
+        Profile p = new Profile(now, c);
         Double safeRate = 0D;
         Double safeRatePercent = 0D;
 
@@ -60,12 +60,12 @@ public class pumpAction {
         basal.start_time = now;
         basal.save();
 
-        if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")){                      //Send the new Basal to the pump
+        if (basal.openaps_mode.equals("closed") || basal.openaps_mode.equals("open")){              //Send the new Basal to the pump
             // TODO: 08/09/2015 pump interface
 
         }
 
-        Notifications.updateCard(c);
+        Notifications.clear("updateCard",c);
         NSUploader.uploadTempBasals(c);
 
         //Run openAPS again
@@ -78,7 +78,7 @@ public class pumpAction {
 
         final TempBasal active_basal = TempBasal.getCurrentActive(null);
         Date now = new Date();
-        Profile p = new Profile().ProfileAsOf(now, c);
+        Profile p = new Profile(now, c);
         TempBasal basal = new TempBasal();
 
         //The current Pumps Basal
@@ -145,7 +145,7 @@ public class pumpAction {
     public static void setBolus(final Treatments insulinTreatment, final Treatments carbTreatment, final Context c){
 
         Date now = new Date();
-        Profile p = new Profile().ProfileAsOf(now, c);
+        Profile p = new Profile(now, c);
 
         if (insulinTreatment.value > p.max_bolus){                                                  //Wow there, Bolus is > user set limit
             if (insulinTreatment.value > 15){                                                       //Wow wow, Bolus is > hardcoded safety limit

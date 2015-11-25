@@ -26,19 +26,19 @@ public class BolusWizard {
     public static JSONObject bw (Context c, Double carbs){
 
         Date dateNow = new Date();
-        Profile profile = Profile.ProfileAsOf(dateNow = new Date(), c);
+        Profile profile = new Profile(dateNow = new Date(), c);
         JSONObject iobNow       = Treatments.getIOB(profile, dateNow);
         JSONObject cobNow       = Treatments.getCOB(profile, dateNow);
-        JSONObject openAPSNow   = determine_basal.runOpenAPS(c);
+        //JSONObject openAPSNow   = determine_basal.runOpenAPS(c);
         String bgCorrection="";
 
         Bg bg = Bg.last();
         Double lastBG = 0D;
         if (bg != null) lastBG = bg.sgv_double();
 
-        Double eventualBG, snoozeBG, cob, biob;
-        eventualBG  = openAPSNow.optDouble("eventualBG",0D);
-        snoozeBG    = openAPSNow.optDouble("snoozeBG",0D);
+        Double cob, biob;
+        //eventualBG  = openAPSNow.optDouble("eventualBG",0D);
+        //snoozeBG    = openAPSNow.optDouble("snoozeBG",0D);
         cob         = cobNow.optDouble("cob",0D);
         biob        = iobNow.optDouble("bolusiob",0D);
 
@@ -61,15 +61,15 @@ public class BolusWizard {
             bgCorrection                = "Low";
             insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
 
-        } else if (snoozeBG >= profile.max_bg){                                                     //Snooze HIGH
-            insulin_correction_bg       = (snoozeBG - profile.max_bg) / profile.isf;
-            bgCorrection                = "High";
-            insulin_correction_bg_maths = "snoozeBG(" + snoozeBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f",insulin_correction_bg) + "U";
+        //} else if (snoozeBG >= profile.max_bg){                                                     //Snooze HIGH
+        //    insulin_correction_bg       = (snoozeBG - profile.max_bg) / profile.isf;
+        //    bgCorrection                = "High";
+        //    insulin_correction_bg_maths = "snoozeBG(" + snoozeBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f",insulin_correction_bg) + "U";
 
-        } else if (snoozeBG <= profile.min_bg){                                                     //Snooze LOW
-            insulin_correction_bg       = (snoozeBG - profile.target_bg) / profile.isf;
-            bgCorrection                = "Low";
-            insulin_correction_bg_maths = "(snoozeBG(" + snoozeBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
+        //} else if (snoozeBG <= profile.min_bg){                                                     //Snooze LOW
+        //    insulin_correction_bg       = (snoozeBG - profile.target_bg) / profile.isf;
+        //    bgCorrection                = "Low";
+        //    insulin_correction_bg_maths = "(snoozeBG(" + snoozeBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
         } else {                                                                                    //IN RANGE
             insulin_correction_bg       = 0D;
             bgCorrection                = "Within Target";
@@ -87,8 +87,8 @@ public class BolusWizard {
             reply.put("cob",cob);
             reply.put("carbRatio",profile.carbRatio);
             reply.put("bolusiob",biob);
-            reply.put("eventualBG",eventualBG);
-            reply.put("snoozeBG",snoozeBG);
+            //reply.put("eventualBG",eventualBG);
+            //reply.put("snoozeBG",snoozeBG);
             reply.put("max_bg",profile.max_bg);
             reply.put("target_bg",profile.target_bg);
             reply.put("bgCorrection",bgCorrection);
@@ -129,7 +129,7 @@ public class BolusWizard {
     public static JSONObject run_NS_BW(Context context) {
 
         Date dateNow = new Date();
-        Profile profile = new Profile().ProfileAsOf(dateNow, context);
+        Profile profile = new Profile(dateNow, context);
         List treatments = Treatments.latestTreatments(20, "Insulin");
 
         JSONObject bwp = bwp_calc(treatments, profile, dateNow);

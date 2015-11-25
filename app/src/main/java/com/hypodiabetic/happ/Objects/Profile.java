@@ -36,33 +36,30 @@ public class Profile {
     public Double max_bolus;                        //The maximum Bolus the app can deliver
     public String openaps_algorithm;
 
-    public static Profile ProfileAsOf(Date thisTime, Context c){
+    public Profile(Date thisTime, Context c){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-        Profile ProfileNow = new Profile();
 
         //OpenAPS expected Profile settings
-        ProfileNow.carbAbsorptionRate   = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
-        ProfileNow.max_iob              = Double.parseDouble(prefs.getString("max_iob", "3"));
-        ProfileNow.dia                  = Double.parseDouble(prefs.getString("dia", "1.5"));
-        ProfileNow.current_basal        = getCurrent_basal(thisTime, prefs);
-        ProfileNow.carbRatio            = getCurrent_carbratio(thisTime, prefs);
+        carbAbsorptionRate   = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
+        max_iob              = Double.parseDouble(prefs.getString("max_iob", "3"));
+        dia                  = Double.parseDouble(prefs.getString("dia", "1.5"));
+        current_basal        = getCurrent_basal(thisTime, prefs);
+        carbRatio            = getCurrent_carbratio(thisTime, prefs);
 
-        ProfileNow.max_basal            = Double.parseDouble(prefs.getString("max_basal", "2"));
-        ProfileNow.max_daily_basal      = 999D;
-        //ProfileNow.type                 = "current";
+        max_basal            = Double.parseDouble(prefs.getString("max_basal", "2"));
+        max_daily_basal      = 999D;
+        //type                 = "current";
 
-        ProfileNow.basal_mode           = prefs.getString("basal_mode", "percent");
-        ProfileNow.openaps_mode         = prefs.getString("openaps_mode", "offline");
-        ProfileNow.openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
-        ProfileNow.max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
-        ProfileNow.openaps_algorithm    = prefs.getString("openaps_algorithm", "openaps_android");
+        basal_mode           = prefs.getString("basal_mode", "percent");
+        openaps_mode         = prefs.getString("openaps_mode", "offline");
+        openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
+        max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
+        openaps_algorithm    = prefs.getString("openaps_algorithm", "openaps_android");
 
-        ProfileNow.max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
-        ProfileNow.min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
-        ProfileNow.target_bg            = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
-        ProfileNow.isf                  = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs), c));
-
-        return ProfileNow;
+        max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
+        min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
+        target_bg            = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
+        isf                  = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs), c));
     }
 
     public static Double getCurrent_basal(Date dateNow, SharedPreferences prefs){

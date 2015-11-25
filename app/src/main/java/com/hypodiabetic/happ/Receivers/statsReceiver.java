@@ -29,7 +29,7 @@ public class statsReceiver extends BroadcastReceiver {
 
 
         Date dateVar = new Date();
-        Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);
+        Profile profileAsOfNow = new Profile(dateVar,context);
 
             Stats stat = new Stats();
 
@@ -56,7 +56,6 @@ public class statsReceiver extends BroadcastReceiver {
 
         Intent intent = new Intent("ACTION_UPDATE_STATS");
         context.sendBroadcast(intent);
-        //MainActivity.getInstace().updateStats();                                                    //Updates the Main Activity screen
 
     }
 

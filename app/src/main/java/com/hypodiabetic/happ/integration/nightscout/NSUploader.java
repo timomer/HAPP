@@ -154,7 +154,7 @@ public class NSUploader {
 
     public static void jsonPost(JSONArray treatmentsJSONArray, String url, Context c) {
 
-        RequestQueue queue = volleyQ.getInstance(c.getApplicationContext()).getRequestQueue();
+        //RequestQueue queue = volleyQ.getInstance(c.getApplicationContext()).getRequestQueue();
 
         JSONArrayPOST jsonArrayRequest = new JSONArrayPOST(Request.Method.POST, url, treatmentsJSONArray, new Response.Listener<JSONArray>() {
 

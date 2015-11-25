@@ -1,8 +1,6 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,14 +33,13 @@ import com.activeandroid.Configuration;
 import com.crashlytics.android.Crashlytics;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.gson.Gson;
+import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Receivers.openAPSReceiver;
-import com.hypodiabetic.happ.Receivers.statsReceiver;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
-import com.hypodiabetic.happ.code.openaps.openAPS_Support;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
 
@@ -68,10 +65,7 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     private static MainActivity ins;
-    private PendingIntent pendingIntent;
-    private PendingIntent pendingIntentTreatments;
-    private AlarmManager manager;
-    private AlarmManager managerTreatments;
+    private static APSResult currentAPSResult;
 
     private TextView sysMsg;
     private TextView iobValueTextView;
@@ -187,30 +181,13 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         basalvsTempBasalObject      = new basalvsTempBasalFragment();
 
 
-        //listens out for openAPS updates
-        newOpenAPSReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                JSONObject openAPSSuggest = new JSONObject();
-                try {
-                    openAPSSuggest = new JSONObject(intent.getStringExtra("openAPSSuggest"));
-                }  catch (JSONException e) {
-                    Crashlytics.logException(e);
-                } finally {
-                    updateOpenAPSDetails(openAPSSuggest);
-                    setupBGCharts();
-                    displayCurrentInfo();
-                }
-            }
-        };
-        registerReceiver(newOpenAPSReceiver, new IntentFilter("ACTION_UPDATE_OPENAPS"));
-        runOpenAPS(findViewById(android.R.id.content));
+
 
         //Updates notifications every 60 seconds
         updateEvery60Seconds = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Notifications.updateCard(context);
+                Notifications.updateCard(context,currentAPSResult);
             }
         };
         registerReceiver(updateEvery60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
@@ -252,9 +229,12 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
 
     public void showAlgorithmJSON(View view){
+        Date dateVar = new Date();
+        Profile profileNow = new Profile(dateVar,view.getContext());
+
         //Shows the JSON output of the selected Algorithm
         Snackbar snackbar = Snackbar
-                .make(view, "RAW JSON: " + tools.openapsAlgorithmJSON(view.getContext()).toString(), Snackbar.LENGTH_INDEFINITE);
+                .make(view, "RAW JSON: " + APS.rawJSON(view.getContext(),profileNow).toString(), Snackbar.LENGTH_INDEFINITE);
 
         View snackbarView = snackbar.getView();
         TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
@@ -390,9 +370,16 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if (lastRun != null) statsAge.setText(lastRun.statAge());
 
         //OpenAPS age update
-        openAPSAgeTextView = (TextView)findViewById(R.id.openapsAge);
-        openAPSAgeTextView.setText(openAPSFragment.age());
-
+        if (currentAPSResult == null) currentAPSResult = APSResult.last();
+        if (currentAPSResult != null) {
+            eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
+            snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
+            openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
+            //Updates main UI with last APS run
+            openAPSAgeTextView.setText(currentAPSResult.ageFormatted());
+            eventualBGValue.setText(tools.unitizedBG(currentAPSResult.eventualBG, getApplicationContext()));
+            snoozeBGValue.setText(tools.unitizedBG(currentAPSResult.snoozeBG, getApplicationContext()));
+        }
 
         //Temp Basal running update
         Date timeNow = new Date();
@@ -402,7 +389,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
             appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
         } else {                                                                                    //No temp Basal running, show default
-            Double currentBasal = Profile.ProfileAsOf(timeNow, this.getBaseContext()).current_basal;
+            Double currentBasal = new Profile(timeNow, this.getBaseContext()).current_basal;
             appStatus = "No temp basal, current basal: " + currentBasal + "U";
         }
         sysMsg.setText(appStatus);
@@ -414,11 +401,14 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if (_broadcastReceiver != null) {
             unregisterReceiver(_broadcastReceiver);
         }
-        if(newDataReceiver != null) {
+        if (newDataReceiver != null) {
             unregisterReceiver(newDataReceiver);
         }
         if (newStatsReceiver != null){
             unregisterReceiver(newStatsReceiver);
+        }
+        if (newOpenAPSReceiver != null){
+            unregisterReceiver(newOpenAPSReceiver);
         }
     }
     //xdrip functions ends
@@ -467,6 +457,21 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         registerReceiver(newStatsReceiver, new IntentFilter("ACTION_UPDATE_STATS"));
         updateStats();
 
+        //listens out for openAPS updates
+        newOpenAPSReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                updateOpenAPSDetails(new Gson().fromJson(intent.getStringExtra("APSResult"), APSResult.class));
+                setupBGCharts();
+                displayCurrentInfo();
+            }
+        };
+        registerReceiver(newOpenAPSReceiver, new IntentFilter("ACTION_UPDATE_OPENAPS"));
+        //runOpenAPS(findViewById(android.R.id.content));  // TODO: 24/11/2015 only trigger via loop or manual button press
+
+        //if (currentAPSResult == null) APSResult.last();     //If the app has been closed and currentAPSResult has been lost, load the last saved APSResult
+
     }
 
 
@@ -505,23 +510,21 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
 
     //Updates the OpenAPS Fragment
-    public void updateOpenAPSDetails(final JSONObject openAPSSuggest) {
+    public void updateOpenAPSDetails(APSResult apsResult) {
 
-        openAPSFragment.setSuggested_Temp_Basal(openAPSSuggest, MainActivity.activity);     //Set the new suggested Basal
+        //Updates fragment UI with APS suggestion
+        currentAPSResult = apsResult;
+        openAPSFragment.update(apsResult);
 
         eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
         snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
         openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
-        openAPSAgeTextView.setText(openAPSFragment.age());
-        try {
-            if (!openAPSSuggest.isNull("eventualBG") && !openAPSSuggest.getString("eventualBG").equals("NA"))
-                eventualBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("eventualBG"), getApplicationContext()));
-            if (!openAPSSuggest.isNull("snoozeBG") && !openAPSSuggest.getString("snoozeBG").equals("NA"))
-                snoozeBGValue.setText(tools.unitizedBG(openAPSSuggest.getDouble("snoozeBG"), getApplicationContext()));
+        //Updates main UI with last APS run
+        openAPSAgeTextView.setText(apsResult.ageFormatted());
+        eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, getApplicationContext()));
+        snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, getApplicationContext()));
 
-        } catch (JSONException e) {
-            Crashlytics.logException(e);
-        }
+
 
         //displayCurrentInfo();
         //setupBGCharts();
@@ -566,7 +569,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
-        pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), view.getContext());      //Action the suggested Temp
+        pumpAction.setTempBasal(currentAPSResult.getBasal(), view.getContext());      //Action the suggested Temp
         displayCurrentInfo();
     }
 
@@ -631,7 +634,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         private static TextView apsstatus_mode;
         private static TextView apsstatus_loop;
         private static TempBasal Suggested_Temp_Basal = new TempBasal();
-        private static JSONObject currentOpenAPSSuggest;
+
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -645,89 +648,32 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
             apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
 
-            update();
+            update(currentAPSResult);
             return rootView;
         }
 
-        public static TempBasal getSuggested_Temp_Basal(){
-            return Suggested_Temp_Basal;
-        }
 
-        public static JSONObject getcurrentOpenAPSSuggest(){
-            return currentOpenAPSSuggest;
-        }
+        public static void update(APSResult apsResult){
 
-        public static String age(){
-            if (Suggested_Temp_Basal.age() > 1){
-                return Suggested_Temp_Basal.age() + " mins ago";
-            } else {
-                return Suggested_Temp_Basal.age() + " min ago";
-            }
-        }
+            if (apsResult == null) apsResult = APSResult.last();
 
-        public static void setSuggested_Temp_Basal(JSONObject openAPSSuggest, Context c){
-            try {
-                Suggested_Temp_Basal = new TempBasal();
-                Notifications.clear("newTemp", MainActivity.activity);                              //Clears any open temp notifications
-                if (openAPSSuggest.has("rate")){                                                    //Temp Basal suggested
-                    Suggested_Temp_Basal.rate               = openAPSSuggest.getDouble("rate");
-                    Suggested_Temp_Basal.ratePercent        = openAPSSuggest.getInt("ratePercent");
-                    Suggested_Temp_Basal.duration           = openAPSSuggest.getInt("duration");
-                    Suggested_Temp_Basal.basal_type         = openAPSSuggest.getString("temp");
-                    Suggested_Temp_Basal.basal_adjustemnt   = openAPSSuggest.getString("basal_adjustemnt");
+            if (apsResult != null) {
+                Suggested_Temp_Basal = apsResult.getBasal();
 
-                    pumpAction.newTempBasal(Suggested_Temp_Basal, c);
-                    //if (openAPSSuggest.getString("openaps_mode").equals("closed")){                 //OpenAPS mode is closed, send command direct to pump
-                    //    pumpAction.setTempBasal(openAPSFragment.getSuggested_Temp_Basal(), MainActivity.activity);
-                    //} else {                                                                        //Make notification (Wear & Phone)
-                    //    Notifications.newTemp(openAPSSuggest,c);
-                    //}
-                }
-            }catch (Exception e)  {
-                Crashlytics.logException(e);
-                Toast.makeText(MainActivity.activity, "Crash in setSuggested_Temp_Basal", Toast.LENGTH_SHORT).show();
-            }
-            currentOpenAPSSuggest = openAPSSuggest;
-            update();
-        }
+                apsstatus_reason.setText(apsResult.reason);
+                apsstatus_Action.setText(apsResult.action);
+                //apsstatus_temp.setText("None");
+                apsstatus_deviation.setText(apsResult.getFormattedDeviation(MainActivity.activity));
+                apsstatus_mode.setText(apsResult.aps_mode);
+                apsstatus_loop.setText(apsResult.aps_loop + "mins");
+                apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
-        public static void update(){
-
-            if (currentOpenAPSSuggest != null & apsstatus_reason != null) {
-
-                try {
-                    apsstatus_reason.setText("");
-                    apsstatus_Action.setText("");
-                    //apsstatus_temp.setText("None");
-                    apsstatus_deviation.setText("");
-                    if (currentOpenAPSSuggest.has("deviation"))
-                        apsstatus_deviation.setText(currentOpenAPSSuggest.getString("deviation"));
-                    if (currentOpenAPSSuggest.has("openaps_mode"))
-                        apsstatus_mode.setText(currentOpenAPSSuggest.getString("openaps_mode"));
-                    if (currentOpenAPSSuggest.has("openaps_loop"))
-                        apsstatus_loop.setText(currentOpenAPSSuggest.getString("openaps_loop") + "mins");
-                    if (currentOpenAPSSuggest.has("reason"))
-                        apsstatus_reason.setText(currentOpenAPSSuggest.getString("reason"));
-                    if (currentOpenAPSSuggest.has("action"))
-                        apsstatus_Action.setText(currentOpenAPSSuggest.getString("action"));
-                    if (currentOpenAPSSuggest.has("algorithm"))
-                        apsstatus_algorithm.setText(currentOpenAPSSuggest.getString("algorithm"));
-
-                    if (currentOpenAPSSuggest.has("rate")) {
-                        apsstatusAcceptButton.setEnabled(true);
-                        apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
-                        if (currentOpenAPSSuggest.getString("basal_adjustemnt").equals("Pump Default")) {
-                            //apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U");
-                        } else {
-                            //apsstatus_temp.setText(currentOpenAPSSuggest.getDouble("rate") + "U " + currentOpenAPSSuggest.getString("duration") + "mins");
-                        }
-                    } else {
-                        apsstatusAcceptButton.setEnabled(false);
-                        apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
-                    }
-                } catch (Exception e) {
-                    Crashlytics.logException(e);
-                    Toast.makeText(MainActivity.activity, "Crash updating OpenAPS Fragment", Toast.LENGTH_SHORT).show();
+                if (apsResult.tempSuggested) {
+                    apsstatusAcceptButton.setEnabled(true);
+                    apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
+                } else {
+                    apsstatusAcceptButton.setEnabled(false);
+                    apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
                 }
             }
         }

@@ -23,6 +23,7 @@
         <meta-data
             android:name="AA_MODELS"
             android:value="com.hypodiabetic.happ.Objects.Stats,
+                            com.hypodiabetic.happ.Objects.APSResult,
                             com.hypodiabetic.happ.Objects.Treatments,
                             com.hypodiabetic.happ.Objects.TempBasal,
                             com.hypodiabetic.happ.code.nightwatch.Bg,
@@ -32,7 +33,7 @@
             android:value="HAPP.db" />
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="20" />
+            android:value="21" />
 
         <activity
             android:name=".MainActivity"

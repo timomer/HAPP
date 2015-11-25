@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -21,6 +22,8 @@ import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
 import org.json.JSONObject;
 
 import java.lang.reflect.Modifier;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -74,8 +77,9 @@ public class Notifications {
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
     }
 
+
     //Update summary heads up card
-    public static void updateCard(Context c){
+    public static void updateCard(Context c, APSResult apsResult){
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
@@ -91,7 +95,7 @@ public class Notifications {
                     title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U " + lastTempBasal.durationLeft() + "mins left";
                 }
             } else {                                                                                //No temp Basal running, show default
-                Double currentBasal = Profile.ProfileAsOf(timeNow, c).current_basal;
+                Double currentBasal = new Profile(timeNow, c).current_basal;
                 if (prefs.getString("basal_mode","percent").equals("percent")) {
                     title = "Default Basal 100%";
                 } else {
@@ -99,29 +103,18 @@ public class Notifications {
                 }
             }
 
-            Bg lastBG = Bg.last();
-            Stats lastStats = Stats.last();
-            String statSummary = "";
-            //try {
-            //statSummary = lastBG.sgv + " " + lastBG.bgdelta + " Deviation: " + MainActivity.openAPSFragment.getcurrentOpenAPSSuggest().getString("deviation") + " IOB: " + lastStats.iob + " COB: " + lastStats.cob;
-            if (lastBG != null) {
-                String bgDelta = String.valueOf(tools.unitizedBG(lastBG.bgdelta, c));
-                if (lastBG.bgdelta > 0) bgDelta = "+"+bgDelta;
-                statSummary = tools.unitizedBG(lastBG.sgv_double(), c) + " " + lastBG.slopeArrow() + " " + bgDelta + ", " + lastBG.readingAge();
-            } else {
-                statSummary = "No BG data";
+            String msg = "";
+            if (apsResult != null){
+                msg = "Eventual:" +  apsResult.eventualBG + " Snooze:" +  apsResult.snoozeBG;
             }
-            //} catch (JSONException e) {
-            //    e.printStackTrace();
-            //}
 
             Intent intent_open_activity = new Intent(c,MainActivity.class);
             PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 3, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification notification = new Notification.Builder(c)
                     .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(statSummary)
-                    .setContentText(title)
+                    .setContentTitle(title)
+                    .setContentText(msg)
                     .setContentIntent(pending_intent_open_activity)
                     .setPriority(Notification.PRIORITY_DEFAULT)
                     .setCategory(Notification.CATEGORY_STATUS)
@@ -132,6 +125,42 @@ public class Notifications {
                             //.setOngoing(true) Android Wear will not display
                     .build();
             ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
+        }
+    }
+
+    //Update summary heads up card
+    public static void debugCard(Context c, APSResult apsResult){
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+
+        if (prefs.getBoolean("debug_notification", false)) {
+
+            String title, msg="";
+            Date timeNow = new Date();
+            DateFormat df = new SimpleDateFormat("HH:mm:ss c");
+
+            title = "Last run: " + df.format(timeNow);
+            if (apsResult != null){
+                msg = "Eventual:" +  apsResult.eventualBG + " Snooze:" +  apsResult.snoozeBG + " Temp?:" + apsResult.tempSuggested;
+            }
+
+            Intent intent_open_activity = new Intent(c,MainActivity.class);
+            PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 4, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Notification notification = new Notification.Builder(c)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(title)
+                    .setContentText(msg)
+                    .setContentIntent(pending_intent_open_activity)
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setCategory(Notification.CATEGORY_STATUS)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .extend(new Notification.WearableExtender()
+                                    .setBackground(createWearBitmap(2, c))
+                    )
+                            //.setOngoing(true) Android Wear will not display
+                    .build();
+            ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(57, notification);
         }
     }
 

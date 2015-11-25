@@ -103,7 +103,7 @@ public class Stats extends Model{
     public static List<Stats> updateActiveBarChart(Context c){
         List<Stats> statList = new ArrayList<Stats>();
         Date dateVar = new Date();
-        Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,c);
+        Profile profileAsOfNow = new Profile(dateVar,c);
 
         for (int v=0; v<=5; v++) {
             Stats stat = new Stats();
@@ -128,7 +128,7 @@ public class Stats extends Model{
                 statList.add(stat);
 
                 dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
-                profileAsOfNow = new Profile().ProfileAsOf(dateVar,c);        //Gets Profile info for the new dateVar
+                profileAsOfNow = new Profile(dateVar,c);        //Gets Profile info for the new dateVar
 
             } catch (Exception e)  {
                 Crashlytics.logException(e);

@@ -3,6 +3,7 @@ package com.hypodiabetic.happ;
 import android.content.Context;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
@@ -84,7 +85,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         Line openAPSPredictLine = new Line(openAPSPredictValue);
         ValueShape shape = ValueShape.DIAMOND;
         openAPSPredictLine.setColor(ChartUtils.COLOR_VIOLET);
-        openAPSPredictLine.setHasLines(true);
+        openAPSPredictLine.setHasLines(false);
         openAPSPredictLine.setPointRadius(3);
         openAPSPredictLine.setHasPoints(true);
         openAPSPredictLine.setCubic(true);
@@ -93,24 +94,30 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
     }
     public void getOpenAPSPredictValues() {
         openAPSPredictValue.clear();                                                                //clears past values
-        JSONObject openAPSSuggest = tools.openapsAlgorithmJSON(context);                            //Run OpenAPS
+        APSResult apsResult = APSResult.last();
         Date timeeNow = new Date();
         Date in15mins = new Date(timeeNow.getTime() + 15*60000);
-        Double snoozeBG=0D;
+        Double snoozeBG=0D, eventualBG=0D;
 
-        try {
-            if (!openAPSSuggest.isNull("eventualBG") && !openAPSSuggest.getString("eventualBG").equals("NA")) snoozeBG = openAPSSuggest.getDouble("eventualBG");
-            if (snoozeBG >= 400){
-                snoozeBG = 400D;
-            } if (snoozeBG < 0D){
-                snoozeBG = 0D;
-            }
-        } catch (JSONException e) {
-            Crashlytics.logException(e);
-            e.printStackTrace();
+        if (apsResult != null){
+            snoozeBG = apsResult.snoozeBG;
+            eventualBG = apsResult.eventualBG;
         }
+
+        if (snoozeBG >= 400){
+            snoozeBG = 400D;
+        } if (snoozeBG < 0D){
+            snoozeBG = 0D;
+        }
+        if (eventualBG >= 400){
+            eventualBG = 400D;
+        } if (eventualBG < 0D){
+            eventualBG = 0D;
+        }
+
         //openAPSPredictValue.add(new PointValue((float) (timeeNow.getTime() / fuzz), (float) Bg.last().sgv_double()));
         openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz), (float) unitized(snoozeBG.floatValue())));
+        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz), (float) unitized(eventualBG.floatValue())));
     }
     //##### Adds OpenAPS eventualBG to BG chart #####
 
@@ -379,7 +386,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         List cobtreatments = Treatments.latestTreatments(20,null);
         Collections.reverse(cobtreatments);                                             //Sort the Treatments from oldest to newest
 
-        Profile profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);
+        Profile profileAsOfNow = new Profile(dateVar,context);
 
         for (int v=0; v<=10; v++) {
             JSONObject iobcobValue = new JSONObject();
@@ -388,7 +395,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
             cobFutureValues.put(cob.cobTotal(cobtreatments, profileAsOfNow, dateVar));
 
             dateVar = new Date(dateVar.getTime() + 10*60000);                   //Adds 10mins to dateVar
-            profileAsOfNow = new Profile().ProfileAsOf(dateVar,context);        //Gets Profile info for the new dateVar
+            profileAsOfNow = new Profile(dateVar,context);        //Gets Profile info for the new dateVar
         }
     }
 

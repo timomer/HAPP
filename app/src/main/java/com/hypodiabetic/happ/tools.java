@@ -156,34 +156,4 @@ public class tools {
         }
     }
 
-    //Returns the Raw JSON output of the current Algorithm
-    public static JSONObject openapsAlgorithmJSON(Context c) {
-
-        Date dateVar = new Date();
-        JSONObject result = new JSONObject();
-        Profile profileNow = Profile.ProfileAsOf(dateVar, c);
-
-        switch (profileNow.openaps_algorithm) {
-            case "openaps_js":
-                result = openAPS_Support.runDetermine_Basal(profileNow, c);
-                break;
-            case "openaps_android":
-                result = determine_basal.runOpenAPS(c);
-                break;
-            case "openaps_js_v8":
-                try {
-                    DetermineBasalAdapterJS dbJS = new DetermineBasalAdapterJS(new ScriptReader(c), c);
-
-                    JSONObject dbJSJSON = dbJS.invoke();
-                    result = dbJSJSON;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Crashlytics.logException(e);
-                }
-                break;
-        }
-
-        return result;
-    }
 }
