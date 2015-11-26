@@ -2,6 +2,8 @@ package com.hypodiabetic.happ;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
@@ -13,6 +15,7 @@ import com.hypodiabetic.happ.code.openaps.DetermineBasalAdapterJS;
 import com.hypodiabetic.happ.code.openaps.ScriptReader;
 import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.code.openaps.openAPS_Support;
+import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -156,4 +159,20 @@ public class tools {
         }
     }
 
+    public static void syncInteractions(Context c){
+        //Sends data from HAPP to Interactions
+        ConnectivityManager cm = (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if(cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+
+            //NS Interaction
+            if (NSUploader.isNSIntegrationActive("nightscout_treatments",   prefs)) NSUploader.uploadTreatments(c,prefs);
+            if (NSUploader.isNSIntegrationActive("nightscout_tempbasal",    prefs)) NSUploader.uploadTempBasals(c,prefs);
+
+
+        }
+
+    }
 }

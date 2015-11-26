@@ -12,7 +12,6 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +65,7 @@ public class pumpAction {
         }
 
         Notifications.clear("updateCard",c);
-        NSUploader.uploadTempBasals(c);
+        tools.syncInteractions(c);
 
         //Run openAPS again
         Intent intent = new Intent("RUN_OPENAPS");
@@ -120,7 +119,7 @@ public class pumpAction {
                                 active_basal.integration = tempBasalIntegration.toString();
                                 active_basal.duration = active_basal.age();
                                 active_basal.save();
-                                NSUploader.uploadTempBasals(c);
+                                tools.syncInteractions(c);
 
                                 //Run openAPS again
                                 Intent intent = new Intent("RUN_OPENAPS");
@@ -187,7 +186,7 @@ public class pumpAction {
                                 carbTreatment.save();
                                 toastMsg += carbTreatment.value + "g ";
                             }
-                            NSUploader.uploadTreatments(MainActivity.activity);
+                            tools.syncInteractions(MainActivity.activity);
 
                             Toast.makeText(c, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
 

@@ -51,10 +51,15 @@ public class BolusWizard {
         String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + String.format("%.1f",biob) + ") = " + String.format("%.1f",net_correction_biob) + "U";
         Double insulin_correction_carbs         = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
         String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + String.format("%.1f",insulin_correction_carbs) + "U";
-        if (lastBG >= profile.max_bg){                                                              //True HIGH
-            insulin_correction_bg       = (lastBG - profile.max_bg) / profile.isf;
-            bgCorrection                = "High";
-            insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f",insulin_correction_bg) + "U";
+        if (lastBG >= profile.max_bg) {                                                              //True HIGH
+            insulin_correction_bg = (lastBG - profile.max_bg) / profile.isf;
+            bgCorrection = "High";
+            insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f", insulin_correction_bg) + "U";
+
+        } else if (lastBG <= (profile.min_bg-30)){                                                  //Critical LOW
+            insulin_correction_bg       = 0D;
+            bgCorrection                = "Critical Low";
+            insulin_correction_bg_maths = "NA - Blood Sugars below " + (profile.min_bg-30);
 
         } else if (lastBG <= profile.min_bg){                                                       //True LOW
             insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;

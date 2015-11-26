@@ -31,64 +31,61 @@ import java.util.List;
  */
 public class NSUploader {
 
-    public static void uploadTempBasals(Context c) {
+    public static void uploadTempBasals(Context c, SharedPreferences prefs) {
         //Will grab the last 20 suggested TempBasals and check they have all been uploaded to NS
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
 
-        if (isNSIntegrationActive("nightscout_tempbasal", prefs)) {
+        List<TempBasal> tempBasals = TempBasal.latestTempBasals(20);
+        JSONArray tempBasalsJSONArray = new JSONArray();
+        String url = prefs.getString("nightscout_url", "") + "/treatments/";
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        String dateAsISO8601;
 
-            List<TempBasal> tempBasals = TempBasal.latestTempBasals(20);
-            JSONArray tempBasalsJSONArray = new JSONArray();
-            String url = prefs.getString("nightscout_url", "") + "/treatments/";
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-            String dateAsISO8601;
+        for (TempBasal tempBasal : tempBasals) {
+            try {
 
-            for (TempBasal tempBasal : tempBasals) {
-                try {
+                JSONObject tempBasalJSON = new JSONObject();
+                JSONObject tempBasalIntegration = tools.getJSONO(tempBasal.integration);
 
-                    JSONObject tempBasalJSON = new JSONObject();
-                    JSONObject tempBasalIntegration = tools.getJSONO(tempBasal.integration);
+                if (!tempBasalIntegration.has("ns_upload_id")) {
 
-                    if (!tempBasalIntegration.has("ns_upload_id")) {
+                    tempBasalJSON.put("happ_id", tempBasal.getId());
+                    tempBasalJSON.put("enterdBy", "HAPP_APP");
+                    dateAsISO8601 = df.format(tempBasal.start_time);
+                    tempBasalJSON.put("created_at", dateAsISO8601);
+                    tempBasalJSON.put("eventType", "Temp Basal");
+                    tempBasalJSON.put("duration", tempBasal.duration);
 
+                    //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
+                    //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
+                    //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
+                        tempBasalJSON.put("absolute", tempBasal.rate);
+                    //}
+
+                    tempBasalsJSONArray.put(tempBasalJSON);
+                } else if (tempBasalIntegration.has("ns_temp_basal_stop")) {
+                    //This Temp Basal has been stopped, insert a record to NS so it knows
+                    if (tempBasalIntegration.getString("ns_temp_basal_stop").equals("dirty")) {
                         tempBasalJSON.put("happ_id", tempBasal.getId());
                         tempBasalJSON.put("enterdBy", "HAPP_APP");
-                        dateAsISO8601 = df.format(tempBasal.start_time);
+                        dateAsISO8601 = df.format(tempBasal.endDate());
                         tempBasalJSON.put("created_at", dateAsISO8601);
                         tempBasalJSON.put("eventType", "Temp Basal");
-                        tempBasalJSON.put("duration", tempBasal.duration);
-
-                        //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
-                        //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
-                        //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
-                            tempBasalJSON.put("absolute", tempBasal.rate);
-                        //}
+                        //tempBasalJSON.put("happ_note", "temp_basal_stop");
 
                         tempBasalsJSONArray.put(tempBasalJSON);
-                    } else if (tempBasalIntegration.has("ns_temp_basal_stop")) {
-                        //This Temp Basal has been stopped, insert a record to NS so it knows
-                        if (tempBasalIntegration.getString("ns_temp_basal_stop").equals("dirty")) {
-                            tempBasalJSON.put("happ_id", tempBasal.getId());
-                            tempBasalJSON.put("enterdBy", "HAPP_APP");
-                            dateAsISO8601 = df.format(tempBasal.endDate());
-                            tempBasalJSON.put("created_at", dateAsISO8601);
-                            tempBasalJSON.put("eventType", "Temp Basal");
-                            //tempBasalJSON.put("happ_note", "temp_basal_stop");
-
-                            tempBasalsJSONArray.put(tempBasalJSON);
-                        }
                     }
-
-                } catch (JSONException | NullPointerException e) {
-                    Crashlytics.logException(e);
                 }
 
+            } catch (JSONException | NullPointerException e) {
+                Crashlytics.logException(e);
             }
 
-            if (tempBasalsJSONArray.length() > 0) {
-                jsonPost(tempBasalsJSONArray, url, c);
-            }
         }
+
+        if (tempBasalsJSONArray.length() > 0) {
+            jsonPost(tempBasalsJSONArray, url, c);
+        }
+
     }
 
     public static boolean isNSIntegrationActive(String integrationItem, SharedPreferences prefs){
@@ -99,57 +96,53 @@ public class NSUploader {
         }
     }
 
-    public static void uploadTreatments(Context c){
+    public static void uploadTreatments(Context c, SharedPreferences prefs){
         //Will grab the last 10 treatments and check they have all been uploaded to NS
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        List<Treatments> treatments = Treatments.latestTreatments(10, null);
+        JSONArray treatmentsJSONArray = new JSONArray();
+        String url = prefs.getString("nightscout_url", "") + "/treatments/";
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        String dateAsISO8601;
 
-        if (isNSIntegrationActive("nightscout_treatments", prefs)) {
+        for (Treatments treatment : treatments) {
+            try {
+                JSONObject treatmentJSON = new JSONObject();
+                JSONObject treatmentIntegration = tools.getJSONO(treatment.integration);
 
-            List<Treatments> treatments = Treatments.latestTreatments(10, null);
-            JSONArray treatmentsJSONArray = new JSONArray();
-            String url = prefs.getString("nightscout_url", "") + "/treatments/";
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-            String dateAsISO8601;
+                if (!treatmentIntegration.has("ns_upload_id")) {
 
-            for (Treatments treatment : treatments) {
-                try {
-                    JSONObject treatmentJSON = new JSONObject();
-                    JSONObject treatmentIntegration = tools.getJSONO(treatment.integration);
+                    treatmentJSON.put("happ_id", treatment.getId());
+                    treatmentJSON.put("enterdBy", "HAPP_APP");
+                    treatmentJSON.put("display_date", treatment.datetime_display);
+                    dateAsISO8601 = df.format(treatment.datetime);
+                    treatmentJSON.put("created_at", dateAsISO8601);
 
-                    if (!treatmentIntegration.has("ns_upload_id")) {
-
-                        treatmentJSON.put("happ_id", treatment.getId());
-                        treatmentJSON.put("enterdBy", "HAPP_APP");
-                        treatmentJSON.put("display_date", treatment.datetime_display);
-                        dateAsISO8601 = df.format(treatment.datetime);
-                        treatmentJSON.put("created_at", dateAsISO8601);
-
-                        switch (treatment.type) {
-                            case "Insulin":
-                                treatmentJSON.put("insulin", treatment.value);
-                                treatmentJSON.put("units", tools.bgUnitsFormat(c));
-                                treatmentJSON.put("eventType", "Bolus");
-                                break;
-                            case "Carbs":
-                                treatmentJSON.put("carbs", treatment.value);
-                                treatmentJSON.put("eventType", "Carbs");
-                                break;
-                            default:
-                                //no idea what this treatment is, exit
-                                return;
-                        }
-                        treatmentsJSONArray.put(treatmentJSON);
+                    switch (treatment.type) {
+                        case "Insulin":
+                            treatmentJSON.put("insulin", treatment.value);
+                            treatmentJSON.put("units", tools.bgUnitsFormat(c));
+                            treatmentJSON.put("eventType", "Bolus");
+                            break;
+                        case "Carbs":
+                            treatmentJSON.put("carbs", treatment.value);
+                            treatmentJSON.put("eventType", "Carbs");
+                            break;
+                        default:
+                            //no idea what this treatment is, exit
+                            return;
                     }
-                } catch (JSONException e) {
-                    Crashlytics.logException(e);
+                    treatmentsJSONArray.put(treatmentJSON);
                 }
-            }
-
-            if (treatmentsJSONArray.length() > 0){
-                jsonPost(treatmentsJSONArray, url, c);
+            } catch (JSONException e) {
+                Crashlytics.logException(e);
             }
         }
+
+        if (treatmentsJSONArray.length() > 0){
+            jsonPost(treatmentsJSONArray, url, c);
+        }
+
     }
 
     public static void jsonPost(JSONArray treatmentsJSONArray, String url, Context c) {
