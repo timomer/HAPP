@@ -44,7 +44,7 @@ public class openAPSReceiver extends BroadcastReceiver{
 
             Intent intent = new Intent("ACTION_UPDATE_OPENAPS");
             APSResult apsResult = APS.execute(context);                                             //Runs APS
-            tools.syncInteractions(context);                                                        //Syncs Notifications
+            tools.syncIntegrations(context);                                                        //Syncs Notifications
             intent.putExtra("APSResult", gson.toJson(apsResult, APSResult.class));                  //sends result to update UI if loaded
             context.sendBroadcast(intent);
 

@@ -159,7 +159,7 @@ public class tools {
         }
     }
 
-    public static void syncInteractions(Context c){
+    public static void syncIntegrations(Context c){
         //Sends data from HAPP to Interactions
         ConnectivityManager cm = (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
 

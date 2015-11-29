@@ -27,12 +27,14 @@ public class pumpAction {
 
     public static void newTempBasal(TempBasal basal, Context c){
         //A new Temp Basal has been suggested
+        if (basal != null && c != null) {
 
-        if (basal.openaps_mode.equals("closed")){                                                   //Send Direct to pump
-            setTempBasal(basal,c);
+            if (basal.openaps_mode.equals("closed")) {                                              //Send Direct to pump
+                setTempBasal(basal, c);
 
-        } else {
-            Notifications.newTemp(basal,c);                                                         //Notify user
+            } else {
+                Notifications.newTemp(basal, c);                                                    //Notify user
+            }
         }
     }
 
@@ -65,7 +67,7 @@ public class pumpAction {
         }
 
         Notifications.clear("updateCard",c);
-        tools.syncInteractions(c);
+        tools.syncIntegrations(c);
 
         //Run openAPS again
         Intent intent = new Intent("RUN_OPENAPS");
@@ -119,7 +121,7 @@ public class pumpAction {
                                 active_basal.integration = tempBasalIntegration.toString();
                                 active_basal.duration = active_basal.age();
                                 active_basal.save();
-                                tools.syncInteractions(c);
+                                tools.syncIntegrations(c);
 
                                 //Run openAPS again
                                 Intent intent = new Intent("RUN_OPENAPS");
@@ -186,7 +188,7 @@ public class pumpAction {
                                 carbTreatment.save();
                                 toastMsg += carbTreatment.value + "g ";
                             }
-                            tools.syncInteractions(MainActivity.activity);
+                            tools.syncIntegrations(MainActivity.activity);
 
                             Toast.makeText(c, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
 

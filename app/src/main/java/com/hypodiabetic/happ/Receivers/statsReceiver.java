@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
@@ -14,6 +16,7 @@ import com.hypodiabetic.happ.Objects.Treatments;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,9 +55,15 @@ public class statsReceiver extends BroadcastReceiver {
             }
 
 
-        stat.save();                                                                                //Records Stat for now to DB (not future stats)
+        stat.save();
+
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
+                .serializeNulls()
+                .create();
 
         Intent intent = new Intent("ACTION_UPDATE_STATS");
+        intent.putExtra("stat", gson.toJson(stat, Stats.class));                                    //sends result to update UI if loaded
         context.sendBroadcast(intent);
 
     }

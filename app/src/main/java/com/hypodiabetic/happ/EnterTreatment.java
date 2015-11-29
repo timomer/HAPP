@@ -27,6 +27,8 @@ import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,6 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 
 public class EnterTreatment extends Activity implements View.OnFocusChangeListener {
@@ -57,10 +60,6 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
         setupPickers();
         loadLastTreatments();
-
-
-
-
     }
 
     public void setupPickers(){
@@ -254,6 +253,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         final EditText editText_treatment_value;
         Spinner spinner_treatment_type;
         Spinner spinner_notes;
+        DecimalFormat df = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.UK));
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyyHH:mm", getResources().getConfiguration().locale);
         Date treatmentDateTime = new Date();
@@ -277,12 +277,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         treatment.datetime_display  = treatmentDateTime.toString();
         treatment.note              = spinner_notes.getSelectedItem().toString();
         treatment.type              = spinner_treatment_type.getSelectedItem().toString();
-        try {
-            treatment.value = NumberFormat.getNumberInstance(java.util.Locale.UK).parse(editText_treatment_value.getText().toString()).doubleValue();
-        } catch (ParseException e){
-            Crashlytics.logException(e);
-        }
-
+        treatment.value             = Double.valueOf(df.format(editText_treatment_value.getText()));
 
         if (treatment.value == 0) {                                                                 //No value given
             Toast.makeText(this, "Enter a value", Toast.LENGTH_SHORT).show();
@@ -296,7 +291,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
                             treatment.save();
                             editText_treatment_value.setText("");
-                            tools.syncInteractions(MainActivity.activity);
+                            tools.syncIntegrations(MainActivity.activity);
                             Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
                             loadLastTreatments();
 
@@ -316,7 +311,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
 
             treatment.save();
             editText_treatment_value.setText("");
-            tools.syncInteractions(this);
+            tools.syncIntegrations(this);
             Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
 
             loadLastTreatments();

@@ -365,38 +365,16 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             }
         }
 
-        //Stats age update
-        statsAge = (TextView) findViewById(R.id.statsAge);
-        Stats lastRun = Stats.last();
-        if (lastRun != null) statsAge.setText(lastRun.statAge());
+        //Stats UI update
+        updateStats(null);
 
-        //OpenAPS age update
-        APSResult apsResult = APSResult.last();
-        //if (currentAPSResult == null) currentAPSResult = APSResult.last();
-        if (apsResult != null) {
-            eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
-            snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
-            openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
-            //Updates main UI with last APS run
-            openAPSAgeTextView.setText(apsResult.ageFormatted());
-            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, getApplicationContext()));
-            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, getApplicationContext()));
-        }
+        //OpenAPS UI update
+        updateOpenAPSDetails(null);
 
         //Temp Basal running update
-        Date timeNow = new Date();
-        sysMsg = (TextView) findViewById(R.id.sysmsg);
-        TempBasal lastTempBasal = TempBasal.last();
-        String appStatus;
-        if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
-            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
-        } else {                                                                                    //No temp Basal running, show default
-            Double currentBasal = new Profile(timeNow, this.getBaseContext()).current_basal;
-            appStatus = "No temp basal, current basal: " + currentBasal + "U";
-        }
-        sysMsg.setText(appStatus);
-
+        updateRunningTemp();
     }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -452,12 +430,12 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         newStatsReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateStats();
+                updateStats(new Gson().fromJson(intent.getStringExtra("stat"), Stats.class));
                 displayCurrentInfo();
             }
         };
         registerReceiver(newStatsReceiver, new IntentFilter("ACTION_UPDATE_STATS"));
-        updateStats();
+        updateStats(null);
 
         //listens out for openAPS updates
         newOpenAPSReceiver = new BroadcastReceiver() {
@@ -470,9 +448,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             }
         };
         registerReceiver(newOpenAPSReceiver, new IntentFilter("ACTION_UPDATE_OPENAPS"));
-        //runOpenAPS(findViewById(android.R.id.content));  // TODO: 24/11/2015 only trigger via loop or manual button press
-
-        //if (currentAPSResult == null) APSResult.last();     //If the app has been closed and currentAPSResult has been lost, load the last saved APSResult
 
     }
 
@@ -515,53 +490,65 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     public void updateOpenAPSDetails(APSResult apsResult) {
 
         //Updates fragment UI with APS suggestion
-        //currentAPSResult = apsResult;
-        openAPSFragment.update(apsResult);
+        if (apsResult == null) apsResult = APSResult.last();
 
-        eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
-        snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
-        openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
-        //Updates main UI with last APS run
-        openAPSAgeTextView.setText(apsResult.ageFormatted());
-        eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, getApplicationContext()));
-        snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, getApplicationContext()));
+        if (apsResult != null) {
 
+            Fragment apsDash = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":0");
+            if (apsDash != null) openAPSFragment.update(apsResult);
 
-
-        //displayCurrentInfo();
-        //setupBGCharts();
-    }
-    //Updates stats and stats Fragments charts
-    public void updateStats() {
-
-        try {
-            iobValueTextView = (TextView) findViewById(R.id.iobValue);
-            cobValueTextView = (TextView) findViewById(R.id.cobValue);
-
-            JSONObject reply;
-            Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":2");
-            if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
-                reply = iobcobActiveFragment.updateChart(MainActivity.activity);
-            } else {
-                reply = iobcobActiveFragment.getIOBCOB(MainActivity.activity);
-            }
-            iobValueTextView.setText(reply.getString("iob"));
-            cobValueTextView.setText(reply.getString("cob"));
-
-            Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
-            if (iobcob != null) {                                                                //Check IOB COB fragment is loaded
-                iobcobFragment.updateChart();
-            }
-            Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":3");
-            if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
-                basalvsTempBasalFragment.updateChart();
-            }
-
-        } catch (JSONException e) {
-            Crashlytics.logException(e);
-            Toast.makeText(MainActivity.activity, "Crash running updateStats()", Toast.LENGTH_SHORT).show();
+            eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
+            snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
+            openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
+            //Updates main UI with last APS run
+            openAPSAgeTextView.setText(apsResult.ageFormatted());
+            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, getApplicationContext()));
+            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, getApplicationContext()));
         }
 
+        //Temp Basal running update
+        updateRunningTemp();
+    }
+    //Updates stats and stats Fragments charts
+    public void updateStats(Stats stat) {
+
+        if (stat == null) stat = Stats.last();
+
+        iobValueTextView = (TextView) findViewById(R.id.iobValue);
+        cobValueTextView = (TextView) findViewById(R.id.cobValue);
+        statsAge = (TextView) findViewById(R.id.statsAge);
+
+        Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":2");
+        if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
+            iobcobActiveFragment.updateChart(MainActivity.activity);
+        }
+        if (stat != null) {
+            iobValueTextView.setText(String.format(Locale.ENGLISH, "%.2f", stat.iob));
+            cobValueTextView.setText(String.format(Locale.ENGLISH, "%.2f", stat.cob));
+            statsAge.setText(stat.statAge());
+        }
+
+        Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
+        if (iobcob != null) {                                                                //Check IOB COB fragment is loaded
+            iobcobFragment.updateChart();
+        }
+        Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":3");
+        if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
+            basalvsTempBasalFragment.updateChart();
+        }
+    }
+    public void updateRunningTemp(){
+        Date timeNow = new Date();
+        sysMsg = (TextView) findViewById(R.id.sysmsg);
+        TempBasal lastTempBasal = TempBasal.last();
+        String appStatus;
+        if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
+            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
+        } else {                                                                                    //No temp Basal running, show default
+            Double currentBasal = new Profile(timeNow, this.getBaseContext()).current_basal;
+            appStatus = "No temp basal, current basal: " + currentBasal + "U";
+        }
+        sysMsg.setText(appStatus);
     }
 
 
@@ -667,7 +654,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 //apsstatus_temp.setText("None");
                 apsstatus_deviation.setText(apsResult.getFormattedDeviation(MainActivity.activity));
                 apsstatus_mode.setText(apsResult.aps_mode);
-                apsstatus_loop.setText(apsResult.aps_loop + "mins");
+                apsstatus_loop.setText(apsResult.aps_loop + " mins");
                 apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
                 if (apsResult.tempSuggested) {
@@ -781,34 +768,17 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         }
 
         //Updates Stats
-        public static JSONObject updateChart(Activity a){
+        public static void updateChart(Activity a){
 
-            JSONObject reply = new JSONObject();
             List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
-
-            //enter blank data if there are no stats or the chart is not loaded so below is ignored
-            try {
-                reply.put("iob", String.format(Locale.ENGLISH, "%.2f", 0.00));
-                reply.put("cob", String.format(Locale.ENGLISH, "%.2f", 0.00));
-            } catch (JSONException e) {
-                Crashlytics.logException(e);
-                e.printStackTrace();
-            }
 
             if (iobcobChart != null && statList != null) {
                 if (statList.size() > 0) {
                     //reloads charts with Treatment data
                     iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
-                    try {
-                        reply.put("iob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).iob));
-                        reply.put("cob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).cob));
-                    } catch (JSONException e) {
-                        Crashlytics.logException(e);
-                        e.printStackTrace();
-                    }
                 }
             }
-            return reply;
+
         }
     }
     public static class basalvsTempBasalFragment extends Fragment {

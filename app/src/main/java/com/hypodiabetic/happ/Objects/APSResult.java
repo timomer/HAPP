@@ -71,6 +71,8 @@ public class APSResult extends Model{
     @Expose
     @Column(name = "current_pump_basal")
     public Double   current_pump_basal;     //Pumps current basal
+    @Expose
+    @Column(name = "aps_loop")
     public Integer  aps_loop;               //Loop in mins
 
 

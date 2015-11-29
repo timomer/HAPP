@@ -20,9 +20,12 @@ import com.hypodiabetic.happ.Objects.Treatments;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Locale;
 
 public class BolusWizardActivity extends Activity {
 
@@ -114,17 +117,13 @@ public class BolusWizardActivity extends Activity {
         bwDisplayCarbCorr   = (TextView) findViewById(R.id.bwDisplayCarbCorr);
         bwDisplayBGCorr     = (TextView) findViewById(R.id.bwDisplayBGCorr);
         Double carbValue = 0D;
+        DecimalFormat df = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.UK));
 
         if (!carbs.getText().toString().equals("")){
-            try {
-                carbValue = NumberFormat.getNumberInstance(java.util.Locale.UK).parse(carbs.getText().toString()).doubleValue();
-            } catch (ParseException e){
-                Crashlytics.logException(e);
-            }
+            carbValue = Double.valueOf(df.format(carbs.getText()));
         }
 
         JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
-
 
             //Bolus Wizard Display
             bwDisplayIOBCorr.setText(   bw.optString("net_biob", "") + "U");
@@ -141,16 +140,12 @@ public class BolusWizardActivity extends Activity {
 
             Date dateNow = new Date();
             if (bw.has("suggested_bolus")) {
-                try {
-                    if (NumberFormat.getNumberInstance(java.util.Locale.UK).parse(bw.optString("suggested_bolus", "")).doubleValue() > 0) {
-                        bolusTreatment.datetime = dateNow.getTime();
-                        bolusTreatment.datetime_display = dateNow.toString();
-                        bolusTreatment.note = "bolus";
-                        bolusTreatment.type = "Insulin";
-                        bolusTreatment.value = bw.optDouble("suggested_bolus", 0D);
-                    }
-                } catch (ParseException e){
-                    Crashlytics.logException(e);
+                if (bw.optDouble("suggested_bolus", 0D) > 0) {
+                    bolusTreatment.datetime = dateNow.getTime();
+                    bolusTreatment.datetime_display = dateNow.toString();
+                    bolusTreatment.note = "bolus";
+                    bolusTreatment.type = "Insulin";
+                    bolusTreatment.value = bw.optDouble("suggested_bolus", 0D);
                 }
             }
             if (carbValue > 0){
@@ -172,13 +167,10 @@ public class BolusWizardActivity extends Activity {
     }
 
     public void wizardAccept(View view){
+        DecimalFormat df = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.UK));
 
-        if (suggestedBolus.getText().toString().trim().length() != 0 && Double.parseDouble(suggestedBolus.getText().toString()) > 0) {
-            try {
-                bolusTreatment.value = NumberFormat.getNumberInstance(java.util.Locale.UK).parse(suggestedBolus.getText().toString()).doubleValue();
-            } catch (ParseException e){
-                Crashlytics.logException(e);
-            }
+        if (suggestedBolus.getText().toString().trim().length() != 0 && Double.valueOf(df.format(suggestedBolus.getText())) > 0) {
+            bolusTreatment.value = Double.valueOf(df.format(suggestedBolus.getText()));
             pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
         } else if (carbTratment.value > 0) {
             carbTratment.save();
