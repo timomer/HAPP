@@ -27,6 +27,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -174,5 +177,16 @@ public class tools {
 
         }
 
+    }
+
+    public static Double stringToDouble(String string){
+        //Used to support locations where , is used as decimal separator
+        DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
+        try {
+            return df.parse(string).doubleValue();
+        } catch (ParseException e){
+            Crashlytics.logException(e);
+            return 0.0;
+        }
     }
 }

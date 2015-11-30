@@ -125,7 +125,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         // TODO: 05/11/2015 appears to be a bug in Active Andorid where DB version is ignored in Manifest, must be added here as well
         // http://stackoverflow.com/questions/33164456/update-existing-database-table-with-new-column-not-working-in-active-android
-        Configuration configuration = new Configuration.Builder(this).setDatabaseVersion(20).create();
+        Configuration configuration = new Configuration.Builder(this).setDatabaseVersion(23).create();
         ActiveAndroid.initialize(configuration);
 
 

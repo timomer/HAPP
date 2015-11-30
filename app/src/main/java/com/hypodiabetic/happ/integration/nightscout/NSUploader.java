@@ -155,41 +155,43 @@ public class NSUploader {
             public void onResponse(JSONArray response) {
 
                 try {
-                    JSONArray reply_ops = response.getJSONObject(0).getJSONArray("ops");
+                    if (response.getJSONObject(0).has("ops")) {
+                        JSONArray reply_ops = response.getJSONObject(0).getJSONArray("ops");
 
-                    for (int i = 0; i < reply_ops.length(); i++) {
+                        for (int i = 0; i < reply_ops.length(); i++) {
 
-                        String happ_id = "", ns_id = "";
-                        if (reply_ops.getJSONObject(i).has("happ_id"))
-                            happ_id = reply_ops.getJSONObject(i).getString("happ_id");
-                        if (reply_ops.getJSONObject(i).has("_id"))
-                            ns_id = reply_ops.getJSONObject(i).getString("_id");
+                            String happ_id = "", ns_id = "";
+                            if (reply_ops.getJSONObject(i).has("happ_id"))
+                                happ_id = reply_ops.getJSONObject(i).getString("happ_id");
+                            if (reply_ops.getJSONObject(i).has("_id"))
+                                ns_id = reply_ops.getJSONObject(i).getString("_id");
 
-                        if (happ_id != "" && ns_id != "") {                                         //Updates the Object with the NS ID
-                            JSONObject integrationJSON;
-                            switch (reply_ops.getJSONObject(i).getString("eventType")){
-                                case "Carbs":
-                                case "Bolus":
-                                    Treatments treatment = Treatments.load(Treatments.class, Long.parseLong(happ_id));
-                                    integrationJSON = tools.getJSONO(treatment.integration);
-                                    integrationJSON.put("ns_upload_id", ns_id);
-                                    treatment.integration = integrationJSON.toString();
-                                    treatment.save();
-                                    break;
-                                case "Temp Basal":
-                                    TempBasal tempBasal = TempBasal.load(TempBasal.class, Long.parseLong(happ_id));
-                                    integrationJSON = tools.getJSONO(tempBasal.integration);
-                                    if (integrationJSON.has("ns_temp_basal_stop")){
-                                        if (integrationJSON.getString("ns_temp_basal_stop").equals("dirty")) {
-                                            integrationJSON.remove("ns_temp_basal_stop");
-                                            integrationJSON.put("ns_temp_basal_stop", ns_id);
-                                        }
-                                    } else {
+                            if (happ_id != "" && ns_id != "") {                                         //Updates the Object with the NS ID
+                                JSONObject integrationJSON;
+                                switch (reply_ops.getJSONObject(i).getString("eventType")) {
+                                    case "Carbs":
+                                    case "Bolus":
+                                        Treatments treatment = Treatments.load(Treatments.class, Long.parseLong(happ_id));
+                                        integrationJSON = tools.getJSONO(treatment.integration);
                                         integrationJSON.put("ns_upload_id", ns_id);
-                                    }
-                                    tempBasal.integration = integrationJSON.toString();
-                                    tempBasal.save();
-                                    break;
+                                        treatment.integration = integrationJSON.toString();
+                                        treatment.save();
+                                        break;
+                                    case "Temp Basal":
+                                        TempBasal tempBasal = TempBasal.load(TempBasal.class, Long.parseLong(happ_id));
+                                        integrationJSON = tools.getJSONO(tempBasal.integration);
+                                        if (integrationJSON.has("ns_temp_basal_stop")) {
+                                            if (integrationJSON.getString("ns_temp_basal_stop").equals("dirty")) {
+                                                integrationJSON.remove("ns_temp_basal_stop");
+                                                integrationJSON.put("ns_temp_basal_stop", ns_id);
+                                            }
+                                        } else {
+                                            integrationJSON.put("ns_upload_id", ns_id);
+                                        }
+                                        tempBasal.integration = integrationJSON.toString();
+                                        tempBasal.save();
+                                        break;
+                                }
                             }
                         }
                     }
