@@ -277,7 +277,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
         treatment.datetime_display  = treatmentDateTime.toString();
         treatment.note              = spinner_notes.getSelectedItem().toString();
         treatment.type              = spinner_treatment_type.getSelectedItem().toString();
-        treatment.value             = Double.valueOf(df.format(editText_treatment_value.getText()));
+        treatment.value             = Double.valueOf(editText_treatment_value.getText().toString());
 
         if (treatment.value == 0) {                                                                 //No value given
             Toast.makeText(this, "Enter a value", Toast.LENGTH_SHORT).show();

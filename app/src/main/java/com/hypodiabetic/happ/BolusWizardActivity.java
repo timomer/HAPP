@@ -117,10 +117,10 @@ public class BolusWizardActivity extends Activity {
         bwDisplayCarbCorr   = (TextView) findViewById(R.id.bwDisplayCarbCorr);
         bwDisplayBGCorr     = (TextView) findViewById(R.id.bwDisplayBGCorr);
         Double carbValue = 0D;
-        DecimalFormat df = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.UK));
+        DecimalFormat df = new DecimalFormat("0.00#", new DecimalFormatSymbols(Locale.UK));
 
         if (!carbs.getText().toString().equals("")){
-            carbValue = Double.valueOf(df.format(carbs.getText()));
+            carbValue = Double.valueOf(carbs.getText().toString());
         }
 
         JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
@@ -169,8 +169,8 @@ public class BolusWizardActivity extends Activity {
     public void wizardAccept(View view){
         DecimalFormat df = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.UK));
 
-        if (suggestedBolus.getText().toString().trim().length() != 0 && Double.valueOf(df.format(suggestedBolus.getText())) > 0) {
-            bolusTreatment.value = Double.valueOf(df.format(suggestedBolus.getText()));
+        if (suggestedBolus.getText().toString().trim().length() != 0 && Double.valueOf(suggestedBolus.getText().toString()) > 0) {
+            bolusTreatment.value = Double.valueOf(suggestedBolus.getText().toString());
             pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
         } else if (carbTratment.value > 0) {
             carbTratment.save();
