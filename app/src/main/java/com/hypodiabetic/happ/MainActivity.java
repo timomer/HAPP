@@ -2,6 +2,7 @@ package com.hypodiabetic.happ;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.ClipboardManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +36,7 @@ import com.crashlytics.android.Crashlytics;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
@@ -224,7 +227,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         example.rate = 5D;
         example.duration = 30;
 
-        pumpAction.newTempBasal(example,view.getContext());
+        //pumpAction.newTempBasal(example,view.getContext());
 
     }
 
@@ -234,14 +237,19 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         Profile profileNow = new Profile(dateVar,view.getContext());
 
         //Shows the JSON output of the selected Algorithm
+        String rawAPSJSON = APS.rawJSON(view.getContext(),profileNow).toString();
         Snackbar snackbar = Snackbar
-                .make(view, "RAW JSON: " + APS.rawJSON(view.getContext(),profileNow).toString(), Snackbar.LENGTH_INDEFINITE);
+                .make(view, "RAW JSON: " + rawAPSJSON, Snackbar.LENGTH_INDEFINITE);
 
         View snackbarView = snackbar.getView();
         TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setMaxLines(5);  //set the max lines for textview to show multiple lines
 
         snackbar.show();
+
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        clipboard.setText(rawAPSJSON);
+        Toast.makeText(view.getContext(), "Raw JSON sent to clipboard", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -430,7 +438,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         newStatsReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                updateStats(new Gson().fromJson(intent.getStringExtra("stat"), Stats.class));
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
+
+                updateStats(stat);
                 displayCurrentInfo();
             }
         };
@@ -441,8 +452,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         newOpenAPSReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                APSResult apsResult = gson.fromJson(intent.getStringExtra("APSResult"), APSResult.class);
 
-                updateOpenAPSDetails(new Gson().fromJson(intent.getStringExtra("APSResult"), APSResult.class));
+                updateOpenAPSDetails(apsResult);
                 setupBGCharts();
                 displayCurrentInfo();
             }
@@ -649,7 +662,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             if (apsResult != null) {
                 Suggested_Temp_Basal = apsResult.getBasal();
 
-                apsstatus_reason.setText(apsResult.reason);
+                apsstatus_reason.setText(apsResult.reason); //// TODO: 13/12/2015 poss bug, setting value to a Null TextView? 
                 apsstatus_Action.setText(apsResult.action);
                 //apsstatus_temp.setText("None");
                 apsstatus_deviation.setText(apsResult.getFormattedDeviation(MainActivity.activity));

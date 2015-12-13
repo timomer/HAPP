@@ -18,8 +18,10 @@ android {
         applicationId "com.hypodiabetic.happ"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 21
-        versionName "1.2.5"
+
+        versionCode 22
+        versionName "1.2.6"
+
         multiDexEnabled true
     }
     buildTypes {
@@ -50,7 +52,7 @@ dependencies {
     compile 'com.github.clans:fab:1.6.1'
     compile 'com.mcxiaoke.volley:library:1.0.19'
 
-    compile 'com.eclipsesource.j2v8:j2v8:3.1.0-SNAPSHOT@aar'
+    compile 'com.eclipsesource.j2v8:j2v8:3.1.6@aar'
     compile 'com.github.tony19:logback-android-classic:1.1.1-4'
     compile 'org.slf4j:slf4j-api:1.7.12'
 

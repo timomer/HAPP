@@ -82,7 +82,8 @@
                 <action android:name="RUN_OPENAPS" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Receivers.statsReceiver" />
+        <receiver android:name=".Receivers.statsReceiver" >
+        </receiver>
 
         <activity
             android:name=".BolusWizardActivity"

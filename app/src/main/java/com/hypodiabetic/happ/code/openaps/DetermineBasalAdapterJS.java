@@ -222,7 +222,7 @@ public class DetermineBasalAdapterJS {
             bgErrorExitJSON.put("eventualBG", "NA");
             bgErrorExitJSON.put("snoozeBG", "NA");
 
-            if (PARAM_glucoseStatus.length() < 2) {
+            if (mGlucoseStatus.length() < 2) {
                 bgErrorExitJSON.put("reason", "Need min 2 BG readings to run OpenAPS");
                 return bgErrorExitJSON;
             }
