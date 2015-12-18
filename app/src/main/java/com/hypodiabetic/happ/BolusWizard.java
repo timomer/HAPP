@@ -57,10 +57,15 @@ public class BolusWizard {
             insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f", insulin_correction_bg) + "U";
 
         } else if (lastBG <= (profile.min_bg-30)){                                                  //Critical LOW
-            insulin_correction_bg       = 0D;
+            insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;
             bgCorrection                = "Critical Low";
-            insulin_correction_bg_maths = "NA - Blood Sugars below " + (profile.min_bg-30);
-
+            if(insulin_correction_bg > 0) {
+                insulin_correction_bg_maths = "Suggestion " + insulin_correction_bg + "U, Blood Sugars below " + (profile.min_bg-30) + ". Setting to 0.";
+                insulin_correction_bg   = 0D;
+            } else {
+                insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
+            }
+            
         } else if (lastBG <= profile.min_bg){                                                       //True LOW
             insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;
             bgCorrection                = "Low";
