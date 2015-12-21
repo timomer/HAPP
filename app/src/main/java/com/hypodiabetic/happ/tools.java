@@ -109,7 +109,7 @@ public class tools {
             }
             pw.close();
             fw.close();
-            Toast.makeText(c, "Settings Exported to " + path, Toast.LENGTH_LONG).show();
+            Toast.makeText(c, "Settings Exported to " + path + "/" + file, Toast.LENGTH_LONG).show();
         }
         catch (Exception e){
             Crashlytics.logException(e);

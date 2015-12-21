@@ -38,7 +38,7 @@
     </string-array>
     <string-array name="openaps_algorithmValues">
         <item>openaps_android</item>
-        <item>openaps_js</item>
+        <!--<item>openaps_js</item> old openAPS with Rhino -->
         <item>openaps_js_v8</item>
     </string-array>
 

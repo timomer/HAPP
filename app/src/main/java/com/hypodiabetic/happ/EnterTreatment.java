@@ -77,7 +77,7 @@ public class EnterTreatment extends Activity implements View.OnFocusChangeListen
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getSelectedItem().equals("Insulin")){
-                    String[] InsulinNotes = {"bolus", "TempBasal"};
+                    String[] InsulinNotes = {"bolus", "correction"};
                     ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(EnterTreatment.this, android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
                     Spinner notesSpinner= (Spinner)findViewById(R.id.noteSpinner);
                     notesSpinner.setAdapter(stringArrayAdapter);

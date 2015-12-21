@@ -54,7 +54,7 @@ public class Notifications {
         intent_accept_temp.putExtra("SUGGESTED_BASAL", gson.toJson(basal, TempBasal.class));
         intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
 
-        PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(MainActivity.activity,1,intent_accept_temp,PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(c,1,intent_accept_temp,PendingIntent.FLAG_CANCEL_CURRENT);
         Intent intent_open_activity = new Intent(c,MainActivity.class);
         PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 2, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -70,8 +70,7 @@ public class Notifications {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .extend(new Notification.WearableExtender()
                         .setBackground(createWearBitmap(2, c))
-                        .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT)))
+                        .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT)))
                 .addAction(R.drawable.ic_input_black, "Accept Temp", pending_intent_accept_temp)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
@@ -111,6 +110,11 @@ public class Notifications {
             Intent intent_open_activity = new Intent(c,MainActivity.class);
             PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 3, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 
+            Intent intent_run_aps = new Intent();
+            intent_run_aps.setAction("com.hypodiabetic.happ.RUN_OPENAPS");
+            PendingIntent pending_intent_run_aps = PendingIntent.getBroadcast(c, 5, intent_run_aps, PendingIntent.FLAG_CANCEL_CURRENT);
+
+
             Notification notification = new Notification.Builder(c)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle(title)
@@ -122,6 +126,7 @@ public class Notifications {
                     .extend(new Notification.WearableExtender()
                             .setBackground(createWearBitmap(2, c))
                     )
+                    .addAction(R.drawable.ic_media_play, "Run APS", pending_intent_run_aps)
                             //.setOngoing(true) Android Wear will not display
                     .build();
             ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);

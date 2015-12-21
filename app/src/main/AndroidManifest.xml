@@ -79,7 +79,7 @@
         </receiver>
         <receiver android:name=".Receivers.openAPSReceiver" >
             <intent-filter>
-                <action android:name="RUN_OPENAPS" />
+                <action android:name="com.hypodiabetic.happ.RUN_OPENAPS" />
             </intent-filter>
         </receiver>
         <receiver android:name=".Receivers.statsReceiver" >

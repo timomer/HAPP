@@ -508,7 +508,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if (apsResult != null) {
 
             Fragment apsDash = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":0");
-            if (apsDash != null) openAPSFragment.update(apsResult);
+            if (openAPSFragment.isLoaded) openAPSFragment.update(apsResult);
 
             eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
             snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
@@ -567,7 +567,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     public void runOpenAPS(View view){
         //Run openAPS
-        Intent intent = new Intent("RUN_OPENAPS");
+        Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
@@ -636,6 +636,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         private static TextView apsstatus_mode;
         private static TextView apsstatus_loop;
         private static TempBasal Suggested_Temp_Basal = new TempBasal();
+        private static boolean isLoaded=false;
 
 
         @Override
@@ -650,10 +651,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
             apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
 
+            isLoaded=true;
             update(null);
             return rootView;
         }
-
 
         public static void update(APSResult apsResult){
 

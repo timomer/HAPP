@@ -70,7 +70,7 @@ public class pumpAction {
         tools.syncIntegrations(c);
 
         //Run openAPS again
-        Intent intent = new Intent("RUN_OPENAPS");
+        Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
         c.sendBroadcast(intent);
     }
 
@@ -124,7 +124,7 @@ public class pumpAction {
                                 tools.syncIntegrations(c);
 
                                 //Run openAPS again
-                                Intent intent = new Intent("RUN_OPENAPS");
+                                Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
                                 c.sendBroadcast(intent);
 
                             }
@@ -193,7 +193,7 @@ public class pumpAction {
                             Toast.makeText(c, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
 
                             //Run openAPS again
-                            Intent intent = new Intent("RUN_OPENAPS");
+                            Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
                             LocalBroadcastManager.getInstance(c).sendBroadcast(intent);
 
                             //Return to the home screen (if not already on it)

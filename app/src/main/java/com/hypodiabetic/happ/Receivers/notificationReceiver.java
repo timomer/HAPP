@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -15,6 +16,8 @@ import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.pumpAction;
 
 import org.json.JSONObject;
+
+import java.lang.reflect.Modifier;
 
 /**
  * Created by Tim on 27/09/2015.
@@ -30,11 +33,13 @@ public class notificationReceiver extends BroadcastReceiver {
             case "newTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
 
-                TempBasal suggestedTemp = new Gson().fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+
+                TempBasal suggestedTemp = gson.fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
 
                 pumpAction.setTempBasal(suggestedTemp, context);   //Action the suggested Temp
                 Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
-                Notifications.clear("updateCard",context);                                                  //Clears info card on current Basal
+                Notifications.clear("updateCard", context);                                                  //Clears info card on current Basal
                 break;
             case "setTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);  //Kills the notification

@@ -19,8 +19,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 22
 
-        versionCode 22
-        versionName "1.2.6"
+        versionCode 23
+        versionName "1.2.7"
 
         multiDexEnabled true
     }
@@ -45,7 +45,7 @@ dependencies {
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.github.lecho:hellocharts-library:1.5.5@aar'
-    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.android.gms:play-services:7.5.0'
     compile 'com.android.support:design:22.2.1'
     compile 'com.android.support:support-v4:22.0'
