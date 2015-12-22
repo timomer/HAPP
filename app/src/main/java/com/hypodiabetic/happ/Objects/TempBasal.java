@@ -42,9 +42,11 @@ public class TempBasal extends Model {
     @Expose
     @Column(name = "integration")           //JSON String holding details of integration made with this record, NS upload, etc
     public String integration;
+    @Expose
+    @Column(name = "aps_mode")
+    public String   aps_mode;
 
     public Date     created_time = new Date();
-    public String   openaps_mode;
 
     public static TempBasal last() {
         TempBasal last = new Select()
@@ -78,7 +80,6 @@ public class TempBasal extends Model {
         if (start_time == null){ return false;}
 
         Date fur = new Date(start_time.getTime() + duration * 60000);
-        boolean boo = fur.after(atThisDate);
         if (fur.after(atThisDate)){
             return true;
         } else {

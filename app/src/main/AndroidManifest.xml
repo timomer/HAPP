@@ -35,7 +35,7 @@
         <!-- Also up date AA_DB_VERSION in MainActivity onCreate -->
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="23" />
+            android:value="24" />
 
         <activity
             android:name=".MainActivity"

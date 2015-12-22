@@ -29,7 +29,7 @@ public class pumpAction {
         //A new Temp Basal has been suggested
         if (basal != null && c != null) {
 
-            if (basal.openaps_mode.equals("closed")) {                                              //Send Direct to pump
+            if (basal.aps_mode.equals("closed")) {                                                  //Send Direct to pump
                 setTempBasal(basal, c);
 
             } else {
@@ -61,7 +61,7 @@ public class pumpAction {
         basal.start_time = now;
         basal.save();
 
-        if (basal.openaps_mode.equals("closed") || basal.openaps_mode.equals("open")){              //Send the new Basal to the pump
+        if (basal.aps_mode.equals("closed") || basal.aps_mode.equals("open")){              //Send the new Basal to the pump
             // TODO: 08/09/2015 pump interface
 
         }

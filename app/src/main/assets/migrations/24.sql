@@ -1,0 +1,1 @@
+ALTER TABLE openaps_temp_basals ADD COLUMN aps_mode TEXT;
