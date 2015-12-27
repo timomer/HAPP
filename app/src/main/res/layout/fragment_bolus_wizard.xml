@@ -124,21 +124,26 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="right">
 
             <Button
-                android:layout_width="0dp"
+                android:layout_width="88dp"
                 android:layout_height="36dp"
                 android:text="Accept"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:textSize="13pt"
+                android:fontFamily="sans-serif-medium"
                 android:onClick="wizardAccept"
-                android:id="@+id/wizardAccept"
-                android:layout_weight=".5" />
+                android:id="@+id/wizardAccept" />
             <Button
-                android:layout_width="0dp"
+                android:layout_width="88dp"
                 android:layout_height="36dp"
                 android:text="Cancel"
-                android:onClick="wizardCancel"
-                android:layout_weight=".5"/>
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:onClick="wizardCancel"/>
 
         </LinearLayout>
 
