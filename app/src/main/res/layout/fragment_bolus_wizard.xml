@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:orientation="horizontal"
+            android:paddingTop="20dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:id="@+id/bwDisplayCarbCorr"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="18dp"
+                    android:text="carb bolus"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:textColor="#B8B8B8"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:id="@+id/bwDisplayBGCorr"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="18dp"
+                    android:text="bg correction"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:textColor="#B8B8B8"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="1">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:id="@+id/bwDisplayIOBCorr"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="18dp"
+                    android:text="iob correction"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:textColor="#B8B8B8"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="Enter Carb Value"
+                android:id="@+id/wizardCarbValue"
+                android:inputType="number"
+                android:textSize="14sp"/>
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="Bolus"
+                android:id="@+id/wizardSuggestedBolus"
+                android:inputType="numberDecimal"
+                android:text="0"
+                android:textSize="14sp"/>
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="Correction"
+                android:text="0"
+                android:id="@+id/wizardSuggestedCorrection"
+                android:inputType="numberDecimal"
+                android:textSize="14sp"/>
+        </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:text="Accept"
+                android:onClick="wizardAccept"
+                android:id="@+id/wizardAccept"
+                android:layout_weight=".5" />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:text="Cancel"
+                android:onClick="wizardCancel"
+                android:layout_weight=".5"/>
+
+        </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_gravity="center_horizontal"
+        android:text="Bolus Wizard Calculations >"
+        android:textSize="14sp"
+        android:paddingBottom="8dp"
+        android:paddingTop="10dp"
+        android:id="@+id/showBWPCalc"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="136dp"
+        android:id="@+id/bwpCalc"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_gravity="center_horizontal"
+            android:text="-"
+            android:id="@+id/wizardReqInsulinCarbs"
+            android:textSize="12sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_gravity="center_horizontal"
+            android:text="carb correction"
+            android:textColor="#B8B8B8"
+            android:textSize="10sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_gravity="center_horizontal"
+            android:text="-"
+            android:id="@+id/wizardReqInsulinBg"
+            android:textSize="12sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_gravity="center_horizontal"
+            android:text="bg correction"
+            android:textColor="#B8B8B8"
+            android:id="@+id/wizardReqInsulinBgText"
+            android:textSize="10sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_gravity="center_horizontal"
+            android:text="-"
+            android:id="@+id/wizardNetIOB"
+            android:textSize="12sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_gravity="center_horizontal"
+            android:text="net bolus iob"
+            android:textColor="#B8B8B8"
+            android:textSize="10sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_gravity="center_horizontal"
+            android:text="-"
+            android:id="@+id/wizardSugBolus"
+            android:textSize="12sp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="18dp"
+            android:layout_gravity="center_horizontal"
+            android:text="suggested bolus"
+            android:textColor="#B8B8B8"
+            android:textSize="10sp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

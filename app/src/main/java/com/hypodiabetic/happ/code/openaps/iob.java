@@ -44,7 +44,7 @@ public class iob {
 
             if (minAgo < peak) {                                                                    //Still before the Peak stage of the insulin taken
                 Double x = (minAgo/5 + 1);
-                iobContrib = treatment.value * (1 - 0.001852 * x * x + 0.001852 * x);                            //Amount of Insulin active? // TODO: 28/08/2015 getting negative numbers at times, what is this doing?
+                iobContrib = treatment.value * (1 - 0.001852 * x * x + 0.001852 * x);               //Amount of Insulin active? // TODO: 28/08/2015 getting negative numbers at times, what is this doing?
                 //var activityContrib=sens*treatment.insulin*(2/dia/60/peak)*minAgo;
                 activityContrib=treatment.value * (2 / dia / 60 / peak) * minAgo;
             }
@@ -58,6 +58,7 @@ public class iob {
             try {
                 returnValue.put("iobContrib", iobContrib);
                 returnValue.put("activityContrib", activityContrib);
+                returnValue.put("minsLeft", end-minAgo);                                            //mins left *HAPP added*
                 return returnValue;
 
             } catch (JSONException e) {

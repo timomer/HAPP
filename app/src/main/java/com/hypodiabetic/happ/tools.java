@@ -30,6 +30,8 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -66,6 +68,35 @@ public class tools {
         } else {
             return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MGDL_TO_MMOLL));
         }
+    }
+
+    public static String formatDisplayInsulin(Double value){
+        return String.format(Locale.ENGLISH, "%.1f", value) + "u";
+    }
+    public static String formatDisplayCarbs(Double value){
+        if (value < 1){
+            return String.format(Locale.ENGLISH, "%.1f", value) + "g";
+        } else {
+            return String.format(Locale.ENGLISH, "%d", value.longValue()) + "g";
+        }
+    }
+
+    public static String formatDisplayTimeLeft(Date start, Date end){
+        //milliseconds
+        long different = end.getTime() - start.getTime();
+
+        long secondsInMilli = 1000;
+        long minutesInMilli = secondsInMilli * 60;
+        long hoursInMilli = minutesInMilli * 60;
+
+        long elapsedHours = different / hoursInMilli;
+        if (elapsedHours < 0) elapsedHours = 0;
+        different = different % hoursInMilli;
+
+        long elapsedMinutes = different / minutesInMilli;
+        if (elapsedMinutes < 0) elapsedMinutes = 0;
+
+        return elapsedHours + "h " + elapsedMinutes + "m";
     }
 
     //Clears all Integration data stored for all records
@@ -173,8 +204,6 @@ public class tools {
             //NS Interaction
             if (NSUploader.isNSIntegrationActive("nightscout_treatments",   prefs)) NSUploader.uploadTreatments(c,prefs);
             if (NSUploader.isNSIntegrationActive("nightscout_tempbasal",    prefs)) NSUploader.uploadTempBasals(c,prefs);
-
-
         }
 
     }
@@ -188,5 +217,28 @@ public class tools {
             Crashlytics.logException(e);
             return 0.0;
         }
+    }
+
+    /**
+     * @param date the date in the format "yyyy-MM-dd"
+     */
+    public static long getStartOfDayInMillis(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long dateInMillis = ((calendar.getTimeInMillis()+calendar.getTimeZone().getOffset(calendar.getTimeInMillis())));
+        return dateInMillis;
+    }
+    /**
+     * @param date the date in the format "yyyy-MM-dd"
+     */
+    public static long getEndOfDayInMillis(Date date) {
+        // Add one day's time to the beginning of the day.
+        // 24 hours * 60 minutes * 60 seconds * 1000 milliseconds = 1 day
+        long time =getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
+        return getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
     }
 }

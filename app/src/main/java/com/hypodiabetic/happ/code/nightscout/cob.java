@@ -119,11 +119,11 @@ public class cob {
 
         JSONObject returnObject = new JSONObject();
         try {
-            returnObject.put("decayedBy", lastDecayedBy);                                           //When this treatment will be decayed for calculating the next testament of carbs
+            returnObject.put("decayedBy", lastDecayedBy.getTime());                                 //When this treatment will be decayed for calculating the next testament of carbs
             returnObject.put("isDecaying", isDecaying);                                             //Are these carbs being digested?
             returnObject.put("carbs_hr", profileNow.carbAbsorptionRate);                            //How many crabs / H are digested
             returnObject.put("rawCarbImpact", rawCarbImpact);                                       //?
-            returnObject.put("cob", String.format(Locale.ENGLISH, "%.2f",totalCOB));                                                      //Total Carbs on board
+            returnObject.put("cob", String.format(Locale.ENGLISH, "%.2f",totalCOB));                //Total Carbs on board
             returnObject.put("display", display);
             returnObject.put("displayLine", "COB: " + display + "g");
             returnObject.put("as_of",timeNow.getTime());                                            //Time this was requested

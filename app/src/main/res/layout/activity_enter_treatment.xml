@@ -9,87 +9,42 @@
 
 <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:layout_height="293dp"
+    android:orientation="vertical"
+    android:id="@+id/enterTreatmentsLayout">
 
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/treatmentSpinner"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight=".5"/>
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/noteSpinner"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight=".5"/>
-
-</LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <EditText
+        <android.support.v4.view.ViewPager
+            android:id="@+id/enterTreatmentsPager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Value"
-            android:id="@+id/treatmentValue"/>
+            android:layout_height="match_parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
->
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/treatmentDate"
-                android:inputType="date"
-                android:layout_weight=".5"/>
+            <android.support.v4.view.PagerTabStrip
+                android:id="@+id/enterTreatmentsPager_title_strip"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:paddingBottom="15dp">
+            </android.support.v4.view.PagerTabStrip>
 
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/treatmentTime"
-                android:inputType="time"
-                android:layout_weight=".5"/>
-        </LinearLayout>
+        </android.support.v4.view.ViewPager>
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:text="Save"
-            android:onClick="saveTreatmentToDB"
-            android:layout_weight=".5"/>
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:text="Bolus Wizard"
-            android:onClick="runBolusWizard"
-            android:layout_weight=".5"/>
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:text="Last 10 Treatments"
-        android:textSize="16sp"
-        android:paddingTop="8dp"/>
-    <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/treatmentList"
-        android:layout_weight="1"/>
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <android.support.v4.view.ViewPager
+            android:id="@+id/treatmentsPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+            <android.support.v4.view.PagerTabStrip
+                android:id="@+id/treatmentsPager_title_strip"
+                android:layout_width="match_parent"
+                android:layout_height="33dp"
+                android:paddingBottom="15dp">
+            </android.support.v4.view.PagerTabStrip>
 
+        </android.support.v4.view.ViewPager>
+    </LinearLayout>
 </LinearLayout>

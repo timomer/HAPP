@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.APS;
 import com.hypodiabetic.happ.MainActivity;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
@@ -45,6 +46,7 @@ public class openAPSReceiver extends BroadcastReceiver{
             Intent intent = new Intent("ACTION_UPDATE_OPENAPS");
             APSResult apsResult = APS.execute(context);                                             //Runs APS
             tools.syncIntegrations(context);                                                        //Syncs Notifications
+            Notifications.updateCard(context, apsResult);                                           //Updates Summary Notification
             intent.putExtra("APSResult", gson.toJson(apsResult, APSResult.class));                  //sends result to update UI if loaded
             context.sendBroadcast(intent);
 

@@ -9,6 +9,7 @@ import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.tools;
 
 import org.json.JSONObject;
 
@@ -49,14 +50,14 @@ public class Treatments extends Model{
     @Column(name = "integration")                   //JSON String holding details of integration made with this record, NS upload, etc
     public String integration;
 
-    public static List<Treatments> latestTreatments(int limit, String where) {
+    public static List<Treatments> latestTreatments(int limit, String type) {
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(1);
 
-        if (where != null) {
+        if (type != null) {
             return new Select()
                     .from(Treatments.class)
-                    .where("type = '" + where + "'")
+                    .where("type = '" + type + "'")
                     .orderBy("datetime desc")
                     .limit(limit)
                     .execute();
@@ -65,6 +66,26 @@ public class Treatments extends Model{
                     .from(Treatments.class)
                     .orderBy("datetime desc")
                     .limit(limit)
+                    .execute();
+        }
+    }
+
+    public static List<Treatments> getTreatmentsDated(Long dateFrom, Long dateTo, String type) {
+        DecimalFormat df = new DecimalFormat("#");
+        df.setMaximumFractionDigits(1);
+
+        if (type != null) {
+            return new Select()
+                    .from(Treatments.class)
+                    .where("type = '" + type + "'")
+                    .where("datetime > ? and datetime < ?", dateFrom, dateTo)
+                    .orderBy("datetime desc")
+                    .execute();
+        } else {
+            return new Select()
+                    .from(Treatments.class)
+                    .where("datetime > ? and datetime < ?", dateFrom, dateTo)
+                    .orderBy("datetime desc")
                     .execute();
         }
     }
@@ -86,6 +107,12 @@ public class Treatments extends Model{
         List cobtreatments = latestTreatments(20, null);
         Collections.reverse(cobtreatments);                                                         //Sort the Treatments from oldest to newest
         return cob.cobTotal(cobtreatments, p, t);
+    }
+
+    public static JSONObject getCOBBetween(Profile p, Long from, Long to){
+        List cobtreatments = getTreatmentsDated(from, to, null);
+        Collections.reverse(cobtreatments);                                                         //Sort the Treatments from oldest to newest
+        return cob.cobTotal(cobtreatments, p, new Date());
     }
 
 }

@@ -80,6 +80,7 @@ public class APS {
         return result;
     }
 
+    //Sets the suggested Temp Basal info as result of APS suggestion
     public static APSResult setTempBasalInfo(APSResult apsResult, Profile profile_data){
 
         Double maxSafeBasal = Math.min(profile_data.max_basal, 3 * profile_data.max_daily_basal);
@@ -97,8 +98,13 @@ public class APS {
         //    canceledTemp = true;
         //}
 
-        Double ratePercent = (apsResult.rate / profile_data.current_basal) * 100;                             //Get rate percent increase or decrease based on current Basal
-        ratePercent = (double) (ratePercent.intValue() / 10) * 10;
+        Double ratePercent = ((apsResult.rate - profile_data.current_basal) / profile_data.current_basal) * 100;//Get rate percent increase or decrease based on current Basal
+        if (ratePercent < 0){ //We have a % decrease, get the low % wanted and not the % to decrease by
+            ratePercent = ratePercent + 100;
+        }
+        ratePercent = (double) Math.round(ratePercent / 10) * 10; //round to closest 10
+        //Double ratePercent = (apsResult.rate / profile_data.current_basal) * 100;                             //Get rate percent increase or decrease based on current Basal
+        //ratePercent = (double) (ratePercent.intValue() / 10) * 10;
 
         TempBasal currentTemp = TempBasal.getCurrentActive(null);
         String pumpAction;
