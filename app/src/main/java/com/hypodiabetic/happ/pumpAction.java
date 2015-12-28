@@ -54,8 +54,9 @@ public class pumpAction {
         basal.rate = safeRate;
 
         //Re calculate rate percent
-        safeRatePercent     = (safeRate / p.current_basal) * 100;                                   //Get rate percent increase or decrease based on current Basal
-        basal.ratePercent   = (safeRatePercent.intValue() / 10) * 10;
+        basal.ratePercent   = APS.calcRateToPercentOfBasal(basal.rate, p);
+        //safeRatePercent     = (safeRate / p.current_basal) * 100;                                   //Get rate percent increase or decrease based on current Basal
+        //basal.ratePercent   = (safeRatePercent.intValue() / 10) * 10;
 
         //Save
         basal.start_time = now;

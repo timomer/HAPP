@@ -98,25 +98,20 @@ public class APS {
         //    canceledTemp = true;
         //}
 
-        Double ratePercent = ((apsResult.rate - profile_data.current_basal) / profile_data.current_basal) * 100;//Get rate percent increase or decrease based on current Basal
-        if (ratePercent < 0){ //We have a % decrease, get the low % wanted and not the % to decrease by
-            ratePercent = ratePercent + 100;
-        }
-        ratePercent = (double) Math.round(ratePercent / 10) * 10; //round to closest 10
+        apsResult.ratePercent = calcRateToPercentOfBasal(apsResult.rate, profile_data);
         //Double ratePercent = (apsResult.rate / profile_data.current_basal) * 100;                             //Get rate percent increase or decrease based on current Basal
         //ratePercent = (double) (ratePercent.intValue() / 10) * 10;
 
         TempBasal currentTemp = TempBasal.getCurrentActive(null);
         String pumpAction;
         if (profile_data.basal_mode.equals("percent")){
-            pumpAction = ratePercent.intValue() + "%";
+            pumpAction = apsResult.ratePercent + "%";
         } else {
             pumpAction = apsResult.rate + "U";
         }
 
             //requestedTemp.put("duration", duration);
             //openAPSSuggest.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places
-            apsResult.ratePercent = ratePercent.intValue();
             if (apsResult.rate == 0 && apsResult.duration == 0 && currentTemp.isactive(null)) {
                 apsResult.action            =   "Cancel Temp Basal";
                 apsResult.basal_adjustemnt  =   "Pump Default";
@@ -154,5 +149,17 @@ public class APS {
 
 
         return apsResult;
+    }
+
+    //Calculates rate to Percent of normal basal
+    public static Integer calcRateToPercentOfBasal(Double rate, Profile p){
+
+        Double ratePercent = (rate / p.current_basal) * 100;
+        //Double ratePercent = ((rate - p.current_basal) / p.current_basal) * 100;//Get rate percent increase or decrease based on current Basal
+        //if (ratePercent < 0){ //We have a % decrease, get the low % wanted and not the % to decrease by
+        //    ratePercent = ratePercent + 100;
+        //}
+        ratePercent = (double) Math.round(ratePercent / 10) * 10; //round to closest 10
+        return ratePercent.intValue();
     }
 }

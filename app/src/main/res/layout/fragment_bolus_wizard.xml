@@ -86,19 +86,6 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:hint="Enter Carb Value"
-                android:id="@+id/wizardCarbValue"
-                android:inputType="number"
-                android:textSize="14sp"/>
-        </android.support.design.widget.TextInputLayout>
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:layout_weight="1">
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
                 android:hint="Bolus"
                 android:id="@+id/wizardSuggestedBolus"
                 android:inputType="numberDecimal"
@@ -127,22 +114,36 @@
             android:orientation="horizontal"
             android:gravity="right">
 
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:layout_weight="1">
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:hint="Enter Carb Value"
+                    android:id="@+id/wizardCarbValue"
+                    android:inputType="number"
+                    android:textSize="14sp"/>
+            </android.support.design.widget.TextInputLayout>
+
             <Button
-                android:layout_width="88dp"
-                android:layout_height="36dp"
-                android:text="Accept"
+                android:layout_width="wrap_content"
+                android:minWidth="88dp"
+                android:layout_height="46dp"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                android:textSize="13pt"
-                android:fontFamily="sans-serif-medium"
+                android:text="Accept"
                 android:onClick="wizardAccept"
                 android:id="@+id/wizardAccept" />
             <Button
-                android:layout_width="88dp"
-                android:layout_height="36dp"
+                android:layout_width="wrap_content"
+                android:minWidth="88dp"
+                android:layout_height="46dp"
                 android:text="Cancel"
-                android:paddingLeft="16dp"
                 android:paddingRight="16dp"
+                android:paddingLeft="16dp"
                 android:onClick="wizardCancel"/>
 
         </LinearLayout>

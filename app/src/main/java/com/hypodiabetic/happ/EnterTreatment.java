@@ -64,7 +64,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class EnterTreatment extends android.support.v4.app.FragmentActivity implements View.OnFocusChangeListener {
+public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     private static EditText editText_treatment_time;
     private static EditText editText_treatment_date;
     private static EditText editText_treatment_value;
@@ -261,19 +261,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity impl
     }
 
     @Override
-    public void onFocusChange(View view, boolean hasFocus) {
-        if(hasFocus) {
-            if (view == treatmentDate) {
-                treatmentDatePickerDialog.show();
-            } else if (view == treatmentTime) {
-                treatmentTimePicker.show();
-            }
-
-            view.clearFocus();
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_enter_treatment, menu);
@@ -460,10 +447,25 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity impl
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_manual_treatment, container, false);
 
+            rootView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean b) {
+                    if(b) {
+                        if (view == treatmentDate) {
+                            treatmentDatePickerDialog.show();
+                        } else if (view == treatmentTime) {
+                            treatmentTimePicker.show();
+                        }
+                        //view.clearFocus();
+                    }
+                }
+            });
+
             setupPickers(rootView);
 
             return rootView;
         }
+
 
         public void setupPickers(final View v){
             //setups the date, time, value and type picker
