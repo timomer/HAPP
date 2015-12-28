@@ -10,11 +10,15 @@
         android:orientation="horizontal">
 
         <EditText
+            android:layout_width="0px"
+            android:layout_height="0px"
+            android:text="SET FOCUS TO ME WORKAROUND"/>
+        <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/treatmentDate"
             android:inputType="date"
-            android:layout_weight=".5"/>
+            android:layout_weight=".5" />
 
         <EditText
             android:layout_width="0dp"
@@ -43,6 +47,8 @@
     </LinearLayout>
 
         <EditText
+            android:focusableInTouchMode="true"
+            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="57dp"
             android:hint="Enter Value"
