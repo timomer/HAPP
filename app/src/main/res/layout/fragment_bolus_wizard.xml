@@ -2,19 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="200dp">
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="90dp"
+            android:layout_height="100dp"
             android:orientation="horizontal"
-            android:paddingTop="20dp">
-
-            <EditText
-                android:layout_width="0px"
-                android:layout_height="0px"
-                android:text="SET FOCUS TO ME WORKAROUND"/>
+            android:paddingTop="20dp"
+            android:layout_gravity="center">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -91,6 +87,19 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
+                android:hint="Enter Carb Value"
+                android:id="@+id/wizardCarbValue"
+                android:inputType="number"
+                android:textSize="14sp"/>
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
                 android:hint="Bolus"
                 android:id="@+id/wizardSuggestedBolus"
                 android:inputType="numberDecimal"
@@ -115,118 +124,42 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:gravity="right">
+            android:layout_height="50dp"
+            android:orientation="horizontal">
 
-            <android.support.design.widget.TextInputLayout
+            <Button
+                android:layout_width="wrap_content"
+                android:minWidth="88dp"
+                android:layout_height="46dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="Show Calc"
+                android:onClick="wizardShowCalc"/>
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_centerHorizontal="true"
+                android:orientation="horizontal"
+                android:gravity="right"
                 android:layout_weight="1">
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:hint="Enter Carb Value"
-                    android:id="@+id/wizardCarbValue"
-                    android:inputType="number"
-                    android:textSize="14sp"/>
-            </android.support.design.widget.TextInputLayout>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:minWidth="88dp"
-                android:layout_height="46dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:text="Accept"
-                android:onClick="wizardAccept"
-                android:id="@+id/wizardAccept" />
-            <Button
-                android:layout_width="wrap_content"
-                android:minWidth="88dp"
-                android:layout_height="46dp"
-                android:text="Cancel"
-                android:paddingRight="16dp"
-                android:paddingLeft="16dp"
-                android:onClick="wizardCancel"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:minWidth="88dp"
+                    android:layout_height="46dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:text="Accept"
+                    android:onClick="wizardAccept"
+                    android:id="@+id/wizardAccept" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:minWidth="88dp"
+                    android:layout_height="46dp"
+                    android:text="Cancel"
+                    android:paddingRight="16dp"
+                    android:paddingLeft="16dp"
+                    android:onClick="cancel"/>
+            </LinearLayout>
 
         </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_gravity="center_horizontal"
-        android:text="Bolus Wizard Calculations >"
-        android:textSize="14sp"
-        android:paddingBottom="8dp"
-        android:paddingTop="10dp"
-        android:id="@+id/showBWPCalc"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="136dp"
-        android:id="@+id/bwpCalc"
-        android:orientation="vertical"
-        android:visibility="gone">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_gravity="center_horizontal"
-            android:text="-"
-            android:id="@+id/wizardReqInsulinCarbs"
-            android:textSize="12sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="18dp"
-            android:layout_gravity="center_horizontal"
-            android:text="carb correction"
-            android:textColor="#B8B8B8"
-            android:textSize="10sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_gravity="center_horizontal"
-            android:text="-"
-            android:id="@+id/wizardReqInsulinBg"
-            android:textSize="12sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="18dp"
-            android:layout_gravity="center_horizontal"
-            android:text="bg correction"
-            android:textColor="#B8B8B8"
-            android:id="@+id/wizardReqInsulinBgText"
-            android:textSize="10sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_gravity="center_horizontal"
-            android:text="-"
-            android:id="@+id/wizardNetIOB"
-            android:textSize="12sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="18dp"
-            android:layout_gravity="center_horizontal"
-            android:text="net bolus iob"
-            android:textColor="#B8B8B8"
-            android:textSize="10sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_gravity="center_horizontal"
-            android:text="-"
-            android:id="@+id/wizardSugBolus"
-            android:textSize="12sp"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="18dp"
-            android:layout_gravity="center_horizontal"
-            android:text="suggested bolus"
-            android:textColor="#B8B8B8"
-            android:textSize="10sp"/>
-
-    </LinearLayout>
-
 </LinearLayout>

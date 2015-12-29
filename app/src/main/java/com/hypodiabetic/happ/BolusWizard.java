@@ -47,14 +47,16 @@ public class BolusWizard {
         String insulin_correction_bg_maths;
         String suggested_bolus_maths;
         Double suggested_bolus;
+        String suggested_correction_maths;
+        Double suggested_correction;
         Double net_correction_biob              = (cob / profile.carbRatio) - biob;                                     //Net Bolus IOB after current carbs taken into consideration
-        String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + String.format("%.1f",biob) + ") = " + String.format("%.1f",net_correction_biob) + "U";
+        String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + tools.formatDisplayInsulin(biob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
         Double insulin_correction_carbs         = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
-        String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + String.format("%.1f",insulin_correction_carbs) + "U";
+        String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + tools.formatDisplayInsulin(insulin_correction_carbs,2);
         if (lastBG >= profile.max_bg) {                                                              //True HIGH
             insulin_correction_bg = (lastBG - profile.max_bg) / profile.isf;
             bgCorrection = "High";
-            insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + String.format("%.1f", insulin_correction_bg) + "U";
+            insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.isf + ")) = " + tools.formatDisplayInsulin(insulin_correction_bg,2);
 
         } else if (lastBG <= (profile.min_bg-30)){                                                  //Critical LOW
             insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;
@@ -63,13 +65,13 @@ public class BolusWizard {
                 insulin_correction_bg_maths = "Suggestion " + insulin_correction_bg + "U, Blood Sugars below " + (profile.min_bg-30) + ". Setting to 0.";
                 insulin_correction_bg   = 0D;
             } else {
-                insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
+                insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + tools.formatDisplayInsulin(insulin_correction_bg,2);
             }
             
         } else if (lastBG <= profile.min_bg){                                                       //True LOW
             insulin_correction_bg       = (lastBG - profile.target_bg) / profile.isf;
             bgCorrection                = "Low";
-            insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + String.format("%.1f",insulin_correction_bg) + "U";
+            insulin_correction_bg_maths = "(BG(" + lastBG + ") - Target BG(" + profile.target_bg + ") / ISF(" + profile.isf + ") = " + tools.formatDisplayInsulin(insulin_correction_bg,2);
 
         //} else if (snoozeBG >= profile.max_bg){                                                     //Snooze HIGH
         //    insulin_correction_bg       = (snoozeBG - profile.max_bg) / profile.isf;
@@ -86,8 +88,15 @@ public class BolusWizard {
             insulin_correction_bg_maths = "NA - BG within Target";
         }
 
-        suggested_bolus             = insulin_correction_carbs + insulin_correction_bg + net_correction_biob;
-        suggested_bolus_maths       = "Carb Corr(" + String.format("%.1f",insulin_correction_carbs) + ") + BG Corr(" + String.format("%.1f",insulin_correction_bg) + ") - Net Bolus(" + String.format("%.1f",net_correction_biob) + ") = " + String.format("%.1f",suggested_bolus);
+        suggested_correction        = insulin_correction_bg + net_correction_biob;
+        suggested_correction_maths  = "BG Corr(" + tools.formatDisplayInsulin(insulin_correction_bg,2) + ") - Net Bolus(" + tools.formatDisplayInsulin(net_correction_biob,2) + ") = " + tools.formatDisplayInsulin(suggested_correction,2);
+        if (suggested_correction < 0) {
+            suggested_bolus = insulin_correction_carbs + suggested_correction;
+            suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayCarbs(insulin_correction_carbs) + ") + " + "Neg Corr(" + tools.formatDisplayInsulin(suggested_correction,2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
+        } else {
+            suggested_bolus = insulin_correction_carbs;
+            suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayCarbs(insulin_correction_carbs) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
+        }
 
 
         JSONObject reply = new JSONObject();
@@ -123,6 +132,8 @@ public class BolusWizard {
             if (suggested_bolus < 0) suggested_bolus=0D;
             reply.put("suggested_bolus",                String.format("%.1f", suggested_bolus));
             reply.put("suggested_bolus_maths",          suggested_bolus_maths);
+            reply.put("suggested_correction",           String.format("%.1f", suggested_correction));
+            reply.put("suggested_correction_maths",     suggested_correction_maths);
         } catch (JSONException e) {
             Crashlytics.logException(e);
         }

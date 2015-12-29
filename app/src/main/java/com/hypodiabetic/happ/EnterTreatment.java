@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -19,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +43,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.Cal;
@@ -65,21 +68,28 @@ import java.util.Locale;
 
 
 public class EnterTreatment extends android.support.v4.app.FragmentActivity {
+
+    //Enter treatment fragments
+    eSectionsPagerAdapter eSectionsPagerAdapter;                                                    //will provide fragments for each of the sections
+    static ViewPager eViewPager;                                                                    //The {@link ViewPager} that will host the section contents.
+
+    //manual treatment
+    Fragment manualEnterFragmentObject;
+    private static Spinner spinner_treatment_type;
+    private static Spinner spinner_notes;
     private static EditText editText_treatment_time;
     private static EditText editText_treatment_date;
     private static EditText editText_treatment_value;
-    private static Spinner spinner_treatment_type;
-    private static Spinner spinner_notes;
-
-    private static EditText treatmentDate;
-    private static EditText treatmentTime;
-    private static DatePickerDialog treatmentDatePickerDialog;
-    private static TimePickerDialog treatmentTimePicker;
-
-    private static EditText suggestedBolus;
-    private static LinearLayout manualTreatmentsLayout;
-    private static Treatments bolusTreatment = new Treatments();
-    private static Treatments carbTratment = new Treatments();
+    private static Treatments manualTreatment               = new Treatments();
+    //wizard treatment
+    Fragment bolusWizardFragmentObject;
+    private static EditText wizardSuggestedBolus;
+    private static EditText wizardSuggestedCorrection;
+    private static EditText wizardCarbs;
+    private static String bwpCalculations;
+    private static Treatments wizzardBolusTreatment        = new Treatments();
+    private static Treatments wizzardCarbTratment          = new Treatments();
+    private static Treatments wizzardCorrectionTreatment   = new Treatments();
 
     //Treatment Lists
     SectionsPagerAdapter mSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
@@ -87,27 +97,16 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     Fragment todayTreatmentsFragmentObject;
     Fragment yestTreatmentsFragmentObject;
     Fragment activeTreatmentsFragmentObject;
-    public static Integer selectedListItem;
+    public static Integer selectedListItemDB_ID;                                                    //Tracks the selected items Treatments DB ID
+    public static HashMap selectedListItemID;                                                       //Tracks the selected items list ID
+    public static Boolean listDirty=false;                                                          //Tracks if treatment lists are dirty and need to be reloaded
 
-    //Enter treatment fragments
-    eSectionsPagerAdapter eSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
-    static ViewPager eViewPager;                                                                           //The {@link ViewPager} that will host the section contents.
-    Fragment bolusWizardFragmentObject;
-    Fragment manualEnterFragmentObject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_treatment);
-
-        spinner_treatment_type      = (Spinner) findViewById(R.id.treatmentSpinner);
-        spinner_notes               = (Spinner) findViewById(R.id.noteSpinner);
-        editText_treatment_time     = (EditText) findViewById(R.id.treatmentTime);
-        editText_treatment_date     = (EditText) findViewById(R.id.treatmentDate);
-        editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
-        manualTreatmentsLayout      = (LinearLayout) findViewById(R.id.enterTreatmentsLayout);
-
 
         //Treatment Lists
         // Create the adapter that will return a fragment .
@@ -116,9 +115,9 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         mViewPager = (ViewPager) this.findViewById(R.id.treatmentsPager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         //Build Fragments
-        todayTreatmentsFragmentObject   = new treatmentsFragment();
-        yestTreatmentsFragmentObject    = new treatmentsFragment();
-        activeTreatmentsFragmentObject  = new treatmentsFragment();
+        todayTreatmentsFragmentObject   = new treatmentsListFragment();
+        yestTreatmentsFragmentObject    = new treatmentsListFragment();
+        activeTreatmentsFragmentObject  = new treatmentsListFragment();
         Bundle bundleToday = new Bundle();
         bundleToday.putString("LOAD", "TODAY");
         Bundle bundleYest = new Bundle();
@@ -140,40 +139,49 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
     }
 
-    public void refreshFragments(){
+    public void refreshListFragments(){
         final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.detach(todayTreatmentsFragmentObject);
-        ft.attach(todayTreatmentsFragmentObject);
-        ft.detach(yestTreatmentsFragmentObject);
-        ft.attach(yestTreatmentsFragmentObject);
-        ft.detach(activeTreatmentsFragmentObject);
-        ft.attach(activeTreatmentsFragmentObject);
+        if (activeTreatmentsFragmentObject.isAdded()) {
+            ft.detach(activeTreatmentsFragmentObject);
+            ft.attach(activeTreatmentsFragmentObject);
+        }
+        if (todayTreatmentsFragmentObject.isAdded()) {
+            ft.detach(todayTreatmentsFragmentObject);
+            ft.attach(todayTreatmentsFragmentObject);
+        }
+        if (yestTreatmentsFragmentObject.isAdded()) {
+            ft.detach(yestTreatmentsFragmentObject);
+            ft.attach(yestTreatmentsFragmentObject);
+        }
         ft.commit();
     }
 
+    public void wizardShowCalc(View view){
+        if (bwpCalculations != ""){
+            Snackbar snackbar = Snackbar.make(view, bwpCalculations, Snackbar.LENGTH_INDEFINITE);
+            View snackbarView = snackbar.getView();
+            TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP,10F);
+            textView.setMaxLines(10);  //set the max lines for textview to show multiple lines
 
-
-    //saves a new Treatment
-    public void saveTreatmentToDB(final View view){
-        final Treatments treatment = new Treatments();
-
-        EditText editText_treatment_time;
-        EditText editText_treatment_date;
-        final EditText editText_treatment_value;
-        Spinner spinner_treatment_type;
-        Spinner spinner_notes;
-        DecimalFormat df = new DecimalFormat("#.#", new DecimalFormatSymbols(Locale.UK));
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyyHH:mm", getResources().getConfiguration().locale);
+            snackbar.show();
+        }
+    }
+    public void wizardAccept(View view){
+        wizzardCarbTratment.value           = tools.stringToDouble(wizardCarbs.getText().toString());
+        wizzardBolusTreatment.value         = tools.stringToDouble(wizardSuggestedBolus.getText().toString());
+        wizzardCorrectionTreatment.value    = tools.stringToDouble(wizardSuggestedCorrection.getText().toString());
+        if (wizzardCarbTratment.value == 0)         wizzardCarbTratment = null;
+        if (wizzardBolusTreatment.value == 0)       wizzardBolusTreatment = null;
+        if (wizzardCorrectionTreatment.value == 0)  wizzardCorrectionTreatment = null;
+        saveTreatment(wizzardCarbTratment, wizzardBolusTreatment, wizzardCorrectionTreatment, view);
+    }
+    public void manualSave(View view){
         Date treatmentDateTime = new Date();
-        String treatmentDateTimeString = new String();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyyHH:mm", getResources().getConfiguration().locale);
+        String treatmentDateTimeString;
 
         //gets the values the user has entered
-        spinner_treatment_type      = (Spinner) findViewById(R.id.treatmentSpinner);
-        spinner_notes               = (Spinner) findViewById(R.id.noteSpinner);
-        editText_treatment_time     = (EditText) findViewById(R.id.treatmentTime);
-        editText_treatment_date     = (EditText) findViewById(R.id.treatmentDate);
-        editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
         treatmentDateTimeString     = editText_treatment_date.getText().toString() + editText_treatment_time.getText().toString();
 
         try {
@@ -182,50 +190,93 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             Crashlytics.logException(e);
         }
 
-        treatment.datetime          = treatmentDateTime.getTime();
-        treatment.datetime_display  = treatmentDateTime.toString();
-        treatment.note              = spinner_notes.getSelectedItem().toString();
-        treatment.type              = spinner_treatment_type.getSelectedItem().toString();
-        treatment.value             = tools.stringToDouble(editText_treatment_value.getText().toString());
+        manualTreatment                   = new Treatments();
+        manualTreatment.datetime          = treatmentDateTime.getTime();
+        manualTreatment.datetime_display  = treatmentDateTime.toString();
+        manualTreatment.note              = spinner_notes.getSelectedItem().toString();
+        manualTreatment.type              = spinner_treatment_type.getSelectedItem().toString();
+        manualTreatment.value             = tools.stringToDouble(editText_treatment_value.getText().toString());
 
-        if (treatment.value == 0) {                                                                 //No value given
-            Toast.makeText(this, "Enter a value", Toast.LENGTH_SHORT).show();
-        } else if (treatment.type.equals("Insulin")){                                               //Bolus suggested, send to pump?
+        if (manualTreatment.value > 0){
+            if (manualTreatment.type.equals("Carbs")){
+                saveTreatment(manualTreatment,null,null,view);
 
-            new AlertDialog.Builder(view.getContext())
-                    .setTitle("Send Bolus to pump?")
-                    .setMessage("Save this Bolus or Save & Send to Pump?")
-                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
+            } else if (manualTreatment.type.equals("Insulin")){
+                if (manualTreatment.note.equals("bolus")) {
+                    saveTreatment(null,manualTreatment,null,view);
 
-                            treatment.save();
-                            editText_treatment_value.setText("");
-                            tools.syncIntegrations(MainActivity.activity);
-                            Toast.makeText(view.getContext(), treatment.value + " " + treatment.type + " saved, NOT sent to Pump", Toast.LENGTH_SHORT).show();
-                            refreshFragments();
+                } else if (manualTreatment.note.equals("correction")){
+                    saveTreatment(null,null,manualTreatment,view);
 
-                        }
-                    })
-                    .setNegativeButton("Save & Send", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            pumpAction.setBolus(treatment, null, view.getContext());
-                            refreshFragments();
-
-                        }
-                    })
-                    .show();
-
-        } else {
-
-            treatment.save();
-            editText_treatment_value.setText("");
-            tools.syncIntegrations(this);
-            Toast.makeText(this, treatment.value + " " + treatment.type + " entered", Toast.LENGTH_SHORT).show();
-
-            refreshFragments();
-            //finish();
+                }
+            }
         }
+    }
+    public void cancel(View view){
+        Intent intentHome = new Intent(view.getContext(), MainActivity.class);
+        intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        view.getContext().startActivity(intentHome);
+    }
+
+    //saves a new Treatment
+    public void saveTreatment(final Treatments carbs, final Treatments bolus, final Treatments correction,final View v){
+
+        if (bolus == null && correction == null && carbs != null){                                  //carbs to save only
+            carbs.save();
+            editText_treatment_value.setText("");
+            wizardCarbs.setText("");
+            tools.syncIntegrations(this);
+            Toast.makeText(this, carbs.value + " " + carbs.type + " entered", Toast.LENGTH_SHORT).show();
+
+            refreshListFragments();
+        } else {                                                                                    //We have insulin to deliver
+
+            Profile p = new Profile(new Date(),v.getContext());
+            //Do we need to warn the user about sending this to a connacted pump?
+            if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")) {                 //Poss pump connected, warn
+
+                new AlertDialog.Builder(v.getContext())
+                        .setTitle("Send Bolus to pump?")
+                        .setMessage("Save this Bolus or Save & Send to Pump?")
+                        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                Double totalBolus = 0D;
+                                if (carbs != null) {
+                                    carbs.save();
+                                }
+                                if (bolus != null) {
+                                    totalBolus += bolus.value;
+                                    bolus.save();
+                                }
+                                if (correction != null) {
+                                    if (correction.value != null) {
+                                        totalBolus += correction.value;
+                                        correction.save();
+                                    }
+                                }
+                                editText_treatment_value.setText("");
+                                wizardCarbs.setText("");
+                                tools.syncIntegrations(MainActivity.activity);
+                                Toast.makeText(v.getContext(), tools.formatDisplayInsulin(totalBolus, 2) + " saved, NOT sent to Pump", Toast.LENGTH_LONG).show();
+                                refreshListFragments();
+
+                            }
+                        })
+                        .setNegativeButton("Save & Send", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                pumpAction.setBolus(bolus, carbs, correction, v.getContext());
+                                //refreshListFragments();
+
+                            }
+                        })
+                        .show();
+            } else {                                                                                //No pump, just action
+                pumpAction.setBolus(bolus, carbs, correction, v.getContext());
+            }
+        }
+
     }
 
     //NOT IN USE
@@ -238,27 +289,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         startActivity(intent);
     }
 
-    public void wizardAccept(View view){
 
-        if (suggestedBolus.getText().toString().trim().length() != 0 && tools.stringToDouble(suggestedBolus.getText().toString()) > 0) {
-            bolusTreatment.value = tools.stringToDouble(suggestedBolus.getText().toString());
-            pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
-        } else if (carbTratment.value > 0) {
-            carbTratment.save();
-            Toast.makeText(view.getContext(), carbTratment.value + "g saved, no Bolus suggested", Toast.LENGTH_SHORT).show();
-
-            //Return to the home screen (if not already on it)
-            Intent intentHome = new Intent(view.getContext(), MainActivity.class);
-            intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            view.getContext().startActivity(intentHome);
-        }
-    }
-
-    public void wizardCancel(View view){
-        Intent intentHome = new Intent(view.getContext(), MainActivity.class);
-        intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        view.getContext().startActivity(intentHome);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -323,17 +354,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     }
     public static class boluesWizardFragment extends Fragment {
         public boluesWizardFragment() {}
-        public LinearLayout bwpCalc;
-        private EditText carbs;
-        public  TextView showBWPCalc;
-        private TextView reqInsulinbiob;
-        private EditText treatmentValue;
-        private TextView reqInsulinCarbs;
-        private TextView reqInsulinBg;
-        private TextView sugBolus;
-        private Button buttonAccept;
-        private TextView ReqInsulinBgText;
 
+        private Button buttonAccept;
         private TextView bwDisplayIOBCorr;
         private TextView bwDisplayCarbCorr;
         private TextView bwDisplayBGCorr;
@@ -343,93 +365,91 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_bolus_wizard, container, false);
 
-            reqInsulinbiob  = (TextView) rootView.findViewById(R.id.wizardNetIOB);
-            carbs           = (EditText) rootView.findViewById(R.id.wizardCarbValue);
-            reqInsulinCarbs = (TextView) rootView.findViewById(R.id.wizardReqInsulinCarbs);
-            reqInsulinBg    = (TextView) rootView.findViewById(R.id.wizardReqInsulinBg);
-            sugBolus        = (TextView) rootView.findViewById(R.id.wizardSugBolus);
-            suggestedBolus  = (EditText) rootView.findViewById(R.id.wizardSuggestedBolus);
-            ReqInsulinBgText= (TextView) rootView.findViewById(R.id.wizardReqInsulinBgText);
-
+            //Bolus wizard summaries
             bwDisplayIOBCorr    = (TextView) rootView.findViewById(R.id.bwDisplayIOBCorr);
             bwDisplayCarbCorr   = (TextView) rootView.findViewById(R.id.bwDisplayCarbCorr);
             bwDisplayBGCorr     = (TextView) rootView.findViewById(R.id.bwDisplayBGCorr);
+            //Inputs
+            wizardCarbs                 = (EditText) rootView.findViewById(R.id.wizardCarbValue);
+            wizardSuggestedBolus        = (EditText) rootView.findViewById(R.id.wizardSuggestedBolus);
+            wizardSuggestedCorrection   = (EditText) rootView.findViewById(R.id.wizardSuggestedCorrection);
+
+            buttonAccept            = (Button) rootView.findViewById(R.id.wizardAccept);
 
             //Run Bolus Wizard on suggested carb amount change
-            carbs.addTextChangedListener(new TextWatcher() {
+            wizardCarbs.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 }
+
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     run_bw(rootView);
                 }
+
                 @Override
                 public void afterTextChanged(Editable editable) {
                 }
             });
 
-            showBWPCalc             = (TextView)rootView.findViewById(R.id.showBWPCalc);
-            bwpCalc                 = (LinearLayout)rootView.findViewById(R.id.bwpCalc);
-            showBWPCalc.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    float scale = view.getResources().getDisplayMetrics().density;
-                    if (bwpCalc.getVisibility() == View.GONE) {
-                        bwpCalc.setVisibility(View.VISIBLE);
-                        int pixels = (int) ((293+136) * scale + 0.5f);
-                        manualTreatmentsLayout.getLayoutParams().height=pixels;
-                    } else {
-                        bwpCalc.setVisibility(View.GONE);
-                        int pixels = (int) ((293) * scale + 0.5f);
-                        manualTreatmentsLayout.getLayoutParams().height=pixels;
-                    }
-                }
-            });
             return rootView;
         }
         public void run_bw(View v){
             Double carbValue = 0D;
 
-            if (!carbs.getText().toString().equals("")){
-                carbValue = tools.stringToDouble(carbs.getText().toString());
+            if (!wizardCarbs.getText().toString().equals("")){
+                carbValue = tools.stringToDouble(wizardCarbs.getText().toString());
             }
 
             JSONObject bw = BolusWizard.bw(v.getContext(), carbValue);
 
             //Bolus Wizard Display
-            bwDisplayIOBCorr.setText(   bw.optString("net_biob", "") + "U");
-            bwDisplayCarbCorr.setText(  bw.optString("insulin_correction_carbs", "") + "U");
-            bwDisplayBGCorr.setText(    bw.optString("insulin_correction_bg", "") + "U");
+            bwDisplayIOBCorr.setText(           tools.formatDisplayInsulin(bw.optDouble("net_biob", 0),1));
+            bwDisplayCarbCorr.setText(          tools.formatDisplayInsulin(bw.optDouble("insulin_correction_carbs", 0),1));
+            bwDisplayBGCorr.setText(            tools.formatDisplayInsulin(bw.optDouble("insulin_correction_bg", 0), 1));
+            wizardSuggestedBolus.setText(       bw.optString("suggested_bolus", ""));
+            wizardSuggestedCorrection.setText(  bw.optString("suggested_correction", ""));
 
             //Bolus Wizard Calculations
-            reqInsulinbiob.setText(bw.optString("net_biob_maths", ""));
-            reqInsulinCarbs.setText(bw.optString("insulin_correction_carbs_maths", ""));
-            ReqInsulinBgText.setText(bw.optString("bgCorrection", "") + " bg correction");
-            reqInsulinBg.setText(bw.optString("insulin_correction_bg_maths", ""));
-            sugBolus.setText(bw.optString("suggested_bolus_maths", ""));
-            suggestedBolus.setText(bw.optString("suggested_bolus", ""));
+            bwpCalculations =   "carb correction \n" +
+                                    ">" + bw.optString("insulin_correction_carbs_maths", "") + "\n" +
+                                bw.optString("bgCorrection", "") + " bg correction" + "\n" +
+                                    ">" + bw.optString("insulin_correction_bg_maths", "") + "\n" +
+                                "net bolus iob \n" +
+                                    ">" + bw.optString("net_biob_maths", "") + "\n" +
+                                "suggested correction \n" +
+                                    ">" + bw.optString("suggested_correction_maths", "") + "\n" +
+                                "suggested bolus \n" +
+                                    ">" + bw.optString("suggested_bolus_maths", "");
+
 
             Date dateNow = new Date();
-            if (bw.has("suggested_bolus")) {
-                if (bw.optDouble("suggested_bolus", 0D) > 0) {
-                    bolusTreatment.datetime = dateNow.getTime();
-                    bolusTreatment.datetime_display = dateNow.toString();
-                    bolusTreatment.note = "bolus";
-                    bolusTreatment.type = "Insulin";
-                    bolusTreatment.value = bw.optDouble("suggested_bolus", 0D);
-                }
+            if (bw.optDouble("suggested_bolus", 0D) > 0) {
+                wizzardBolusTreatment                   = new Treatments();
+                wizzardBolusTreatment.datetime          = dateNow.getTime();
+                wizzardBolusTreatment.datetime_display  = dateNow.toString();
+                wizzardBolusTreatment.note              = "bolus";
+                wizzardBolusTreatment.type              = "Insulin";
+                wizzardBolusTreatment.value             = bw.optDouble("suggested_bolus", 0D);
+            }
+            if (bw.optDouble("suggested_correction", 0D) > 0) {
+                wizzardCorrectionTreatment                  = new Treatments();
+                wizzardCorrectionTreatment.datetime         = dateNow.getTime();
+                wizzardCorrectionTreatment.datetime_display = dateNow.toString();
+                wizzardCorrectionTreatment.note             = "correction";
+                wizzardCorrectionTreatment.type             = "Insulin";
+                wizzardCorrectionTreatment.value            = bw.optDouble("suggested_correction", 0D);
             }
             if (carbValue > 0){
-                carbTratment.datetime         = dateNow.getTime();
-                carbTratment.datetime_display = dateNow.toString();
-                carbTratment.note             = "";
-                carbTratment.type             = "Carbs";
-                carbTratment.value            = carbValue;
+                wizzardCarbTratment                     = new Treatments();
+                wizzardCarbTratment.datetime            = dateNow.getTime();
+                wizzardCarbTratment.datetime_display    = dateNow.toString();
+                wizzardCarbTratment.note                = "";
+                wizzardCarbTratment.type                = "Carbs";
+                wizzardCarbTratment.value               = carbValue;
             }
 
-            buttonAccept = (Button) v.findViewById(R.id.wizardAccept);
-            if (carbTratment.value == null && bolusTreatment.value == null){
+            if (wizzardCarbTratment.value == null && wizzardBolusTreatment.value == null && wizzardCorrectionTreatment == null){
                 buttonAccept.setEnabled(false);
             } else {
                 buttonAccept.setEnabled(true);
@@ -439,21 +459,29 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     }
     public static class manualTreatmentFragment extends Fragment {
         public manualTreatmentFragment() {}
+
+        private DatePickerDialog treatmentDatePickerDialog;
+        private TimePickerDialog treatmentTimePicker;
         private SimpleDateFormat dateFormatterDate;
         private SimpleDateFormat dateFormatterTime;
-        private EditText treatmentValue;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_manual_treatment, container, false);
 
+            spinner_treatment_type      = (Spinner) rootView.findViewById(R.id.treatmentSpinner);
+            spinner_notes               = (Spinner) rootView.findViewById(R.id.noteSpinner);
+            editText_treatment_time     = (EditText) rootView.findViewById(R.id.treatmentTime);
+            editText_treatment_date     = (EditText) rootView.findViewById(R.id.treatmentDate);
+            editText_treatment_value    = (EditText) rootView.findViewById(R.id.treatmentValue);
+
             rootView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean b) {
                     if(b) {
-                        if (view == treatmentDate) {
+                        if (view == editText_treatment_date) {
                             treatmentDatePickerDialog.show();
-                        } else if (view == treatmentTime) {
+                        } else if (view == editText_treatment_time) {
                             treatmentTimePicker.show();
                         }
                         //view.clearFocus();
@@ -462,10 +490,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             });
 
             setupPickers(rootView);
-
             return rootView;
         }
-
 
         public void setupPickers(final View v){
             //setups the date, time, value and type picker
@@ -481,48 +507,47 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             treatmentSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    if (parent.getSelectedItem().equals("Insulin")){
+                    if (parent.getSelectedItem().equals("Insulin")) {
                         String[] InsulinNotes = {"bolus", "correction"};
-                        ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
-                        Spinner notesSpinner= (Spinner)v.findViewById(R.id.noteSpinner);
+                        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
+                        Spinner notesSpinner = (Spinner) v.findViewById(R.id.noteSpinner);
                         notesSpinner.setAdapter(stringArrayAdapter);
                     } else {
                         String[] EmptyNotes = {""};
-                        ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, EmptyNotes);
-                        Spinner notesSpinner= (Spinner)v.findViewById(R.id.noteSpinner);
+                        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, EmptyNotes);
+                        Spinner notesSpinner = (Spinner) v.findViewById(R.id.noteSpinner);
                         notesSpinner.setAdapter(stringArrayAdapter);
                     }
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
             });
 
             //Value picker
-            treatmentValue = (EditText) v.findViewById(R.id.treatmentValue);
-            treatmentValue.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            editText_treatment_value = (EditText) v.findViewById(R.id.treatmentValue);
+            editText_treatment_value.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
             //Date picker
-            treatmentDate = (EditText) v.findViewById(R.id.treatmentDate);
-            treatmentDate.setInputType(InputType.TYPE_NULL);
-            treatmentDate.setOnFocusChangeListener(v.getOnFocusChangeListener());
+            editText_treatment_date.setInputType(InputType.TYPE_NULL);
+            editText_treatment_date.setOnFocusChangeListener(v.getOnFocusChangeListener());
             dateFormatterDate = new SimpleDateFormat("dd-MM-yyyy",  getResources().getConfiguration().locale);
-            treatmentDate.setText(dateFormatterDate.format(newCalendar.getTime()));
+            editText_treatment_date.setText(dateFormatterDate.format(newCalendar.getTime()));
 
             treatmentDatePickerDialog = new DatePickerDialog(v.getContext(), new DatePickerDialog.OnDateSetListener() {
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                     Calendar newDate = Calendar.getInstance();
                     newDate.set(year, monthOfYear, dayOfMonth);
-                    treatmentDate.setText(dateFormatterDate.format(newDate.getTime()));
+                    editText_treatment_date.setText(dateFormatterDate.format(newDate.getTime()));
                 }
             },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
 
             //Time Picker
-            treatmentTime = (EditText) v.findViewById(R.id.treatmentTime);
-            treatmentTime.setInputType(InputType.TYPE_NULL);
+            editText_treatment_time.setInputType(InputType.TYPE_NULL);
             dateFormatterTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
-            treatmentTime.setText(dateFormatterTime.format(newCalendar.getTime()));
-            treatmentTime.setOnFocusChangeListener(v.getOnFocusChangeListener());
+            editText_treatment_time.setText(dateFormatterTime.format(newCalendar.getTime()));
+            editText_treatment_time.setOnFocusChangeListener(v.getOnFocusChangeListener());
 
             Calendar mcurrentTime = Calendar.getInstance();
             int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
@@ -531,7 +556,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             treatmentTimePicker = new TimePickerDialog(v.getContext(), new TimePickerDialog.OnTimeSetListener() {
                 @Override
                 public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                    treatmentTime.setText(selectedHour + ":" + selectedMinute);
+                    editText_treatment_time.setText(selectedHour + ":" + selectedMinute);
                 }
             }, hour, minute, true);//Yes 24 hour time
             treatmentTimePicker.setTitle("Select Time");
@@ -572,6 +597,10 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
+            if (listDirty) {
+                refreshListFragments();
+                listDirty = false;
+            }
             switch (position) {
                 case 0:
                     return "Active";
@@ -584,11 +613,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         }
     }
 
-    public static class treatmentsFragment extends Fragment {
-        public treatmentsFragment(){}
+    public static class treatmentsListFragment extends Fragment {
+        public treatmentsListFragment(){}
         public ListView list;
         public mySimpleAdapter adapter;
         public View parentsView;
+        public ArrayList<HashMap<String, String>> treatmentsList;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -611,15 +641,15 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
 
-                TextView treatmentValue, treatmentType;
-                treatmentType = (TextView) view.findViewById(R.id.treatmentTypeLayout);
-                treatmentValue = (TextView) view.findViewById(R.id.treatmentAmountLayout);
-                if (treatmentType.getText().equals("Carbs")){
-                    treatmentValue.setBackgroundResource(R.drawable.carb_treatment_round);
-                    treatmentValue.setText(tools.formatDisplayCarbs(Double.valueOf(treatmentValue.getText().toString())));
+                TextView treatmentListValue, treatmentListType;
+                treatmentListType = (TextView) view.findViewById(R.id.treatmentTypeLayout);
+                treatmentListValue = (TextView) view.findViewById(R.id.treatmentAmountLayout);
+                if (treatmentListType.getText().equals("Carbs")){
+                    treatmentListValue.setBackgroundResource(R.drawable.carb_treatment_round);
+                    treatmentListValue.setText(tools.formatDisplayCarbs(Double.valueOf(treatmentListValue.getText().toString())));
                 } else {
-                    treatmentValue.setBackgroundResource(R.drawable.insulin_treatment_round);
-                    treatmentValue.setText(tools.formatDisplayInsulin(Double.valueOf(treatmentValue.getText().toString())));
+                    treatmentListValue.setBackgroundResource(R.drawable.insulin_treatment_round);
+                    treatmentListValue.setText(tools.formatDisplayInsulin(Double.valueOf(treatmentListValue.getText().toString()),1));
                 }
 
                 return view;
@@ -627,7 +657,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         }
 
         public void loadTreatments(final View rootView){
-            ArrayList<HashMap<String, String>> treatmentsList      = new ArrayList<>();
+            treatmentsList          = new ArrayList<>();
             List<Treatments> treatments;
             SimpleDateFormat sdfDate = new SimpleDateFormat("dd MMM", getResources().getConfiguration().locale);
             SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
@@ -670,17 +700,16 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 if (treatment.type.equals("Insulin")){
                     if (lastInsulin == false) {
                         JSONObject iobDetails = iob.iobCalc(treatment, new Date(), profile.dia);
-                        String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0));
+                        String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0),2);
                         Date now = new Date();
                         Long calc = now.getTime() + (iobDetails.optLong("minsLeft", 0) * 60000);
                         Date finish = new Date(calc);
                         String timeLeft = tools.formatDisplayTimeLeft(new Date(), finish);
 
-                        if (iobDetails.optLong("minsLeft", 0) > 0) {                                //Still active Insulin
+                        if (iobDetails.optDouble("iobContrib", 0) > 0) {                            //Still active Insulin
                             treatmentItem.put("active", isLeft + " " + timeLeft + " remaining");
                         } else {                                                                    //Not active
                             lastInsulin = true;
-                            if (toLoad.equals("ACTIVE")) break;                                     //Only want active treatments, exit
                         }
                     }
                     treatmentItem.put("result", "");
@@ -690,16 +719,24 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                         String isLeft = tools.formatDisplayCarbs(cobDetails.optDouble("cob", 0));
                         String timeLeft = tools.formatDisplayTimeLeft(new Date(), new Date(cobDetails.optLong("decayedBy", 0)));
 
-                        if (new Date().getTime() <= cobDetails.optLong("decayedBy", 0)) {           //Still active carbs
+                        if (cobDetails.optDouble("cob", 0) > 0) {                                   //Still active carbs
                             treatmentItem.put("active", isLeft + " " + timeLeft + " remaining");
                         } else {                                                                    //Not active
                             lastCarb = true;
-                            if (toLoad.equals("ACTIVE")) break;                                     //Only want active treatments, exit
                         }
                     }
                     treatmentItem.put("result", "");
                 }
-                treatmentsList.add(treatmentItem);
+
+                if (toLoad.equals("ACTIVE")){
+                    if (treatment.type.equals("Insulin")){
+                        if (!lastInsulin ) treatmentsList.add(treatmentItem);
+                    } else {
+                        if (!lastCarb) treatmentsList.add(treatmentItem);
+                    }
+                } else {
+                    treatmentsList.add(treatmentItem);
+                }
 
             }
 
@@ -729,7 +766,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             // We know that each row in the adapter is a Map
             HashMap map =  (HashMap) adapter.getItem(aInfo.position);
 
-            selectedListItem = Integer.parseInt(map.get("id").toString());
+            selectedListItemDB_ID   = Integer.parseInt(map.get("id").toString());
+            selectedListItemID      = (HashMap) adapter.getItem(aInfo.position);
 
             menu.setHeaderTitle(map.get("value") + " " + map.get("type"));
             menu.add(1, 1, 1, "Edit");
@@ -738,33 +776,45 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         // This method is called when user selects an Item in the Context menu
         @Override
         public boolean onContextItemSelected(MenuItem item) {
-            int itemId = item.getItemId();
-            Treatments treatment = Treatments.getTreatmentByID(selectedListItem);
+            if (getUserVisibleHint()) {                                                             //be sure we only action for the current Fragment http://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
+                int itemId = item.getItemId();
+                Treatments treatment = Treatments.getTreatmentByID(selectedListItemDB_ID);
 
-            if (treatment != null) {
+                if (treatment != null) {
 
-                if (itemId == 1) {   //Edit - loads the treatment to be edited and deleted the original
+                    if (itemId == 1) {   //Edit - loads the treatment to be edited and delete the original
 
-                    spinner_treatment_type.setSelection(getIndex(spinner_treatment_type, treatment.type));
-                    spinner_notes.setSelection(getIndex(spinner_notes, treatment.note));
-                    Date treatmentDate = new Date(treatment.datetime);
-                    SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
-                    SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
-                    editText_treatment_date.setText(sdfDate.format(treatmentDate));
-                    editText_treatment_time.setText(sdfTime.format(treatmentDate));
-                    editText_treatment_value.setText(treatment.value.toString());
+                        spinner_treatment_type.setSelection(getIndex(spinner_treatment_type, treatment.type));
+                        spinner_notes.setSelection(getIndex(spinner_notes, treatment.note));
+                        Date treatmentDate = new Date(treatment.datetime);
+                        SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
+                        SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+                        editText_treatment_date.setText(sdfDate.format(treatmentDate));
+                        editText_treatment_time.setText(sdfTime.format(treatmentDate));
+                        editText_treatment_value.setText(treatment.value.toString());
 
-                    treatment.delete();
-                    loadTreatments(parentsView);
-                    Toast.makeText(parentsView.getContext(), "Original Treatment Deleted, resave to add back", Toast.LENGTH_SHORT).show();
+                        treatment.delete();
+                        treatmentsList.remove(selectedListItemID);
+                        adapter.notifyDataSetChanged();
+                        adapter.notifyDataSetInvalidated();
+                        listDirty = true;
+                        eViewPager.setCurrentItem(1); //load edit treatment fragment
+                        //loadTreatments(parentsView);
+                        Toast.makeText(parentsView.getContext(), "Original Treatment Deleted, resave to add back", Toast.LENGTH_SHORT).show();
 
-                } else {              //Delete
-                    treatment.delete();
-                    loadTreatments(parentsView);
-                    Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
+                    } else {              //Delete
+                        treatment.delete();
+                        treatmentsList.remove(selectedListItemID);
+                        adapter.notifyDataSetChanged();
+                        adapter.notifyDataSetInvalidated();
+                        listDirty = true;
+                        //loadTreatments(parentsView);
+                        Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
+                    }
                 }
+                return true;
             }
-            return true;
+            return false;
         }
 
         //returns the location of an item in a spinner

@@ -70,8 +70,18 @@ public class tools {
         }
     }
 
-    public static String formatDisplayInsulin(Double value){
-        return String.format(Locale.ENGLISH, "%.1f", value) + "u";
+    public static String formatDisplayInsulin(Double value, int decPoints){
+        switch (decPoints){
+            case 1:
+                return String.format(Locale.ENGLISH, "%.1f", value) + "u";
+            case 2:
+                return String.format(Locale.ENGLISH, "%.2f", value) + "u";
+            case 3:
+                return String.format(Locale.ENGLISH, "%.3f", value) + "u";
+            default:
+                return value.toString() + "u";
+        }
+
     }
     public static String formatDisplayCarbs(Double value){
         if (value < 1){
@@ -96,7 +106,12 @@ public class tools {
         long elapsedMinutes = different / minutesInMilli;
         if (elapsedMinutes < 0) elapsedMinutes = 0;
 
-        return elapsedHours + "h " + elapsedMinutes + "m";
+        if (elapsedHours > 0){
+            return elapsedHours + "h " + elapsedMinutes + "m";
+        } else {
+            return elapsedMinutes + "m";
+        }
+
     }
 
     //Clears all Integration data stored for all records

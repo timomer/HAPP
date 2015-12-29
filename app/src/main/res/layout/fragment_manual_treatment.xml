@@ -2,35 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="210dp">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="10dp">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="Enter Value"
+            android:id="@+id/treatmentValue"
+            android:inputType="number"
+            android:textSize="14sp"/>
+    </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <EditText
-            android:layout_width="0px"
-            android:layout_height="0px"
-            android:text="SET FOCUS TO ME WORKAROUND"/>
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/treatmentDate"
-            android:inputType="date"
-            android:layout_weight=".5" />
-
-        <EditText
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/treatmentTime"
-            android:inputType="time"
-            android:layout_weight=".5"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="60dp">
 
         <Spinner
             android:layout_width="match_parent"
@@ -46,21 +36,46 @@
             android:layout_weight=".5"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
+
         <EditText
-            android:focusableInTouchMode="true"
-            android:focusable="true"
-            android:layout_width="match_parent"
-            android:layout_height="57dp"
-            android:hint="Enter Value"
-            android:id="@+id/treatmentValue"/>
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/treatmentTime"
+            android:inputType="time"
+            android:layout_weight=".5"/>
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/treatmentDate"
+            android:inputType="date"
+            android:layout_weight=".5" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:gravity="right">
         <Button
-            android:layout_gravity="right"
             android:layout_width="wrap_content"
             android:minWidth="88dp"
             android:layout_height="46dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:text="Save"
-            android:onClick="saveTreatmentToDB"/>
+            android:onClick="manualSave"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:minWidth="88dp"
+            android:layout_height="46dp"
+            android:text="Cancel"
+            android:paddingRight="16dp"
+            android:paddingLeft="16dp"
+            android:onClick="cancel"/>
+        </LinearLayout>
 
 </LinearLayout>

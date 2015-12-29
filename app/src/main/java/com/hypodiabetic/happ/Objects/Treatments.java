@@ -78,13 +78,13 @@ public class Treatments extends Model{
             return new Select()
                     .from(Treatments.class)
                     .where("type = '" + type + "'")
-                    .where("datetime > ? and datetime < ?", dateFrom, dateTo)
+                    .where("datetime >= ? and datetime <= ?", dateFrom, dateTo)
                     .orderBy("datetime desc")
                     .execute();
         } else {
             return new Select()
                     .from(Treatments.class)
-                    .where("datetime > ? and datetime < ?", dateFrom, dateTo)
+                    .where("datetime >= ? and datetime <= ?", dateFrom, dateTo)
                     .orderBy("datetime desc")
                     .execute();
         }

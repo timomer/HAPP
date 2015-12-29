@@ -144,18 +144,34 @@ public class pumpAction {
         }
     }
 
-    public static void setBolus(final Treatments insulinTreatment, final Treatments carbTreatment, final Context c){
+    public static void setBolus(final Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
 
         Date now = new Date();
         Profile p = new Profile(now, c);
+        Double totalBolus=0D;
+        if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
+        if (correctionTrearment != null) totalBolus += correctionTrearment.value;
 
-        if (insulinTreatment.value > p.max_bolus){                                                  //Wow there, Bolus is > user set limit
-            if (insulinTreatment.value > 15){                                                       //Wow wow, Bolus is > hardcoded safety limit
-                Toast.makeText(c, "Suggested Bolus " + insulinTreatment.value + "U > System Max Bolus 15U. Setting to " + p.max_bolus + "U" , Toast.LENGTH_LONG).show();
+        if (totalBolus > p.max_bolus){                                                              //Wow there, Bolus is > user set limit
+            if (totalBolus > 15){                                                                   //Wow wow, Bolus is > hardcoded safety limit
+                Toast.makeText(c, "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > System Max Bolus 15U. Setting to " + tools.formatDisplayInsulin(p.max_bolus,2), Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(c, "Suggested Bolus " + insulinTreatment.value + "U > User Max Bolus. Setting to " + p.max_bolus + "U" , Toast.LENGTH_LONG).show();
+                Toast.makeText(c, "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > User Max Bolus. Setting to " + tools.formatDisplayInsulin(p.max_bolus,2), Toast.LENGTH_LONG).show();
             }
-            insulinTreatment.value = p.max_basal;
+            Double diffBolus = totalBolus - p.max_bolus;
+            if (correctionTrearment != null){
+
+                if (correctionTrearment.value > diffBolus) {                                        //Delete the correction bolus and also reduce the bolus
+                    diffBolus = correctionTrearment.value - diffBolus;
+                    correctionTrearment = null;
+                    bolusTreatment.value = bolusTreatment.value - diffBolus;
+                } else {                                                                            //Take the diff off the correction
+                    correctionTrearment.value = correctionTrearment.value - diffBolus;
+                }
+            } else {                                                                                //No correction, reset the bolus to safe value
+                bolusTreatment.value = p.max_bolus;
+            }
+            totalBolus = p.max_bolus;
         }
 
         //Notify or Send command to pump depending on OpenAPS mode
@@ -165,13 +181,15 @@ public class pumpAction {
             // TODO: 08/09/2015 pump interface
 
         } else {
-
             //Offline mode, prompt user
+
+            final Double finalTotalBolus = totalBolus;
+            final Treatments finalCorrectionTrearment = correctionTrearment;
             String popUpMsg;
             if (carbTreatment != null){
-                popUpMsg = insulinTreatment.value + "U Bolus to set & " + carbTreatment.value + "g Carbs to save";
+                popUpMsg = tools.formatDisplayInsulin(totalBolus,2) + " Bolus to set & " + tools.formatDisplayCarbs(carbTreatment.value) + " Carbs to save";
             } else {
-                popUpMsg = insulinTreatment.value + "U Bolus to set";
+                popUpMsg = tools.formatDisplayInsulin(totalBolus,2) + " Bolus to set";
             }
 
             new AlertDialog.Builder(c)
@@ -180,15 +198,13 @@ public class pumpAction {
                     .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 
-                            String toastMsg = "";
-                            if (insulinTreatment.value != null) {
-                                insulinTreatment.save();
-                                toastMsg += insulinTreatment.value + "U ";
-                            }
+                            String toastMsg = tools.formatDisplayInsulin(finalTotalBolus,2);
                             if (carbTreatment != null) {
                                 carbTreatment.save();
-                                toastMsg += carbTreatment.value + "g ";
+                                toastMsg += tools.formatDisplayCarbs(carbTreatment.value);
                             }
+                            if (bolusTreatment != null) bolusTreatment.save();
+                            if (finalCorrectionTrearment != null) finalCorrectionTrearment.save();
                             tools.syncIntegrations(MainActivity.activity);
 
                             Toast.makeText(c, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
@@ -199,7 +215,7 @@ public class pumpAction {
 
                             //Return to the home screen (if not already on it)
                             Intent intentHome = new Intent(c, MainActivity.class);
-                            intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                             c.startActivity(intentHome);
 
                         }

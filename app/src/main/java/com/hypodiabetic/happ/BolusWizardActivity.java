@@ -169,7 +169,7 @@ public class BolusWizardActivity extends Activity {
 
         if (suggestedBolus.getText().toString().trim().length() != 0 && tools.stringToDouble(suggestedBolus.getText().toString()) > 0) {
             bolusTreatment.value = tools.stringToDouble(suggestedBolus.getText().toString());
-            pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
+            //pumpAction.setBolus(bolusTreatment, carbTratment, view.getContext());                   //Action the suggested Bolus
         } else if (carbTratment.value > 0) {
             carbTratment.save();
             Toast.makeText(this, carbTratment.value + "g saved, no Bolus suggested", Toast.LENGTH_SHORT).show();
