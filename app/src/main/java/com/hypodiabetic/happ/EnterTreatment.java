@@ -257,6 +257,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 }
                                 editText_treatment_value.setText("");
                                 wizardCarbs.setText("");
+                                wizardSuggestedCorrection.setText("");
+                                wizardSuggestedBolus.setText("");
                                 tools.syncIntegrations(MainActivity.activity);
                                 Toast.makeText(v.getContext(), tools.formatDisplayInsulin(totalBolus, 2) + " saved, NOT sent to Pump", Toast.LENGTH_LONG).show();
                                 refreshListFragments();
@@ -424,30 +426,30 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
 
             Date dateNow = new Date();
-            if (bw.optDouble("suggested_bolus", 0D) > 0) {
+            //if (bw.optDouble("suggested_bolus", 0D) > 0) {
                 wizzardBolusTreatment                   = new Treatments();
                 wizzardBolusTreatment.datetime          = dateNow.getTime();
                 wizzardBolusTreatment.datetime_display  = dateNow.toString();
                 wizzardBolusTreatment.note              = "bolus";
                 wizzardBolusTreatment.type              = "Insulin";
                 wizzardBolusTreatment.value             = bw.optDouble("suggested_bolus", 0D);
-            }
-            if (bw.optDouble("suggested_correction", 0D) > 0) {
+            //}
+            //if (bw.optDouble("suggested_correction", 0D) > 0) {
                 wizzardCorrectionTreatment                  = new Treatments();
                 wizzardCorrectionTreatment.datetime         = dateNow.getTime();
                 wizzardCorrectionTreatment.datetime_display = dateNow.toString();
                 wizzardCorrectionTreatment.note             = "correction";
                 wizzardCorrectionTreatment.type             = "Insulin";
                 wizzardCorrectionTreatment.value            = bw.optDouble("suggested_correction", 0D);
-            }
-            if (carbValue > 0){
+            //}
+            //if (carbValue > 0){
                 wizzardCarbTratment                     = new Treatments();
                 wizzardCarbTratment.datetime            = dateNow.getTime();
                 wizzardCarbTratment.datetime_display    = dateNow.toString();
                 wizzardCarbTratment.note                = "";
                 wizzardCarbTratment.type                = "Carbs";
                 wizzardCarbTratment.value               = carbValue;
-            }
+            //}
 
             if (wizzardCarbTratment.value == null && wizzardBolusTreatment.value == null && wizzardCorrectionTreatment == null){
                 buttonAccept.setEnabled(false);
