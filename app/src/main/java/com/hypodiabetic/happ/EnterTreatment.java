@@ -174,6 +174,15 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         if (wizzardCarbTratment.value == 0)         wizzardCarbTratment = null;
         if (wizzardBolusTreatment.value == 0)       wizzardBolusTreatment = null;
         if (wizzardCorrectionTreatment.value == 0)  wizzardCorrectionTreatment = null;
+
+        if (wizzardCorrectionTreatment != null) {
+            if (wizzardCorrectionTreatment.value < 0) {                                             //Negative correction, take it off bolus
+                wizzardBolusTreatment.value += wizzardCorrectionTreatment.value;
+                wizzardCorrectionTreatment = null;
+                if (wizzardBolusTreatment.value < 0) wizzardBolusTreatment = null;
+            }
+        }
+
         saveTreatment(wizzardCarbTratment, wizzardBolusTreatment, wizzardCorrectionTreatment, view);
     }
     public void manualSave(View view){
@@ -219,7 +228,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     }
 
     //saves a new Treatment
-    public void saveTreatment(final Treatments carbs, final Treatments bolus, final Treatments correction,final View v){
+    public void saveTreatment(final Treatments carbs,final Treatments bolus,final Treatments correction,final View v){
 
         if (bolus == null && correction == null && carbs != null){                                  //carbs to save only
             carbs.save();
@@ -377,6 +386,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             wizardSuggestedCorrection   = (EditText) rootView.findViewById(R.id.wizardSuggestedCorrection);
 
             buttonAccept            = (Button) rootView.findViewById(R.id.wizardAccept);
+            bwpCalculations = "";
 
             //Run Bolus Wizard on suggested carb amount change
             wizardCarbs.addTextChangedListener(new TextWatcher() {
@@ -451,7 +461,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 wizzardCarbTratment.value               = carbValue;
             //}
 
-            if (wizzardCarbTratment.value == null && wizzardBolusTreatment.value == null && wizzardCorrectionTreatment == null){
+            if (wizzardCarbTratment.value == 0 && wizzardBolusTreatment.value == 0 && wizzardCorrectionTreatment.value == 0){
                 buttonAccept.setEnabled(false);
             } else {
                 buttonAccept.setEnabled(true);

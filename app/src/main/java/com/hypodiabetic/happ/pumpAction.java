@@ -144,7 +144,7 @@ public class pumpAction {
         }
     }
 
-    public static void setBolus(final Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
+    public static void setBolus(Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
 
         Date now = new Date();
         Profile p = new Profile(now, c);
@@ -185,6 +185,7 @@ public class pumpAction {
 
             final Double finalTotalBolus = totalBolus;
             final Treatments finalCorrectionTrearment = correctionTrearment;
+            final Treatments finalBolusTreatment = bolusTreatment;
             String popUpMsg;
             if (carbTreatment != null){
                 popUpMsg = tools.formatDisplayInsulin(totalBolus,2) + " Bolus to set & " + tools.formatDisplayCarbs(carbTreatment.value) + " Carbs to save";
@@ -203,7 +204,7 @@ public class pumpAction {
                                 carbTreatment.save();
                                 toastMsg += tools.formatDisplayCarbs(carbTreatment.value);
                             }
-                            if (bolusTreatment != null) bolusTreatment.save();
+                            if (finalBolusTreatment != null) finalBolusTreatment.save();
                             if (finalCorrectionTrearment != null) finalCorrectionTrearment.save();
                             tools.syncIntegrations(MainActivity.activity);
 
