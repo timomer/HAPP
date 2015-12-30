@@ -168,12 +168,19 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         }
     }
     public void wizardAccept(View view){
-        wizzardCarbTratment.value           = tools.stringToDouble(wizardCarbs.getText().toString());
-        wizzardBolusTreatment.value         = tools.stringToDouble(wizardSuggestedBolus.getText().toString());
-        wizzardCorrectionTreatment.value    = tools.stringToDouble(wizardSuggestedCorrection.getText().toString());
-        if (wizzardCarbTratment.value == 0)         wizzardCarbTratment = null;
-        if (wizzardBolusTreatment.value == 0)       wizzardBolusTreatment = null;
-        if (wizzardCorrectionTreatment.value == 0)  wizzardCorrectionTreatment = null;
+
+        if (wizzardCarbTratment != null){
+            wizzardCarbTratment.value                   = tools.stringToDouble(wizardCarbs.getText().toString());
+            if (wizzardCarbTratment.value == 0)         wizzardCarbTratment = null;
+        }
+        if (wizzardBolusTreatment != null){
+            wizzardBolusTreatment.value                 = tools.stringToDouble(wizardSuggestedBolus.getText().toString());
+            if (wizzardBolusTreatment.value == 0)       wizzardBolusTreatment = null;
+        }
+        if (wizzardCorrectionTreatment != null){
+            wizzardCorrectionTreatment.value            = tools.stringToDouble(wizardSuggestedCorrection.getText().toString());
+            if (wizzardCorrectionTreatment.value == 0)  wizzardCorrectionTreatment = null;
+        }
 
         if (wizzardCorrectionTreatment != null) {
             if (wizzardCorrectionTreatment.value < 0) {                                             //Negative correction, take it off bolus
@@ -243,6 +250,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             Profile p = new Profile(new Date(),v.getContext());
             //Do we need to warn the user about sending this to a connacted pump?
             if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")) {                 //Poss pump connected, warn
+
+                Toast.makeText(v.getContext(), "APS mode is open or closed - pump interface is not supported yet", Toast.LENGTH_LONG).show();
 
                 new AlertDialog.Builder(v.getContext())
                         .setTitle("Send Bolus to pump?")
@@ -415,12 +424,14 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
             JSONObject bw = BolusWizard.bw(v.getContext(), carbValue);
 
+            DecimalFormat df = new DecimalFormat("##0.0");
+
             //Bolus Wizard Display
-            bwDisplayIOBCorr.setText(           tools.formatDisplayInsulin(bw.optDouble("net_biob", 0),1));
-            bwDisplayCarbCorr.setText(          tools.formatDisplayInsulin(bw.optDouble("insulin_correction_carbs", 0),1));
-            bwDisplayBGCorr.setText(            tools.formatDisplayInsulin(bw.optDouble("insulin_correction_bg", 0), 1));
-            wizardSuggestedBolus.setText(       bw.optString("suggested_bolus", ""));
-            wizardSuggestedCorrection.setText(  bw.optString("suggested_correction", ""));
+            bwDisplayIOBCorr.setText(           bw.optString("net_biob", "error"));
+            bwDisplayCarbCorr.setText(          bw.optString("insulin_correction_carbs", "error"));
+            bwDisplayBGCorr.setText(            bw.optString("insulin_correction_bg", "error"));
+            wizardSuggestedBolus.setText(       df.format(bw.optDouble("suggested_bolus", 0)));
+            wizardSuggestedCorrection.setText(  df.format(bw.optDouble("suggested_correction", 0)));
 
             //Bolus Wizard Calculations
             bwpCalculations =   "carb correction \n" +

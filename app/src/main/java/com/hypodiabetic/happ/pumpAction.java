@@ -179,6 +179,7 @@ public class pumpAction {
 
             //Online mode, send commend to pump
             // TODO: 08/09/2015 pump interface
+            Toast.makeText(c, "APS mode is open or closed - pump interface is not supported yet", Toast.LENGTH_LONG).show();
 
         } else {
             //Offline mode, prompt user
@@ -188,9 +189,9 @@ public class pumpAction {
             final Treatments finalBolusTreatment = bolusTreatment;
             String popUpMsg;
             if (carbTreatment != null){
-                popUpMsg = tools.formatDisplayInsulin(totalBolus,2) + " Bolus to set & " + tools.formatDisplayCarbs(carbTreatment.value) + " Carbs to save";
+                popUpMsg = tools.formatDisplayInsulin(totalBolus,1) + " Bolus to set & " + tools.formatDisplayCarbs(carbTreatment.value) + " Carbs to save";
             } else {
-                popUpMsg = tools.formatDisplayInsulin(totalBolus,2) + " Bolus to set";
+                popUpMsg = tools.formatDisplayInsulin(totalBolus,1) + " Bolus to set";
             }
 
             new AlertDialog.Builder(c)
@@ -199,7 +200,7 @@ public class pumpAction {
                     .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 
-                            String toastMsg = tools.formatDisplayInsulin(finalTotalBolus,2);
+                            String toastMsg = tools.formatDisplayInsulin(finalTotalBolus,1) + " ";
                             if (carbTreatment != null) {
                                 carbTreatment.save();
                                 toastMsg += tools.formatDisplayCarbs(carbTreatment.value);

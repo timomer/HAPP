@@ -36,11 +36,11 @@ public class BolusWizard {
         Double lastBG = 0D;
         if (bg != null) lastBG = bg.sgv_double();
 
-        Double cob, biob;
+        Double cob, iob;
         //eventualBG  = openAPSNow.optDouble("eventualBG",0D);
         //snoozeBG    = openAPSNow.optDouble("snoozeBG",0D);
         cob         = cobNow.optDouble("cob",0D);
-        biob        = iobNow.optDouble("bolusiob",0D);
+        iob         = iobNow.optDouble("iob",0D);
 
 
         Double insulin_correction_bg;
@@ -49,8 +49,8 @@ public class BolusWizard {
         Double suggested_bolus;
         String suggested_correction_maths;
         Double suggested_correction;
-        Double net_correction_biob              = (cob / profile.carbRatio) - biob;                                     //Net Bolus IOB after current carbs taken into consideration
-        String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - BolusIOB(" + tools.formatDisplayInsulin(biob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
+        Double net_correction_biob              = (cob / profile.carbRatio) - iob;                                     //Net IOB after current carbs taken into consideration
+        String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
         Double insulin_correction_carbs         = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
         String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + tools.formatDisplayInsulin(insulin_correction_carbs,2);
         if (lastBG >= profile.max_bg) {                                                              //True HIGH
@@ -102,37 +102,37 @@ public class BolusWizard {
         JSONObject reply = new JSONObject();
         try {
             reply.put("isf",profile.isf);
-            reply.put("biob",biob);
+            reply.put("iob",iob);
             reply.put("cob",cob);
             reply.put("carbRatio",profile.carbRatio);
-            reply.put("bolusiob",biob);
+            //reply.put("bolusiob",biob);
             //reply.put("eventualBG",eventualBG);
             //reply.put("snoozeBG",snoozeBG);
             reply.put("max_bg",profile.max_bg);
             reply.put("target_bg",profile.target_bg);
             reply.put("bgCorrection",bgCorrection);
             if (net_correction_biob > 0){
-                reply.put("net_biob",                   "+" + String.format("%.1f", net_correction_biob));
+                reply.put("net_biob",                   "+" + tools.formatDisplayInsulin(net_correction_biob,1));
             } else {
-                reply.put("net_biob",                   String.format("%.1f", net_correction_biob));
+                reply.put("net_biob",                   tools.formatDisplayInsulin(net_correction_biob,1));
             }
             reply.put("net_biob_maths",                 net_biob_correction_maths);
             if (insulin_correction_carbs > 0){
-                reply.put("insulin_correction_carbs",   "+" + String.format("%.1f", insulin_correction_carbs));
+                reply.put("insulin_correction_carbs",   "+" + tools.formatDisplayInsulin(insulin_correction_carbs,1));
             } else {
-                reply.put("insulin_correction_carbs",   String.format("%.1f", insulin_correction_carbs));
+                reply.put("insulin_correction_carbs",   tools.formatDisplayInsulin(insulin_correction_carbs,1));
             }
             reply.put("insulin_correction_carbs_maths", insulin_correction_carbs_maths);
             if (insulin_correction_bg > 0){
-                reply.put("insulin_correction_bg",      "+" + String.format("%.1f", insulin_correction_bg));
+                reply.put("insulin_correction_bg",      "+" + tools.formatDisplayInsulin(insulin_correction_bg,1));
             } else {
-                reply.put("insulin_correction_bg",      String.format("%.1f", insulin_correction_bg));
+                reply.put("insulin_correction_bg",      tools.formatDisplayInsulin(insulin_correction_bg,1));
             }
             reply.put("insulin_correction_bg_maths",    insulin_correction_bg_maths);
             if (suggested_bolus < 0) suggested_bolus=0D;
-            reply.put("suggested_bolus",                String.format("%.1f", suggested_bolus));
+            reply.put("suggested_bolus",                suggested_bolus);
             reply.put("suggested_bolus_maths",          suggested_bolus_maths);
-            reply.put("suggested_correction",           String.format("%.1f", suggested_correction));
+            reply.put("suggested_correction",           suggested_correction);
             reply.put("suggested_correction_maths",     suggested_correction_maths);
         } catch (JSONException e) {
             Crashlytics.logException(e);
