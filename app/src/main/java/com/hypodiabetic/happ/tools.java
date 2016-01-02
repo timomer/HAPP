@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -225,13 +226,42 @@ public class tools {
 
     public static Double stringToDouble(String string){
         //Used to support locations where , is used as decimal separator
-        DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
-        try {
-            return df.parse(string).doubleValue();
-        } catch (ParseException e){
-            Crashlytics.logException(e);
+        //DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
+        //try {
+        //    return df.parse(string).doubleValue();
+        //} catch (ParseException e){
+        //    Crashlytics.logException(e);
+        //    return 0.0;
+        //}
+        if (string == null) {
+            Log.e("CORE", "Null value!");
             return 0.0;
         }
+
+        Locale theLocale = Locale.getDefault();
+        NumberFormat numberFormat = DecimalFormat.getInstance(theLocale);
+        Number theNumber;
+        try {
+            theNumber = numberFormat.parse(string);
+            return theNumber.doubleValue();
+        } catch (ParseException e) {
+            // The string value might be either 99.99 or 99,99, depending on Locale.
+            // We can deal with this safely, by forcing to be a point for the decimal separator, and then using Double.valueOf ...
+            // http://stackoverflow.com/a/21901846/4088013
+            String valueWithDot = string.replaceAll(",",".");
+
+            try {
+                return Double.valueOf(valueWithDot);
+            } catch (NumberFormatException e2)  {
+                // This happens if we're trying (say) to parse a string that isn't a number, as though it were a number!
+                // If this happens, it should only be due to application logic problems.
+                // In this case, the safest thing to do is return 0, having first fired-off a log warning.
+                Log.w("CORE", "Warning: Value is not a number" + string);
+                Crashlytics.logException(e2);
+                return 0.0;
+            }
+        }
+
     }
 
     /**
@@ -256,4 +286,5 @@ public class tools {
         long time =getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
         return getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
     }
+
 }

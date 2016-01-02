@@ -1,10 +1,16 @@
 package com.hypodiabetic.happ;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -148,86 +154,130 @@ public class pumpAction {
 
         Date now = new Date();
         Profile p = new Profile(now, c);
-        Double totalBolus=0D;
+        Double totalBolus=0D, hardcodedMaxBolus=15D, diffBolus=0D;
         if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
         if (correctionTrearment != null) totalBolus += correctionTrearment.value;
+        String warningMSG = null;
+        final Boolean manualPump;
 
-        if (totalBolus > p.max_bolus){                                                              //Wow there, Bolus is > user set limit
-            if (totalBolus > 15){                                                                   //Wow wow, Bolus is > hardcoded safety limit
-                Toast.makeText(c, "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > System Max Bolus 15U. Setting to " + tools.formatDisplayInsulin(p.max_bolus,2), Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(c, "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > User Max Bolus. Setting to " + tools.formatDisplayInsulin(p.max_bolus,2), Toast.LENGTH_LONG).show();
+        if (totalBolus > p.max_bolus || totalBolus > hardcodedMaxBolus){
+            if (totalBolus > p.max_bolus){                                                          //Wow there, Bolus is > user set limit
+                warningMSG = "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > User Max Bolus. Setting to " + tools.formatDisplayInsulin(p.max_bolus, 2);
+                diffBolus = totalBolus - p.max_bolus;
+                totalBolus = p.max_bolus;
             }
-            Double diffBolus = totalBolus - p.max_bolus;
+            if (totalBolus > hardcodedMaxBolus){                                                    //Wow wow, Bolus is > hardcoded safety limit
+                warningMSG = "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > System Max Bolus. Setting to " + tools.formatDisplayInsulin(hardcodedMaxBolus,2);
+                diffBolus = totalBolus - hardcodedMaxBolus;
+                totalBolus = hardcodedMaxBolus;
+            }
+
             if (correctionTrearment != null){
 
-                if (correctionTrearment.value > diffBolus) {                                        //Delete the correction bolus and also reduce the bolus
-                    diffBolus = correctionTrearment.value - diffBolus;
+                if (correctionTrearment.value <= diffBolus) {                                        //Delete the correction bolus and also reduce the bolus
+                    diffBolus = diffBolus - correctionTrearment.value;
                     correctionTrearment = null;
                     bolusTreatment.value = bolusTreatment.value - diffBolus;
+                    if (bolusTreatment.value < 0) bolusTreatment.value = 0D;
                 } else {                                                                            //Take the diff off the correction
                     correctionTrearment.value = correctionTrearment.value - diffBolus;
                 }
             } else {                                                                                //No correction, reset the bolus to safe value
-                bolusTreatment.value = p.max_bolus;
+                bolusTreatment.value = totalBolus;
             }
-            totalBolus = p.max_bolus;
+
         }
+
+        final Treatments finalCorrectionTrearment = correctionTrearment;
+        final Treatments finalBolusTreatment = bolusTreatment;
 
         //Notify or Send command to pump depending on OpenAPS mode
         if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")){
-
             //Online mode, send commend to pump
-            // TODO: 08/09/2015 pump interface
-            Toast.makeText(c, "APS mode is open or closed - pump interface is not supported yet", Toast.LENGTH_LONG).show();
-
+            manualPump = false;
         } else {
             //Offline mode, prompt user
-
-            final Double finalTotalBolus = totalBolus;
-            final Treatments finalCorrectionTrearment = correctionTrearment;
-            final Treatments finalBolusTreatment = bolusTreatment;
-            String popUpMsg;
-            if (carbTreatment != null){
-                popUpMsg = tools.formatDisplayInsulin(totalBolus,1) + " Bolus to set & " + tools.formatDisplayCarbs(carbTreatment.value) + " Carbs to save";
-            } else {
-                popUpMsg = tools.formatDisplayInsulin(totalBolus,1) + " Bolus to set";
-            }
-
-            new AlertDialog.Builder(c)
-                    .setTitle("Manually set Bolus")
-                    .setMessage(popUpMsg)
-                    .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            String toastMsg = tools.formatDisplayInsulin(finalTotalBolus,1) + " ";
-                            if (carbTreatment != null) {
-                                carbTreatment.save();
-                                toastMsg += tools.formatDisplayCarbs(carbTreatment.value);
-                            }
-                            if (finalBolusTreatment != null) finalBolusTreatment.save();
-                            if (finalCorrectionTrearment != null) finalCorrectionTrearment.save();
-                            tools.syncIntegrations(MainActivity.activity);
-
-                            Toast.makeText(c, "Saved " + toastMsg, Toast.LENGTH_SHORT).show();
-
-                            //Run openAPS again
-                            Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
-                            LocalBroadcastManager.getInstance(c).sendBroadcast(intent);
-
-                            //Return to the home screen (if not already on it)
-                            Intent intentHome = new Intent(c, MainActivity.class);
-                            intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            c.startActivity(intentHome);
-
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .show();
+            manualPump = true;
         }
+
+        final Dialog dialog = new Dialog(c);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.bolus_dialog);
+
+        TextView bolusAmount            = (TextView) dialog.findViewById(R.id.bolusDialogBolusAmount);
+        TextView bolusMsg               = (TextView) dialog.findViewById(R.id.bolusDialogActionMsg);
+        LinearLayout bolusTreatLayout   = (LinearLayout) dialog.findViewById(R.id.bolusDialogBolusTreatment);
+        TextView bolusTreatValue        = (TextView) dialog.findViewById(R.id.bolusDialogBolusTreatmentValue);
+        TextView bolusTreatText         = (TextView) dialog.findViewById(R.id.bolusDialogBolusTreatmentText);
+        LinearLayout corrTreatLayout    = (LinearLayout) dialog.findViewById(R.id.bolusDialogCorrTreatment);
+        TextView corrTreatValue         = (TextView) dialog.findViewById(R.id.bolusDialogCorrTreatmentValue);
+        TextView corrTreatText          = (TextView) dialog.findViewById(R.id.bolusDialogCorrTreatmentText);
+        LinearLayout carbTreatLayout    = (LinearLayout) dialog.findViewById(R.id.bolusDialogCarbTreatment);
+        TextView carbTreatValue         = (TextView) dialog.findViewById(R.id.bolusDialogCarbTreatmentValue);
+        TextView carbTreatText          = (TextView) dialog.findViewById(R.id.bolusDialogCarbTreatmentText);
+        TextView warningMSGText         = (TextView) dialog.findViewById(R.id.bolusDialogWarning);
+        Button buttonOK                 = (Button) dialog.findViewById(R.id.bolusDialogOK);
+
+        bolusAmount.setText(tools.formatDisplayInsulin(totalBolus,1));
+        if (manualPump){
+            bolusMsg.setText("manually set on pump");
+            buttonOK.setText("Done");
+        } else {
+            bolusMsg.setText("deliver to pump");
+            buttonOK.setText("Deliver");
+        }
+        if (finalBolusTreatment != null){
+            bolusTreatValue.setText(tools.formatDisplayInsulin(finalBolusTreatment.value, 1));
+            bolusTreatText.setText("Insulin Bolus");
+        } else {bolusTreatLayout.setVisibility(View.GONE);}
+        if (finalCorrectionTrearment != null){
+            corrTreatValue.setText(tools.formatDisplayInsulin(finalCorrectionTrearment.value, 1));
+            corrTreatText.setText("Insulin Correction");
+        } else {corrTreatLayout.setVisibility(View.GONE);}
+        if (carbTreatment != null){
+            carbTreatValue.setText(tools.formatDisplayCarbs(carbTreatment.value));
+            carbTreatText.setText("Carbohydrates");
+        } else {carbTreatLayout.setVisibility(View.GONE);}
+        if (warningMSG != null) {
+            warningMSGText.setText(warningMSG);
+        } else {warningMSGText.setVisibility(View.GONE);}
+
+        buttonOK.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                if (carbTreatment != null)              carbTreatment.save();
+                if (finalBolusTreatment != null)        finalBolusTreatment.save();
+                if (finalCorrectionTrearment != null)   finalCorrectionTrearment.save();
+                tools.syncIntegrations(MainActivity.activity);
+
+                if (!manualPump){
+                    // TODO: 08/09/2015 pump interface
+                    Toast.makeText(c, "APS mode is open or closed - pump interface is not supported yet", Toast.LENGTH_LONG).show();
+                }
+
+                //Run openAPS again
+                Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
+                LocalBroadcastManager.getInstance(c).sendBroadcast(intent);
+
+                //Return to the home screen (if not already on it)
+                Intent intentHome = new Intent(c, MainActivity.class);
+                intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                c.startActivity(intentHome);
+
+            }
+        });
+
+        Button buttonCancel = (Button) dialog.findViewById(R.id.bolusDialogCancel);
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                }
+        });
+
+        dialog.show();
+
+
     }
 }

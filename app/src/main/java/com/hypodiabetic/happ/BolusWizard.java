@@ -93,6 +93,7 @@ public class BolusWizard {
         if (suggested_correction < 0) {
             suggested_bolus = insulin_correction_carbs + suggested_correction;
             suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayCarbs(insulin_correction_carbs) + ") + " + "Neg Corr(" + tools.formatDisplayInsulin(suggested_correction,2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
+            suggested_correction = 0D;
         } else {
             suggested_bolus = insulin_correction_carbs;
             suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayCarbs(insulin_correction_carbs) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);

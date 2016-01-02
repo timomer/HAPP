@@ -20,7 +20,7 @@ android {
         targetSdkVersion 22
 
         versionCode 26
-        versionName "1.3.4"
+        versionName "1.3.5"
 
         multiDexEnabled true
     }

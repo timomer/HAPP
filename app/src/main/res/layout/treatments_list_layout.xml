@@ -21,12 +21,11 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:textSize="14sp"
-            android:text="10u"
+            android:text="1.0u"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
             android:gravity="center"
-            android:background="@drawable/insulin_treatment_round"
-            android:padding="0dp"/>
+            android:background="@drawable/insulin_treatment_round"/>
 
     </LinearLayout>
 

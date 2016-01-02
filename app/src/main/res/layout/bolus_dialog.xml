@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:id="@+id/bolusDialogBolusAmount"
+            android:text="1.0u"
+            android:textSize="40sp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:background="@drawable/insulin_treatment_round"/>/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textSize="22sp"
+            android:layout_gravity="center"
+            android:id="@+id/bolusDialogActionMsg"
+            android:text="to manually set on pump"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Treatments HAPP will Save"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:id="@+id/bolusDialogBolusTreatment">
+                <TextView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:text="2.0u"
+                    android:id="@+id/bolusDialogBolusTreatmentValue"
+                    android:background="@drawable/insulin_treatment_round"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="12sp"
+                    android:text="Insulin Bolus"
+                    android:id="@+id/bolusDialogBolusTreatmentText"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="10dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:id="@+id/bolusDialogCorrTreatment"
+                android:layout_marginTop="6dp">
+                <TextView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:text="0.5u"
+                    android:id="@+id/bolusDialogCorrTreatmentValue"
+                    android:background="@drawable/insulin_treatment_round"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="12sp"
+                    android:text="Insulin Correction"
+                    android:id="@+id/bolusDialogCorrTreatmentText"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="10dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:id="@+id/bolusDialogCarbTreatment"
+                android:layout_marginTop="6dp">
+                <TextView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:text="10g"
+                    android:id="@+id/bolusDialogCarbTreatmentValue"
+                    android:background="@drawable/carb_treatment_round"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="12sp"
+                    android:text="Carbohydrates"
+                    android:id="@+id/bolusDialogCarbTreatmentText"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="10dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="xxx"
+            android:id="@+id/bolusDialogWarning"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:id="@+id/bolusDialogCancel"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:id="@+id/bolusDialogOK"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+    </LinearLayout>
+
+</LinearLayout>

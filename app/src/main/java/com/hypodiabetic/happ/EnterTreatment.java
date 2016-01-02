@@ -182,14 +182,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             if (wizzardCorrectionTreatment.value == 0)  wizzardCorrectionTreatment = null;
         }
 
-        if (wizzardCorrectionTreatment != null) {
-            if (wizzardCorrectionTreatment.value < 0) {                                             //Negative correction, take it off bolus
-                wizzardBolusTreatment.value += wizzardCorrectionTreatment.value;
-                wizzardCorrectionTreatment = null;
-                if (wizzardBolusTreatment.value < 0) wizzardBolusTreatment = null;
-            }
-        }
-
         saveTreatment(wizzardCarbTratment, wizzardBolusTreatment, wizzardCorrectionTreatment, view);
     }
     public void manualSave(View view){
@@ -247,54 +239,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             refreshListFragments();
         } else {                                                                                    //We have insulin to deliver
 
-            Profile p = new Profile(new Date(),v.getContext());
-            //Do we need to warn the user about sending this to a connacted pump?
-            if (p.openaps_mode.equals("closed") || p.openaps_mode.equals("open")) {                 //Poss pump connected, warn
-
-                Toast.makeText(v.getContext(), "APS mode is open or closed - pump interface is not supported yet", Toast.LENGTH_LONG).show();
-
-                new AlertDialog.Builder(v.getContext())
-                        .setTitle("Send Bolus to pump?")
-                        .setMessage("Save this Bolus or Save & Send to Pump?")
-                        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                Double totalBolus = 0D;
-                                if (carbs != null) {
-                                    carbs.save();
-                                }
-                                if (bolus != null) {
-                                    totalBolus += bolus.value;
-                                    bolus.save();
-                                }
-                                if (correction != null) {
-                                    if (correction.value != null) {
-                                        totalBolus += correction.value;
-                                        correction.save();
-                                    }
-                                }
-                                editText_treatment_value.setText("");
-                                wizardCarbs.setText("");
-                                wizardSuggestedCorrection.setText("");
-                                wizardSuggestedBolus.setText("");
-                                tools.syncIntegrations(MainActivity.activity);
-                                Toast.makeText(v.getContext(), tools.formatDisplayInsulin(totalBolus, 2) + " saved, NOT sent to Pump", Toast.LENGTH_LONG).show();
-                                refreshListFragments();
-
-                            }
-                        })
-                        .setNegativeButton("Save & Send", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                pumpAction.setBolus(bolus, carbs, correction, v.getContext());
-                                //refreshListFragments();
-
-                            }
-                        })
-                        .show();
-            } else {                                                                                //No pump, just action
-                pumpAction.setBolus(bolus, carbs, correction, v.getContext());
-            }
+            pumpAction.setBolus(bolus, carbs, correction, v.getContext());
         }
 
     }
@@ -413,6 +358,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 }
             });
 
+            run_bw(rootView);
             return rootView;
         }
         public void run_bw(View v){
@@ -720,16 +666,17 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 treatmentItem.put("note", treatment.note);
                 treatmentItem.put("active", "");
 
+                //Loads the remaining amouing of activity for the treatment, if any
                 if (treatment.type.equals("Insulin")){
                     if (lastInsulin == false) {
                         JSONObject iobDetails = iob.iobCalc(treatment, new Date(), profile.dia);
-                        String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0),2);
-                        Date now = new Date();
-                        Long calc = now.getTime() + (iobDetails.optLong("minsLeft", 0) * 60000);
-                        Date finish = new Date(calc);
-                        String timeLeft = tools.formatDisplayTimeLeft(new Date(), finish);
 
                         if (iobDetails.optDouble("iobContrib", 0) > 0) {                            //Still active Insulin
+                            String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0),2);
+                            Date now = new Date();
+                            Long calc = now.getTime() + (iobDetails.optLong("minsLeft", 0) * 60000);
+                            Date finish = new Date(calc);
+                            String timeLeft = tools.formatDisplayTimeLeft(new Date(), finish);
                             treatmentItem.put("active", isLeft + " " + timeLeft + " remaining");
                         } else {                                                                    //Not active
                             lastInsulin = true;
@@ -739,10 +686,16 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 } else {
                     if (lastCarb == false) {
                         JSONObject cobDetails = Treatments.getCOBBetween(profile, treatment.datetime - (8 * 60 * 60000), treatment.datetime); //last 8 hours
-                        String isLeft = tools.formatDisplayCarbs(cobDetails.optDouble("cob", 0));
-                        String timeLeft = tools.formatDisplayTimeLeft(new Date(), new Date(cobDetails.optLong("decayedBy", 0)));
 
                         if (cobDetails.optDouble("cob", 0) > 0) {                                   //Still active carbs
+                            String isLeft;
+                            if (cobDetails.optDouble("cob", 0) > treatment.value) {
+                                isLeft = tools.formatDisplayCarbs(treatment.value);
+                            } else {
+                                isLeft = tools.formatDisplayCarbs(cobDetails.optDouble("cob", 0));
+                            }
+                            String timeLeft = tools.formatDisplayTimeLeft(new Date(), new Date(cobDetails.optLong("decayedBy", 0)));
+
                             treatmentItem.put("active", isLeft + " " + timeLeft + " remaining");
                         } else {                                                                    //Not active
                             lastCarb = true;
