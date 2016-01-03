@@ -14,8 +14,8 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:id="@+id/bolusDialogBolusAmount"
-            android:text="1.0u"
-            android:textSize="40sp"
+            android:text="11.0u"
+            android:textSize="44sp"
             android:gravity="center"
             android:layout_gravity="center"
             android:background="@drawable/insulin_treatment_round"/>/>
@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:layout_gravity="center"
             android:id="@+id/bolusDialogActionMsg"
             android:text="to manually set on pump"/>

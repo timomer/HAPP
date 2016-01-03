@@ -234,7 +234,11 @@ public class tools {
         //    return 0.0;
         //}
         if (string == null) {
-            Log.e("CORE", "Null value!");
+            Log.e("CORE", "stringToDouble Null value!");
+            return 0.0;
+        }
+        if (string == "") {
+            Log.e("CORE", "stringToDouble Empty value!");
             return 0.0;
         }
 

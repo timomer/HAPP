@@ -117,8 +117,14 @@ public class DetermineBasalAdapterJS {
     }
 
     private void loadScript() throws IOException {
-        mV8rt.executeVoidScript(readFile("openaps/oref0-determine-basal.js"), "openaps/oref0-determine-basal.js", 1);
-        mV8rt.executeVoidScript("var determinebasal = init();");
+        //mV8rt.executeVoidScript(readFile("openaps/oref0-determine-basal.js"), "openaps/oref0-determine-basal.js", 1);
+        //mV8rt.executeVoidScript("var determinebasal = init();");
+        mV8rt.executeVoidScript(
+                "(function() {\n"+
+                    readFile("openaps/oref0-determine-basal.js") +
+                "\n})()" ,
+                "openaps/oref0-determine-basal.js", 2);
+        mV8rt.executeVoidScript("var determinebasal = module.exports();");
     }
 
     private void initModuleParent() {

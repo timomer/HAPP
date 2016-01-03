@@ -50,7 +50,7 @@ if (!module.parent) {
     if (minAgo > 10 || minAgo < -5) { // Dexcom data is too old, or way in the future
         var reason = "BG data is too old, or clock set incorrectly";
         console.error(reason);
-        //return 1;
+        return 1;
     }
     console.error(JSON.stringify(glucose_status));
     console.error(JSON.stringify(currenttemp));
