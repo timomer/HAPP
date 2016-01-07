@@ -17,6 +17,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.text.ClipboardManager;
 import android.view.KeyEvent;
@@ -109,6 +110,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     BroadcastReceiver newStatsReceiver;
     BroadcastReceiver newOpenAPSReceiver;
     BroadcastReceiver updateEvery60Seconds;
+
+    BroadcastReceiver nsUpdate;
 
 
 
@@ -455,6 +458,17 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             }
         };
         registerReceiver(newOpenAPSReceiver, new IntentFilter("ACTION_UPDATE_OPENAPS"));
+
+        //NS updates
+        nsUpdate = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                TextView msg = (TextView) findViewById(R.id.sysmsg2);
+                msg.setText(intent.getStringExtra("msg"));
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                nsUpdate, new IntentFilter("ACTION_NS_UPDATE"));
 
     }
 

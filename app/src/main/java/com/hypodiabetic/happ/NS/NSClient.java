@@ -1,9 +1,12 @@
 package com.hypodiabetic.happ.NS;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
@@ -75,10 +78,12 @@ public class NSClient {
         if (nsAPISecret!="") nsAPIhashCode = Hashing.sha1().hashString(nsAPISecret, Charsets.UTF_8).toString();
 
         //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+        notifyApp(connectionStatus);
         if (nsEnabled && nsURL != "") {
             try {
                 connectionStatus = "Connecting ...";
                 //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+                notifyApp(connectionStatus);
                 mSocket = IO.socket(nsURL);
                 mSocket.connect();
                 mSocket.on("dataUpdate", onDataUpdate);
@@ -90,10 +95,12 @@ public class NSClient {
             } catch (URISyntaxException e) {
                 connectionStatus = "Wrong URL syntax";
                 //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+                notifyApp(connectionStatus);
             }
         } else {
             connectionStatus = "Disabled";
             //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+            notifyApp(connectionStatus);
         }
     }
 
@@ -120,6 +127,7 @@ public class NSClient {
             isConnected = false;
             connectionStatus = "Auth interrupted";
             //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+            notifyApp(connectionStatus);
         }
         else if (ack.received){
             connectionStatus = "Authenticated (";
@@ -129,10 +137,12 @@ public class NSClient {
             connectionStatus += ')';
             isConnected = true;
             //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+            notifyApp(connectionStatus);
         } else {
             isConnected = false;
             connectionStatus = "Timed out";
             //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+            notifyApp(connectionStatus);
         }
     }
 
@@ -172,6 +182,7 @@ public class NSClient {
                     response.put("data", responseData);
                     mSocket.emit("dbUpdate", response);
                     //mBus.post(new NSCommandEvent(_id, "bolus", insulin)); //HAPP added
+
                 }
             } catch (JSONException e) {
                 return;
@@ -312,9 +323,17 @@ public class NSClient {
                     connectionStatus = "Connected";
                 }
                 //mBus.post(new NSStatusEvent(connectionStatus)); //HAPP added
+                notifyApp(connectionStatus);
             } catch (JSONException e) {
              }
         }
     };
+
+    public void notifyApp(String msg){
+        Log.w("NS_Update", msg);
+        Intent intent = new Intent("ACTION_NS_UPDATE");
+        intent.putExtra("msg",msg);
+        LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
+    }
 
 }

@@ -26,6 +26,14 @@
                 android:text="Sys Msg"
                 android:textColor="@android:color/white"
                 android:paddingLeft="8dp"/>
+            <TextView
+                android:id="@+id/sysmsg2"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="#0099FF"
+                android:text="Sys Msg"
+                android:textColor="@android:color/white"
+                android:paddingLeft="8dp"/>
 
             <LinearLayout
                 android:id="@+id/topLayout"
