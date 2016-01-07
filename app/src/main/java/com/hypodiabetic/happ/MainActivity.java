@@ -126,11 +126,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         ins = this;
         PreferenceManager.setDefaultValues(this, R.xml.pref_openaps, false);                        //Sets default OpenAPS Preferences if the user has not
 
-        // TODO: 05/11/2015 appears to be a bug in Active Andorid where DB version is ignored in Manifest, must be added here as well
-        // http://stackoverflow.com/questions/33164456/update-existing-database-table-with-new-column-not-working-in-active-android
-        Configuration configuration = new Configuration.Builder(this).setDatabaseVersion(24).create();
-        ActiveAndroid.initialize(configuration);
-
 
         //xdrip start
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -223,11 +218,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     public void test(View view){
 
-        TempBasal example = new TempBasal();
-        example.rate = 5D;
-        example.duration = 30;
+        Snackbar snackbar = Snackbar
+                .make(view, MainApp.getNSClient().connectionStatus, Snackbar.LENGTH_INDEFINITE);
 
-        //pumpAction.newTempBasal(example,view.getContext());
+        snackbar.show();
 
     }
 

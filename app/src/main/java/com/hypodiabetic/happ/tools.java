@@ -70,6 +70,23 @@ public class tools {
             return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MGDL_TO_MMOLL));
         }
     }
+    //Returns BG in local and converted format
+    public static String formatDisplayBG(Double bgValue, Boolean showConverted, Context c){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        String unit = prefs.getString("units", "mgdl");
+        String reply;
+
+        if(unit.compareTo("mgdl") == 0) {
+            reply = bgValue.intValue() + "mgdl";
+            if (showConverted) reply += " (" + String.format(Locale.ENGLISH, "%.1f", (bgValue * Constants.MGDL_TO_MMOLL)) + "mmol/l)";
+            return reply;
+        } else {
+            reply = String.format(Locale.ENGLISH, "%.1f", (bgValue * Constants.MMOLL_TO_MGDL)) + "mgdl";
+            if (showConverted) reply += " (" + bgValue + "mmol/l)";
+            return reply;
+        }
+    }
+
 
     public static String formatDisplayInsulin(Double value, int decPoints){
         switch (decPoints){

@@ -21,6 +21,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.widget.Switch;
 
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.R;
@@ -127,7 +128,9 @@ public class SettingsActivity extends PreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
+            if (preference.getKey().equals("highValue") || preference.getKey().equals("lowValue") || preference.getKey().equals("target_bg")){
+                preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue),true,MainApp.instance().getApplicationContext()));
+            } else if (preference instanceof ListPreference) {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
                 preference.setSummary(

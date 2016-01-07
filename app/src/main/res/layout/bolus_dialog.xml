@@ -18,12 +18,19 @@
             android:textSize="44sp"
             android:gravity="center"
             android:layout_gravity="center"
-            android:background="@drawable/insulin_treatment_round"/>/>
-
+            android:background="@drawable/insulin_treatment_round"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:textSize="24sp"
+            android:layout_gravity="center"
+            android:id="@+id/bolusDialogBolusType"
+            android:text="bolus"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:textSize="24sp"
             android:layout_gravity="center"
             android:id="@+id/bolusDialogActionMsg"
