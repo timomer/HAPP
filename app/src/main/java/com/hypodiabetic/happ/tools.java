@@ -67,7 +67,7 @@ public class tools {
         if(unit.compareTo("mgdl") == 0) {
             return Integer.toString(value.intValue());
         } else {
-            return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MGDL_TO_MMOLL));
+            return String.format(Locale.ENGLISH, "%.1f", (value * Constants.MGDL_TO_MMOLL));
         }
     }
     //Returns BG in local and converted format
@@ -81,8 +81,9 @@ public class tools {
             if (showConverted) reply += " (" + String.format(Locale.ENGLISH, "%.1f", (bgValue * Constants.MGDL_TO_MMOLL)) + "mmol/l)";
             return reply;
         } else {
-            reply = String.format(Locale.ENGLISH, "%.1f", (bgValue * Constants.MMOLL_TO_MGDL)) + "mgdl";
-            if (showConverted) reply += " (" + bgValue + "mmol/l)";
+            reply = bgValue + "mmol/l";
+            Double toMgdl = (bgValue * Constants.MMOLL_TO_MGDL);
+            if (showConverted) reply += " (" + toMgdl.intValue() + "mgdl)";
             return reply;
         }
     }

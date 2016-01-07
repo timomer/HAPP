@@ -25,8 +25,8 @@
                 android:background="#0099FF"
                 android:text="Sys Msg"
                 android:textColor="@android:color/white"
-                android:paddingLeft="8dp"/>
-
+                android:paddingLeft="8dp"
+                android:gravity="center_vertical"/>
             <LinearLayout
                 android:id="@+id/topLayout"
                 android:layout_width="match_parent"
@@ -40,25 +40,25 @@
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/currentBgValueRealTime"
                                 android:layout_width="match_parent"
-                                android:layout_height="20dp"
+                                android:layout_height="wrap_content"
                                 android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
@@ -77,14 +77,14 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/bgDelta"
                                 android:layout_width="match_parent"
-                                android:layout_height="20dp"
+                                android:layout_height="wrap_content"
                                 android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
@@ -104,7 +104,7 @@
                     <TextView
                         android:id="@+id/notices"
                         android:layout_width="match_parent"
-                        android:layout_height="20dp"
+                        android:layout_height="wrap_content"
                         android:background="#0099FF"
                         android:gravity="center"
                         android:text="0 mins ago"
@@ -115,30 +115,30 @@
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:background="#ffff"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/eventualBGValue"
                                 android:layout_width="match_parent"
-                                android:layout_height="20dp"
+                                android:layout_height="wrap_content"
                                 android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
@@ -156,14 +156,14 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/snoozeBGValue"
                                 android:layout_width="match_parent"
-                                android:layout_height="20dp"
+                                android:layout_height="wrap_content"
                                 android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
@@ -182,7 +182,7 @@
                     <TextView
                         android:id="@+id/openapsAge"
                         android:layout_width="match_parent"
-                        android:layout_height="20dp"
+                        android:layout_height="wrap_content"
                         android:background="#0099FF"
                         android:gravity="center"
                         android:text="0 mins ago"
@@ -193,30 +193,30 @@
                     android:layout_width="1dp"
                     android:layout_height="match_parent"
                     android:background="#ffff"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="72dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/iobValue"
                                 android:layout_width="match_parent"
-                                android:layout_height="20dp"
+                                android:layout_height="wrap_content"
                                 android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
@@ -235,14 +235,14 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
                             <TextView
                                 android:id="@+id/cobValue"
                                 android:layout_width="match_parent"
-                                android:layout_height="20dp"
+                                android:layout_height="wrap_content"
                                 android:background="#0099FF"
                                 android:gravity="center"
                                 android:text="-"
@@ -263,7 +263,7 @@
                     <TextView
                         android:id="@+id/statsAge"
                         android:layout_width="match_parent"
-                        android:layout_height="20dp"
+                        android:layout_height="wrap_content"
                         android:background="#0099FF"
                         android:gravity="center"
                         android:text="0 mins ago"

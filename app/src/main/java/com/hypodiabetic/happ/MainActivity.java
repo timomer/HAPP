@@ -218,10 +218,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
     public void test(View view){
 
-        Snackbar snackbar = Snackbar
-                .make(view, MainApp.getNSClient().connectionStatus, Snackbar.LENGTH_INDEFINITE);
+        //Snackbar snackbar = Snackbar
+        //        .make(view, MainApp.getNSClient().connectionStatus, Snackbar.LENGTH_INDEFINITE);
 
-        snackbar.show();
+        //snackbar.show();
 
     }
 
@@ -346,7 +346,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
 
         if (lastBgreading != null) {
             notificationText.setText(lastBgreading.readingAge());
-            String bgDelta = new String(String.format(Locale.ENGLISH, "%.2f", lastBgreading.bgdelta));
+            String bgDelta = tools.unitizedBG(lastBgreading.bgdelta, MainApp.instance().getApplicationContext());
             if (lastBgreading.bgdelta >= 0) bgDelta = "+" + bgDelta;
             deltaText.setText(bgDelta);
             currentBgValueText.setText(extendedGraphBuilder.unitized_string(lastBgreading.sgv_double()) + " " + lastBgreading.slopeArrow());
@@ -509,8 +509,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
             //Updates main UI with last APS run
             openAPSAgeTextView.setText(apsResult.ageFormatted());
-            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, getApplicationContext()));
-            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, getApplicationContext()));
+            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, MainApp.instance().getApplicationContext()));
+            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, MainApp.instance().getApplicationContext()));
         }
 
         //Temp Basal running update
@@ -530,8 +530,8 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
             iobcobActiveFragment.updateChart(MainActivity.activity);
         }
         if (stat != null) {
-            iobValueTextView.setText(String.format(Locale.ENGLISH, "%.2f", stat.iob));
-            cobValueTextView.setText(String.format(Locale.ENGLISH, "%.2f", stat.cob));
+            iobValueTextView.setText(tools.formatDisplayInsulin(stat.iob, 1));//  String.format(Locale.ENGLISH, "%.2f", stat.iob));
+            cobValueTextView.setText(tools.formatDisplayCarbs(stat.cob)); //String.format(Locale.ENGLISH, "%.2f", stat.cob));
             statsAge.setText(stat.statAge());
         }
 
@@ -550,10 +550,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         TempBasal lastTempBasal = TempBasal.last();
         String appStatus;
         if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
-            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + lastTempBasal.rate + "U(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
+            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + tools.formatDisplayInsulin(lastTempBasal.rate,2) + "(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
         } else {                                                                                    //No temp Basal running, show default
             Double currentBasal = new Profile(timeNow, this.getBaseContext()).current_basal;
-            appStatus = "No temp basal, current basal: " + currentBasal + "U";
+            appStatus = "No temp basal, current basal: " + tools.formatDisplayInsulin(currentBasal,2);
         }
         sysMsg.setText(appStatus);
     }

@@ -15,7 +15,6 @@ import android.util.Log;
 //import retrofit.RetrofitError;
 //import com.hypodiabetic.happ.TreatmentsRepo;
 import com.hypodiabetic.happ.MainApp;
-import com.hypodiabetic.happ.NS.NSClient;
 import com.hypodiabetic.happ.Receivers.openAPSReceiver;
 import com.hypodiabetic.happ.Receivers.statsReceiver;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
@@ -44,7 +43,7 @@ public class DataCollectionService extends Service {
     AlarmManager managerOpenAPS;
     PendingIntent pendingIntentOpenAPS;
 
-    private NSClient mNSClient; //NS
+    //private NSClient mNSClient; //NS
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -66,10 +65,10 @@ public class DataCollectionService extends Service {
         setFailoverTimer();
         setSettings();
 
-        if(mNSClient==null) { //NS
-            mNSClient = new NSClient();
-            MainApp.setNSClient(mNSClient);
-        }
+        //if(mNSClient==null) { //NS
+        //    mNSClient = new NSClient();
+        //    MainApp.setNSClient(mNSClient);
+        //}
 
         if(endpoint_set) { doService(); }
         setAlarm();

@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.activeandroid.ActiveAndroid;
 import com.activeandroid.Configuration;
-import com.hypodiabetic.happ.NS.NSClient;
 
 /**
  * Created by Tim on 06/01/2016.
@@ -13,7 +12,7 @@ import com.hypodiabetic.happ.NS.NSClient;
 public class MainApp extends Application {
 
     private static MainApp sInstance;
-    private static NSClient nsClient = null;
+    //private static NSClient nsClient = null;
 
 
     @Override
@@ -34,11 +33,11 @@ public class MainApp extends Application {
         return sInstance;
     }
 
-    public static void setNSClient(NSClient client) {
-        nsClient = client;
-    }
-    public static NSClient getNSClient() {
-        return nsClient;
-    }
+    //public static void setNSClient(NSClient client) {
+    //    nsClient = client;
+    //}
+    //public static NSClient getNSClient() {
+    //    return nsClient;
+    //}
 
 }
