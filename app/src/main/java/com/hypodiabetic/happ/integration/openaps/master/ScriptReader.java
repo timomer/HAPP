@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.code.openaps;
+package com.hypodiabetic.happ.integration.openaps.master;
 
 import android.content.Context;
 import android.content.res.AssetManager;

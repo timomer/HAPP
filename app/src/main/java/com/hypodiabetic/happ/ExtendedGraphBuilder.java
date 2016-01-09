@@ -8,10 +8,8 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
-import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
-import com.hypodiabetic.happ.code.openaps.determine_basal;
-import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,7 +21,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Random;
 import java.util.TimeZone;
 
 import lecho.lib.hellocharts.model.Axis;

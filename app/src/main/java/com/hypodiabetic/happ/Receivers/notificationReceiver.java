@@ -9,15 +9,9 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.code.openaps.determine_basal;
 import com.hypodiabetic.happ.pumpAction;
-
-import org.json.JSONObject;
-
-import java.lang.reflect.Modifier;
 
 /**
  * Created by Tim on 27/09/2015.

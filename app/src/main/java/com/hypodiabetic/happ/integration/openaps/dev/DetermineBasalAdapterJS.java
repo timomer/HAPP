@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.code.openaps;
+package com.hypodiabetic.happ.integration.openaps.dev;
 
 
 import android.content.Context;
@@ -8,11 +8,11 @@ import com.eclipsesource.v8.JavaVoidCallback;
 import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
-import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -121,9 +121,9 @@ public class DetermineBasalAdapterJS {
         //mV8rt.executeVoidScript("var determinebasal = init();");
         mV8rt.executeVoidScript(
                 "(function() {\n"+
-                    readFile("openaps/oref0-determine-basal.js") +
+                    readFile("openaps/dev/oref0-determine-basal.js") +
                 "\n})()" ,
-                "openaps/oref0-determine-basal.js", 2);
+                "openaps/dev/oref0-determine-basal.js", 2);
         mV8rt.executeVoidScript("var determinebasal = module.exports();");
     }
 

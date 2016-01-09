@@ -37,11 +37,11 @@ public class Notifications {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         String title, msg;
 
-        title = basal.basal_adjustemnt + " Temp Basal";
+        title = basal.basal_adjustemnt + " Temp Basal Suggested";
         if (prefs.getString("basal_mode","percent").equals("percent")) {
             msg = "Set: " + basal.ratePercent + "%";
         } else {
-            msg = "Set: " + basal.rate + "U";
+            msg = "Set: " + tools.formatDisplayInsulin(basal.rate,2);
         }
 
         Intent intent_accept_temp = new Intent();
@@ -91,20 +91,20 @@ public class Notifications {
                 if (prefs.getString("basal_mode","percent").equals("percent")) {
                     title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.ratePercent + "% " + lastTempBasal.durationLeft() + "mins left";
                 } else {
-                    title = lastTempBasal.basal_adjustemnt + " Basal " + lastTempBasal.rate + "U " + lastTempBasal.durationLeft() + "mins left";
+                    title = lastTempBasal.basal_adjustemnt + " Basal " + tools.formatDisplayInsulin(lastTempBasal.rate,2) + " " + lastTempBasal.durationLeft() + "mins left";
                 }
             } else {                                                                                //No temp Basal running, show default
                 Double currentBasal = new Profile(timeNow, c).current_basal;
                 if (prefs.getString("basal_mode","percent").equals("percent")) {
                     title = "Default Basal 100%";
                 } else {
-                    title = "Default Basal " + currentBasal + "U";
+                    title = "Default Basal " + tools.formatDisplayInsulin(currentBasal,2);
                 }
             }
 
             String msg = "";
             if (apsResult != null){
-                msg = "Eventual:" +  apsResult.eventualBG + " Snooze:" +  apsResult.snoozeBG;
+                msg = "Eventual:" +  tools.unitizedBG(apsResult.eventualBG, c) + " Snooze:" +  tools.unitizedBG(apsResult.snoozeBG,c);
             }
 
             Intent intent_open_activity = new Intent(c,MainActivity.class);

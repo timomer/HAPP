@@ -41,7 +41,6 @@ repositories {
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'org.mozilla:rhino:1.7.7'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.github.lecho:hellocharts-library:1.5.5@aar'

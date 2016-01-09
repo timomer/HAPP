@@ -8,8 +8,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.code.nightscout.cob;
-import com.hypodiabetic.happ.code.openaps.iob;
-import com.hypodiabetic.happ.tools;
+import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONObject;
 

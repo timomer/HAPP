@@ -1,18 +1,12 @@
 package com.hypodiabetic.happ;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.code.openaps.DetermineBasalAdapterJS;
-import com.hypodiabetic.happ.code.openaps.ScriptReader;
-import com.hypodiabetic.happ.code.openaps.determine_basal;
-import com.hypodiabetic.happ.code.openaps.openAPS_Support;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -57,15 +51,21 @@ public class APS {
         JSONObject result = new JSONObject();
 
         switch (p.openaps_algorithm) {
-            case "openaps_js":
-                result = openAPS_Support.runDetermine_Basal(p, c);
-                break;
-            case "openaps_android":
-                result = determine_basal.runOpenAPS(c);
-                break;
-            case "openaps_js_v8":
+            case "openaps_js_master":
                 try {
-                    DetermineBasalAdapterJS dbJS = new DetermineBasalAdapterJS(new ScriptReader(c), c);
+                    com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(c), c);
+
+                    JSONObject dbJSJSON = dbJS.invoke();
+                    result = dbJSJSON;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Crashlytics.logException(e);
+                }
+                break;
+            case "openaps_js_dev":
+                try {
+                    com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(c), c);
 
                     JSONObject dbJSJSON = dbJS.invoke();
                     result = dbJSJSON;

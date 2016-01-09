@@ -1,8 +1,7 @@
-package com.hypodiabetic.happ.code.openaps;
+package com.hypodiabetic.happ.integration.openaps;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;

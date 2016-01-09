@@ -8,8 +8,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.code.openaps.determine_basal;
-import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +28,6 @@ public class BolusWizard {
         Profile profile = new Profile(dateNow = new Date(), c);
         JSONObject iobNow       = Treatments.getIOB(profile, dateNow);
         JSONObject cobNow       = Treatments.getCOB(profile, dateNow);
-        //JSONObject openAPSNow   = determine_basal.runOpenAPS(c);
         String bgCorrection="";
 
         Bg bg = Bg.last();

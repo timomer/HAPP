@@ -142,12 +142,12 @@ public class APSResult extends Model{
 
     public String getFormattedAlgorithmName(){
         switch (aps_algorithm) {
-            case "openaps_js":
-                return "OpenAPS js";
-            case "openaps_js_v8":
-                return "OpenAPS oref0";
-            default:    // "openaps_android"
-                return "OpenAPS Android";
+            case "openaps_js_master":
+                return "OpenAPS Master";
+            case "openaps_js_dev":
+                return "OpenAPS Dev";
+            default:
+                return "error: unknown";
         }
     }
 

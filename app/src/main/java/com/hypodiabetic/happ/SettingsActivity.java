@@ -153,7 +153,7 @@ public class SettingsActivity extends PreferenceActivity {
                     }
                 }
             } else {
-                if (preference.getKey().contains("basal_") || preference.getKey().contains("isf_") || preference.getKey().contains("carbratio_")){
+                if (preference.getKey().contains("basal_") || preference.getKey().contains("carbratio_")){
                     //24H Profile info, if preference has no value, get set summary to value of parent (this is what Profile code does)
                     if (stringValue.equals("")) {
                         preference.setSummary("<Inherits from parent, or defaults to 0>");
@@ -161,7 +161,15 @@ public class SettingsActivity extends PreferenceActivity {
                         preference.setSummary(stringValue);
                     }
 
-                } else {
+                } if (preference.getKey().contains("isf_")){
+                    //24H Profile info, if preference has no value, get set summary to value of parent (this is what Profile code does)
+                    if (stringValue.equals("")) {
+                        preference.setSummary("<Inherits from parent, or defaults to 0>");
+                    } else {
+                        preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue),true,MainApp.instance()));
+                    }
+
+                }else {
                     preference.setSummary(stringValue);
                 }
             }

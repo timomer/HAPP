@@ -5,7 +5,7 @@ import android.widget.Toast;
 import com.hypodiabetic.happ.ApplicationContextProvider;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.code.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -10,12 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.code.nightwatch.Constants;
-import com.hypodiabetic.happ.code.openaps.DetermineBasalAdapterJS;
-import com.hypodiabetic.happ.code.openaps.ScriptReader;
-import com.hypodiabetic.happ.code.openaps.determine_basal;
-import com.hypodiabetic.happ.code.openaps.openAPS_Support;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
 import org.json.JSONException;
@@ -31,7 +26,6 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;

@@ -1,6 +1,4 @@
-package com.hypodiabetic.happ.code.openaps;
-
-import android.util.Log;
+package com.hypodiabetic.happ.integration.openaps;
 
 //import com.hypodiabetic.happ.DBHelper;
 import com.crashlytics.android.Crashlytics;
@@ -8,13 +6,11 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 //import com.hypodiabetic.happ.TreatmentsRepo;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+        import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 
 /**
