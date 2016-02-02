@@ -20,32 +20,34 @@
             <item>percent</item>
         </string-array>
 
-    <string-array name="openaps_modeArray">
-        <item>Closed Loop - full auto</item>
-        <item>Open Loop - notify, then send to pump</item>
-        <item>Notify Only - notify, manually set pump</item>
+    <string-array name="aps_modeArray">
+        <item>Closed Loop</item>
+        <item>Open Loop</item>
+        <!--<item>Notify Only - notify, manually set pump</item> -->
     </string-array>
-    <string-array name="openaps_modeValues">
+    <string-array name="aps_modeValues">
         <item>closed</item>
         <item>open</item>
-        <item>notify</item>
+        <!--<item>notify</item> -->
     </string-array>
 
-    <string-array name="openaps_algorithmArray">
+    <string-array name="aps_algorithmArray">
         <!--<item>OpenAPS Android</item> -->
         <!--<item>OpenAPS openaps-js (ran in Rhino)</item> -->
+        <item>None</item>
         <item>OpenAPS oref0 - Master (Stable)</item>
         <item>OpenAPS oref0 - Dev (Meal-Assist)</item>
     </string-array>
-    <string-array name="openaps_algorithmValues">
+    <string-array name="aps_algorithmValues">
         <!--<item>openaps_android</item> -->
         <!--<item>openaps_js</item> old openAPS with Rhino -->
-        <item>openaps_js_master</item>
-        <item>openaps_js_dev</item>
+        <item>none</item>
+        <item>openaps_oref0_master</item>
+        <item>openaps_oref0_dev</item>
     </string-array>
 
 
-    <string-array name="openaps_loopArray">
+    <string-array name="aps_loopArray">
         <item>5mins</item>
         <item>10mins</item>
         <item>15mins</item>
@@ -53,7 +55,7 @@
         <item>25mins</item>
         <item>30mins</item>
     </string-array>
-    <string-array name="openaps_loopValues">
+    <string-array name="aps_loopValues">
         <item>300000</item>
         <item>600000</item>
         <item>900000</item>

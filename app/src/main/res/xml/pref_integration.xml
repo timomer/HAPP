@@ -2,9 +2,9 @@
     <PreferenceCategory android:title="Integration">
 
         <PreferenceScreen
-            android:key="button_nighscout_category"
+            android:key="Integrations"
             android:persistent="false"
-            android:title="NightScout Integration">
+            android:title="Integrations">
 
             <PreferenceCategory
                 android:title="NightScout Integration"
@@ -31,6 +31,26 @@
                     android:title="Upload Temp Basal"
                     android:defaultValue="false" />
             </PreferenceCategory>
+
+            <PreferenceCategory
+                android:key="ti"
+                android:title="Treatment Integration">
+                <SwitchPreference
+                    android:title="Send Bolus"
+                    android:key="insulin_integration_send_bolus"
+                    android:summary="Send Bolus to Treatment Integration App"
+                    android:defaultValue="false"/>
+                <SwitchPreference
+                    android:title="Send Temp Basal"
+                    android:key="insulin_integration_send_temp_basal"
+                    android:summary="Send Temp Basal to Treatment Integration App"
+                    android:defaultValue="false"/>
+                <Preference
+                    android:title="Insulin Treatments App"
+                    android:key="insulin_integration"
+                    android:summary="Select App to send New Insulin Treatment information to. This is required for Closed Loop operation."/>
+            </PreferenceCategory>
+
         </PreferenceScreen>
     </PreferenceCategory>
 </PreferenceScreen>

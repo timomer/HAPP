@@ -69,9 +69,8 @@ public class Treatments extends Model{
         }
     }
 
+
     public static List<Treatments> getTreatmentsDated(Long dateFrom, Long dateTo, String type) {
-        DecimalFormat df = new DecimalFormat("#");
-        df.setMaximumFractionDigits(1);
 
         if (type != null) {
             return new Select()
@@ -89,7 +88,7 @@ public class Treatments extends Model{
         }
     }
 
-    public static Treatments getTreatmentByID(Integer dbid) {
+    public static Treatments getTreatmentByID(Long dbid) {
         Treatments treatment = new Select()
                 .from(Treatments.class)
                 .where("_id = " + dbid)

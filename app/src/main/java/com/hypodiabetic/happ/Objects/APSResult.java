@@ -83,10 +83,10 @@ public class APSResult extends Model{
         snoozeBG = apsJSON.optDouble("snoozeBG",0);
         datetime = new Date().getTime();
 
-        aps_algorithm = p.openaps_algorithm;
+        aps_algorithm = p.aps_algorithm;
         basal_type = p.basal_mode;
-        aps_mode = p.openaps_mode;
-        aps_loop = p.openaps_loop;
+        aps_mode = p.aps_mode;
+        aps_loop = p.aps_loop;
         current_pump_basal = p.current_basal;
 
         if (apsJSON.has("deviation")) deviation = apsJSON.optDouble("deviation");
@@ -142,12 +142,12 @@ public class APSResult extends Model{
 
     public String getFormattedAlgorithmName(){
         switch (aps_algorithm) {
-            case "openaps_js_master":
+            case "openaps_oref0_master":
                 return "OpenAPS Master";
-            case "openaps_js_dev":
+            case "openaps_oref0_dev":
                 return "OpenAPS Dev";
             default:
-                return "error: unknown";
+                return "No Algorithm Selected";
         }
     }
 

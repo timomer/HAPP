@@ -26,6 +26,7 @@
                         android:layout_height="20dp"
                         android:id="@+id/apsstatus_Action"
                         android:text="-"
+                        android:textColor="@color/primary_text"
                         android:textSize="16sp"/>
                     <TextView
                         android:layout_width="match_parent"
@@ -43,6 +44,7 @@
                 android:id="@+id/apsstatus_reason"
                 android:text="-"
                 android:gravity="bottom"
+                android:textColor="@color/primary_text"
                 android:textSize="16sp"/>
             <TextView
                 android:layout_width="match_parent"
@@ -65,7 +67,8 @@
                         android:layout_height="20dp"
                         android:id="@+id/apsstatus_algorithm"
                         android:text="-"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textColor="@color/primary_text"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
@@ -102,7 +105,8 @@
                         android:layout_height="20dp"
                         android:id="@+id/apsstatus_mode"
                         android:text="-"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textColor="@color/primary_text"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
@@ -120,7 +124,8 @@
                         android:layout_height="20dp"
                         android:id="@+id/apsstatus_loop"
                         android:text="-"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textColor="@color/primary_text"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"

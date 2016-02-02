@@ -1,0 +1,1 @@
+ALTER TABLE integration ADD COLUMN action_to_perform TEXT;

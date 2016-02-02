@@ -48,6 +48,14 @@ public class TempBasal extends Model {
 
     public Date     created_time = new Date();
 
+    public static TempBasal getTempBasalByID(Long dbid) {
+        TempBasal tempBasal = new Select()
+                .from(TempBasal.class)
+                .where("_id = " + dbid)
+                .executeSingle();
+        return tempBasal;
+    }
+
     public static TempBasal last() {
         TempBasal last = new Select()
                 .from(TempBasal.class)

@@ -1,18 +1,25 @@
 package com.hypodiabetic.happ;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.code.nightwatch.Constants;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,6 +35,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -51,6 +59,63 @@ public class tools {
                 return returnJSON;                                          //Did not like that string, return empty JSON Object
             }
         }
+    }
+    //Returns a JSON Array from String
+    public static JSONArray getJSONOArray(String stringJSONArray){
+        JSONArray returnJSONArray;
+        if (stringJSONArray == null || stringJSONArray.isEmpty()){
+            returnJSONArray = new JSONArray();
+            return returnJSONArray;                                              //Returns empty JSON Object
+        } else {
+            try {
+                returnJSONArray = new JSONArray(stringJSONArray);
+                return returnJSONArray;                                          //Returns a JSON Object from string
+            } catch (JSONException e){
+                returnJSONArray = new JSONArray();
+                return returnJSONArray;                                          //Did not like that string, return empty JSON Object
+            }
+        }
+    }
+    //Updates a JSON Array with a new / updated JSON Object via key as ID
+    public static JSONArray updateJSONArrayObject(JSONArray jsonArray, JSONObject jsonObject, String key){
+        if (jsonArray == null) return new JSONArray();
+        if (jsonObject == null) return jsonArray;
+        if (key == null) return jsonArray;
+
+        for(int n = 0; n < jsonArray.length(); n++)
+        {
+            try {
+                if (jsonArray.getJSONObject(n).has("KEY")) {                                        //We have a key ID for this JSONObject
+                    if (jsonArray.getJSONObject(n).optString("KEY", "").equals(key)) {              //key of this JSONObject is the one we want
+                        jsonArray.remove(n);
+                    }
+                }
+            } catch (JSONException e){
+                Crashlytics.logException(e);
+            }
+        }
+        jsonArray.put(jsonObject);
+        return jsonArray;
+    }
+    //gets a JSON Object from a JSON Array via key as ID
+    public static JSONObject getJSONArrayObject(JSONArray jsonArray,String key){
+        if (jsonArray == null) return new JSONObject();
+        if (key == null) return new JSONObject();
+
+        for(int n = 0; n < jsonArray.length(); n++)
+        {
+            try {
+                if (jsonArray.getJSONObject(n).has("KEY")) {                                          //We have a key ID for this JSONObject
+                    //if (jsonArray.getJSONObject(n).optString("KEY", key).equals(key)) {              //key of this JSONObject is the one we want
+                        return jsonArray.getJSONObject(n);
+                    //}
+                }
+            } catch (JSONException e){
+                Crashlytics.logException(e);
+            }
+        }
+
+        return new JSONObject();
     }
 
     //Converts BG between US and UK formats
@@ -94,8 +159,11 @@ public class tools {
             default:
                 return value.toString() + "u";
         }
-
     }
+    public static String formatDisplayBasal(Double value){
+        return String.format(Locale.ENGLISH, "%.2f", value) + "U/h";
+    }
+
     public static String formatDisplayCarbs(Double value){
         if (value < 1){
             return String.format(Locale.ENGLISH, "%.1f", value) + "g";
@@ -221,21 +289,6 @@ public class tools {
         }
     }
 
-    public static void syncIntegrations(Context c){
-        //Sends data from HAPP to Interactions
-        ConnectivityManager cm = (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if(cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
-            //we are connected to a network
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-
-            //NS Interaction
-            if (NSUploader.isNSIntegrationActive("nightscout_treatments",   prefs)) NSUploader.uploadTreatments(c,prefs);
-            if (NSUploader.isNSIntegrationActive("nightscout_tempbasal",    prefs)) NSUploader.uploadTempBasals(c,prefs);
-        }
-
-    }
-
     public static Double stringToDouble(String string){
         //Used to support locations where , is used as decimal separator
         //DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
@@ -301,6 +354,49 @@ public class tools {
         // 24 hours * 60 minutes * 60 seconds * 1000 milliseconds = 1 day
         long time =getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
         return getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
+    }
+
+    //Allows user to select an external app for an action and saves to prefs
+    public static void getExternalAppForPref(final String pref, Context c){
+        final ShareIntentListAdapter objShareIntentListAdapter;
+
+        Intent sharingIntent = new Intent();
+        sharingIntent.setAction("INSULIN_TREATMENT");
+        sharingIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        // what type of data needs to be send by sharing
+        sharingIntent.setType("text/plain");
+        // package names
+        PackageManager pm = MainApp.instance().getPackageManager();
+        // list package
+        List<ResolveInfo> activityList = pm.queryIntentActivities(sharingIntent, 0);
+
+        objShareIntentListAdapter = new ShareIntentListAdapter(MainActivity.activity, activityList.toArray());
+
+        // Create alert dialog box
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Insulin Treatment Apps installed");
+        builder.setAdapter(objShareIntentListAdapter, new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int item) {
+
+                ResolveInfo info = (ResolveInfo) objShareIntentListAdapter.getItem(item);
+                String packageName = info.activityInfo.packageName;
+
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(pref, packageName);
+                editor.commit();
+
+                //reloads settings
+                Intent intent = new Intent(MainApp.instance(), SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                MainApp.instance().startActivity(intent);
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
 }

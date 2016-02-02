@@ -12,8 +12,6 @@ import com.hypodiabetic.happ.code.nightwatch.Bg;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +40,7 @@ public class openAPS_Support {
             } catch (JSONException e){}
         }
         return bgJSON;
+
     }
 
     public static JSONObject getTempBasal(){
@@ -83,82 +82,6 @@ public class openAPS_Support {
         return profileJSON;
     }
 
-    public static JSONObject runDetermine_Basal(Profile p, Context c) {
-        //#### Mode ####
-        String mode = "online";
-
-        //#### Reads in the JS ####
-        AssetManager assetManager = c.getAssets();
-        InputStream input;
-        String text = "";
-        try {
-            input = assetManager.open("openaps/determine-basal.js");
-            //input = assetManager.open("openaps/test.js");
-
-            int size = input.available();
-            byte[] buffer = new byte[size];
-            input.read(buffer);
-            input.close();
-
-            // byte buffer into a string
-            text = new String(buffer);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        String result = "";
-        JSONArray BG = openAPS_Support.getBG();
-        if (BG.length() < 1) {
-            JSONObject nobg = new JSONObject();
-            try {
-                nobg.put("reason", "At least one BG value is required to run OpenAPS");
-                nobg.put("rate", 0);
-                nobg.put("action", "none");
-            } catch (JSONException e) {
-            }
-            return nobg;
-        } else {
-
-            //#### Runs the JavaScript ####
-            Object[] params = new Object[]{BG.toString(),
-                    getTempBasal().toString(),
-                    getIOB(p,c).toString(),
-                    getProfile(p).toString(),
-                    mode};
-
-            org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
-            rhino.setOptimizationLevel(-1);
-
-            try {
-                Scriptable scope = rhino.initStandardObjects();
-
-                rhino.evaluateString(scope, text, "JavaScript", 0, null);
-                Object obj = scope.get("run", scope);
-
-                if (obj instanceof Function) {
-                    Function jsFunction = (Function) obj;
-
-                    // Call the function with params
-                    Object jsResult = jsFunction.call(rhino, scope, scope, params);
-                    // Parse the jsResult object to a String
-                    result = org.mozilla.javascript.Context.toString(jsResult);
-
-                    //Toast.makeText(MainActivity.activity, result, Toast.LENGTH_LONG).show();
-
-
-                }
-            } finally {
-                org.mozilla.javascript.Context.exit();
-            }
-
-            try {
-                return new JSONObject(result);
-            } catch (JSONException e) {
-                return new JSONObject();
-            }
-        }
-    }
 
     //Returns the calculated duration and rate of a temp basal adjustment
     public static JSONObject setTempBasal(Profile profile_data, JSONObject openAPSSuggest) {

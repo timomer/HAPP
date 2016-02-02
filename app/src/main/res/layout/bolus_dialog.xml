@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:minWidth="280dp"
     android:layout_height="match_parent"
     android:padding="0dp">
 
@@ -30,14 +31,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:textSize="24sp"
             android:layout_gravity="center"
             android:id="@+id/bolusDialogActionMsg"
             android:text="to manually set on pump"/>
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="Treatments HAPP will Save"/>
@@ -119,7 +120,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="xxx"
+            android:text="warning msg"
+            android:textColor="#FF5722"
             android:id="@+id/bolusDialogWarning"
             android:layout_gravity="center"
             android:textAlignment="center"

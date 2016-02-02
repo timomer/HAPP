@@ -1,16 +1,26 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:title="Notifications"
-        android:key="notifications">
-        <CheckBoxPreference
-            android:key="summary_notification"
-            android:title="Summary Notification"
-            android:summary="Show summary card with current BG and Temp Basal."
-            android:defaultValue="true" />
-        <CheckBoxPreference
-            android:key="debug_notification"
-            android:title="Debug Notification"
-            android:summary="Show summary card when APS is ran with details."
-            android:defaultValue="false" />
+    <PreferenceCategory android:title="Notifications">
+
+        <PreferenceScreen
+            android:key="Notifications"
+            android:persistent="false"
+            android:title="Notifications">
+
+            <PreferenceCategory
+            android:title="Summary Notifications"
+            android:key="summary_notifications">
+            <CheckBoxPreference
+                android:key="summary_notification"
+                android:title="Summary Notification"
+                android:summary="Show summary card with current BG and Temp Basal."
+                android:defaultValue="true" />
+            <CheckBoxPreference
+                android:key="debug_notification"
+                android:title="Debug Notification"
+                android:summary="Show summary card when APS is ran with details."
+                android:defaultValue="false" />
+            </PreferenceCategory>
+
+        </PreferenceScreen>
     </PreferenceCategory>
 </PreferenceScreen>

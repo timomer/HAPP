@@ -2,7 +2,6 @@ package com.hypodiabetic.happ;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,14 +9,21 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-//import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.ClipboardManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -25,16 +31,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.activeandroid.ActiveAndroid;
-import com.activeandroid.Configuration;
 import com.crashlytics.android.Crashlytics;
-import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.APSResult;
@@ -43,6 +49,7 @@ import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
+import com.hypodiabetic.happ.integration.InsulinIntegrationApp;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
 
 
@@ -65,7 +72,7 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 
 
 
-public class MainActivity extends android.support.v4.app.FragmentActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static MainActivity ins;
     //private static APSResult currentAPSResult;
@@ -77,9 +84,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     private TextView eventualBGValue;
     private TextView snoozeBGValue;
     private TextView openAPSAgeTextView;
+    private TextView insulinIntegrationApp_status;
+    private ImageView insulinIntegrationApp_icon;
     private ExtendedGraphBuilder extendedGraphBuilder;
     public static Activity activity;
-    private FloatingActionMenu menu1;
+    private Toolbar toolbar;
 
     SectionsPagerAdapter mSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
     ViewPager mViewPager;                                                                           //The {@link ViewPager} that will host the section contents.
@@ -88,7 +97,15 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     Fragment iobcobFragmentObject;
     Fragment basalvsTempBasalObject;
 
+    private ListView mDrawerList;
+    private ArrayAdapter<String> mAdapter;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private LinearLayout mDrawerLinear;
+    private String mActivityTitle;
 
+    private Drawable tickWhite;
+    private Drawable clockWhite;
 
     //xdrip start
     private LineChartView chart;
@@ -107,10 +124,10 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     BroadcastReceiver newDataReceiver;
     //xdrip end
     BroadcastReceiver newStatsReceiver;
-    BroadcastReceiver newOpenAPSReceiver;
+    BroadcastReceiver newAPSUpdate;
     BroadcastReceiver updateEvery60Seconds;
-
-
+    BroadcastReceiver insulinIntegrationAppUpdate;
+    BroadcastReceiver appNotification;
 
     public static MainActivity getInstace(){
         return ins;
@@ -124,7 +141,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         ins = this;
-        PreferenceManager.setDefaultValues(this, R.xml.pref_openaps, false);                        //Sets default OpenAPS Preferences if the user has not
+        PreferenceManager.setDefaultValues(this, R.xml.pref_aps, false);                            //Sets default APS Preferences if the user has not
 
 
         //xdrip start
@@ -132,7 +149,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         checkEula();
 
         startService(new Intent(getApplicationContext(), DataCollectionService.class));
-        
+
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         PreferenceManager.setDefaultValues(this, R.xml.pref_bg_notification, false);
         //xdrip end
@@ -141,30 +158,85 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         extendedGraphBuilder = new ExtendedGraphBuilder(this);
 
         //Setup menu
-        menu1 = (FloatingActionMenu) findViewById(R.id.menu);
-        FloatingActionButton menu_add_treatment = (FloatingActionButton) findViewById(R.id.menu_add_treatment);
-        menu_add_treatment.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), EnterTreatment.class);
-                startActivity(intent);
-                menu1.close(true);
-            }
-        });
-        FloatingActionButton menu_settings = (FloatingActionButton) findViewById(R.id.menu_settings);
-        menu_settings.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
-                menu1.close(true);
-            }
-        });
-        FloatingActionButton menu_cancel_temp = (FloatingActionButton) findViewById(R.id.menu_cancel_temp);
-        menu_cancel_temp.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                pumpAction.cancelTempBasal(MainActivity.activity);
-                menu1.close(true);
-            }
-        });
+        tickWhite = getDrawable(R.drawable.checkbox_marked_circle);
+        clockWhite = getDrawable(R.drawable.clock);
+        tickWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+        clockWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
+        insulinIntegrationApp_status = (TextView) findViewById(R.id.insulinIntegrationApp_status);
+        insulinIntegrationApp_icon = (ImageView) findViewById(R.id.insulinIntegrationApp_icon);
+        mDrawerList = (ListView)findViewById(R.id.navList);
+        String[] osArray = { "Cancel Temp", "Settings", "Integration Report" };
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        mDrawerList.setAdapter(mAdapter);
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        pumpAction.cancelTempBasal(MainActivity.activity);
+                        break;
+                    case 1:
+                        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                        break;
+                    case 2:
+                        startActivity(new Intent(getApplicationContext(), Integration_Report.class));
+                        break;
+                }
+                mDrawerLayout.closeDrawers();
+            }
+        });
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mDrawerLinear = (LinearLayout) findViewById(R.id.left_drawer);
+        mActivityTitle = getTitle().toString();
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,R.string.drawer_open, R.string.drawer_close) {
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
+                Date now = new Date();
+                Profile p = new Profile(now, MainActivity.getInstace());
+                //Local device based Integrations
+                String insulin_Integration_App = prefs.getString("insulin_integration", "");
+
+                //Insulin Integration App, try and connect
+                if (!insulin_Integration_App.equals("")){
+                    InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST");
+                    insulinIntegrationApp.connectInsulinTreatmentApp();
+                    insulinIntegrationApp_status.setText("Connecting...");
+                    insulinIntegrationApp_icon.setBackground(clockWhite);
+
+                    //listens out for connection
+                    insulinIntegrationAppUpdate = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            insulinIntegrationApp_status.setText(intent.getStringExtra("MSG"));
+                            insulinIntegrationApp_icon.setBackground(tickWhite);
+
+
+                        }
+                    };
+                    LocalBroadcastManager.getInstance(MainActivity.getInstace()).registerReceiver(insulinIntegrationAppUpdate, new IntentFilter("INSULIN_INTEGRATION_TEST"));
+                } else {
+                    insulinIntegrationApp_status.setText("No app selected or not in Closed Loop");
+                    insulinIntegrationApp_icon.setBackgroundResource(R.drawable.alert_circle);
+                }
+            }
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        mDrawerToggle.syncState();
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         // Create the adapter that will return a fragment for each of the 4 primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -177,8 +249,6 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         iobcobActiveFragmentObject  = new iobcobActiveFragment();
         iobcobFragmentObject        = new iobcobFragment();
         basalvsTempBasalObject      = new basalvsTempBasalFragment();
-
-
 
 
         //Updates notifications every 60 seconds
@@ -217,12 +287,43 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
 
     public void test(View view){
-
-        //Snackbar snackbar = Snackbar
-        //        .make(view, MainApp.getNSClient().connectionStatus, Snackbar.LENGTH_INDEFINITE);
+         TextView notificationText = (TextView)findViewById(R.id.notices);
+        notificationText.setTextColor(Color.WHITE);
+        //Snackbar snackbar = Snackbar.make(view, String.valueOf(MainApp.insulin_Integration_App_isBound), Snackbar.LENGTH_INDEFINITE);
 
         //snackbar.show();
 
+    }
+
+    public void checkInsulinAppIntegration(View view){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
+        Date now = new Date();
+        Profile p = new Profile(now, MainActivity.getInstace());
+        //Local device based Integrations
+        String insulin_Integration_App = prefs.getString("insulin_integration", "");
+
+        //Insulin Integration App, try and connect
+        if (!insulin_Integration_App.equals("")){
+            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST");
+            insulinIntegrationApp.connectInsulinTreatmentApp();
+            insulinIntegrationApp_status.setText("Connecting...");
+            insulinIntegrationApp_icon.setBackground(clockWhite);
+            insulinIntegrationApp_icon.setColorFilter(Color.WHITE);
+            //listens out for connection
+            insulinIntegrationAppUpdate = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    insulinIntegrationApp_status.setText(intent.getStringExtra("MSG"));
+                    insulinIntegrationApp_icon.setBackground(tickWhite);
+                    insulinIntegrationApp.sendTest();
+                    LocalBroadcastManager.getInstance(MainActivity.getInstace()).unregisterReceiver(insulinIntegrationAppUpdate);
+                }
+            };
+            LocalBroadcastManager.getInstance(MainActivity.getInstace()).registerReceiver(insulinIntegrationAppUpdate, new IntentFilter("INSULIN_INTEGRATION_TEST"));
+        } else {
+            insulinIntegrationApp_status.setText("No app selected or not in Closed Loop");
+            insulinIntegrationApp_icon.setBackgroundResource(R.drawable.alert_circle);
+        }
     }
 
 
@@ -389,9 +490,12 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         if (newStatsReceiver != null){
             unregisterReceiver(newStatsReceiver);
         }
-        if (newOpenAPSReceiver != null){
-            unregisterReceiver(newOpenAPSReceiver);
+        if (newAPSUpdate != null){
+            unregisterReceiver(newAPSUpdate);
         }
+        //if (appNotification != null){
+        //    unregisterReceiver(appNotification);
+        //}
     }
     //xdrip functions ends
 
@@ -443,7 +547,7 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
         updateStats(null);
 
         //listens out for openAPS updates
-        newOpenAPSReceiver = new BroadcastReceiver() {
+        newAPSUpdate = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -454,22 +558,48 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
                 displayCurrentInfo();
             }
         };
-        registerReceiver(newOpenAPSReceiver, new IntentFilter("ACTION_UPDATE_OPENAPS"));
+        registerReceiver(newAPSUpdate, new IntentFilter("APS_UPDATE"));
+
+        //listens out for app notifications
+        appNotification = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int snackbar_length;
+                snackbar_length                 = intent.getIntExtra("snackbar_length", Snackbar.LENGTH_INDEFINITE);
+                final String alertDialogText    = intent.getStringExtra("alertDialogText");
+                String snackBarMsg              = intent.getStringExtra("snackBarMsg");
+
+                Snackbar snackbar = Snackbar
+                        .make(MainActivity.activity.findViewById(R.id.mainActivity), snackBarMsg, snackbar_length)
+                        .setAction("DETAILS", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
+                                builder.setMessage(alertDialogText);
+                                builder.setPositiveButton("OK", null);
+                                builder.show();
+                            }
+                        });
+                snackbar.show();
+
+            }
+        };
+        registerReceiver(appNotification, new IntentFilter("NEW_APP_NOTIFICATION"));
 
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_MENU:
-                menu1.toggle(true);
+                //menu1.toggle(true);
+                mDrawerLayout.closeDrawers();
                 return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -479,11 +609,11 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(mDrawerLinear);
                 return true;
-            case R.id.action_cancel_temp:
-                pumpAction.cancelTempBasal(MainActivity.activity);
+            case R.id.miTreatments:
+                startActivity(new Intent(getApplicationContext(), EnterTreatment.class));
                 return true;
             default:
                 return true;
@@ -546,16 +676,17 @@ public class MainActivity extends android.support.v4.app.FragmentActivity {
     }
     public void updateRunningTemp(){
         Date timeNow = new Date();
-        sysMsg = (TextView) findViewById(R.id.sysmsg);
+        //sysMsg = (TextView) findViewById(R.id.sysmsg);
         TempBasal lastTempBasal = TempBasal.last();
-        String appStatus;
+        //String appStatus;
         if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
-            appStatus = lastTempBasal.basal_adjustemnt + " Temp active: " + tools.formatDisplayInsulin(lastTempBasal.rate,2) + "(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left";
+            toolbar.setTitle(lastTempBasal.basal_adjustemnt + " Temp Active");
+            toolbar.setSubtitle(tools.formatDisplayBasal(lastTempBasal.rate) + "(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left");
         } else {                                                                                    //No temp Basal running, show default
             Double currentBasal = new Profile(timeNow, this.getBaseContext()).current_basal;
-            appStatus = "No temp basal, current basal: " + tools.formatDisplayInsulin(currentBasal,2);
+            toolbar.setTitle("Default Basal");
+            toolbar.setSubtitle(tools.formatDisplayBasal(currentBasal));
         }
-        sysMsg.setText(appStatus);
     }
 
 

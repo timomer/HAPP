@@ -7,6 +7,7 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -50,8 +51,8 @@ public class APS {
 
         JSONObject result = new JSONObject();
 
-        switch (p.openaps_algorithm) {
-            case "openaps_js_master":
+        switch (p.aps_algorithm) {
+            case "openaps_oref0_master":
                 try {
                     com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(c), c);
 
@@ -59,11 +60,14 @@ public class APS {
                     result = dbJSJSON;
 
                 } catch (IOException e) {
+                    try {
+                        result.put("error",e.getMessage()); // TODO: 09/01/2016 show user the error 
+                    } catch (JSONException j){}
                     e.printStackTrace();
                     Crashlytics.logException(e);
                 }
                 break;
-            case "openaps_js_dev":
+            case "openaps_oref0_dev":
                 try {
                     com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(c), c);
 
@@ -71,6 +75,9 @@ public class APS {
                     result = dbJSJSON;
 
                 } catch (IOException e) {
+                    try {
+                        result.put("error",e.getMessage());
+                    } catch (JSONException j){}
                     e.printStackTrace();
                     Crashlytics.logException(e);
                 }

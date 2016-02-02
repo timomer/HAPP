@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.tools;
 
 import java.util.Calendar;
@@ -31,35 +32,54 @@ public class Profile {
 
     public Double target_bg;                        //OpenAPS Target BG
     public String basal_mode;                       //Basal Mode for the pump, absolute or percent
-    public String openaps_mode;                     //Online ~ send commands to pump OR Offline ~ Notify only
-    public Integer openaps_loop;                    //OpenAPS Loops in mins
+    public String aps_mode;                         //Open - do not send to pump \ Closed - send to pump
+    public Boolean temp_basal_notification;         //Should user be notified of a new Temp Basal?
+    public Boolean send_bolus_allowed;              //Do we send the Bolus to a insulin_integration app?
+    public Integer aps_loop;                        //APS Loops in mins
     public Double max_bolus;                        //The maximum Bolus the app can deliver
-    public String openaps_algorithm;
+    public String aps_algorithm;
 
     public Profile(Date thisTime, Context c){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         //OpenAPS expected Profile settings
-        carbAbsorptionRate   = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
-        max_iob              = Double.parseDouble(prefs.getString("max_iob", "3"));
-        dia                  = Double.parseDouble(prefs.getString("dia", "1.5"));
-        current_basal        = getCurrent_basal(thisTime, prefs);
-        carbRatio            = getCurrent_carbratio(thisTime, prefs);
+        carbAbsorptionRate      = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
+        max_iob                 = Double.parseDouble(prefs.getString("max_iob", "3"));
+        dia                     = Double.parseDouble(prefs.getString("dia", "1.5"));
+        current_basal           = getCurrent_basal(thisTime, prefs);
+        carbRatio               = getCurrent_carbratio(thisTime, prefs);
 
-        max_basal            = Double.parseDouble(prefs.getString("max_basal", "2"));
-        max_daily_basal      = 999D;
+        max_basal               = Double.parseDouble(prefs.getString("max_basal", "2"));
+        max_daily_basal         = 999D;
         //type                 = "current";
 
-        basal_mode           = prefs.getString("basal_mode", "percent");
-        openaps_mode         = prefs.getString("openaps_mode", "offline");
-        openaps_loop         = Integer.parseInt(prefs.getString("openaps_loop", "900000")) / 60000;
-        max_bolus            = Double.parseDouble(prefs.getString("max_bolus", "4"));
-        openaps_algorithm    = prefs.getString("openaps_algorithm", "openaps_android");
+        basal_mode              = prefs.getString("basal_mode", "percent");
+        temp_basal_notification = prefs.getBoolean("temp_basal_notification", true);
 
-        max_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
-        min_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
-        target_bg            = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
-        isf                  = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs), c));
+        aps_loop                = Integer.parseInt(prefs.getString("aps_loop", "900000")) / 60000;
+        max_bolus               = Double.parseDouble(prefs.getString("max_bolus", "4"));
+        aps_algorithm           = prefs.getString("aps_algorithm", "none");
+
+        String aps_mode_prefs                       = prefs.getString("aps_mode", "open");
+        String insulin_integration_prefs            = prefs.getString("insulin_integration", "");
+        Boolean insulin_integration_send_temp_basal = prefs.getBoolean("insulin_integration_send_temp_basal", false);
+        Boolean insulin_integration_send_bolus      = prefs.getBoolean("insulin_integration_send_bolus", false);
+        if (aps_mode_prefs.equals("closed") && !insulin_integration_prefs.equals("") && insulin_integration_send_temp_basal){
+            //only run in Closed loop if APS mode is Closed, we have a Integration app and we allow sending Temp Basal
+            aps_mode = "closed";
+        } else {
+            aps_mode = "open";
+        }
+        if (insulin_integration_send_bolus && !insulin_integration_prefs.equals("")){
+            send_bolus_allowed = true;
+        } else {
+            send_bolus_allowed = false;
+        }
+
+        max_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
+        min_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
+        target_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
+        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs), c));
     }
 
     public static Double getCurrent_basal(Date dateNow, SharedPreferences prefs){

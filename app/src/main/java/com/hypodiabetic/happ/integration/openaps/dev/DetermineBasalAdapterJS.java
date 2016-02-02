@@ -37,10 +37,10 @@ import java.util.List;
 public class DetermineBasalAdapterJS {
     private static Logger log = LoggerFactory.getLogger(DetermineBasalAdapterJS.class);
 
-
     private final ScriptReader mScriptReader;
     V8 mV8rt ;
     private V8Object mProfile;
+    private V8Object mMealData;
     private V8Array mGlucoseStatus;
     private V8Object mIobData;
     private V8Object mCurrentTemp;
@@ -49,15 +49,18 @@ public class DetermineBasalAdapterJS {
     private final String PARAM_iobData = "iobData";
     private final String PARAM_glucoseStatus = "glucose_data";
     private final String PARAM_profile = "profile";
+    private final String PARM_meal_data = "meal_data";
+
+    JSONObject bgCheck;
 
     public DetermineBasalAdapterJS(ScriptReader scriptReader, Context c) throws IOException {
         mV8rt = V8.createV8Runtime();
         mScriptReader  = scriptReader;
 
-        Date dateVar = new Date();
-        Profile profile = new Profile(dateVar, c);
+        Profile profile = new Profile(new Date(), c);
 
         initProfile(profile);
+        initMealData(profile);
         initGlucoseStatus();
         initIobData(profile);
         initCurrentTemp();
@@ -74,41 +77,47 @@ public class DetermineBasalAdapterJS {
     public JSONObject invoke() {
 
         //Checks we have enough BG readings and that they are not too old
-        JSONObject bgCheck = checkGlucose();
         if (bgCheck != null) {
             return bgCheck;
         }
 
         mV8rt.executeVoidScript(
-                "var glucose_status = determinebasal.getLastGlucose(" + PARAM_glucoseStatus + ");");
-
+                "console.error(\"determine_basal(\"+\n" +
+                        "JSON.stringify("+PARAM_glucoseStatus+")+ \", \" +\n" +
+                        "JSON.stringify("+PARAM_currentTemp+")+ \", \" + \n" +
+                        "JSON.stringify("+PARAM_iobData+")+ \", \" +\n" +
+                        "JSON.stringify("+PARM_meal_data+")+ \", \" +\n" +
+                        "JSON.stringify("+PARAM_profile+")+ \") \");");
         mV8rt.executeVoidScript(
-                "var rT = determinebasal.determine_basal(" +
-                        "glucose_status" + ", " +
-                        PARAM_currentTemp + ", " +
-                        PARAM_iobData + ", " +
-                        PARAM_profile +
+                "var rT = determine_basal(" +
+                        PARAM_glucoseStatus + ", " +
+                        PARAM_currentTemp+", " +
+                        PARAM_iobData +", " +
+                        PARAM_profile + ", " +
+                        "undefined, "+  //was "offline"
+                        PARM_meal_data + ", " +
+                        "setTempBasal"+
                         ");");
 
 
         String ret = "";
         log.debug(mV8rt.executeStringScript("JSON.stringify(rT);"));
-
         V8Object v8ObjectReuslt = mV8rt.getObject("rT");
-        {
-            V8Object result = v8ObjectReuslt;
-            log.debug(Arrays.toString(result.getKeys()));
-        }
+        //{
+        //    V8Object result = v8ObjectReuslt;
+        //    log.debug(Arrays.toString(result.getKeys()));
+        //}
 
         JSONObject v8ObjectReusltJSON = new JSONObject();
         try {
-            if (v8ObjectReuslt.contains("rate")) v8ObjectReusltJSON.put("rate", v8ObjectReuslt.getDouble("rate"));
-            if (v8ObjectReuslt.contains("duration")) v8ObjectReusltJSON.put("duration", v8ObjectReuslt.getDouble("duration"));
-            if (v8ObjectReuslt.contains("tick")) v8ObjectReusltJSON.put("tick", v8ObjectReuslt.get("tick"));
-            if (v8ObjectReuslt.contains("bg")) v8ObjectReusltJSON.put("bg", v8ObjectReuslt.getDouble("bg"));
-            v8ObjectReusltJSON.put("temp", v8ObjectReuslt.getString("temp"));
-            v8ObjectReusltJSON.put("eventualBG", v8ObjectReuslt.getDouble("eventualBG"));
-            v8ObjectReusltJSON.put("snoozeBG", v8ObjectReuslt.getDouble("snoozeBG"));
+            if (v8ObjectReuslt.contains("rate"))        v8ObjectReusltJSON.put("rate",      v8ObjectReuslt.getDouble("rate"));
+            if (v8ObjectReuslt.contains("duration"))    v8ObjectReusltJSON.put("duration",  v8ObjectReuslt.getDouble("duration"));
+            if (v8ObjectReuslt.contains("tick"))        v8ObjectReusltJSON.put("tick",      v8ObjectReuslt.get("tick"));
+            if (v8ObjectReuslt.contains("bg"))          v8ObjectReusltJSON.put("bg",        v8ObjectReuslt.getDouble("bg"));
+            if (v8ObjectReuslt.contains("mealAssist"))  v8ObjectReusltJSON.put("mealAssist",v8ObjectReuslt.get("mealAssist"));
+            v8ObjectReusltJSON.put("temp",      v8ObjectReuslt.getString("temp"));
+            v8ObjectReusltJSON.put("eventualBG",v8ObjectReuslt.getDouble("eventualBG"));
+            v8ObjectReusltJSON.put("snoozeBG",  v8ObjectReuslt.getDouble("snoozeBG"));
             v8ObjectReusltJSON.put("reason", v8ObjectReuslt.getString("reason"));
         } catch (JSONException e){}
         v8ObjectReuslt.release();
@@ -117,14 +126,22 @@ public class DetermineBasalAdapterJS {
     }
 
     private void loadScript() throws IOException {
-        //mV8rt.executeVoidScript(readFile("openaps/oref0-determine-basal.js"), "openaps/oref0-determine-basal.js", 1);
-        //mV8rt.executeVoidScript("var determinebasal = init();");
         mV8rt.executeVoidScript(
-                "(function() {\n"+
-                    readFile("openaps/dev/oref0-determine-basal.js") +
-                "\n})()" ,
-                "openaps/dev/oref0-determine-basal.js", 2);
-        mV8rt.executeVoidScript("var determinebasal = module.exports();");
+                readFile("openaps/dev/oref0/lib/determine-basal/determine-basal.js"),
+                "oref0/bin/oref0-determine-basal.js",
+                0);
+        mV8rt.executeVoidScript("var determine_basal = module.exports;");
+
+        mV8rt.executeVoidScript(
+                "var setTempBasal = function (rate, duration, profile, rT, offline) {" +
+                        "rT.duration = duration;\n" +
+                        "    rT.rate = rate;" +
+                        "return rT;" +
+                        "};",
+                "setTempBasal.js",
+                0
+        );
+
     }
 
     private void initModuleParent() {
@@ -152,7 +169,7 @@ public class DetermineBasalAdapterJS {
             public void invoke(V8Object arg0, V8Array parameters) {
                 if (parameters.length() > 0) {
                     Object arg1 = parameters.get(0);
-                    log.debug("LOG " + arg1);
+                    log.debug("JSLOG " + arg1);
 
 
                 }
@@ -189,7 +206,7 @@ public class DetermineBasalAdapterJS {
         try {
             mIobData.add("iob", iobJSON.getDouble("iob"));
             mIobData.add("activity", iobJSON.getDouble("activity"));
-            mIobData.add("bolusiob", iobJSON.getDouble("bolusiob"));
+            mIobData.add("bolussnooze", iobJSON.getDouble("bolusiob")); // TODO: 31/01/2016 oref0 66d16c4 on Dec 22, 2015 @scottleibrand scottleibrand rename bolusiob to bolussnooze
         } catch (JSONException e){}
 
         mV8rt.add(PARAM_iobData, mIobData);
@@ -209,34 +226,58 @@ public class DetermineBasalAdapterJS {
 
         double fuzz = (1000 * 30 * 5);
         double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
-        List<Bg> bgReadings = Bg.latestForGraph(5, start_time * fuzz);
-        JSONArray bgJSON = new JSONArray();
-        for (Bg bgReading : bgReadings) {
+        List<Bg> bgReadings = Bg.latestForGraph(4, start_time * fuzz);
 
-            V8Object aBg = new V8Object(mV8rt);
-            aBg.add("glucose", bgReading.sgv_double());
-            aBg.add("dateString", bgReading.datetime);
-            mGlucoseStatus.push(aBg);
+        bgCheck = checkGlucose(bgReadings);
+        if (bgCheck == null) {
+
+            Bg now = new Bg(), last = new Bg();
+            if (bgReadings.size() > 0) now = bgReadings.get(0);
+            if (bgReadings.size() > 1) last = bgReadings.get(1);
+
+            Integer minutes = 0;
+            Double change;
+            Double avg;
+
+            //TODO: calculate average using system_time instead of assuming 1 data point every 5m
+            if (bgReadings.size() == 4) {
+                minutes = 3 * 5;
+                change = now.sgv_double() - bgReadings.get(3).sgv_double();
+            } else if (bgReadings.size() == 3) {
+                minutes = 2 * 5;
+                change = now.sgv_double() - bgReadings.get(2).sgv_double();
+            } else if (bgReadings.size() == 2) {
+                minutes = 5;
+                change = now.sgv_double() - last.sgv_double();
+            } else {
+                change = 0D;
+            }
+            // multiply by 5 to get the same units as delta, i.e. mg/dL/5m
+            avg = change / minutes * 5;
+
+
+            mGlucoseStatus.add("delta", now.bgdelta);
+            mGlucoseStatus.add("glucose", now.sgv_double());
+            mGlucoseStatus.add("avgdelta", avg);
+
+            mV8rt.add(PARAM_glucoseStatus, mGlucoseStatus);
         }
-
-        mV8rt.add(PARAM_glucoseStatus, mGlucoseStatus);
-
     }
-    public JSONObject checkGlucose() {
+    public JSONObject checkGlucose(List<Bg> bgReadings) {
         JSONObject bgErrorExitJSON = new JSONObject();
         try {
             bgErrorExitJSON.put("eventualBG", "NA");
             bgErrorExitJSON.put("snoozeBG", "NA");
 
-            if (mGlucoseStatus.length() < 2) {
+            if (bgReadings.size() < 2) {
                 bgErrorExitJSON.put("reason", "Need min 2 BG readings to run OpenAPS");
                 return bgErrorExitJSON;
             }
 
             Date systemTime = new Date();
             Date bgTime = new Date();
-            if (mGlucoseStatus.getObject(0).contains("dateString")) {
-                bgTime = new Date((long) mGlucoseStatus.getObject(0).getDouble("dateString"));
+            if (bgReadings.get(0).datetime != 0) {
+                bgTime = new Date((long) bgReadings.get(0).datetime);
                 Long minAgo = (systemTime.getTime() - bgTime.getTime()) / 60 / 1000;
 
                 if (minAgo > 10 || minAgo < -5) { // Dexcom data is too old, or way in the future
@@ -280,6 +321,21 @@ public class DetermineBasalAdapterJS {
         mV8rt.add(PARAM_profile, mProfile);
     }
 
+    private void initMealData(Profile p) {
+        mMealData = new V8Object(mV8rt);
+
+        JSONObject iobJSONValue = Treatments.getIOB(p, new Date());
+        JSONObject cobJSONValue = Treatments.getCOB(p, new Date());
+
+        Double cob          =   cobJSONValue.optDouble("display", 0D);
+        Double bolus_iob    =   iobJSONValue.optDouble("bolusiob", 0D);
+
+        mMealData.add("carbs", cob);
+        mMealData.add("boluses", bolus_iob);
+
+        mV8rt.add(PARM_meal_data, mMealData);
+    }
+
     private void setProfile_CurrentBasal(double currentBasal) {
         mProfile.add("current_basal", currentBasal);
     }
@@ -288,7 +344,7 @@ public class DetermineBasalAdapterJS {
     protected void finalize() throws Throwable {
         super.finalize();
         try {
-            mV8rt.release();
+            //mV8rt.release();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,16 +1,23 @@
 package com.hypodiabetic.happ;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.InputType;
@@ -22,11 +29,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -35,8 +45,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
+import com.hypodiabetic.happ.integration.IntegrationsManager;
+import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONObject;
@@ -81,7 +94,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     Fragment todayTreatmentsFragmentObject;
     Fragment yestTreatmentsFragmentObject;
     Fragment activeTreatmentsFragmentObject;
-    public static Integer selectedListItemDB_ID;                                                    //Tracks the selected items Treatments DB ID
+    public static Long selectedListItemDB_ID;                                                       //Tracks the selected items Treatments DB ID
     public static HashMap selectedListItemID;                                                       //Tracks the selected items list ID
     public static Boolean listDirty=false;                                                          //Tracks if treatment lists are dirty and need to be reloaded
 
@@ -217,7 +230,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             carbs.save();
             editText_treatment_value.setText("");
             wizardCarbs.setText("");
-            tools.syncIntegrations(this);
+            IntegrationsManager.syncIntegrations(MainApp.instance());
             Toast.makeText(this, carbs.value + " " + carbs.type + " entered", Toast.LENGTH_SHORT).show();
 
             refreshListFragments();
@@ -602,7 +615,31 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     treatmentListValue.setText(tools.formatDisplayCarbs(Double.valueOf(treatmentListValue.getText().toString())));
                 } else {
                     treatmentListValue.setBackgroundResource(R.drawable.insulin_treatment_round);
-                    treatmentListValue.setText(tools.formatDisplayInsulin(Double.valueOf(treatmentListValue.getText().toString()),1));
+                    treatmentListValue.setText(tools.formatDisplayInsulin(Double.valueOf(treatmentListValue.getText().toString()), 1));
+                }
+
+                //Shows Integration details, if any
+                ImageView treatmentInsulinIntegrationImage = (ImageView) view.findViewById(R.id.treatmentIntegrationIconLayout);
+                TextView treatmentInsulinIntegrationText = (TextView) view.findViewById(R.id.treatmentIntegrationLayout);
+                switch (treatmentInsulinIntegrationText.getText().toString()) {
+                    case "sent":
+                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.arrow_right_bold_circle);
+                        break;
+                    case "received":
+                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.information);
+                        break;
+                    case "delayed":
+                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.clock);
+                        break;
+                    case "delivered":
+                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.checkbox_marked_circle);
+                        break;
+                    case "error":
+                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.alert_circle);
+                        break;
+                    default:
+                        treatmentInsulinIntegrationImage.setBackgroundResource(0);
+                        break;
                 }
 
                 return view;
@@ -621,6 +658,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             Profile profile = new Profile(new Date(),rootView.getContext());
             Boolean lastCarb=false,lastInsulin=false;
 
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+
             String toLoad="";
             Bundle bundle = this.getArguments();
             if (bundle != null) {
@@ -632,7 +671,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             } else if (toLoad.equals("YESTERDAY")){
                 treatments = Treatments.getTreatmentsDated(tools.getStartOfDayInMillis(calYesterday.getTime()),tools.getEndOfDayInMillis(calYesterday.getTime()), null);
             } else { //all active
-                treatments = Treatments.getTreatmentsDated(calDate.getTimeInMillis() - (8 * 60 * 60000),calDate.getTimeInMillis(), null);
+                treatments = Treatments.getTreatmentsDated(calDate.getTimeInMillis() - (8 * 60 * 60000),calDate.getTimeInMillis(), null); //Grab all for the last 8 hours, we will look later if they are active
             }
 
             for (Treatments treatment : treatments){                                                    //Convert from a List<Object> Array to ArrayList
@@ -650,7 +689,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 treatmentItem.put("note", treatment.note);
                 treatmentItem.put("active", "");
 
-                //Loads the remaining amouing of activity for the treatment, if any
+                //Loads the remaining amount of activity for the treatment, if any
                 if (treatment.type.equals("Insulin")){
                     if (lastInsulin == false) {
                         JSONObject iobDetails = iob.iobCalc(treatment, new Date(), profile.dia);
@@ -666,7 +705,10 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             lastInsulin = true;
                         }
                     }
-                    treatmentItem.put("result", "");
+
+                    Integration integration = Integration.getIntegration("insulin_integration_app","treatment",treatment.getId());
+                    treatmentItem.put("integration", integration.state);  //log STATUS of insulin_Integration_App
+
                 } else {
                     if (lastCarb == false) {
                         JSONObject cobDetails = Treatments.getCOBBetween(profile, treatment.datetime - (8 * 60 * 60000), treatment.datetime); //last 8 hours
@@ -685,7 +727,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             lastCarb = true;
                         }
                     }
-                    treatmentItem.put("result", "");
+                    treatmentItem.put("integration", "");
                 }
 
                 if (toLoad.equals("ACTIVE")){
@@ -702,8 +744,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
             list = (ListView) rootView.findViewById(R.id.treatmentList);
             adapter = new mySimpleAdapter(rootView.getContext(), treatmentsList, R.layout.treatments_list_layout,
-                    new String[]{"id", "time", "value", "type", "note", "active", "result"},
-                    new int[]{R.id.treatmentID, R.id.treatmentTimeLayout, R.id.treatmentAmountLayout, R.id.treatmentTypeLayout, R.id.treatmentNoteLayout, R.id.treatmentActiveLayout, R.id.treatmentResultLayout});
+                    new String[]{"id", "time", "value", "type", "note", "active", "integration"},
+                    new int[]{R.id.treatmentID, R.id.treatmentTimeLayout, R.id.treatmentAmountLayout, R.id.treatmentTypeLayout, R.id.treatmentNoteLayout, R.id.treatmentActiveLayout, R.id.treatmentIntegrationLayout});
             list.setAdapter(adapter);
 
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -726,12 +768,13 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             // We know that each row in the adapter is a Map
             HashMap map =  (HashMap) adapter.getItem(aInfo.position);
 
-            selectedListItemDB_ID   = Integer.parseInt(map.get("id").toString());
+            selectedListItemDB_ID   = Long.parseLong(map.get("id").toString());
             selectedListItemID      = (HashMap) adapter.getItem(aInfo.position);
 
             menu.setHeaderTitle(map.get("value") + " " + map.get("type"));
             menu.add(1, 1, 1, "Edit");
             menu.add(1, 2, 2, "Delete");
+            menu.add(1, 3, 3, "Integration Details");
         }
         // This method is called when user selects an Item in the Context menu
         @Override
@@ -742,34 +785,77 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
                 if (treatment != null) {
 
-                    if (itemId == 1) {   //Edit - loads the treatment to be edited and delete the original
+                    switch (itemId) {
+                        case 1: //Edit - loads the treatment to be edited and delete the original
+                            spinner_treatment_type.setSelection(getIndex(spinner_treatment_type, treatment.type));
+                            spinner_notes.setSelection(getIndex(spinner_notes, treatment.note));
+                            Date treatmentDate = new Date(treatment.datetime);
+                            SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
+                            SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
+                            editText_treatment_date.setText(sdfDate.format(treatmentDate));
+                            editText_treatment_time.setText(sdfTime.format(treatmentDate));
+                            editText_treatment_value.setText(treatment.value.toString());
 
-                        spinner_treatment_type.setSelection(getIndex(spinner_treatment_type, treatment.type));
-                        spinner_notes.setSelection(getIndex(spinner_notes, treatment.note));
-                        Date treatmentDate = new Date(treatment.datetime);
-                        SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
-                        SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
-                        editText_treatment_date.setText(sdfDate.format(treatmentDate));
-                        editText_treatment_time.setText(sdfTime.format(treatmentDate));
-                        editText_treatment_value.setText(treatment.value.toString());
+                            treatment.delete();
+                            treatmentsList.remove(selectedListItemID);
+                            adapter.notifyDataSetChanged();
+                            adapter.notifyDataSetInvalidated();
+                            listDirty = true;
+                            eViewPager.setCurrentItem(1); //load edit treatment fragment
+                            //loadTreatments(parentsView);
+                            Toast.makeText(parentsView.getContext(), "Original Treatment Deleted, re-save to add back", Toast.LENGTH_SHORT).show();
+                            break;
+                        case 2: //Delete
+                            treatment.delete();
+                            treatmentsList.remove(selectedListItemID);
+                            adapter.notifyDataSetChanged();
+                            adapter.notifyDataSetInvalidated();
+                            listDirty = true;
+                            //loadTreatments(parentsView);
+                            Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
+                            break;
+                        case 3: //Integration Details
+                            List<Integration> integrations = Integration.getIntegrationsFor("treatment",treatment.getId());
 
-                        treatment.delete();
-                        treatmentsList.remove(selectedListItemID);
-                        adapter.notifyDataSetChanged();
-                        adapter.notifyDataSetInvalidated();
-                        listDirty = true;
-                        eViewPager.setCurrentItem(1); //load edit treatment fragment
-                        //loadTreatments(parentsView);
-                        Toast.makeText(parentsView.getContext(), "Original Treatment Deleted, resave to add back", Toast.LENGTH_SHORT).show();
+                            final Dialog dialog = new Dialog(parentsView.getContext());
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                            dialog.setContentView(R.layout.integration_dialog);
+                            dialog.setCancelable(true);
+                            dialog.setCanceledOnTouchOutside(true);
 
-                    } else {              //Delete
-                        treatment.delete();
-                        treatmentsList.remove(selectedListItemID);
-                        adapter.notifyDataSetChanged();
-                        adapter.notifyDataSetInvalidated();
-                        listDirty = true;
-                        //loadTreatments(parentsView);
-                        Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
+                            ListView integrationListView        = (ListView) dialog.findViewById(R.id.integrationList);
+                            ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
+                            Calendar integrationDate  = Calendar.getInstance();
+                            SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
+
+                            for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
+                                HashMap<String, String> integrationItem = new HashMap<String, String>();
+
+                                ObjectToSync objectSyncDetails = new ObjectToSync(integration);
+
+                                if (objectSyncDetails.requested != null){
+                                    integrationDate.setTime(objectSyncDetails.requested);
+                                } else {
+                                    integrationDate.setTime(new Date(0));                                                 //Bad integration
+                                }
+                                integrationItem.put("integrationType",      integration.type);
+                                integrationItem.put("integrationWhat",      "Request sent: " + objectSyncDetails.getObjectSummary());
+                                integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
+                                integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);
+                                integrationItem.put("integrationAction",    "Action: " + objectSyncDetails.action);
+                                integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id.toString());
+                                integrationItem.put("integrationDetails",   objectSyncDetails.details);
+
+                                integrationList.add(integrationItem);
+                            }
+
+                            SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
+                                    new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails"},
+                                    new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails});
+                            integrationListView.setAdapter(adapter);
+
+                            dialog.show();
+                            break;
                     }
                 }
                 return true;

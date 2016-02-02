@@ -68,7 +68,7 @@ public class SettingsActivity extends PreferenceActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
-            addPreferencesFromResource(R.xml.pref_openaps);
+            addPreferencesFromResource(R.xml.pref_aps);
             addPreferencesFromResource(R.xml.pref_pump);
             addPreferencesFromResource(R.xml.pref_bg_notification);
             addPreferencesFromResource(R.xml.pref_integration);
@@ -83,9 +83,9 @@ public class SettingsActivity extends PreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("units"));
             //bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
             bindPreferenceSummaryToValue(findPreference("target_bg"));
-            bindPreferenceSummaryToValue(findPreference("openaps_loop"));
-            bindPreferenceSummaryToValue(findPreference("openaps_mode"));
-            bindPreferenceSummaryToValue(findPreference("openaps_algorithm"));
+            bindPreferenceSummaryToValue(findPreference("aps_loop"));
+            bindPreferenceSummaryToValue(findPreference("aps_mode"));
+            bindPreferenceSummaryToValue(findPreference("aps_algorithm"));
             findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory().toString());
 
             for (int x=0; x<24; x++ ){
@@ -110,6 +110,17 @@ public class SettingsActivity extends PreferenceActivity {
                     return true;
                 }
             });
+
+            bindPreferenceSummaryToValue(findPreference("insulin_integration"));
+            Preference preference_insulin_integration = findPreference("insulin_integration");
+            preference_insulin_integration.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    tools.getExternalAppForPref("insulin_integration", preference.getContext());
+                    return true;
+                }
+            });
+
 
             PackageManager manager = MainActivity.activity.getPackageManager();
             try {

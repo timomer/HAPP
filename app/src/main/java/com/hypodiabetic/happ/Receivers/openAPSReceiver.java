@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 
 /**
  * Created by tim on 11/08/2015.
+ * We have a request to run APS code
  */
 public class openAPSReceiver extends BroadcastReceiver{
 
@@ -29,10 +30,10 @@ public class openAPSReceiver extends BroadcastReceiver{
                     .create();
 
 
-            Intent intent = new Intent("ACTION_UPDATE_OPENAPS");
             APSResult apsResult = APS.execute(context);                                             //Runs APS
-            tools.syncIntegrations(context);                                                        //Syncs Notifications
+            //tools.syncIntegrations(context);                                                        //Syncs Notifications // TODO: 24/01/2016 why am I doing this!? command and comment do not match
             Notifications.updateCard(context, apsResult);                                           //Updates Summary Notification
+            Intent intent = new Intent("APS_UPDATE");
             intent.putExtra("APSResult", gson.toJson(apsResult, APSResult.class));                  //sends result to update UI if loaded
             context.sendBroadcast(intent);
 

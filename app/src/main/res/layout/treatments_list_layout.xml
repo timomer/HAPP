@@ -40,7 +40,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="0dp">
             <TextView
                 android:id="@+id/treatmentTypeLayout"
                 android:layout_width="match_parent"
@@ -66,14 +66,15 @@
                 android:textSize="14sp"
                 android:id="@+id/treatmentTimeLayout"
                 android:text="00:00"
-                android:gravity="top"/>
+                android:gravity="center"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:layout_marginTop="0dp">
+            android:layout_marginTop="0dp"
+            >
             <TextView
                 android:id="@+id/treatmentActiveLayout"
                 android:layout_width="match_parent"
@@ -81,22 +82,27 @@
                 android:textSize="13sp"
                 android:layout_weight="1"
                 android:text="Active"
-                android:gravity="top"/>
+                android:gravity="center_vertical"/>
 
             <TextView
-                android:id="@+id/treatmentResultLayout"
+                android:id="@+id/treatmentIntegrationLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textSize="13sp"
-                android:layout_weight="1.5"
+                android:layout_weight="1"
                 android:text="Result"
+                android:visibility="gone"
                 android:gravity="top"/>
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:id="@+id/treatmentIntegrationIconLayout"
+                android:layout_marginRight="16dp"
+                android:layout_gravity="top"
+                />
         </LinearLayout>
 
     </LinearLayout>
-
-
-
 
 
 

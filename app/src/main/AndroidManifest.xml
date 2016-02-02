@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hypodiabetic.happ" >
+    package="com.hypodiabetic.happ">
 
     <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -20,26 +20,21 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="AA_MODELS"
-            android:value="com.hypodiabetic.happ.Objects.Stats,
-                            com.hypodiabetic.happ.Objects.APSResult,
-                            com.hypodiabetic.happ.Objects.Treatments,
-                            com.hypodiabetic.happ.Objects.TempBasal,
-                            com.hypodiabetic.happ.code.nightwatch.Bg,
-                            com.hypodiabetic.happ.code.nightwatch.UserNotification" />
+            android:value="com.hypodiabetic.happ.Objects.Stats,                             com.hypodiabetic.happ.Objects.APSResult,                             com.hypodiabetic.happ.Objects.Treatments,                             com.hypodiabetic.happ.Objects.TempBasal,                             com.hypodiabetic.happ.code.nightwatch.Bg,                             com.hypodiabetic.happ.Objects.Integration,                             com.hypodiabetic.happ.code.nightwatch.UserNotification" />
         <meta-data
             android:name="AA_DB_NAME"
             android:value="HAPP.db" />
         <!-- Also up date AA_DB_VERSION in MainActivity onCreate -->
         <meta-data
             android:name="AA_DB_VERSION"
-            android:value="24" />
+            android:value="28" />
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -48,77 +43,81 @@
         </activity>
         <activity
             android:name=".EnterTreatment"
-            android:label="@string/title_activity_enter_treatment" >
-        </activity>
+            android:label="@string/title_activity_enter_treatment"></activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" >
-        </activity>
+            android:label="@string/title_activity_settings"></activity>
 
         <service
             android:name=".code.nightwatch.DataCollectionService"
             android:enabled="true"
-            android:exported="true" >
-        </service>
-
+            android:exported="true"></service>
         <service
             android:name=".integration.dexdrip.IntentService"
             android:exported="false" />
+        <service
+            android:name=".services.TreatmentService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":treatment_service_process">
+            <intent-filter>
+                <action android:name="com.hypodiabetic.happ.services.TreatmentService"></action>
+            </intent-filter>
+        </service>
 
-        <receiver android:name=".code.nightwatch.AutoStart" >
+        <receiver android:name=".code.nightwatch.AutoStart">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".integration.dexdrip.DataReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Receivers.openAPSReceiver" >
+        <receiver android:name=".Receivers.openAPSReceiver">
             <intent-filter>
                 <action android:name="com.hypodiabetic.happ.RUN_OPENAPS" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Receivers.statsReceiver" >
-        </receiver>
+        <receiver android:name=".Receivers.statsReceiver"></receiver>
 
         <activity
             android:name=".BolusWizardActivity"
             android:label="@string/title_activity_bolus_wizard"
-            android:parentActivityName=".EnterTreatment" >
+            android:parentActivityName=".EnterTreatment">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.hypodiabetic.happ.EnterTreatment" />
         </activity>
         <activity
-            android:name=".activity_license_agreement"
-            android:label="@string/title_activity_activity_license_agreement" >
-        </activity>
-        <activity
             android:name=".license_agreement"
-            android:label="@string/title_activity_license_agreement" >
-        </activity>
+            android:label="@string/title_activity_license_agreement"></activity>
         <activity
             android:name=".WearDisplayActivity"
             android:allowEmbedded="true"
             android:exported="true"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.DeviceDefault.Light" >
-        </activity>
+            android:theme="@android:style/Theme.DeviceDefault.Light"></activity>
 
         <receiver
             android:name=".Receivers.notificationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.hypodiabetic.happ.NOTIFICATION_RECEIVER" />
             </intent-filter>
         </receiver>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="be254c8585dff3174ce74dd5e856b96909f9f8c1" />
+
+        <activity
+            android:name=".Integration_Report"
+            android:label="@string/title_activity_integration__report"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

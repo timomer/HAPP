@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="APS">
+
+        <PreferenceScreen
+            android:key="button_aps_category"
+            android:persistent="false"
+            android:title="APS Settings">
+
+            <PreferenceCategory
+                android:key="aps_general"
+                android:title="General">
+
+                <ListPreference
+                    android:title="APS Mode"
+                    android:key="aps_mode"
+                    android:defaultValue="notify"
+                    android:summary="APS Loop Mode"
+                    android:entries="@array/aps_modeArray"
+                    android:entryValues="@array/aps_modeValues"/>
+                <SwitchPreference
+                    android:title="Temp Basal Notification"
+                    android:key="temp_basal_notification"
+                    android:summary="Suggested Temp Basal have to be confirmed by the user"
+                    android:defaultValue="true"/>
+                <ListPreference
+                    android:title="APS Algorithm"
+                    android:key="aps_algorithm"
+                    android:defaultValue="none"
+                    android:entries="@array/aps_algorithmArray"
+                    android:entryValues="@array/aps_algorithmValues"/>
+                <ListPreference
+                    android:title="APS Loop Time"
+                    android:key="aps_loop"
+                    android:defaultValue="900000"
+                    android:entries="@array/aps_loopArray"
+                    android:entryValues="@array/aps_loopValues"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:key="aps_limits"
+                android:title="Limits">
+
+                <EditTextPreference
+                    android:title="Max Basal"
+                    android:defaultValue="2"
+                    android:key="max_basal"
+                    android:numeric="decimal"
+                    android:summary="Max U/hr a Temp Basal can be set to" />
+                <EditTextPreference
+                    android:title="Max Basal IOB"
+                    android:defaultValue="3"
+                    android:key="max_iob"
+                    android:numeric="decimal"
+                    android:summary="Maximum amount of non-bolus IOB OpenAPS can deliver"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:key="aps_patient_prefs"
+                android:title="Patient Preferences">
+
+                <EditTextPreference
+                    android:title="DIA"
+                    android:defaultValue="1.5"
+                    android:key="dia"
+                    android:numeric="decimal"
+                    android:summary="Duration of Insulin Action (hours)"/>
+                <EditTextPreference
+                    android:title="Carb Absorption Rate"
+                    android:defaultValue="20"
+                    android:key="CarbAbsorptionRate"
+                    android:numeric="decimal"
+                    android:summary="Amount of Carbs digested per hour (grams)"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:key="aps_profiles"
+                android:title="Profiles">
+
+                <PreferenceScreen
+                    android:title="Insulin Sensitivity Factor"
+                    android:key="button_aps_isf_profile"
+                    android:persistent="false"
+                    android:summary="How much 1U of Insulin will lower your Blood Glucose">
+
+                    <EditTextPreference
+                        android:key="isf_0"
+                        android:numeric="decimal"
+                        android:title="isf 00:00-00:59" />
+                    <EditTextPreference
+                        android:key="isf_1"
+                        android:numeric="decimal"
+                        android:title="isf 01:00-01:59" />
+                    <EditTextPreference
+                        android:key="isf_2"
+                        android:numeric="decimal"
+                        android:title="isf 02:00-02:59" />
+                    <EditTextPreference
+                        android:key="isf_3"
+                        android:numeric="decimal"
+                        android:title="isf 03:00-03:59" />
+                    <EditTextPreference
+                        android:key="isf_4"
+                        android:numeric="decimal"
+                        android:title="isf 04:00-04:59" />
+                    <EditTextPreference
+                        android:key="isf_5"
+                        android:numeric="decimal"
+                        android:title="isf 05:00-05:59" />
+                    <EditTextPreference
+                        android:key="isf_6"
+                        android:numeric="decimal"
+                        android:title="isf 06:00-06:59" />
+                    <EditTextPreference
+                        android:key="isf_7"
+                        android:numeric="decimal"
+                        android:title="isf 07:00-07:59" />
+                    <EditTextPreference
+                        android:key="isf_8"
+                        android:numeric="decimal"
+                        android:title="isf 08:00-08:59" />
+                    <EditTextPreference
+                        android:key="isf_9"
+                        android:numeric="decimal"
+                        android:title="isf 09:00-09:59" />
+                    <EditTextPreference
+                        android:key="isf_10"
+                        android:numeric="decimal"
+                        android:title="isf 10:00-10:59" />
+                    <EditTextPreference
+                        android:key="isf_11"
+                        android:numeric="decimal"
+                        android:title="isf 11:00-11:59" />
+                    <EditTextPreference
+                        android:key="isf_12"
+                        android:numeric="decimal"
+                        android:title="isf 12:00-12:59" />
+                    <EditTextPreference
+                        android:key="isf_13"
+                        android:numeric="decimal"
+                        android:title="isf 13:00-13:59" />
+                    <EditTextPreference
+                        android:key="isf_14"
+                        android:numeric="decimal"
+                        android:title="isf 14:00-14:59" />
+                    <EditTextPreference
+                        android:key="isf_15"
+                        android:numeric="decimal"
+                        android:title="isf 15:00-15:59" />
+                    <EditTextPreference
+                        android:key="isf_16"
+                        android:numeric="decimal"
+                        android:title="isf 16:00-16:59" />
+                    <EditTextPreference
+                        android:key="isf_17"
+                        android:numeric="decimal"
+                        android:title="isf 17:00-17:59" />
+                    <EditTextPreference
+                        android:key="isf_18"
+                        android:numeric="decimal"
+                        android:title="isf 18:00-18:59" />
+                    <EditTextPreference
+                        android:key="isf_19"
+                        android:numeric="decimal"
+                        android:title="isf 19:00-19:59" />
+                    <EditTextPreference
+                        android:key="isf_20"
+                        android:numeric="decimal"
+                        android:title="isf 20:00-20:59" />
+                    <EditTextPreference
+                        android:key="isf_21"
+                        android:numeric="decimal"
+                        android:title="isf 21:00-21:59" />
+                    <EditTextPreference
+                        android:key="isf_22"
+                        android:numeric="decimal"
+                        android:title="isf 22:00-22:59" />
+                    <EditTextPreference
+                        android:key="isf_23"
+                        android:numeric="decimal"
+                        android:title="isf 23:00-23:59" />
+
+                </PreferenceScreen>
+
+                <PreferenceScreen
+                    android:title="Carbohydrate Ratio"
+                    android:key="button_aps_carbratio_profile"
+                    android:persistent="false"
+                    android:summary="How many grams of Carbohydrate are covered by 1U of Insulin">
+
+                    <EditTextPreference
+                        android:key="carbratio_0"
+                        android:numeric="decimal"
+                        android:title="carbratio 00:00" />
+                    <EditTextPreference
+                        android:key="carbratio_1"
+                        android:numeric="decimal"
+                        android:title="carbratio 01:00" />
+                    <EditTextPreference
+                        android:key="carbratio_2"
+                        android:numeric="decimal"
+                        android:title="carbratio 02:00" />
+                    <EditTextPreference
+                        android:key="carbratio_3"
+                        android:numeric="decimal"
+                        android:title="carbratio 03:00" />
+                    <EditTextPreference
+                        android:key="carbratio_4"
+                        android:numeric="decimal"
+                        android:title="carbratio 04:00" />
+                    <EditTextPreference
+                        android:key="carbratio_5"
+                        android:numeric="decimal"
+                        android:title="carbratio 05:00" />
+                    <EditTextPreference
+                        android:key="carbratio_6"
+                        android:numeric="decimal"
+                        android:title="carbratio 06:00" />
+                    <EditTextPreference
+                        android:key="carbratio_7"
+                        android:numeric="decimal"
+                        android:title="carbratio 07:00" />
+                    <EditTextPreference
+                        android:key="carbratio_8"
+                        android:numeric="decimal"
+                        android:title="carbratio 08:00" />
+                    <EditTextPreference
+                        android:key="carbratio_9"
+                        android:numeric="decimal"
+                        android:title="carbratio 09:00" />
+                    <EditTextPreference
+                        android:key="carbratio_10"
+                        android:numeric="decimal"
+                        android:title="carbratio 10:00" />
+                    <EditTextPreference
+                        android:key="carbratio_11"
+                        android:numeric="decimal"
+                        android:title="carbratio 11:00" />
+                    <EditTextPreference
+                        android:key="carbratio_12"
+                        android:numeric="decimal"
+                        android:title="carbratio 12:00" />
+                    <EditTextPreference
+                        android:key="carbratio_13"
+                        android:numeric="decimal"
+                        android:title="carbratio 13:00" />
+                    <EditTextPreference
+                        android:key="carbratio_14"
+                        android:numeric="decimal"
+                        android:title="carbratio 14:00" />
+                    <EditTextPreference
+                        android:key="carbratio_15"
+                        android:numeric="decimal"
+                        android:title="carbratio 15:00" />
+                    <EditTextPreference
+                        android:key="carbratio_16"
+                        android:numeric="decimal"
+                        android:title="carbratio 16:00" />
+                    <EditTextPreference
+                        android:key="carbratio_17"
+                        android:numeric="decimal"
+                        android:title="carbratio 17:00" />
+                    <EditTextPreference
+                        android:key="carbratio_18"
+                        android:numeric="decimal"
+                        android:title="carbratio 18:00" />
+                    <EditTextPreference
+                        android:key="carbratio_19"
+                        android:numeric="decimal"
+                        android:title="carbratio 19:00" />
+                    <EditTextPreference
+                        android:key="carbratio_20"
+                        android:numeric="decimal"
+                        android:title="carbratio 20:00" />
+                    <EditTextPreference
+                        android:key="carbratio_21"
+                        android:numeric="decimal"
+                        android:title="carbratio 21:00" />
+                    <EditTextPreference
+                        android:key="carbratio_22"
+                        android:numeric="decimal"
+                        android:title="carbratio 22:00" />
+                    <EditTextPreference
+                        android:key="carbratio_23"
+                        android:numeric="decimal"
+                        android:title="carbratio 23:00" />
+
+                </PreferenceScreen>
+
+            </PreferenceCategory>
+
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

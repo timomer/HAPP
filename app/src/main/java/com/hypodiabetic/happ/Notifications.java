@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
@@ -30,6 +33,7 @@ import java.util.Date;
  * Created by Tim on 07/10/2015.
  */
 public class Notifications {
+
 
     //New Temp has been suggested
     public static void newTemp(TempBasal basal, Context c){
@@ -60,7 +64,7 @@ public class Notifications {
 
         Intent displayIntent = new Intent(c, WearDisplayActivity.class);
         Notification notification = new Notification.Builder(c)
-                .setSmallIcon(R.drawable.ic_input_black)
+                .setSmallIcon(R.drawable.exit_to_app)
                 .setContentTitle(title)
                 .setContentText(msg)
                 .setContentIntent(pending_intent_open_activity)
@@ -71,7 +75,7 @@ public class Notifications {
                 .extend(new Notification.WearableExtender()
                         .setBackground(createWearBitmap(2, c))
                         .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT)))
-                .addAction(R.drawable.ic_input_black, "Accept Temp", pending_intent_accept_temp)
+                .addAction(R.drawable.ic_exit_to_app_white_24dp, "Accept Temp", pending_intent_accept_temp)
                 .build();
         ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
     }
