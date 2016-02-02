@@ -706,7 +706,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                         }
                     }
 
-                    Integration integration = Integration.getIntegration("insulin_integration_app","treatment",treatment.getId());
+                    Integration integration = Integration.getIntegration("insulin_integration_app","bolus_delivery",treatment.getId());
                     treatmentItem.put("integration", integration.state);  //log STATUS of insulin_Integration_App
 
                 } else {
