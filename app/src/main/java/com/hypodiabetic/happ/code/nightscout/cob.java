@@ -5,7 +5,7 @@ import android.widget.Toast;
 import com.hypodiabetic.happ.ApplicationContextProvider;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.integration.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,8 +68,8 @@ public class cob {
                             if (decaysin_hr > -10) {                                                                        //Carbs have been active within at least the last 10 hours!? // TODO: 27/08/2015    
                                 Double actStart=0D, actEnd=0D;
                                 try {
-                                    actStart = iob.iobTotal(treatments, profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
-                                    actEnd = iob.iobTotal(treatments, profileNow, decayedByDate).getDouble("activity");
+                                    actStart = IOB.iobTotal(profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
+                                    actEnd = IOB.iobTotal(profileNow, decayedByDate).getDouble("activity");
                                 } catch (JSONException e){
                                     Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB activity " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 }

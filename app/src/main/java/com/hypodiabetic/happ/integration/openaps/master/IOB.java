@@ -1,25 +1,59 @@
-package com.hypodiabetic.happ.integration.openaps;
+package com.hypodiabetic.happ.integration.openaps.master;
 
-//import com.hypodiabetic.happ.DBHelper;
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 //import com.hypodiabetic.happ.TreatmentsRepo;
 
-        import org.json.JSONException;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.List;
 
 
 /**
  * Created by tim on 06/08/2015.
- * source openaps-js https://github.com/openaps/openaps-js/blob/master
+ * source https://github.com/timomer/oref0/tree/master/lib/iob
  */
-public class iob {
+public class IOB {
 
+    //Gets a list of Insulin treatments, converts Temp Basal treatments to Bolus events, called from iobTotal below
+    public static List<Treatments> calcTempTreatments (Date time, Profile profile_data) {
+        List<Treatments> tempBoluses = Treatments.getTreatmentsDated(time.getTime(), time.getTime() - 8 * 60 * 60 * 1000, "Insulin");   //last 8 hours of Insulin Bolus Treatments
+        List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(time.getTime(), time.getTime() - 8 * 60 * 60 * 1000);   //last 8 hours of Temp Basals
 
+        Double tempBolusSize;
+        for (TempBasal temp : tempHistory) {
+            if (temp.duration > 0) {
+                Double netBasalRate = temp.rate - profile_data.current_basal;
+                if (netBasalRate < 0) {
+                    tempBolusSize = -0.05;
+                } else {
+                    tempBolusSize = 0.05;
+                }
+                Double netBasalAmount = (netBasalRate * temp.duration * 10 / 6) / 100;
+                Double tempBolusCount = (netBasalAmount / tempBolusSize);
+                Double tempBolusSpacing = temp.duration / tempBolusCount;
+                for (int j = 0; j < tempBolusCount.intValue(); j++) {
+                    Treatments tempBolus = new Treatments();
+                    tempBolus.value = tempBolusSize;
+                    tempBolus.datetime = temp.created_time.getTime() + j * tempBolusSpacing.longValue() * 60 * 1000;
+                    tempBolus.datetime_display = new Date(tempBolus.datetime).toString();
+                    tempBolus.type = "Insulin";
+                    tempBolus.note = "bolus";
+                    tempBoluses.add(tempBolus);
+                }
+            }
+        }
+        Collections.sort(tempBoluses, new Treatments.sortByDateTime());
+
+        return tempBoluses;
+    }
 
 
     //Calculates the Bolus IOB from only one treatment, called from iobTotal below
@@ -69,9 +103,10 @@ public class iob {
         }
     }
 
-    //gets the total IOB from mutiple Treatments
-    public static JSONObject iobTotal(List<Treatments> treatments, Profile profileNow, Date time) {
+    //gets the total IOB from multiple Treatments
+    public static JSONObject iobTotal(Profile profile_data, Date time) {
 
+        List<Treatments> treatments = calcTempTreatments(time, profile_data);
         JSONObject returnValue = new JSONObject();
 
         Double iob = 0D;
@@ -86,28 +121,28 @@ public class iob {
 
                 if (treatment.datetime.longValue() <= time.getTime()) {      //Treatment is not in the future
 
-                        Double dia = profileNow.dia;                                                            //How long Insulin stays active in your system
-                        JSONObject tIOB = iobCalc(treatment, time, dia);
-                        if (tIOB.has("iobContrib"))
-                            iob += tIOB.getDouble("iobContrib");
-                        if (tIOB.has("activityContrib"))
-                            activity += tIOB.getDouble("activityContrib");
-                        // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
-                        if (treatment.value >= 0.2 && treatment.note.equals("bolus")) {             //Only use bolus for Bolus Snooze *HAPP Added*
-                            //use half the dia for double speed bolus snooze
-                            JSONObject bIOB = iobCalc(treatment, time, dia / 2);
-                            //console.log(treatment);
-                            //console.log(bIOB);
-                            if (bIOB.has("iobContrib"))
-                                bolusiob += bIOB.getDouble("iobContrib");
-                        }
+                    Double dia = profile_data.dia;                                                            //How long Insulin stays active in your system
+                    JSONObject tIOB = iobCalc(treatment, time, dia);
+                    if (tIOB.has("iobContrib"))
+                        iob += tIOB.getDouble("iobContrib");
+                    if (tIOB.has("activityContrib"))
+                        activity += tIOB.getDouble("activityContrib");
+                    // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
+                    if (treatment.value >= 0.2){ // && treatment.note.equals("bolus")) {             //Only use bolus for Bolus Snooze *HAPP Added*
+                        //use half the dia for double speed bolus snooze
+                        JSONObject bIOB = iobCalc(treatment, time, dia / 2);
+                        //console.log(treatment);
+                        //console.log(bIOB);
+                        if (bIOB.has("iobContrib"))
+                            bolusiob += bIOB.getDouble("iobContrib");
+                    }
 
                 }
             }
 
             returnValue.put("iob", iob);                                                            //Total IOB
             returnValue.put("activity", activity);                                                  //Total Amount of insulin active at this time
-            returnValue.put("bolusiob", bolusiob);                                                  //Total Bolus IOB (User entered, assumed when eating) DIA is twice as fast
+            returnValue.put("bolusiob", bolusiob);                                                  //Total Bolus IOB DIA is twice as fast
             returnValue.put("as_of", time.getTime());                                               //Date this request was made
             return returnValue;
 

@@ -8,18 +8,16 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
 import org.json.JSONObject;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by Tim on 08/09/2015.
@@ -36,7 +34,7 @@ public class statsReceiver extends BroadcastReceiver {
 
         Stats stat = new Stats();
 
-        JSONObject iobJSONValue = Treatments.getIOB(profileAsOfNow, dateVar);
+        JSONObject iobJSONValue = IOB.iobTotal(profileAsOfNow, dateVar);
         JSONObject cobJSONValue = Treatments.getCOB(profileAsOfNow, dateVar);
         TempBasal currentTempBasal = TempBasal.getCurrentActive(dateVar);
 

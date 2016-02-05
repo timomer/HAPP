@@ -12,16 +12,14 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.integration.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -200,9 +198,7 @@ public class DetermineBasalAdapterJS {
         mIobData = new V8Object(mV8rt);
         //setIobData(0.0, 0.0, 0.0);
 
-        Date dateVar = new Date();
-        List<Treatments> treatments = Treatments.latestTreatments(20, "Insulin");
-        JSONObject iobJSON = iob.iobTotal(treatments, p, dateVar);
+        JSONObject iobJSON = IOB.iobTotal(p, new Date());
         try {
             mIobData.add("iob", iobJSON.getDouble("iob"));
             mIobData.add("activity", iobJSON.getDouble("activity"));
@@ -324,7 +320,7 @@ public class DetermineBasalAdapterJS {
     private void initMealData(Profile p) {
         mMealData = new V8Object(mV8rt);
 
-        JSONObject iobJSONValue = Treatments.getIOB(p, new Date());
+        JSONObject iobJSONValue = IOB.iobTotal(p, new Date());
         JSONObject cobJSONValue = Treatments.getCOB(p, new Date());
 
         Double cob          =   cobJSONValue.optDouble("display", 0D);

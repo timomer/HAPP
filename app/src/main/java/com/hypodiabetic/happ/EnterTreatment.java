@@ -1,15 +1,12 @@
 package com.hypodiabetic.happ;
 
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -17,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.InputType;
@@ -36,7 +32,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -50,7 +45,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
-import com.hypodiabetic.happ.integration.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
 import org.json.JSONObject;
 
@@ -692,7 +687,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 //Loads the remaining amount of activity for the treatment, if any
                 if (treatment.type.equals("Insulin")){
                     if (lastInsulin == false) {
-                        JSONObject iobDetails = iob.iobCalc(treatment, new Date(), profile.dia);
+                        JSONObject iobDetails = IOB.iobCalc(treatment, new Date(), profile.dia);
 
                         if (iobDetails.optDouble("iobContrib", 0) > 0) {                            //Still active Insulin
                             String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0),2);

@@ -121,8 +121,6 @@ public class TempBasal extends Model {
     }
 
     public static List<TempBasal> latestTempBasals(int limit) {
-        DecimalFormat df = new DecimalFormat("#");
-        df.setMaximumFractionDigits(1);
 
         return new Select()
                 .from(TempBasal.class)
@@ -130,4 +128,14 @@ public class TempBasal extends Model {
                 .limit(limit)
                 .execute();
     }
+
+    public static List<TempBasal> getTempBasalsDated(Long dateFrom, Long dateTo) {
+
+        return new Select()
+                .from(TempBasal.class)
+                .where("start_time >= ? and start_time <= ?", dateFrom, dateTo)
+                .orderBy("start_time desc")
+                .execute();
+    }
+
 }

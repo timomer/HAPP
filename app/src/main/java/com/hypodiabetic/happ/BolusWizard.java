@@ -8,7 +8,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.integration.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +26,7 @@ public class BolusWizard {
 
         Date dateNow = new Date();
         Profile profile = new Profile(dateNow = new Date(), c);
-        JSONObject iobNow       = Treatments.getIOB(profile, dateNow);
+        JSONObject iobNow       = IOB.iobTotal(profile, dateNow);
         JSONObject cobNow       = Treatments.getCOB(profile, dateNow);
         String bgCorrection="";
 
@@ -202,7 +202,8 @@ public class BolusWizard {
 
         Double iobValue=0D;
         try {
-            iobValue = iob.iobTotal(treatments, profile, dateNow).getDouble("bolusiob");
+            iobValue = IOB.iobTotal(profile, dateNow).getDouble("bolusiob");
+            //iobValue = iob.iobTotal(treatments, profile, dateNow).getDouble("bolusiob");
         } catch (JSONException e) {
             //Toast.makeText(ApplicationContextProvider.getContext(), "Error getting IOB for bwp_calc", Toast.LENGTH_LONG).show();
             Crashlytics.logException(e);

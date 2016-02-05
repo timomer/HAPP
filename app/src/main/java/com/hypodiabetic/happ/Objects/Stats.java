@@ -10,6 +10,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.annotations.Expose;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
 import org.json.JSONObject;
 
@@ -108,7 +109,7 @@ public class Stats extends Model{
         for (int v=0; v<=5; v++) {
             Stats stat = new Stats();
 
-            JSONObject iobJSONValue = Treatments.getIOB(profileAsOfNow, dateVar);
+            JSONObject iobJSONValue = IOB.iobTotal(profileAsOfNow, dateVar);
             JSONObject cobJSONValue = Treatments.getCOB(profileAsOfNow, dateVar);
 
             try {

@@ -64,9 +64,9 @@ public class ObjectToSync {
     public String getObjectSummary(){
         switch (happ_object_type){
             case "bolus_delivery":
-                return tools.formatDisplayInsulin(value1,1) + " " + value3;
+                return tools.formatDisplayInsulin(value1,2) + " " + value3;
             case "temp_basal":
-                return tools.formatDisplayInsulin(value1,1) + " (" + value2 + "%) " + value3 + "mins";
+                return tools.formatDisplayInsulin(value1,2) + " (" + value2 + "%) " + value3 + "mins";
             default:
                 return "";
         }

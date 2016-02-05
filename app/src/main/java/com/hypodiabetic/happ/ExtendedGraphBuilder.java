@@ -9,7 +9,7 @@ import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
-import com.hypodiabetic.happ.integration.openaps.iob;
+import com.hypodiabetic.happ.integration.openaps.master.IOB;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -388,7 +388,7 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         for (int v=0; v<=10; v++) {
             JSONObject iobcobValue = new JSONObject();
 
-            iobFutureValues.put(iob.iobTotal(treatments, profileAsOfNow, dateVar));                //Based on these treatments, get total IOB as of dateVar
+            iobFutureValues.put(IOB.iobTotal(profileAsOfNow, dateVar));                //get total IOB as of dateVar
             cobFutureValues.put(cob.cobTotal(cobtreatments, profileAsOfNow, dateVar));
 
             dateVar = new Date(dateVar.getTime() + 10*60000);                   //Adds 10mins to dateVar

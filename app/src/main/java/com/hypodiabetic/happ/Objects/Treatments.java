@@ -8,12 +8,12 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.code.nightscout.cob;
-import com.hypodiabetic.happ.integration.openaps.iob;
 
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -96,11 +96,6 @@ public class Treatments extends Model{
         return treatment;
     }
 
-    public static JSONObject getIOB(Profile p, Date t){
-        List treatments = latestTreatments(20, "Insulin");                                          //Get the x most recent Insulin treatments
-        return iob.iobTotal(treatments, p, t);
-    }
-
     public static JSONObject getCOB(Profile p, Date t){
         List cobtreatments = latestTreatments(20, null);
         Collections.reverse(cobtreatments);                                                         //Sort the Treatments from oldest to newest
@@ -111,6 +106,13 @@ public class Treatments extends Model{
         List cobtreatments = getTreatmentsDated(from, to, null);
         Collections.reverse(cobtreatments);                                                         //Sort the Treatments from oldest to newest
         return cob.cobTotal(cobtreatments, p, new Date());
+    }
+
+    public static class sortByDateTime implements Comparator<Treatments> {
+        @Override
+        public int compare(Treatments o1, Treatments o2) {
+            return o1.datetime.compareTo(o2.datetime);
+        }
     }
 
 }
