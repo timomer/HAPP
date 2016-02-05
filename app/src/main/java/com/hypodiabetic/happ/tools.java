@@ -291,13 +291,6 @@ public class tools {
 
     public static Double stringToDouble(String string){
         //Used to support locations where , is used as decimal separator
-        //DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(Locale.UK);
-        //try {
-        //    return df.parse(string).doubleValue();
-        //} catch (ParseException e){
-        //    Crashlytics.logException(e);
-        //    return 0.0;
-        //}
         if (string == null) {
             Log.e("CORE", "stringToDouble Null value!");
             return 0.0;
@@ -330,7 +323,6 @@ public class tools {
                 return 0.0;
             }
         }
-
     }
 
     /**

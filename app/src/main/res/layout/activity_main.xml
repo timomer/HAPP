@@ -338,13 +338,13 @@
             android:padding="16dp"
             android:orientation="vertical">
             <TextView
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="38dp"
                 android:text="Insulin Integration App"
                 android:textSize="14sp"
                 android:gravity="center_vertical"/>
             <LinearLayout
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="38dp"
                 android:orientation="horizontal">
                 <ImageView
@@ -364,7 +364,7 @@
                     android:gravity="center_vertical"/>
             </LinearLayout>
             <LinearLayout
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="38dp"
                 android:orientation="horizontal">
                 <ImageView
@@ -389,7 +389,7 @@
         </LinearLayout>
         <ListView
             android:id="@+id/navList"
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             />
     </LinearLayout>

@@ -48,8 +48,10 @@ public class BolusWizard {
         String suggested_correction_maths;
         Double suggested_correction;
         Double net_correction_biob              = (cob / profile.carbRatio) - iob;                                     //Net IOB after current carbs taken into consideration
+        if (net_correction_biob.isNaN() || net_correction_biob.isInfinite()) net_correction_biob = 0D;
         String net_biob_correction_maths        = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
         Double insulin_correction_carbs         = carbs / profile.carbRatio;                                            //Insulin required for carbs about to be consumed
+        if (insulin_correction_carbs.isNaN() || insulin_correction_carbs.isInfinite()) insulin_correction_carbs = 0D;
         String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.carbRatio + "g) = " + tools.formatDisplayInsulin(insulin_correction_carbs,2);
         if (lastBG >= profile.max_bg) {                                                              //True HIGH
             insulin_correction_bg = (lastBG - profile.max_bg) / profile.isf;
@@ -85,6 +87,7 @@ public class BolusWizard {
             bgCorrection                = "Within Target";
             insulin_correction_bg_maths = "NA - BG within Target";
         }
+        if (insulin_correction_bg.isNaN() || insulin_correction_bg.isInfinite()) insulin_correction_bg = 0D;
 
         suggested_correction        = insulin_correction_bg + net_correction_biob;
         suggested_correction_maths  = "BG Corr(" + tools.formatDisplayInsulin(insulin_correction_bg,2) + ") - Net Bolus(" + tools.formatDisplayInsulin(net_correction_biob,2) + ") = " + tools.formatDisplayInsulin(suggested_correction,2);

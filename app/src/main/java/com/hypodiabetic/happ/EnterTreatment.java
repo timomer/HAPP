@@ -574,7 +574,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     return "Today";
                 case 2:
                     return "Yesterday";
-
             }
             return null;
         }

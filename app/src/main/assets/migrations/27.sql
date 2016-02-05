@@ -1,1 +1,0 @@
-ALTER TABLE integration ADD COLUMN date_created INTEGER;
