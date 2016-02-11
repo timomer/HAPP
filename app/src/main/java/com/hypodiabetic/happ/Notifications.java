@@ -21,6 +21,7 @@ import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
+import com.hypodiabetic.happ.integration.InsulinIntegrationAppNotification;
 
 import org.json.JSONObject;
 
@@ -33,6 +34,28 @@ import java.util.Date;
  * Created by Tim on 07/10/2015.
  */
 public class Notifications {
+
+
+    //Insulin Treatments Integration notification
+    public static void newInsulinUpdate(){
+
+        View mainActivityView = MainActivity.activity.findViewById(R.id.mainActivity);
+
+        if (mainActivityView != null){
+            //Main Activity is loaded, show snackbar notification
+            InsulinIntegrationAppNotification popup = new InsulinIntegrationAppNotification();
+            Snackbar snackbar = popup.check(mainActivityView);
+
+            if (snackbar != null) snackbar.show();
+
+        } else {
+            //Main app not loaded
+
+            // TODO: 11/02/2016 show notification for errors only on phone + wear?
+        }
+
+
+    }
 
 
     //New Temp has been suggested
@@ -88,7 +111,6 @@ public class Notifications {
 
         if (prefs.getBoolean("summary_notification", true)) {
 
-            Date timeNow = new Date();
             TempBasal lastTempBasal = TempBasal.last();
             String title;
             if (lastTempBasal.isactive(null)) {                                                     //Active temp Basal
@@ -98,7 +120,7 @@ public class Notifications {
                     title = lastTempBasal.basal_adjustemnt + " Basal " + tools.formatDisplayInsulin(lastTempBasal.rate,2) + " " + lastTempBasal.durationLeft() + "mins left";
                 }
             } else {                                                                                //No temp Basal running, show default
-                Double currentBasal = new Profile(timeNow, c).current_basal;
+                Double currentBasal = new Profile(new Date()).current_basal;
                 if (prefs.getString("basal_mode","percent").equals("percent")) {
                     title = "Default Basal 100%";
                 } else {

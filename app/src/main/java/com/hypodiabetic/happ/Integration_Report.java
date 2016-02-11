@@ -25,6 +25,7 @@ import java.util.List;
 public class Integration_Report extends AppCompatActivity {
 
     Spinner integrationType;
+    Spinner happObjectType;
     ListView integrationReportList;
 
     @Override
@@ -33,45 +34,16 @@ public class Integration_Report extends AppCompatActivity {
         setContentView(R.layout.activity_integration__report);
 
         integrationType = (Spinner) findViewById(R.id.integrationType);
+        happObjectType = (Spinner) findViewById(R.id.HAPPObjectType);
         integrationReportList = (ListView) findViewById(R.id.integrationReportList);
 
-        String[] integrationTypes = {"bolus_delivery", "temp_basal"};
+        String[] integrationTypes = {"insulin_integration_app"};
         ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, integrationTypes);
         integrationType.setAdapter(stringArrayAdapter);
         integrationType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
-                Calendar integrationDate  = Calendar.getInstance();
-                SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
-                List<Integration> integrations = Integration.getIntegrationsForHappObjectType(parent.getSelectedItem().toString(), 20);
-
-                for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
-                    HashMap<String, String> integrationItem = new HashMap<String, String>();
-
-                    ObjectToSync objectSyncDetails = new ObjectToSync(integration);
-
-                    if (objectSyncDetails.requested != null){
-                        integrationDate.setTime(objectSyncDetails.requested);
-                    } else {
-                        integrationDate.setTime(new Date(0));                                                 //Bad integration
-                    }
-                    integrationItem.put("integrationType",      integration.type);
-                    integrationItem.put("integrationWhat",      "Request sent: " + objectSyncDetails.getObjectSummary());
-                    integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
-                    integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);
-                    integrationItem.put("integrationAction",    "Action: " + objectSyncDetails.action);
-                    integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id.toString());
-                    integrationItem.put("integrationDetails",   objectSyncDetails.details);
-
-                    integrationList.add(integrationItem);
-                }
-
-                SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
-                        new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails"},
-                        new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails});
-                integrationReportList.setAdapter(adapter);
+                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString());
             }
 
             @Override
@@ -79,6 +51,53 @@ public class Integration_Report extends AppCompatActivity {
             }
         });
 
+        String[] happObjectTypes = {"bolus_delivery", "temp_basal"};
+        ArrayAdapter<String> stringArrayAdapter2= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, happObjectTypes);
+        happObjectType.setAdapter(stringArrayAdapter2);
+        happObjectType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+    }
+
+    public void reloadList(String intergartion, String happObject){
+        ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
+        Calendar integrationDate  = Calendar.getInstance();
+        SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
+        List<Integration> integrations = Integration.getIntegrations(intergartion, happObject, 20);
+
+        for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
+            HashMap<String, String> integrationItem = new HashMap<String, String>();
+
+            ObjectToSync objectSyncDetails = new ObjectToSync(integration);
+
+            if (objectSyncDetails.requested != null){
+                integrationDate.setTime(objectSyncDetails.requested);
+            } else {
+                integrationDate.setTime(new Date(0));                                                 //Bad integration
+            }
+            integrationItem.put("integrationType",      integration.type);
+            integrationItem.put("integrationWhat",      "Request sent: " + objectSyncDetails.getObjectSummary());
+            integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
+            integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);
+            integrationItem.put("integrationAction",    "Action: " + objectSyncDetails.action);
+            integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id);
+            integrationItem.put("integrationDetails",   objectSyncDetails.details);
+
+            integrationList.add(integrationItem);
+        }
+
+        SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
+                new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails"},
+                new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails});
+        integrationReportList.setAdapter(adapter);
     }
 
 }

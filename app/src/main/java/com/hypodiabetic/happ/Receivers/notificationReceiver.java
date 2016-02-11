@@ -31,12 +31,20 @@ public class notificationReceiver extends BroadcastReceiver {
 
                 TempBasal suggestedTemp = gson.fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
 
-                pumpAction.setTempBasal(suggestedTemp, context);   //Action the suggested Temp
-                Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
+                if (suggestedTemp.basal_adjustemnt.equals("Pump Default")){
+                    pumpAction.cancelTempBasal(context);
+                } else {
+                    pumpAction.setTempBasal(suggestedTemp, context);   //Action the suggested Temp
+                    Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();
+                }
+
                 Notifications.clear("updateCard", context);                                                  //Clears info card on current Basal
                 break;
             case "setTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);  //Kills the notification
+                break;
+            case "NEW_INSULIN_UPDATE":
+                Notifications.newInsulinUpdate();
                 break;
         }
 

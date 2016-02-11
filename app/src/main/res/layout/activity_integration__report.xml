@@ -8,11 +8,36 @@
     tools:context="com.hypodiabetic.happ.Integration_Report"
     android:orientation="vertical">
 
-    <Spinner
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/integrationType"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Integration"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/integrationType"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="HAPP Object"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/HAPPObjectType"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
 
     <ListView
         android:layout_width="match_parent"

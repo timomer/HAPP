@@ -3,6 +3,7 @@ package com.hypodiabetic.happ.Receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -12,7 +13,7 @@ import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.integration.openaps.master.IOB;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONObject;
 
@@ -30,7 +31,7 @@ public class statsReceiver extends BroadcastReceiver {
 
 
         Date dateVar = new Date();
-        Profile profileAsOfNow = new Profile(dateVar,context);
+        Profile profileAsOfNow = new Profile(dateVar);
 
         Stats stat = new Stats();
 
@@ -63,6 +64,7 @@ public class statsReceiver extends BroadcastReceiver {
         intent.putExtra("stat", gson.toJson(stat, Stats.class));                                    //sends result to update UI if loaded
         context.sendBroadcast(intent);
 
+        Log.d("statsReceiver", "onReceive: " + stat.toString());
     }
 
 

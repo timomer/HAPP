@@ -108,10 +108,10 @@ public class Treatments extends Model{
         return cob.cobTotal(cobtreatments, p, new Date());
     }
 
-    public static class sortByDateTime implements Comparator<Treatments> {
+    public static class sortByDateTimeOld2Young implements Comparator<Treatments> {
         @Override
         public int compare(Treatments o1, Treatments o2) {
-            return o1.datetime.compareTo(o2.datetime);
+            return o2.datetime.compareTo(o1.datetime);
         }
     }
 

@@ -2,6 +2,7 @@ package com.hypodiabetic.happ.integration.openaps.master;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.eclipsesource.v8.JavaVoidCallback;
@@ -11,6 +12,7 @@ import com.eclipsesource.v8.V8Object;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,12 +49,12 @@ public class DetermineBasalAdapterJS {
 
     JSONObject bgCheck;
 
-    public DetermineBasalAdapterJS(ScriptReader scriptReader, Context c) throws IOException {
+    public DetermineBasalAdapterJS(ScriptReader scriptReader) throws IOException {
         mV8rt = V8.createV8Runtime();
         mScriptReader  = scriptReader;
 
         Date dateVar = new Date();
-        Profile profile = new Profile(dateVar, c);
+        Profile profile = new Profile(dateVar);
 
         initProfile(profile);
         initGlucoseStatus();
@@ -199,6 +201,7 @@ public class DetermineBasalAdapterJS {
         } catch (JSONException e){}
 
         mV8rt.add(PARAM_iobData, mIobData);
+        Log.d("DetermineBasalAdapterJS", "master: initIobData: " + mIobData.toString());
     }
 
     private void setIobData(double netIob, double netActivity, double bolusIob) {

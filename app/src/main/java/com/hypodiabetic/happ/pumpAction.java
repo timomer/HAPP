@@ -37,12 +37,16 @@ public class pumpAction {
 
     public static void newTempBasal(TempBasal basal, Context c){
         //A new Temp Basal has been suggested
-        Profile p = new Profile(new Date(), c);
+        Profile p = new Profile(new Date());
 
         if (basal != null && c != null) {
 
             if (basal.aps_mode.equals("closed") && !p.temp_basal_notification) {                    //Send Direct to pump
-                setTempBasal(basal, c);
+                if (basal.basal_adjustemnt.equals("Pump Default")){
+                    cancelTempBasal(c);
+                } else {
+                    setTempBasal(basal, c);
+                }
 
             } else {
                 Notifications.newTemp(basal, c);                                                    //Notify user
@@ -55,7 +59,7 @@ public class pumpAction {
 
         if (basal == null) basal = APSResult.last().getBasal();
 
-        Profile p = new Profile(new Date(), c);
+        Profile p = new Profile(new Date());
         Double safeRate;
 
         //Sanity check the suggested rate is safe
@@ -86,14 +90,8 @@ public class pumpAction {
         //Cancels a Running Temp Basal and updates the DB with the Temp Basal new duration
 
         final TempBasal active_basal = TempBasal.getCurrentActive(null);
-        Date now = new Date();
-        final Profile p = new Profile(now, c);
-        TempBasal basal = new TempBasal();
+        final Profile p = new Profile(new Date());
 
-        //The current Pumps Basal
-        basal.ratePercent       = 100;
-        basal.rate              = p.current_basal;
-        basal.basal_adjustemnt  = "Pump Default";
 
         if (active_basal.isactive(null)) {
 
@@ -110,15 +108,24 @@ public class pumpAction {
                 //Notify
                 String popUpMsg;
                 if (p.basal_mode.equals("percent")) {
-                    popUpMsg = basal.ratePercent + "%";
+                    popUpMsg = "100%";
                 } else {
-                    popUpMsg = basal.rate + "U";
+                    popUpMsg = tools.formatDisplayBasal(p.current_basal,false);
+                }
+
+                final String msgTitle, posativeButton;
+                if (p.aps_mode.equals("closed") && p.temp_basal_notification) {
+                    msgTitle        =   "Default Basal will be set";
+                    posativeButton  =   "ACTION";
+                } else {
+                    msgTitle        =   "Manually set Default Basal";
+                    posativeButton  =   "DONE";
                 }
 
                 new AlertDialog.Builder(c)
-                        .setTitle("Manually set " + basal.basal_adjustemnt + " Basal")
+                        .setTitle(msgTitle)
                         .setMessage("Rate " + popUpMsg)
-                        .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(posativeButton, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 //Updates the duration of the Active Temp Basal we are stopping
                                 updateTempBeingCanceled(active_basal, c);
@@ -155,6 +162,8 @@ public class pumpAction {
         //Inform Integrations Manager
         IntegrationsManager.cancelTempBasal(active_basal);
 
+        Notifications.newInsulinUpdate();
+
         //Update Main Activity of Current Temp Change
         Intent intent = new Intent("APS_UPDATE");
         c.sendBroadcast(intent);
@@ -162,8 +171,7 @@ public class pumpAction {
 
     public static void setBolus(Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
 
-        Date now = new Date();
-        Profile p = new Profile(now, c);
+        Profile p = new Profile(new Date());
         Double totalBolus=0D, hardcodedMaxBolus=15D, diffBolus=0D;
         if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
         if (correctionTrearment != null) totalBolus += correctionTrearment.value;

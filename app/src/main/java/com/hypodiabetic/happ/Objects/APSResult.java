@@ -112,7 +112,6 @@ public class APSResult extends Model{
         reply.basal_type        =   basal_type;
         reply.basal_adjustemnt  =   basal_adjustemnt;
         reply.aps_mode          =   aps_mode;
-        reply.basal_adjustemnt  =   basal_adjustemnt;
 
         return reply;
     }

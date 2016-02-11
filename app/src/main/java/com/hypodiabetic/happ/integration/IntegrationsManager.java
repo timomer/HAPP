@@ -27,8 +27,7 @@ public class IntegrationsManager {
         //Sends data from HAPP to Interactions
         ConnectivityManager cm = (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-        Date now = new Date();
-        Profile p = new Profile(now, c);
+        Profile p = new Profile(new Date());
 
         //Local device based Integrations
         String insulin_Integration_App = prefs.getString("insulin_integration", "");
@@ -58,7 +57,7 @@ public class IntegrationsManager {
     public static void newBolus(Treatments bolus, Treatments correction){
         //Saves the treatments to the DB to be accessed later once we are connected to Insulin Integration App
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-        Profile p               =   new Profile(new Date(), MainApp.instance());
+        Profile p               =   new Profile(new Date());
 
         //Are we allowed and able to send bolus?
         if (p.send_bolus_allowed ) {
@@ -87,7 +86,7 @@ public class IntegrationsManager {
 
     public static void newTempBasal(TempBasal tempBasal){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-        Profile p               =   new Profile(new Date(), MainApp.instance());
+        Profile p               =   new Profile(new Date());
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
@@ -104,7 +103,7 @@ public class IntegrationsManager {
         syncIntegrations(MainApp.instance());
     }
     public static void cancelTempBasal(TempBasal tempBasal){
-        Profile p = new Profile(new Date(), MainApp.instance());
+        Profile p = new Profile(new Date());
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
@@ -114,9 +113,10 @@ public class IntegrationsManager {
             basalIntegration.save();
         }
 
-        // TODO: 30/01/2016 NS Intergartions
+        // TODO: 30/01/2016 NS Integrations
 
         syncIntegrations(MainApp.instance());
     }
+
 
 }

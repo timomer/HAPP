@@ -39,7 +39,7 @@ public class Profile {
     public Double max_bolus;                        //The maximum Bolus the app can deliver
     public String aps_algorithm;
 
-    public Profile(Date thisTime, Context c){
+    public Profile(Date thisTime){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         //OpenAPS expected Profile settings
@@ -76,10 +76,10 @@ public class Profile {
             send_bolus_allowed = false;
         }
 
-        max_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170")), c));
-        min_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70")), c));
-        target_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100")), c));
-        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs), c));
+        max_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170"))));
+        min_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70"))));
+        target_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100"))));
+        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs)));
     }
 
     public static Double getCurrent_basal(Date dateNow, SharedPreferences prefs){

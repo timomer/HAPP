@@ -1,6 +1,7 @@
 package com.hypodiabetic.happ;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.APSResult;
@@ -9,7 +10,7 @@ import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.code.nightscout.cob;
 import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
-import com.hypodiabetic.happ.integration.openaps.master.IOB;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -379,21 +380,20 @@ public class ExtendedGraphBuilder extends BgGraphBuilder  {
         iobFutureValues = new JSONArray();
         cobFutureValues = new JSONArray();
         Date dateVar = new Date();
-        List treatments = Treatments.latestTreatments(20, "Insulin");                   //Get the x most recent Insulin treatments
         List cobtreatments = Treatments.latestTreatments(20,null);
         Collections.reverse(cobtreatments);                                             //Sort the Treatments from oldest to newest
 
-        Profile profileAsOfNow = new Profile(dateVar,context);
+        Profile profileAsOfNow = new Profile(dateVar);
 
         for (int v=0; v<=10; v++) {
-            JSONObject iobcobValue = new JSONObject();
 
             iobFutureValues.put(IOB.iobTotal(profileAsOfNow, dateVar));                //get total IOB as of dateVar
             cobFutureValues.put(cob.cobTotal(cobtreatments, profileAsOfNow, dateVar));
 
             dateVar = new Date(dateVar.getTime() + 10*60000);                   //Adds 10mins to dateVar
-            profileAsOfNow = new Profile(dateVar,context);        //Gets Profile info for the new dateVar
+            profileAsOfNow = new Profile(dateVar);        //Gets Profile info for the new dateVar
         }
+        Log.d("DEBUG", "addfutureValues: ");
     }
 
     public Line cobFutureLine(){

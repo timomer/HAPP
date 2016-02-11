@@ -160,8 +160,12 @@ public class tools {
                 return value.toString() + "u";
         }
     }
-    public static String formatDisplayBasal(Double value){
-        return String.format(Locale.ENGLISH, "%.2f", value) + "U/h";
+    public static String formatDisplayBasal(Double value, Boolean doubleLine){
+        if (doubleLine) {
+            return String.format(Locale.ENGLISH, "%.2f", value) + "\n" + "U/h";
+        } else {
+            return String.format(Locale.ENGLISH, "%.2f", value) + "U/h";
+        }
     }
 
     public static String formatDisplayCarbs(Double value){
@@ -201,8 +205,8 @@ public class tools {
     }
 
     //always returns value in mgdl
-    public static String inmgdl(Double value, Context c) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+    public static String inmgdl(Double value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         String unit = prefs.getString("units", "mgdl");
 
         if(unit.compareTo("mgdl") == 0) {

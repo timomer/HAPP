@@ -52,37 +52,38 @@ public class TreatmentService extends Service{
 
         if (update != null){
 
-            String objectDetails="", state="", details="";
+            //String objectDetails="", state="", details="";
             switch (action){
                 case "bolus_delivery":
                     ObjectToSync bolusUpdate = new Gson().fromJson(update, ObjectToSync.class);
                     bolusUpdate.updateIntegration();
-                    state = bolusUpdate.state;
-                    details = bolusUpdate.details;
-                    objectDetails = bolusUpdate.state.toUpperCase() + ": " + tools.formatDisplayInsulin(bolusUpdate.value1,1) + " " + bolusUpdate.value3;
+                    //state = bolusUpdate.state;
+                    //details = bolusUpdate.details;
+                    //objectDetails = bolusUpdate.state.toUpperCase() + ": " + tools.formatDisplayInsulin(bolusUpdate.value1,1) + " " + bolusUpdate.value3;
                     break;
                 case "temp_basal":
                     ObjectToSync basalUpdate = new Gson().fromJson(update, ObjectToSync.class);
                     basalUpdate.updateIntegration();
-                    state = basalUpdate.state;
-                    details = basalUpdate.details;
-                    objectDetails = basalUpdate.state.toUpperCase() + ": Temp Basal " + tools.formatDisplayBasal(basalUpdate.value1) + " (" + basalUpdate.value2 + "%)";
+                    //state = basalUpdate.state;
+                    //details = basalUpdate.details;
+                    //objectDetails = basalUpdate.state.toUpperCase() + ": Temp Basal " + tools.formatDisplayBasal(basalUpdate.value1, false) + " (" + basalUpdate.value2 + "%)";
                     break;
             }
 
-            final String userMsg = objectDetails;
-            int snackbar_length = Snackbar.LENGTH_LONG;
+            //final String userMsg = objectDetails;
+            //int snackbar_length = Snackbar.LENGTH_LONG;
 
-            if (state.equals("error")){
+            //if (state.equals("error")){
                 //Something went wrong, inform user with INDEFINITE snackbar
-                snackbar_length = Snackbar.LENGTH_INDEFINITE;
-            }
+            //    snackbar_length = Snackbar.LENGTH_INDEFINITE;
+            //}
 
-            //Send broadcast to Main Activity as we are running on a different thread
-            Intent intent = new Intent("NEW_APP_NOTIFICATION");
-            intent.putExtra("snackbar_length", snackbar_length);
-            intent.putExtra("alertDialogText", details);
-            intent.putExtra("snackBarMsg", userMsg);
+            //Send broadcast to Main App as we are running on a different thread
+            Intent intent = new Intent("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
+            intent.putExtra("NOTIFICATION_TYPE", "NEW_INSULIN_UPDATE");
+            //intent.putExtra("snackbar_length", snackbar_length);
+            //intent.putExtra("alertDialogText", details);
+            //intent.putExtra("snackBarMsg", userMsg);
             MainApp.instance().sendBroadcast(intent);
 
         }

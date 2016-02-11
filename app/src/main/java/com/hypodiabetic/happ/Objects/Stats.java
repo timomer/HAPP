@@ -2,6 +2,7 @@ package com.hypodiabetic.happ.Objects;
 
 import android.content.Context;
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.activeandroid.Model;
@@ -10,7 +11,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.annotations.Expose;
-import com.hypodiabetic.happ.integration.openaps.master.IOB;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONObject;
 
@@ -104,7 +105,7 @@ public class Stats extends Model{
     public static List<Stats> updateActiveBarChart(Context c){
         List<Stats> statList = new ArrayList<Stats>();
         Date dateVar = new Date();
-        Profile profileAsOfNow = new Profile(dateVar,c);
+        Profile profileAsOfNow = new Profile(dateVar);
 
         for (int v=0; v<=5; v++) {
             Stats stat = new Stats();
@@ -129,7 +130,7 @@ public class Stats extends Model{
                 statList.add(stat);
 
                 dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
-                profileAsOfNow = new Profile(dateVar,c);        //Gets Profile info for the new dateVar
+                profileAsOfNow = new Profile(dateVar);        //Gets Profile info for the new dateVar
 
             } catch (Exception e)  {
                 Crashlytics.logException(e);
@@ -137,6 +138,7 @@ public class Stats extends Model{
             }
         }
 
+        Log.d("DEBUG", "updateActiveBarChart: " + statList.toString());
         return statList;
     }
 

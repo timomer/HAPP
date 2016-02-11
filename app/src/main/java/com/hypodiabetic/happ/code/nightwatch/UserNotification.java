@@ -1,6 +1,8 @@
 package com.hypodiabetic.happ.code.nightwatch;
 
+import android.content.Context;
 import android.provider.BaseColumns;
+import android.support.design.widget.Snackbar;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
@@ -8,6 +10,7 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by tim on 07/08/2015.
@@ -19,7 +22,7 @@ import java.util.Date;
 public class UserNotification extends Model {
 
     @Column(name = "timestamp", index = true)
-    public double timestamp;
+    public Long timestamp;
 
     @Column(name = "message")
     public String message;
@@ -27,22 +30,4 @@ public class UserNotification extends Model {
     @Column(name = "bg_alert")
     public boolean bg_alert;
 
-    public static UserNotification lastBgAlert() {
-        return new Select()
-                .from(UserNotification.class)
-                .where("bg_alert = ?", true)
-                .orderBy("_ID desc")
-                .executeSingle();
-    }
-
-    public static UserNotification create(String message, String type) {
-        UserNotification userNotification = new UserNotification();
-        userNotification.timestamp = new Date().getTime();
-        userNotification.message = message;
-        if (type == "bg_alert") {
-            userNotification.bg_alert = true;
-        }
-        userNotification.save();
-        return userNotification;
-    }
 }

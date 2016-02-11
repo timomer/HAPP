@@ -100,7 +100,7 @@ public class BolusWizardActivity extends Activity {
     }
 
     public void run_bw(){
-        JSONObject reply = BolusWizard.run_NS_BW(this.getBaseContext());
+        JSONObject reply = BolusWizard.run_NS_BW();
         TextView sysMsg;
         sysMsg = (TextView) findViewById(R.id.wizardCalc);
         sysMsg.setText("NS bwp: " + reply.toString());
@@ -122,7 +122,7 @@ public class BolusWizardActivity extends Activity {
             carbValue = tools.stringToDouble(carbs.getText().toString());
         }
 
-        JSONObject bw = BolusWizard.bw(this.getBaseContext(), carbValue);
+        JSONObject bw = BolusWizard.bw(carbValue);
 
             //Bolus Wizard Display
             bwDisplayIOBCorr.setText(   bw.optString("net_biob", "") + "U");

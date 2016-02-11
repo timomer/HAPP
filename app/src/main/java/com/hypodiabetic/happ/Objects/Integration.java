@@ -92,10 +92,11 @@ public class Integration extends Model {
                 .execute();
     }
 
-    public static List<Integration> getIntegrationsForHappObjectType(String happ_object, int limit) {
+    public static List<Integration> getIntegrations(String type, String happ_object,  int limit) {
         return new Select()
                 .from(Integration.class)
                 .where("happ_object = '" + happ_object + "'")
+                .where("type = '" + type + "'")
                 .limit(limit)
                 .orderBy("date_updated desc")
                 .execute();
@@ -118,6 +119,23 @@ public class Integration extends Model {
                 .executeSingle();
         return integration;
     }
+
+    public static List<Integration> getUpdatedInLastMins(Integer inLastMins, String type) {
+
+        Long now = new Date().getTime();
+        Long minsAgo = new Date().getTime() - (inLastMins * 60 * 1000);
+        return new Select()
+                .from(Integration.class)
+                .where("type = '" + type + "'")
+                .where("date_updated >= ? and date_updated <= ?", minsAgo, now)
+                .orderBy("date_updated desc")
+                .execute();
+    }
+
+
+
+
+
 
     public static Integration updateIntegration(JSONObject syncUpdate){
         Integration integration = Integration.getIntegrationByID(syncUpdate.optLong("happ_integration_id", 0L));

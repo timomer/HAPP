@@ -24,7 +24,7 @@ public class APS {
     public static APSResult execute(Context c) {
 
         Date dateVar = new Date();
-        Profile profileNow = new Profile(dateVar,c);
+        Profile profileNow = new Profile(dateVar);
         JSONObject apsJSON = rawJSON(c, profileNow);
 
 
@@ -54,7 +54,7 @@ public class APS {
         switch (p.aps_algorithm) {
             case "openaps_oref0_master":
                 try {
-                    com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(c), c);
+                    com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(c));
 
                     JSONObject dbJSJSON = dbJS.invoke();
                     result = dbJSJSON;
@@ -69,7 +69,7 @@ public class APS {
                 break;
             case "openaps_oref0_dev":
                 try {
-                    com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(c), c);
+                    com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS dbJS = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(c));
 
                     JSONObject dbJSJSON = dbJS.invoke();
                     result = dbJSJSON;

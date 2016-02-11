@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/insulinSummaryHappObjectType"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="55dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/insulinSummaryAmount"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:textSize="14sp"
+            android:text="1.00U/h"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:background="@drawable/insulin_basal_square"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginTop="0dp">
+            <TextView
+                android:id="@+id/insulinSummarySummary"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:text="Correction"
+                android:gravity="bottom"/>
+
+            <TextView
+                android:id="@+id/insulinSummaryState"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="16sp"
+                android:text="SENT"
+                android:gravity="center_vertical"/>
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:id="@+id/insulinSummaryStateImage"
+                android:layout_marginRight="1dp"
+                android:layout_gravity="bottom"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginTop="0dp">
+            <TextView
+                android:id="@+id/insulinSummaryDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:layout_weight="1"
+                android:text="Active"
+                android:gravity="center_vertical"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

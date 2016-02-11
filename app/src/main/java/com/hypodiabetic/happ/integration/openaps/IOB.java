@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.integration.openaps.master;
+package com.hypodiabetic.happ.integration.openaps;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.MainApp;
@@ -23,14 +23,14 @@ import java.util.List;
 public class IOB {
 
     //Gets a list of Insulin treatments, converts Temp Basal treatments to Bolus events, called from iobTotal below
-    public static List<Treatments> calcTempTreatments (Date time, Profile profile_data) {
-        List<Treatments> tempBoluses = Treatments.getTreatmentsDated(time.getTime(), time.getTime() - 8 * 60 * 60 * 1000, "Insulin");   //last 8 hours of Insulin Bolus Treatments
-        List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(time.getTime(), time.getTime() - 8 * 60 * 60 * 1000);   //last 8 hours of Temp Basals
+    public static List<Treatments> calcTempTreatments (Date time) {
+        List<Treatments> tempBoluses = Treatments.getTreatmentsDated(time.getTime() - 8 * 60 * 60 * 1000, time.getTime(), "Insulin");   //last 8 hours of Insulin Bolus Treatments
+        List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(time.getTime() - 8 * 60 * 60 * 1000, time.getTime());   //last 8 hours of Temp Basals
 
         Double tempBolusSize;
         for (TempBasal temp : tempHistory) {
             if (temp.duration > 0) {
-                Double netBasalRate = temp.rate - profile_data.current_basal;
+                Double netBasalRate = temp.rate - new Profile(temp.start_time).current_basal;       //*HAPP added* use the basal rate when this basal was active
                 if (netBasalRate < 0) {
                     tempBolusSize = -0.05;
                 } else {
@@ -50,7 +50,7 @@ public class IOB {
                 }
             }
         }
-        Collections.sort(tempBoluses, new Treatments.sortByDateTime());
+        Collections.sort(tempBoluses, new Treatments.sortByDateTimeOld2Young());
 
         return tempBoluses;
     }
@@ -106,7 +106,7 @@ public class IOB {
     //gets the total IOB from multiple Treatments
     public static JSONObject iobTotal(Profile profile_data, Date time) {
 
-        List<Treatments> treatments = calcTempTreatments(time, profile_data);
+        List<Treatments> treatments = calcTempTreatments(time);
         JSONObject returnValue = new JSONObject();
 
         Double iob = 0D;
@@ -128,13 +128,15 @@ public class IOB {
                     if (tIOB.has("activityContrib"))
                         activity += tIOB.getDouble("activityContrib");
                     // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
-                    if (treatment.value >= 0.2){ // && treatment.note.equals("bolus")) {             //Only use bolus for Bolus Snooze *HAPP Added*
+                    if (treatment.value >= 0.2) {
                         //use half the dia for double speed bolus snooze
-                        JSONObject bIOB = iobCalc(treatment, time, dia / 2);
-                        //console.log(treatment);
-                        //console.log(bIOB);
-                        if (bIOB.has("iobContrib"))
-                            bolusiob += bIOB.getDouble("iobContrib");
+                        if (!(profile_data.aps_algorithm.equals("openaps_oref0_master") && treatment.note.equals("correction"))) { //Do not use correction for Bolus Snooze if using OpenAPS Master *HAPP Added*
+                            JSONObject bIOB = iobCalc(treatment, time, dia / 2);
+                            //console.log(treatment);
+                            //console.log(bIOB);
+                            if (bIOB.has("iobContrib"))
+                                bolusiob += bIOB.getDouble("iobContrib");
+                        }
                     }
 
                 }

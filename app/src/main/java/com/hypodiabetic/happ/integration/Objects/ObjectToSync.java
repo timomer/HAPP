@@ -15,7 +15,7 @@ import java.util.Date;
  */
 public class ObjectToSync {
 
-    public String   happ_object_type;           //insulin_treatment / temp_basal
+    public String   happ_object_type;           //bolus_delivery / temp_basal
     public String   action;                     //new / update / cancel
     public String   state;                      //to_sync / sent / received / delivered / error
     public String   details;                    //details of this item being synced

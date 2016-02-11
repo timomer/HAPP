@@ -18,6 +18,7 @@ import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -45,7 +46,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
-import com.hypodiabetic.happ.integration.openaps.master.IOB;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONObject;
 
@@ -360,7 +361,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 carbValue = tools.stringToDouble(wizardCarbs.getText().toString());
             }
 
-            JSONObject bw = BolusWizard.bw(v.getContext(), carbValue);
+            JSONObject bw = BolusWizard.bw(carbValue);
 
             DecimalFormat df = new DecimalFormat("##0.0");
 
@@ -650,7 +651,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             Calendar treatmentDate  = Calendar.getInstance();
             Calendar calYesterday   = Calendar.getInstance();
             calYesterday.add(Calendar.DAY_OF_YEAR, -1); // yesterday
-            Profile profile = new Profile(new Date(),rootView.getContext());
+            Profile profile = new Profile(new Date());
             Boolean lastCarb=false,lastInsulin=false;
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
@@ -753,6 +754,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 }
             });
             registerForContextMenu(list);   //Register popup menu when clicking a ListView item
+
+            Log.d("DEBUG", "loadTreatments: " + treatments.size());
         }
 
         @Override
@@ -810,7 +813,13 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
                             break;
                         case 3: //Integration Details
-                            List<Integration> integrations = Integration.getIntegrationsFor("treatment",treatment.getId());
+                            String intergrationType="";
+                            if (treatment.type.equals("Insulin")){
+                                intergrationType="bolus_delivery";
+                            } else {
+                                intergrationType="carbs";
+                            }
+                            List<Integration> integrations = Integration.getIntegrationsFor(intergrationType,treatment.getId());
 
                             final Dialog dialog = new Dialog(parentsView.getContext());
                             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

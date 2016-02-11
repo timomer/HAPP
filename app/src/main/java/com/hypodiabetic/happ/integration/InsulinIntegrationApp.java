@@ -20,6 +20,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.R;
@@ -118,11 +119,11 @@ public class InsulinIntegrationApp {
             switch (basalSync.action) {
                 case "new":
                     bundle.putString("ACTION", "temp_basal");
-                    userMsg = tools.formatDisplayBasal(basalSync.value1) + " (" + basalSync.value2 + "%) Temp Basal";
+                    //userMsg = tools.formatDisplayBasal(basalSync.value1, false) + " (" + basalSync.value2 + "%) Temp Basal";
                     break;
                 case "cancel":
                     bundle.putString("ACTION", "cancel_temp_basal");
-                    userMsg = "Cancel Basal";
+                    //userMsg = "Cancel Basal";
                     break;
             }
             bundle.putLong("DATE_REQUESTED", new Date().getTime());
@@ -140,46 +141,53 @@ public class InsulinIntegrationApp {
             } catch (DeadObjectException d) {
                 Crashlytics.logException(d);
                 d.printStackTrace();
-                userMsg = "Failed: " + userMsg;
+                //userMsg = "Failed: " + userMsg;
                 errorSending = d.getLocalizedMessage() + " " + d.getCause();
             } catch (RemoteException e) {
                 Crashlytics.logException(e);
                 e.printStackTrace();
-                userMsg = "Failed: " + userMsg;
+                //userMsg = "Failed: " + userMsg;
                 errorSending = e.getLocalizedMessage() + " " + e.getCause();
             } finally {
-                userMsg = "Sent: " + userMsg;
-                treatmentsSentOK = true;
+                //userMsg = "Sent: " + userMsg;
+                //treatmentsSentOK = true;
             }
 
-            if (!treatmentsSentOK) {
+            if (!errorSending.equals("")) {
+                    basalIntegration.state = "error";
+                    basalIntegration.details = "HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending;
+                    basalIntegration.save();
+            }
+
+            Notifications.newInsulinUpdate();
+            //if (!treatmentsSentOK) {
                 //We had an error sending, update basal integration with details
-                final String msgText = "HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending;
-                basalIntegration.state = "error";
-                basalIntegration.details = msgText;
-                basalIntegration.save();
+            //    final String msgText = "HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending;
+            //    basalIntegration.state = "error";
+            //    basalIntegration.details = msgText;
+            //    basalIntegration.save();
 
                 //notify user with indefinite snackbar
-                Snackbar snackbar = Snackbar
-                        .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_INDEFINITE)
-                        .setAction("DETAILS", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
-                                builder.setMessage(msgText);
-                                builder.setPositiveButton("OK", null);
-                                builder.show();
-                            }
-                        });
-                snackbar.show();
-            } else {
+            //    Snackbar snackbar = Snackbar
+            //            .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_INDEFINITE)
+            //            .setAction("DETAILS", new View.OnClickListener() {
+            //                @Override
+            //                public void onClick(View view) {
+            //                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
+            //                    builder.setMessage(msgText);
+            //                    builder.setPositiveButton("OK", null);
+            //                    builder.show();
+            //                }
+            //            });
+            //    snackbar.show();
+            //} else {
 
                 //Basal sent ok
-                Snackbar snackbar = Snackbar
-                        .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_LONG);
-                snackbar.show();
+            //    Snackbar snackbar = Snackbar
+            //            .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_LONG);
+            //    snackbar.show();
 
-            }
+            //}
 
         }
 
@@ -252,20 +260,20 @@ public class InsulinIntegrationApp {
             } catch (DeadObjectException d){
                 Crashlytics.logException(d);
                 d.printStackTrace();
-                userMsg = "Failed sending " + tools.formatDisplayInsulin((ok_bolus_value+reject_bolus_value),1) + ", " + (ok_bolus_count+reject_bolus_count) + " Treatments";
+                //userMsg = "Failed sending " + tools.formatDisplayInsulin((ok_bolus_value+reject_bolus_value),1) + ", " + (ok_bolus_count+reject_bolus_count) + " Treatments";
                 errorSending = d.getLocalizedMessage() + " " + d.getCause();
             } catch (RemoteException e) {
                 Crashlytics.logException(e);
                 e.printStackTrace();
-                userMsg = "Failed sending " + tools.formatDisplayInsulin((ok_bolus_value+reject_bolus_value),1) + ", " + (ok_bolus_count+reject_bolus_count) + " Treatments";
+                //userMsg = "Failed sending " + tools.formatDisplayInsulin((ok_bolus_value+reject_bolus_value),1) + ", " + (ok_bolus_count+reject_bolus_count) + " Treatments";
                 errorSending = e.getLocalizedMessage() + " " + e.getCause();
             } finally {
-                if (reject_bolus_count > 0){
-                    userMsg = "Sent " + tools.formatDisplayInsulin(ok_bolus_value, 1) + ", " + (ok_bolus_count) + " Treatments\n" + "Failed sending " + tools.formatDisplayInsulin((reject_bolus_value),1) + ", " + (reject_bolus_count) + " Treatments";
-                } else {
-                    userMsg = "Sent " + tools.formatDisplayInsulin(ok_bolus_value, 1) + ", " + (ok_bolus_count) + " Treatments";
-                }
-                treatmentsSentOK = true;
+                //if (reject_bolus_count > 0){
+                //    userMsg = "Sent " + tools.formatDisplayInsulin(ok_bolus_value, 1) + ", " + (ok_bolus_count) + " Treatments\n" + "Failed sending " + tools.formatDisplayInsulin((reject_bolus_value),1) + ", " + (reject_bolus_count) + " Treatments";
+                //} else {
+                //    userMsg = "Sent " + tools.formatDisplayInsulin(ok_bolus_value, 1) + ", " + (ok_bolus_count) + " Treatments";
+                //}
+                //treatmentsSentOK = true;
             }
 
             if (!errorSending.equals("")){
@@ -278,43 +286,44 @@ public class InsulinIntegrationApp {
                 }
             }
 
-            if (reject_bolus_count > 0 || !treatmentsSentOK){
+            Notifications.newInsulinUpdate();
+            //if (reject_bolus_count > 0 || !treatmentsSentOK){
                 //There was an issue with some treatments, notify user with larger indefinite textview
-                final String msgText = reject_bolus_details + "\n" + ok_bolus_details;
-                Snackbar snackbar = Snackbar
-                        .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_INDEFINITE)
-                        .setAction("DETAILS", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
-                                builder.setMessage(msgText);
-                                builder.setPositiveButton("OK", null);
-                                builder.show();
-                        }
-                    });
-                View snackbarView = snackbar.getView();
-                TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-                //textView.setTextSize(TypedValue.COMPLEX_UNIT_SP,10F);
-                textView.setMaxLines(2);
-                snackbar.show();
-            } else {
+            //    final String msgText = reject_bolus_details + "\n" + ok_bolus_details;
+            //    Snackbar snackbar = Snackbar
+            //            .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_INDEFINITE)
+            //            .setAction("DETAILS", new View.OnClickListener() {
+            //                @Override
+            //                public void onClick(View view) {
+            //                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
+            //                    builder.setMessage(msgText);
+            //                    builder.setPositiveButton("OK", null);
+            //                    builder.show();
+            //            }
+            //        });
+            //    View snackbarView = snackbar.getView();
+            //    TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+            //    //textView.setTextSize(TypedValue.COMPLEX_UNIT_SP,10F);
+            //    textView.setMaxLines(2);
+            //    snackbar.show();
+            //} else {
 
                 //Treatments sent ok and none where rejected when preparing to send
-                final String msgText = ok_bolus_details;
-                Snackbar snackbar = Snackbar
-                        .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_LONG)
-                        .setAction("DETAILS", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
-                                builder.setMessage(msgText);
-                                builder.setPositiveButton("OK", null);
-                                builder.show();
-                            }
-                        });
-                snackbar.show();
+            //    final String msgText = ok_bolus_details;
+            //    Snackbar snackbar = Snackbar
+            //            .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_LONG)
+            //            .setAction("DETAILS", new View.OnClickListener() {
+            //                @Override
+            //                public void onClick(View view) {
+            //                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
+            //                    builder.setMessage(msgText);
+            //                    builder.setPositiveButton("OK", null);
+            //                    builder.show();
+            //                }
+            //            });
+            //    snackbar.show();
 
-            }
+            //}
         }
 
     }

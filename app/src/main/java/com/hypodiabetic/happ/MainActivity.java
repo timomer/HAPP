@@ -51,7 +51,7 @@ import com.hypodiabetic.happ.code.nightwatch.Bg;
 import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
 import com.hypodiabetic.happ.integration.InsulinIntegrationApp;
 import com.hypodiabetic.happ.integration.dexdrip.Intents;
-
+import com.hypodiabetic.happ.integration.InsulinIntegrationAppNotification;
 
 
 import io.fabric.sdk.android.Fabric;
@@ -195,8 +195,6 @@ public class MainActivity extends AppCompatActivity {
                 super.onDrawerOpened(drawerView);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
-                Date now = new Date();
-                Profile p = new Profile(now, MainActivity.getInstace());
                 //Local device based Integrations
                 String insulin_Integration_App = prefs.getString("insulin_integration", "");
 
@@ -287,18 +285,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test(View view){
-         TextView notificationText = (TextView)findViewById(R.id.notices);
-        notificationText.setTextColor(Color.WHITE);
-        //Snackbar snackbar = Snackbar.make(view, String.valueOf(MainApp.insulin_Integration_App_isBound), Snackbar.LENGTH_INDEFINITE);
+         //TextView notificationText = (TextView)findViewById(R.id.notices);
+        //notificationText.setTextColor(Color.WHITE);
 
-        //snackbar.show();
+        InsulinIntegrationAppNotification popup = new InsulinIntegrationAppNotification();
+        Snackbar snackbar = popup.check(view);
+
+        if (snackbar != null) snackbar.show();
 
     }
 
     public void checkInsulinAppIntegration(View view){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
-        Date now = new Date();
-        Profile p = new Profile(now, MainActivity.getInstace());
         //Local device based Integrations
         String insulin_Integration_App = prefs.getString("insulin_integration", "");
 
@@ -328,8 +326,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void showAlgorithmJSON(View view){
-        Date dateVar = new Date();
-        Profile profileNow = new Profile(dateVar,view.getContext());
+        Profile profileNow = new Profile(new Date());
 
         //Shows the JSON output of the selected Algorithm
         String rawAPSJSON = APS.rawJSON(view.getContext(),profileNow).toString();
@@ -493,9 +490,9 @@ public class MainActivity extends AppCompatActivity {
         if (newAPSUpdate != null){
             unregisterReceiver(newAPSUpdate);
         }
-        //if (appNotification != null){
-        //    unregisterReceiver(appNotification);
-        //}
+        if (appNotification != null){
+            unregisterReceiver(appNotification);
+        }
     }
     //xdrip functions ends
 
@@ -675,17 +672,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void updateRunningTemp(){
-        Date timeNow = new Date();
         //sysMsg = (TextView) findViewById(R.id.sysmsg);
         TempBasal lastTempBasal = TempBasal.last();
         //String appStatus;
         if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
             toolbar.setTitle(lastTempBasal.basal_adjustemnt + " Temp Active");
-            toolbar.setSubtitle(tools.formatDisplayBasal(lastTempBasal.rate) + "(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left");
+            toolbar.setSubtitle(tools.formatDisplayBasal(lastTempBasal.rate, false) + "(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left");
         } else {                                                                                    //No temp Basal running, show default
-            Double currentBasal = new Profile(timeNow, this.getBaseContext()).current_basal;
+            Double currentBasal = new Profile(new Date()).current_basal;
             toolbar.setTitle("Default Basal");
-            toolbar.setSubtitle(tools.formatDisplayBasal(currentBasal));
+            toolbar.setSubtitle(tools.formatDisplayBasal(currentBasal, false));
         }
     }
 

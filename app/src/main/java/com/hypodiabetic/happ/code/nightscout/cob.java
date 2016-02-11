@@ -1,11 +1,12 @@
 package com.hypodiabetic.happ.code.nightscout;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import com.hypodiabetic.happ.ApplicationContextProvider;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.integration.openaps.master.IOB;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -132,6 +133,8 @@ public class cob {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Log.d("DEBUG", "cobTotal: " + returnObject.toString());
         return returnObject;
     }
 
