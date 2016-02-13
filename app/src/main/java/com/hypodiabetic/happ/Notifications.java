@@ -35,26 +35,36 @@ import java.util.Date;
  */
 public class Notifications {
 
+    static int NEW_TEMP        =   55;
+    static int UPDATE_CARD     =   56;
+    static int DEBUG_CARD      =   57;
+    static int INSULIN_UPDATE  =   58;
 
     //Insulin Treatments Integration notification
     public static void newInsulinUpdate(){
 
-        View mainActivityView = MainActivity.activity.findViewById(R.id.mainActivity);
+        InsulinIntegrationAppNotification insulinUpdate = new InsulinIntegrationAppNotification();
+        Notification notification = insulinUpdate.getErrorNotification();
+        View mainActivityView=null;
 
-        if (mainActivityView != null){
-            //Main Activity is loaded, show snackbar notification
-            InsulinIntegrationAppNotification popup = new InsulinIntegrationAppNotification();
-            Snackbar snackbar = popup.check(mainActivityView);
+        try {
+            mainActivityView = MainActivity.activity.findViewById(R.id.mainActivity);
+            
+        } catch (NullPointerException e){
+            //Error getting Main app View
+            if (notification != null) ((NotificationManager) MainApp.instance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(INSULIN_UPDATE, notification);
 
-            if (snackbar != null) snackbar.show();
+        } finally {
 
-        } else {
-            //Main app not loaded
-
-            // TODO: 11/02/2016 show notification for errors only on phone + wear?
+            if (mainActivityView != null){
+                //Main Activity is loaded, show snackbar notification
+                Snackbar snackbar = insulinUpdate.getSnackbar(mainActivityView);
+                if (snackbar != null) snackbar.show();
+            } else {
+                //Main app not loaded
+                if (notification != null) ((NotificationManager) MainApp.instance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(INSULIN_UPDATE, notification);
+            }
         }
-
-
     }
 
 
@@ -100,7 +110,7 @@ public class Notifications {
                         .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT)))
                 .addAction(R.drawable.ic_exit_to_app_white_24dp, "Accept Temp", pending_intent_accept_temp)
                 .build();
-        ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(55, notification);
+        ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(NEW_TEMP, notification);
     }
 
 
@@ -155,7 +165,7 @@ public class Notifications {
                     .addAction(R.drawable.ic_media_play, "Run APS", pending_intent_run_aps)
                             //.setOngoing(true) Android Wear will not display
                     .build();
-            ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(56, notification);
+            ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(UPDATE_CARD, notification);
         }
     }
 
@@ -191,7 +201,7 @@ public class Notifications {
                     )
                             //.setOngoing(true) Android Wear will not display
                     .build();
-            ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(57, notification);
+            ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(DEBUG_CARD, notification);
         }
     }
 
@@ -200,10 +210,10 @@ public class Notifications {
 
         switch (what){
             case "updateCard":
-                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(56);
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(UPDATE_CARD);
                 break;
             case "newTemp":
-                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);
+                ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(NEW_TEMP);
                 break;
         }
 

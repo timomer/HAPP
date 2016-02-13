@@ -43,7 +43,7 @@ public class pumpAction {
 
             if (basal.aps_mode.equals("closed") && !p.temp_basal_notification) {                    //Send Direct to pump
                 if (basal.basal_adjustemnt.equals("Pump Default")){
-                    cancelTempBasal(c);
+                    cancelTempBasal();
                 } else {
                     setTempBasal(basal, c);
                 }
@@ -86,88 +86,43 @@ public class pumpAction {
         c.sendBroadcast(intent);
     }
 
-    public static void cancelTempBasal(final Context c){
+    public static void cancelTempBasal(){
         //Cancels a Running Temp Basal and updates the DB with the Temp Basal new duration
 
         final TempBasal active_basal = TempBasal.getCurrentActive(null);
-        final Profile p = new Profile(new Date());
-
 
         if (active_basal.isactive(null)) {
 
-            //Notify of change in Temp Basal?
-            if (p.aps_mode.equals("closed") && !p.temp_basal_notification) {
-
-                //No notification
-                //Updates the duration of the Active Temp Basal we are stopping
-                updateTempBeingCanceled(active_basal, c);
-
-
-            } else {
-
-                //Notify
-                String popUpMsg;
-                if (p.basal_mode.equals("percent")) {
-                    popUpMsg = "100%";
-                } else {
-                    popUpMsg = tools.formatDisplayBasal(p.current_basal,false);
-                }
-
-                final String msgTitle, posativeButton;
-                if (p.aps_mode.equals("closed") && p.temp_basal_notification) {
-                    msgTitle        =   "Default Basal will be set";
-                    posativeButton  =   "ACTION";
-                } else {
-                    msgTitle        =   "Manually set Default Basal";
-                    posativeButton  =   "DONE";
-                }
-
-                new AlertDialog.Builder(c)
-                        .setTitle(msgTitle)
-                        .setMessage("Rate " + popUpMsg)
-                        .setPositiveButton(posativeButton, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                //Updates the duration of the Active Temp Basal we are stopping
-                                updateTempBeingCanceled(active_basal, c);
-
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        })
-                        .show();
+            // TODO: 29/01/2016 NS integration to be replaced with WS
+            JSONObject tempBasalIntegration = tools.getJSONO(active_basal.integration);
+            try {
+                tempBasalIntegration.put("ns_temp_basal_stop", "dirty");        //Tells NSUploader that this Temp Basal needs to be updated
+            } catch (JSONException e){
+                Crashlytics.logException(e);
             }
+            active_basal.integration = tempBasalIntegration.toString();
+            active_basal.duration = active_basal.age();
+            active_basal.save();
+            // TODO: 29/01/2016 NS integration to be replaced with WS
+
+
+            //Inform Integrations Manager
+            IntegrationsManager.cancelTempBasal(active_basal);
+
+            Notifications.newInsulinUpdate();
+
+            //Update Main Activity of Current Temp Change
+            Intent intent = new Intent("APS_UPDATE");
+            MainApp.instance().sendBroadcast(intent);
+
+
         } else {
 
             //No temp Basal active
-            Toast.makeText(c, "No Active Temp Basal to Cancel", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainApp.instance(), "No Active Temp Basal to Cancel", Toast.LENGTH_LONG).show();
         }
     }
-    public static void updateTempBeingCanceled(TempBasal active_basal, Context c){
-        // TODO: 29/01/2016 NS integration to be replaced with WS
-        JSONObject tempBasalIntegration = tools.getJSONO(active_basal.integration);
-        try {
-            tempBasalIntegration.put("ns_temp_basal_stop", "dirty");        //Tells NSUploader that this Temp Basal needs to be updated
-        } catch (JSONException e){
-            Crashlytics.logException(e);
-        }
-        active_basal.integration = tempBasalIntegration.toString();
-        active_basal.duration = active_basal.age();
-        active_basal.save();
-        // TODO: 29/01/2016 NS integration to be replaced with WS
 
-
-        //Inform Integrations Manager
-        IntegrationsManager.cancelTempBasal(active_basal);
-
-        Notifications.newInsulinUpdate();
-
-        //Update Main Activity of Current Temp Change
-        Intent intent = new Intent("APS_UPDATE");
-        c.sendBroadcast(intent);
-    }
 
     public static void setBolus(Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
 

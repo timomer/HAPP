@@ -26,6 +26,7 @@ public class Integration_Report extends AppCompatActivity {
 
     Spinner integrationType;
     Spinner happObjectType;
+    Spinner numHours;
     ListView integrationReportList;
 
     @Override
@@ -34,8 +35,23 @@ public class Integration_Report extends AppCompatActivity {
         setContentView(R.layout.activity_integration__report);
 
         integrationType = (Spinner) findViewById(R.id.integrationType);
-        happObjectType = (Spinner) findViewById(R.id.HAPPObjectType);
+        happObjectType  = (Spinner) findViewById(R.id.HAPPObjectType);
+        numHours        = (Spinner) findViewById(R.id.integrationHours);
         integrationReportList = (ListView) findViewById(R.id.integrationReportList);
+
+        String[] integrationHours = {"4", "8", "12", "24", "48"};
+        ArrayAdapter<String> stringArrayAdapterHours= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, integrationHours);
+        numHours.setAdapter(stringArrayAdapterHours);
+        numHours.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString(), Integer.parseInt(numHours.getSelectedItem().toString()));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
         String[] integrationTypes = {"insulin_integration_app"};
         ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, integrationTypes);
@@ -43,7 +59,7 @@ public class Integration_Report extends AppCompatActivity {
         integrationType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString());
+                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString(), Integer.parseInt(numHours.getSelectedItem().toString()));
             }
 
             @Override
@@ -57,7 +73,7 @@ public class Integration_Report extends AppCompatActivity {
         happObjectType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString());
+                reloadList(integrationType.getSelectedItem().toString(), happObjectType.getSelectedItem().toString(), Integer.parseInt(numHours.getSelectedItem().toString()));
             }
 
             @Override
@@ -67,11 +83,11 @@ public class Integration_Report extends AppCompatActivity {
 
     }
 
-    public void reloadList(String intergartion, String happObject){
+    public void reloadList(String intergartion, String happObject, int hoursOld){
         ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
         Calendar integrationDate  = Calendar.getInstance();
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
-        List<Integration> integrations = Integration.getIntegrations(intergartion, happObject, 20);
+        List<Integration> integrations = Integration.getIntegrationsHoursOld(intergartion, happObject, hoursOld);
 
         for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
             HashMap<String, String> integrationItem = new HashMap<String, String>();

@@ -32,7 +32,7 @@ public class notificationReceiver extends BroadcastReceiver {
                 TempBasal suggestedTemp = gson.fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
 
                 if (suggestedTemp.basal_adjustemnt.equals("Pump Default")){
-                    pumpAction.cancelTempBasal(context);
+                    pumpAction.cancelTempBasal();
                 } else {
                     pumpAction.setTempBasal(suggestedTemp, context);   //Action the suggested Temp
                     Toast.makeText(context, "Accepted Temp Basal", Toast.LENGTH_LONG).show();

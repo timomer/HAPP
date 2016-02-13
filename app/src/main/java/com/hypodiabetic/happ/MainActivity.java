@@ -1,6 +1,8 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -174,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        pumpAction.cancelTempBasal(MainActivity.activity);
+                        pumpAction.cancelTempBasal();
                         break;
                     case 1:
                         startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
@@ -289,9 +291,12 @@ public class MainActivity extends AppCompatActivity {
         //notificationText.setTextColor(Color.WHITE);
 
         InsulinIntegrationAppNotification popup = new InsulinIntegrationAppNotification();
-        Snackbar snackbar = popup.check(view);
+        Snackbar snackbar = popup.getSnackbar(view);
+        Notification notification = popup.getErrorNotification();
 
         if (snackbar != null) snackbar.show();
+        if (notification != null) ((NotificationManager) MainApp.instance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(58, notification);
+
 
     }
 
@@ -692,7 +697,12 @@ public class MainActivity extends AppCompatActivity {
         sendBroadcast(intent);
     }
     public void apsstatusAccept (final View view){
-        pumpAction.setTempBasal(APSResult.last().getBasal(), view.getContext());      //Action the suggested Temp
+        TempBasal suggestedBasal = APSResult.last().getBasal();
+        if (suggestedBasal.basal_adjustemnt.equals("Pump Default")){
+            pumpAction.cancelTempBasal();
+        } else {
+            pumpAction.setTempBasal(suggestedBasal, view.getContext());   //Action the suggested Temp
+        }
         displayCurrentInfo();
     }
 

@@ -1,7 +1,10 @@
 package com.hypodiabetic.happ.integration;
 
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.TypedValue;
@@ -15,8 +18,11 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.hypodiabetic.happ.MainActivity;
+import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.R;
+import com.hypodiabetic.happ.WearDisplayActivity;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.tools;
 
@@ -29,14 +35,18 @@ import java.util.List;
  */
 public class InsulinIntegrationAppNotification {
 
-    public Snackbar check(final View v){
-        List<Integration> recentlyUpdated = Integration.getUpdatedInLastMins(1,"insulin_integration_app");
+    ArrayList<HashMap<String, String>> detailList;
+    List<Integration> recentlyUpdated;
+    String snackbarMsg;
+    Boolean foundError;
+
+    public InsulinIntegrationAppNotification(){
+        detailList      =   new ArrayList<>();
+        recentlyUpdated =   Integration.getUpdatedInLastMins(1,"insulin_integration_app");
+        snackbarMsg     =   "";
+        foundError      =   false;
 
         if (recentlyUpdated.size() > 0) {
-
-            Boolean error = false;
-            String snackbarMsg="";
-            final ArrayList<HashMap<String, String>> detailList = new ArrayList<>();
 
             for (Integration integration : recentlyUpdated) {
                 ObjectToSync integrationWithDetails = new ObjectToSync(integration);
@@ -46,7 +56,7 @@ public class InsulinIntegrationAppNotification {
                     integration.delete();
                 } else {
 
-                    if(integrationWithDetails.state.equals("error")) error = true;
+                    if(integrationWithDetails.state.equals("error")) foundError = true;
 
                     switch (integrationWithDetails.happ_object_type){
                         case "bolus_delivery":
@@ -67,10 +77,14 @@ public class InsulinIntegrationAppNotification {
                     detailList.add(detailListItem);
                 }
             }
+        }
+    }
 
+    public Snackbar getSnackbar(View v){
+        if (recentlyUpdated.size() > 0) {
 
             int snackbarLength = Snackbar.LENGTH_LONG;
-            if (error) snackbarLength = Snackbar.LENGTH_INDEFINITE;
+            if (foundError) snackbarLength = Snackbar.LENGTH_INDEFINITE;
 
             Snackbar snackbar = Snackbar.make(v, snackbarMsg, snackbarLength);
             View snackbarView = snackbar.getView();
@@ -97,6 +111,39 @@ public class InsulinIntegrationAppNotification {
             });
 
             return snackbar;
+        } else {
+            return null;
+        }
+    }
+
+    public Notification getErrorNotification(){
+
+        if (foundError) { // TODO: 13/02/2016 DEBUGING set to false
+            Context c = MainApp.instance();
+            String title = "Error processing Insulin Actions";
+            String msg = snackbarMsg;
+
+            Intent intent_open_activity = new Intent(c, MainActivity.class);
+            PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 2, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent displayIntent = new Intent(c, WearDisplayActivity.class);
+            Notification notification = new Notification.Builder(c)
+                    .setSmallIcon(R.drawable.exit_to_app)
+                    .setContentTitle(title)
+                    .setContentText(msg)
+                    .setContentIntent(pending_intent_open_activity)
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setCategory(Notification.CATEGORY_ALARM)
+                    .setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500})
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .extend(new Notification.WearableExtender()
+                            //.setBackground(createWearBitmap(2, c))
+                            .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT)))
+                            //.addAction(R.drawable.ic_exit_to_app_white_24dp, "Accept Temp", pending_intent_accept_temp)
+                    .build();
+
+            return notification;
+
         } else {
             return null;
         }

@@ -102,6 +102,19 @@ public class Integration extends Model {
                 .execute();
     }
 
+    public static List<Integration> getIntegrationsHoursOld(String type, String happ_object,  int inLastHours) {
+
+        Long now = new Date().getTime();
+        Long hoursAgo = new Date().getTime() - (inLastHours * 60 * 60 * 1000);
+        return new Select()
+                .from(Integration.class)
+                .where("happ_object = '" + happ_object + "'")
+                .where("type = '" + type + "'")
+                .where("date_updated >= ? and date_updated <= ?", hoursAgo, now)
+                .orderBy("date_updated desc")
+                .execute();
+    }
+
     public static List<Integration> getIntegrationsToSync(String type, String happ_object) {
         return new Select()
                 .from(Integration.class)

@@ -59,7 +59,7 @@ public class DetermineBasalAdapterJS {
         Profile profile = new Profile(new Date());
 
         initProfile(profile);
-        initMealData(profile);
+        initMealData();
         initGlucoseStatus();
         initIobData(profile);
         initCurrentTemp();
@@ -319,17 +319,13 @@ public class DetermineBasalAdapterJS {
         mV8rt.add(PARAM_profile, mProfile);
     }
 
-    private void initMealData(Profile p) {
+    private void initMealData() {
         mMealData = new V8Object(mV8rt);
 
-        JSONObject iobJSONValue = IOB.iobTotal(p, new Date());
-        JSONObject cobJSONValue = Treatments.getCOB(p, new Date());
+        JSONObject meal_data = meal.generate();
 
-        Double cob          =   cobJSONValue.optDouble("display", 0D);
-        Double bolus_iob    =   iobJSONValue.optDouble("bolusiob", 0D);
-
-        mMealData.add("carbs", cob);
-        mMealData.add("boluses", bolus_iob);
+        mMealData.add("carbs", meal_data.optDouble("carbs",0));
+        mMealData.add("boluses", meal_data.optDouble("boluses",0));
 
         mV8rt.add(PARM_meal_data, mMealData);
         Log.d("DetermineBasalAdapterJS", "Dev: initMealData: " + mMealData.toString());
