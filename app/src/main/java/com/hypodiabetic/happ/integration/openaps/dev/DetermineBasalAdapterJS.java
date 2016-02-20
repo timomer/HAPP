@@ -1,7 +1,6 @@
 package com.hypodiabetic.happ.integration.openaps.dev;
 
 
-import android.content.Context;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -10,9 +9,9 @@ import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Safety;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONException;
@@ -113,12 +112,14 @@ public class DetermineBasalAdapterJS {
             if (v8ObjectReuslt.contains("duration"))    v8ObjectReusltJSON.put("duration",  v8ObjectReuslt.getDouble("duration"));
             if (v8ObjectReuslt.contains("tick"))        v8ObjectReusltJSON.put("tick",      v8ObjectReuslt.get("tick"));
             if (v8ObjectReuslt.contains("bg"))          v8ObjectReusltJSON.put("bg",        v8ObjectReuslt.getDouble("bg"));
+            if (v8ObjectReuslt.contains("temp"))        v8ObjectReusltJSON.put("temp",      v8ObjectReuslt.getString("temp"));
+            if (v8ObjectReuslt.contains("eventualBG"))  v8ObjectReusltJSON.put("eventualBG",v8ObjectReuslt.getDouble("eventualBG"));
+            if (v8ObjectReuslt.contains("snoozeBG"))    v8ObjectReusltJSON.put("snoozeBG",  v8ObjectReuslt.getDouble("snoozeBG"));
+            if (v8ObjectReuslt.contains("reason"))      v8ObjectReusltJSON.put("reason",    v8ObjectReuslt.getString("reason"));
             if (v8ObjectReuslt.contains("mealAssist"))  v8ObjectReusltJSON.put("mealAssist",v8ObjectReuslt.get("mealAssist"));
-            v8ObjectReusltJSON.put("temp",      v8ObjectReuslt.getString("temp"));
-            v8ObjectReusltJSON.put("eventualBG",v8ObjectReuslt.getDouble("eventualBG"));
-            v8ObjectReusltJSON.put("snoozeBG",  v8ObjectReuslt.getDouble("snoozeBG"));
-            v8ObjectReusltJSON.put("reason", v8ObjectReuslt.getString("reason"));
-        } catch (JSONException e){}
+        } catch (JSONException e){
+            Crashlytics.logException(e);
+        }
         v8ObjectReuslt.release();
 
         return v8ObjectReusltJSON;
@@ -303,13 +304,14 @@ public class DetermineBasalAdapterJS {
 
     private void initProfile(Profile p) {
         mProfile = new V8Object(mV8rt);
+        Safety safty = new Safety();
 
-        mProfile.add("max_iob", p.max_iob);
+        mProfile.add("max_iob", safty.max_iob);
         mProfile.add("carbs_hr", p.carbAbsorptionRate);
         mProfile.add("dia", p.dia);
         mProfile.add("current_basal", p.current_basal);
-        mProfile.add("max_daily_basal", p.max_daily_basal);
-        mProfile.add("max_basal", p.max_basal);
+        mProfile.add("max_daily_basal", safty.max_daily_basal);
+        mProfile.add("max_basal", safty.max_basal);
         mProfile.add("max_bg", p.max_bg);
         mProfile.add("min_bg", p.min_bg);
         mProfile.add("carbratio", p.carbRatio);

@@ -70,22 +70,20 @@ public class SettingsActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             addPreferencesFromResource(R.xml.pref_aps);
             addPreferencesFromResource(R.xml.pref_pump);
-            addPreferencesFromResource(R.xml.pref_bg_notification);
+            addPreferencesFromResource(R.xml.pref_notification);
             addPreferencesFromResource(R.xml.pref_integration);
             addPreferencesFromResource(R.xml.pref_license);
             addPreferencesFromResource(R.xml.pref_misc);
-            //addPreferencesFromResource(R.xml.pref_data_source);
-            //addPreferencesFromResource(R.xml.pref_watch_integration); // TODO: 08/08/2015 leaveout watch for now 
+
 
             bindPreferenceSummaryToValue(findPreference("highValue"));
             bindPreferenceSummaryToValue(findPreference("lowValue"));
-            //bindPreferenceSummaryToValue(findPreference("dex_collection_method"));
             bindPreferenceSummaryToValue(findPreference("units"));
-            //bindPreferenceSummaryToValue(findPreference("dexcom_account_name"));
             bindPreferenceSummaryToValue(findPreference("target_bg"));
             bindPreferenceSummaryToValue(findPreference("aps_loop"));
             bindPreferenceSummaryToValue(findPreference("aps_mode"));
             bindPreferenceSummaryToValue(findPreference("aps_algorithm"));
+            bindPreferenceSummaryToValue(findPreference("pump_name"));
             findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory().toString());
 
             for (int x=0; x<24; x++ ){

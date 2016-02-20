@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.code.nightwatch;
+package com.hypodiabetic.happ.Objects;
 
 import android.content.SharedPreferences;
 import android.provider.BaseColumns;
@@ -9,6 +9,8 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.android.gms.wearable.DataMap;
 import com.google.gson.annotations.Expose;
+import com.hypodiabetic.happ.Constants;
+import com.hypodiabetic.happ.tools;
 
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -148,19 +150,19 @@ public class Bg extends Model {
     public String slopeArrow() {
         String arrow = "--";
         if (direction.compareTo("DoubleDown") == 0) {
-            arrow = "\u21ca";
+            arrow = Constants.ARROW_DOUBLE_DOWN;
         } else if (direction.compareTo("SingleDown") == 0) {
-            arrow = "\u2193";
+            arrow = Constants.ARROW_SINGLE_DOWN;
         } else if (direction.compareTo("FortyFiveDown") == 0) {
-            arrow = "\u2198";
+            arrow = Constants.ARROW_FORTY_FIVE_DOWN;
         } else if (direction.compareTo("Flat") == 0) {
-            arrow = "\u2192";
+            arrow = Constants.ARROW_FLAT;
         } else if (direction.compareTo("FortyFiveUp") == 0) {
-            arrow = "\u2197";
+            arrow = Constants.ARROW_FORTY_FIVE_UP;
         } else if (direction.compareTo("SingleUp") == 0) {
-            arrow = "\u2191";
+            arrow = Constants.ARROW_SINGLE_UP;
         } else if (direction.compareTo("DoubleUp") == 0) {
-            arrow = "\u21c8";
+            arrow = Constants.ARROW_DOUBLE_UP;
         }
         return arrow;
     }
@@ -204,19 +206,6 @@ public class Bg extends Model {
             return value;
         }
 
-    }
-
-    public double fromRaw(Cal cal) {
-        double factor = doMgdl() ? 1 : Constants.MMOLL_TO_MGDL;
-        double raw;
-        double mgdl = sgv_double();
-        if (filtered == Double.NaN || mgdl <= 30) {
-            raw = cal.scale * (unfiltered - cal.intercept) / cal.slope;
-        } else {
-            double ratio = cal.scale * (filtered - cal.intercept) / cal.slope / mgdl;
-            raw = cal.scale * (unfiltered - cal.intercept) / cal.slope / ratio;
-        }
-        return raw * factor;
     }
 
     public long sgvLevel(SharedPreferences prefs) {
@@ -263,23 +252,6 @@ public class Bg extends Model {
                 .executeSingle();
     }
 
-    public static boolean is_new(Bg bg) {
-        Bg foundBg = new Select()
-                .from(Bg.class)
-                .where("datetime = ?", bg.datetime)
-                .orderBy("_ID desc")
-                .executeSingle();
-        return (foundBg == null);
-    }
-
-    public static List<Bg> latest(int number) {
-        return new Select()
-                .from(Bg.class)
-                .orderBy("datetime desc")
-                .limit(number)
-                .execute();
-    }
-
     public static List<Bg> latestForGraph(int number, double startTime) {
         DecimalFormat df = new DecimalFormat("#");
         df.setMaximumFractionDigits(1);
@@ -292,22 +264,6 @@ public class Bg extends Model {
                 .execute();
     }
 
-    public static Bg mostRecentBefore(double timestamp) {
-        return new Select()
-                .from(Bg.class)
-                .where("datetime < ?", (timestamp))
-                .orderBy("datetime desc")
-                .executeSingle();
-    }
-
-    public static Bg findByTimestamp(double timestamp) {
-        return new Select()
-                .from(Bg.class)
-                .where("datetime = ?", (timestamp))
-                .executeSingle();
-    }
-
-
     public static boolean alreadyExists(double timestamp) {
         Bg bg = new Select()
                 .from(Bg.class)
@@ -318,6 +274,46 @@ public class Bg extends Model {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public String stringResult() {
+        Double value = sgv_double();
+
+        DecimalFormat df = new DecimalFormat("#");
+        if (value >= 400) {
+            return "HIGH";
+        } else if (value >= 40) {
+            if(tools.bgUnitsFormat().equals("mgdl")) {
+                df.setMaximumFractionDigits(0);
+                return df.format(value);
+            } else {
+                df.setMaximumFractionDigits(1);
+                return df.format(mmolConvert(value));
+            }
+        } else if (value > 12) {
+            return "LOW";
+        } else {
+            switch(value.intValue()) {
+                case 0:
+                    return "??0";
+                case 1:
+                    return "?SN";
+                case 2:
+                    return "??2";
+                case 3:
+                    return "?NA";
+                case 5:
+                    return "?NC";
+                case 6:
+                    return "?CD";
+                case 9:
+                    return "?AD";
+                case 12:
+                    return "?RF";
+                default:
+                    return "???";
+            }
         }
     }
 

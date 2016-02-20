@@ -94,20 +94,25 @@ public class Integration_Report extends AppCompatActivity {
 
             ObjectToSync objectSyncDetails = new ObjectToSync(integration);
 
-            if (objectSyncDetails.requested != null){
-                integrationDate.setTime(objectSyncDetails.requested);
+            if (objectSyncDetails.state.equals("delete_me")) {
+                integration.delete();
             } else {
-                integrationDate.setTime(new Date(0));                                                 //Bad integration
-            }
-            integrationItem.put("integrationType",      integration.type);
-            integrationItem.put("integrationWhat",      "Request sent: " + objectSyncDetails.getObjectSummary());
-            integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
-            integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);
-            integrationItem.put("integrationAction",    "Action: " + objectSyncDetails.action);
-            integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id);
-            integrationItem.put("integrationDetails",   objectSyncDetails.details);
 
-            integrationList.add(integrationItem);
+                if (objectSyncDetails.requested != null) {
+                    integrationDate.setTime(objectSyncDetails.requested);
+                } else {
+                    integrationDate.setTime(new Date(0));                                                 //Bad integration
+                }
+                integrationItem.put("integrationType", integration.type);
+                integrationItem.put("integrationWhat", "Request sent: " + objectSyncDetails.getObjectSummary());
+                integrationItem.put("integrationDateTime", sdfDateTime.format(integrationDate.getTime()));
+                integrationItem.put("integrationState", "State: " + objectSyncDetails.state);
+                integrationItem.put("integrationAction", "Action: " + objectSyncDetails.action);
+                integrationItem.put("integrationRemoteID", "RemoteID: " + objectSyncDetails.remote_id);
+                integrationItem.put("integrationDetails", objectSyncDetails.details);
+
+                integrationList.add(integrationItem);
+            }
         }
 
         SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,

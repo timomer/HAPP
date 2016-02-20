@@ -1,13 +1,8 @@
 package com.hypodiabetic.happ;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.view.Window;
@@ -18,11 +13,12 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.APSResult;
-import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Safety;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
+import com.hypodiabetic.happ.services.APSService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,13 +36,8 @@ public class pumpAction {
         Profile p = new Profile(new Date());
 
         if (basal != null && c != null) {
-
             if (basal.aps_mode.equals("closed") && !p.temp_basal_notification) {                    //Send Direct to pump
-                if (basal.basal_adjustemnt.equals("Pump Default")){
-                    cancelTempBasal();
-                } else {
-                    setTempBasal(basal, c);
-                }
+                setTempBasal(basal);
 
             } else {
                 Notifications.newTemp(basal, c);                                                    //Notify user
@@ -55,35 +46,35 @@ public class pumpAction {
     }
 
 
-    public static void setTempBasal(TempBasal basal, Context c){
+    public static void setTempBasal(TempBasal basal){
 
         if (basal == null) basal = APSResult.last().getBasal();
 
-        Profile p = new Profile(new Date());
-        Double safeRate;
+        if (basal.checkIsCancelRequest()){
+            cancelTempBasal();
 
-        //Sanity check the suggested rate is safe
-        safeRate = Math.min(basal.rate  , p.max_basal);                                             //Not above Max Basal
-        safeRate = Math.min(safeRate    , 4 * p.current_basal);                                     //Not above 4 * Current Basal
-        basal.rate = safeRate;
+        } else {
 
-        //Re calculate rate percent
-        basal.ratePercent   = APS.calcRateToPercentOfBasal(basal.rate, p);
+            Profile p = new Profile(new Date());
+            Safety safety = new Safety();
 
-        //Save
-        basal.start_time = new Date();
-        basal.save();
+            //Sanity check the suggested rate is safe
+            if (!safety.checkIsSafeMaxBolus(basal.rate)) basal.rate = safety.getMaxBasal(p);
 
+            //Save
+            basal.start_time = new Date();
+            basal.save();
 
-        //Clear notifications
-        Notifications.clear("updateCard", c);
+            //Clear notifications
+            Notifications.clear("updateCard");
 
-        //Inform Integrations Manager
-        IntegrationsManager.newTempBasal(basal);
+            //Inform Integrations Manager
+            IntegrationsManager.newTempBasal(basal);
 
-        //Run openAPS again
-        Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
-        c.sendBroadcast(intent);
+            //Run openAPS again
+            Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
+            MainApp.instance().startService(apsIntent);
+        }
     }
 
     public static void cancelTempBasal(){
@@ -112,8 +103,9 @@ public class pumpAction {
             Notifications.newInsulinUpdate();
 
             //Update Main Activity of Current Temp Change
-            Intent intent = new Intent("APS_UPDATE");
-            MainApp.instance().sendBroadcast(intent);
+            Intent intent = new Intent(Intents.UI_UPDATE);
+            intent.putExtra("UPDATE", "UPDATE_RUNNING_TEMP");
+            LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
 
 
         } else {
@@ -126,23 +118,18 @@ public class pumpAction {
 
     public static void setBolus(Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
 
+        Safety safety = new Safety();
         Profile p = new Profile(new Date());
-        Double totalBolus=0D, hardcodedMaxBolus=15D, diffBolus=0D;
+        Double totalBolus=0D, diffBolus=0D;
         if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
         if (correctionTrearment != null) totalBolus += correctionTrearment.value;
         String warningMSG="";
 
-        if (totalBolus > p.max_bolus || totalBolus > hardcodedMaxBolus){
-            if (totalBolus > p.max_bolus){                                                          //Wow there, Bolus is > user set limit
-                warningMSG = "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > User Max Bolus. Setting to " + tools.formatDisplayInsulin(p.max_bolus, 2);
-                diffBolus = totalBolus - p.max_bolus;
-                totalBolus = p.max_bolus;
-            }
-            if (totalBolus > hardcodedMaxBolus){                                                    //Wow wow, Bolus is > hardcoded safety limit
-                warningMSG = "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > System Max Bolus. Setting to " + tools.formatDisplayInsulin(hardcodedMaxBolus,2);
-                diffBolus = totalBolus - hardcodedMaxBolus;
-                totalBolus = hardcodedMaxBolus;
-            }
+        if (!safety.checkIsSafeMaxBolus(totalBolus)){
+
+            warningMSG = "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > than Safe Bolus (User Max:" + safety.user_max_bolus + " System Max:" + safety.hardcoded_Max_Bolus + "). Setting to " + tools.formatDisplayInsulin(safety.getSafeBolus(),2);
+            diffBolus = totalBolus - safety.getSafeBolus();
+            totalBolus = safety.getSafeBolus();
 
             if (correctionTrearment != null){
 
@@ -182,10 +169,7 @@ public class pumpAction {
 
         if (p.send_bolus_allowed){
             //Bolus allowed to send commend to pump
-            Long bolusDiffInMins=0L, corrDiffInMins=0L;
-            if (bolusTreatment != null) bolusDiffInMins = (new Date().getTime() - bolusTreatment.datetime) /1000/60;
-            if (correctionTrearment != null) corrDiffInMins = (new Date().getTime() - correctionTrearment.datetime) /1000/60;
-            if (bolusDiffInMins > 4 || bolusDiffInMins < 0 || corrDiffInMins > 4 || corrDiffInMins < 0) {
+            if (!safety.checkIsBolusSafeToSend(bolusTreatment,correctionTrearment)) {
                 warningMSG += "\nBolus is in the past or future, will not be sent to Pump.";
             }
             bolusMsg.setText("deliver to pump");
@@ -224,9 +208,10 @@ public class pumpAction {
                 //inform Integration Manager
                 IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment);
 
+                // TODO: 15/02/2016 why?
                 //Run openAPS again
-                Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
-                LocalBroadcastManager.getInstance(c).sendBroadcast(intent);
+                //Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
+                //MainApp.instance().startService(apsIntent);
 
                 //Return to the home screen (if not already on it)
                 Intent intentHome = new Intent(c, MainActivity.class);

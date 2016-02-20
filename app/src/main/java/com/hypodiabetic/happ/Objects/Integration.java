@@ -116,13 +116,22 @@ public class Integration extends Model {
     }
 
     public static List<Integration> getIntegrationsToSync(String type, String happ_object) {
-        return new Select()
-                .from(Integration.class)
-                .where("type = '" + type + "'")
-                .where("happ_object = '" + happ_object + "'")
-                .where("state = 'to_sync'")
-                .orderBy("date_updated desc")
-                .execute();
+        if (happ_object != null) {
+            return new Select()
+                    .from(Integration.class)
+                    .where("type = '" + type + "'")
+                    .where("happ_object = '" + happ_object + "'")
+                    .where("state = 'to_sync'")
+                    .orderBy("date_updated desc")
+                    .execute();
+        } else {
+            return new Select()
+                    .from(Integration.class)
+                    .where("type = '" + type + "'")
+                    .where("state = 'to_sync'")
+                    .orderBy("date_updated desc")
+                    .execute();
+        }
     }
 
     public static Integration getIntegrationByID(Long dbid) {
@@ -145,29 +154,13 @@ public class Integration extends Model {
                 .execute();
     }
 
-
-
-
-
-
-    public static Integration updateIntegration(JSONObject syncUpdate){
-        Integration integration = Integration.getIntegrationByID(syncUpdate.optLong("happ_integration_id", 0L));
-
-        if (syncUpdate != null && integration != null) {
-            //We have new sync data from remote system, populate this object
-            integration.date_updated = new Date().getTime();
-            if (integration.auth_code.equals(syncUpdate.optString("integrationSecretCode", "error"))) {
-                integration.state       = syncUpdate.optString("state", "error");
-                integration.details     = syncUpdate.optString("details", "error syncing data");
-                integration.remote_id   = syncUpdate.optLong("remote_id", 0L);
-                integration.save();
-
-            } else {                                                                                //Auth codes do not match, something odd going along
-                integration.state       = "error";
-                integration.details     = "Auth codes do not match, was this the app we sent the request to!?";
-                integration.save();
-            }
-        }
-        return integration;
+    public static List<Integration> getIntegrationsWithErrors(String type) {
+        return new Select()
+                .from(Integration.class)
+                .where("type = '" + type + "'")
+                .where("state = 'error'")
+                .orderBy("date_updated desc")
+                .execute();
     }
+
 }

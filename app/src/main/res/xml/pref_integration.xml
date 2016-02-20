@@ -7,9 +7,18 @@
             android:title="Integrations">
 
             <PreferenceCategory
-                android:title="NightScout Integration"
+                android:title="xDrip Watch Face">
+                <SwitchPreference
+                    android:title="Update Watch Face"
+                    android:key="xdrip_wf_integration"
+                    android:summary="Show active Basal, IOB and COB. See HAPP github page for xDrip apk with this feature"
+                    android:defaultValue="false"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:title="NightScout"
                 android:key="ns">
-                <CheckBoxPreference
+                <SwitchPreference
                     android:key="nightscout_integration"
                     android:title="Integrate with NightScout"
                     android:summary="Send - Read data from your NightScout site."
@@ -20,12 +29,12 @@
                     android:title="Nightscout URL"
                     android:summary="URL for your nightscout site"
                     android:defaultValue="https://{yoursecret}@{yoursite}/api/v1"/>
-                <CheckBoxPreference
+                <SwitchPreference
                     android:dependency="nightscout_integration"
                     android:key="nightscout_treatments"
                     android:title="Upload Treatments"
                     android:defaultValue="false" />
-                <CheckBoxPreference
+                <SwitchPreference
                     android:dependency="nightscout_integration"
                     android:key="nightscout_tempbasal"
                     android:title="Upload Temp Basal"
@@ -34,7 +43,7 @@
 
             <PreferenceCategory
                 android:key="ti"
-                android:title="Treatment Integration">
+                android:title="Treatment">
                 <SwitchPreference
                     android:title="Send Bolus"
                     android:key="insulin_integration_send_bolus"

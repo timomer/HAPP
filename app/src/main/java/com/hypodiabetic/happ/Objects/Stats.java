@@ -57,6 +57,7 @@ public class Stats extends Model{
     public String temp_basal_type;
 
     public String when;
+    private static final String TAG = "Stats Object";
 
     public String statAge() {
         int minutesAgo = (int) Math.floor(timeSince()/(1000*60));
@@ -138,7 +139,7 @@ public class Stats extends Model{
             }
         }
 
-        Log.d("DEBUG", "updateActiveBarChart: " + statList.toString());
+        Log.d(TAG, "updateActiveBarChart: " + statList.size() + " updated");
         return statList;
     }
 

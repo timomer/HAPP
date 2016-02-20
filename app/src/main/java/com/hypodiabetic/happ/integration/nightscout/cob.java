@@ -1,9 +1,9 @@
-package com.hypodiabetic.happ.code.nightscout;
+package com.hypodiabetic.happ.integration.nightscout;
 
 import android.util.Log;
 import android.widget.Toast;
 
-import com.hypodiabetic.happ.ApplicationContextProvider;
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.openaps.IOB;
@@ -62,7 +62,7 @@ public class cob {
                              try {
                                 decayedByDate = new Date(cCalc.getLong("decayedBy"));                                       //Date when this Treatment will be fully digested
                             } catch (JSONException e){
-                                 Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB decayedByDate " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                 Toast.makeText(MainApp.instance(), "Error getting COB decayedByDate " + e.getMessage(), Toast.LENGTH_LONG).show();
                              }
                             Double decaysin_hr = (double)(decayedByDate.getTime() - timeNow.getTime()) / 1000 / 60 / 60;    //Hours left until these carbs are fully digested
 
@@ -72,7 +72,7 @@ public class cob {
                                     actStart = IOB.iobTotal(profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
                                     actEnd = IOB.iobTotal(profileNow, decayedByDate).getDouble("activity");
                                 } catch (JSONException e){
-                                    Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB activity " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(MainApp.instance(), "Error getting COB activity " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 }
                                 Double avgActivity = (actStart + actEnd) / 2;
 
@@ -84,7 +84,7 @@ public class cob {
                                     try {
                                         cCalc.put("decayedBy", delayed);
                                     } catch (JSONException e){
-                                        Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB decayedBy " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                        Toast.makeText(MainApp.instance(), "Error getting COB decayedBy " + e.getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                     //Date decaysin_hr_date = new Date((cCalc.getLong("decayedBy") - timeNow.getTime()) / 1000 / 60 / 60);
                                     //decaysin_hr = (decaysin_hr_date.getTime());
@@ -103,7 +103,7 @@ public class cob {
                                 try {
                                     isDecaying = cCalc.getInt("isDecaying");
                                 } catch (JSONException e){
-                                    Toast.makeText(ApplicationContextProvider.getContext(), "Error getting COB isDecaying " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(MainApp.instance(), "Error getting COB isDecaying " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 }
                             } else {
                                 totalCOB = 0D;

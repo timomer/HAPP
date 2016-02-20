@@ -12,12 +12,12 @@
                 android:title="Pump General">
 
                 <ListPreference
-                    android:title="Temp Basal Mode"
-                    android:summary="How is a Temp Basal set on the Pump"
-                    android:key="basal_mode"
-                    android:defaultValue="percent"
-                    android:entries="@array/basal_modeArray"
-                    android:entryValues="@array/basal_modeValues" />
+                    android:title="Pump"
+                    android:summary="Select your Pump Model"
+                    android:key="pump_name"
+                    android:defaultValue="medtronic_absolute"
+                    android:entries="@array/pump_nameArray"
+                    android:entryValues="@array/pump_nameValues" />
                 <EditTextPreference
                     android:title="Max Bolus"
                     android:defaultValue="4"

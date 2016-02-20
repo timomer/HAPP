@@ -121,7 +121,7 @@ public class NSUploader {
                     switch (treatment.type) {
                         case "Insulin":
                             treatmentJSON.put("insulin", treatment.value);
-                            treatmentJSON.put("units", tools.bgUnitsFormat(c));
+                            treatmentJSON.put("units", tools.bgUnitsFormat());
                             treatmentJSON.put("eventType", "Bolus");
                             break;
                         case "Carbs":

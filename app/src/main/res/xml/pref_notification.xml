@@ -1,27 +1,36 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Notifications">
 
-    <!-- A 'parent' preference, which enables/disables child preferences (below)
-         when checked/unchecked. -->
-    <CheckBoxPreference
-        android:key="notifications_new_message"
-        android:title="@string/pref_title_new_message_notifications"
-        android:defaultValue="true" />
+        <PreferenceScreen
+            android:key="Notifications"
+            android:persistent="false"
+            android:title="Notifications">
 
-    <!-- Allows the user to choose a ringtone in the 'notification' category. -->
-    <!-- NOTE: This preference will be enabled only when the checkbox above is checked. -->
-    <!-- NOTE: RingtonePreference's summary should be set to its value by the activity code. -->
-    <RingtonePreference
-        android:dependency="notifications_new_message"
-        android:key="notifications_new_message_ringtone"
-        android:title="@string/pref_title_ringtone"
-        android:ringtoneType="notification"
-        android:defaultValue="content://settings/system/notification_sound" />
+            <PreferenceCategory
+                android:title="APS Notifications"
+                android:key="aps_notifications">
+                <SwitchPreference
+                    android:title="Temp Basal Notification"
+                    android:key="temp_basal_notification"
+                    android:summary="Suggested Temp Basal have to be confirmed by the user"
+                    android:defaultValue="true"/>
+            </PreferenceCategory>
 
-    <!-- NOTE: This preference will be enabled only when the checkbox above is checked. -->
-    <CheckBoxPreference
-        android:dependency="notifications_new_message"
-        android:key="notifications_new_message_vibrate"
-        android:title="@string/pref_title_vibrate"
-        android:defaultValue="true" />
+            <PreferenceCategory
+                android:title="Summary Notifications"
+                android:key="summary_notifications">
+                <CheckBoxPreference
+                    android:key="summary_notification"
+                    android:title="Summary Notification"
+                    android:summary="Show summary card with active Basal."
+                    android:defaultValue="true" />
+                <CheckBoxPreference
+                    android:key="debug_notification"
+                    android:title="Debug Notification"
+                    android:summary="Show summary card when APS is ran with details."
+                    android:defaultValue="false" />
+            </PreferenceCategory>
 
+        </PreferenceScreen>
+    </PreferenceCategory>
 </PreferenceScreen>

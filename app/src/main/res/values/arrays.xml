@@ -11,13 +11,17 @@
     </string-array>
 
 
-        <string-array name="basal_modeArray">
-            <item>Absolute (U/hr)</item>
-            <item>Percent of normal basal</item>
+        <string-array name="pump_nameArray">
+            <item>Medtronic - Basal Absolute (U/hr)</item>
+            <item>Medtronic - Basal Percent</item>
+            <item>Roche Accu-Chek Spirit Combo</item>
+            <item>SOOIL Dana R</item>
         </string-array>
-        <string-array name="basal_modeValues">
-            <item>absolute</item>
-            <item>percent</item>
+        <string-array name="pump_nameValues">
+            <item>medtronic_absolute</item>
+            <item>medtronic_percent</item>
+            <item>roche_combo</item>
+            <item>dana_r</item>
         </string-array>
 
     <string-array name="aps_modeArray">

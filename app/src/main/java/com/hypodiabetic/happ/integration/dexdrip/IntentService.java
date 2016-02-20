@@ -7,8 +7,9 @@ package com.hypodiabetic.happ.integration.dexdrip;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
+import com.hypodiabetic.happ.Intents;
+import com.hypodiabetic.happ.Objects.Bg;
+import com.hypodiabetic.happ.services.DataCollectionService;
 
 import java.util.Date;
 

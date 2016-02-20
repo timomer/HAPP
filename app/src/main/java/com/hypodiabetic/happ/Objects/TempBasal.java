@@ -21,24 +21,24 @@ public class TempBasal extends Model {
     @Expose
     @Column(name = "rate")
     public Double   rate=0D;                //Temp Basal Rate for (U/hr) mode
-    @Expose
-    @Column(name = "ratePercent")
-    public Integer  ratePercent=0;          //Temp Basal Rate for "percent" of normal basal
+    //@Expose
+    //@Column(name = "ratePercent")
+    //public Integer  ratePercent=0;          //Temp Basal Rate for "percent" of normal basal
     @Expose
     @Column(name = "duration")
     public Integer  duration=0;             //Duration of Temp
-    @Expose
-    @Column(name = "basal_type")
-    public String   basal_type;             //Absolute or Percent
+    //@Expose
+    //@Column(name = "basal_type")
+    //public String   basal_type;             //Absolute or Percent
     @Expose
     @Column(name = "start_time")
     public Date     start_time;             //When the Temp Basal started
     @Expose
     @Column(name = "basal_adjustemnt")
     public String   basal_adjustemnt="";    //High or Low temp
-    @Expose
-    @Column(name = "current_pump_basal")
-    public Double   current_pump_basal;     //Pumps current basal
+    //@Expose
+    //@Column(name = "current_pump_basal")
+    //public Double   current_pump_basal;     //Pumps current basal
     @Expose
     @Column(name = "integration")           //JSON String holding details of integration made with this record, NS upload, etc
     public String integration;
@@ -110,14 +110,18 @@ public class TempBasal extends Model {
     }
 
     public Date endDate(){
-        Date endedAt = new Date(created_time.getTime() + (duration * 1000 * 60));                   //The date this Temp Basal ended
+        Date endedAt = new Date(start_time.getTime() + (duration * 1000 * 60));                   //The date this Temp Basal ended
         return endedAt;
     }
 
     public Long durationLeft(){
-        Date timeNow = new Date();
-        Long min_left = ((start_time.getTime() + duration * 60000) - timeNow.getTime()) / 60000 ;   //Time left to run in Mins
-        return min_left;
+        if (start_time != null) {
+            Date timeNow = new Date();
+            Long min_left = ((start_time.getTime() + duration * 60000) - timeNow.getTime()) / 60000;   //Time left to run in Mins
+            return min_left;
+        } else {
+            return duration.longValue();
+        }
     }
 
     public static List<TempBasal> latestTempBasals(int limit) {
@@ -136,6 +140,14 @@ public class TempBasal extends Model {
                 .where("start_time >= ? and start_time <= ?", dateFrom, dateTo)
                 .orderBy("start_time desc")
                 .execute();
+    }
+
+    public boolean checkIsCancelRequest() {
+        if (rate == 0 && duration == 0){
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

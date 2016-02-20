@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.tools;
 
@@ -18,7 +19,6 @@ public class Profile {
 
     //OpenAPS expected Profile settings
     public Double   carbAbsorptionRate;             //Carbs Disgested per hour http://diyps.org/2014/05/29/determining-your-carbohydrate-absorption-rate-diyps-lessons-learned/
-    public Double   max_iob;                        //maximum amount of non-bolus IOB OpenAPS will ever deliver
     public Double   dia;                            //Duration of Insulin Action (hours)
     public Double   current_basal;                  //Your current background basal at this moment of time
     public Double   max_bg;                         //high end of BG Target range
@@ -26,38 +26,29 @@ public class Profile {
     public Double   isf;                            //Insulin sensitivity factor, how much one unit of Insulin will lower your BG
     public Integer  carbRatio;                      //How many grams of carbohydrate are covered by one unit of insulin
 
-    public Double max_basal = 0D;                   //Max value a Temp Basal can be set to. This is this value or 4 * the current pump basal
-    public Double max_daily_basal = 0D;             //Hour with the highest basal rate for the day // TODO: 08/09/2015 not used in HAPP right now, set to 999 
-    //public String type = "current";                 //? live info from pump?
+    public Double   target_bg;                      //OpenAPS Target BG
+    public String   pump_name;                      //Pump Selected
+    public String   aps_mode;                       //Open - do not send to pump \ Closed - send to pump
+    public Boolean  temp_basal_notification;        //Should user be notified of a new Temp Basal?
+    public Boolean  send_bolus_allowed;             //Do we send the Bolus to a insulin_integration app?
+    public Integer  aps_loop;                       //APS Loops in mins
+    public String   aps_algorithm;
 
-    public Double target_bg;                        //OpenAPS Target BG
-    public String basal_mode;                       //Basal Mode for the pump, absolute or percent
-    public String aps_mode;                         //Open - do not send to pump \ Closed - send to pump
-    public Boolean temp_basal_notification;         //Should user be notified of a new Temp Basal?
-    public Boolean send_bolus_allowed;              //Do we send the Bolus to a insulin_integration app?
-    public Integer aps_loop;                        //APS Loops in mins
-    public Double max_bolus;                        //The maximum Bolus the app can deliver
-    public String aps_algorithm;
+    private SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+    private Date date;
 
     public Profile(Date thisTime){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+        date = thisTime;
 
         //OpenAPS expected Profile settings
         carbAbsorptionRate      = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
-        max_iob                 = Double.parseDouble(prefs.getString("max_iob", "3"));
         dia                     = Double.parseDouble(prefs.getString("dia", "1.5"));
-        current_basal           = getCurrent_basal(thisTime, prefs);
-        carbRatio               = getCurrent_carbratio(thisTime, prefs);
-
-        max_basal               = Double.parseDouble(prefs.getString("max_basal", "2"));
-        max_daily_basal         = 999D;
-        //type                 = "current";
-
-        basal_mode              = prefs.getString("basal_mode", "percent");
+        current_basal           = getCurrent_basal();
+        carbRatio               = getCurrent_carbratio();
+        pump_name               = prefs.getString("pump_name", "medtronic_absolute");
         temp_basal_notification = prefs.getBoolean("temp_basal_notification", true);
 
         aps_loop                = Integer.parseInt(prefs.getString("aps_loop", "900000")) / 60000;
-        max_bolus               = Double.parseDouble(prefs.getString("max_bolus", "4"));
         aps_algorithm           = prefs.getString("aps_algorithm", "none");
 
         String aps_mode_prefs                       = prefs.getString("aps_mode", "open");
@@ -70,7 +61,7 @@ public class Profile {
         } else {
             aps_mode = "open";
         }
-        if (insulin_integration_send_bolus && !insulin_integration_prefs.equals("")){
+        if (insulin_integration_send_bolus && !insulin_integration_prefs.equals("") && Constants.BOLUS_ALLOWED){
             send_bolus_allowed = true;
         } else {
             send_bolus_allowed = false;
@@ -79,12 +70,12 @@ public class Profile {
         max_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170"))));
         min_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70"))));
         target_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100"))));
-        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf(thisTime, prefs)));
+        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf()));
     }
 
-    public static Double getCurrent_basal(Date dateNow, SharedPreferences prefs){
+    private Double getCurrent_basal(){
         Calendar calendarNow = GregorianCalendar.getInstance();
-        calendarNow.setTime(dateNow);
+        calendarNow.setTime(date);
         Integer hourNow = calendarNow.get(Calendar.HOUR_OF_DAY);
         Double basalNow;
 
@@ -102,9 +93,9 @@ public class Profile {
         }
         return basalNow;
     }
-    public static Double getCurrent_isf(Date dateNow, SharedPreferences prefs){
+    private Double getCurrent_isf(){
         Calendar calendarNow = GregorianCalendar.getInstance();
-        calendarNow.setTime(dateNow);
+        calendarNow.setTime(date);
         Integer hourNow = calendarNow.get(Calendar.HOUR_OF_DAY);
         Double isfNow;
 
@@ -122,9 +113,9 @@ public class Profile {
         }
         return isfNow;
     }
-    public static Integer getCurrent_carbratio(Date dateNow, SharedPreferences prefs){
+    private Integer getCurrent_carbratio(){
         Calendar calendarNow = GregorianCalendar.getInstance();
-        calendarNow.setTime(dateNow);
+        calendarNow.setTime(date);
         Integer hourNow = calendarNow.get(Calendar.HOUR_OF_DAY);
         Double carbratioNow;
 
@@ -144,15 +135,4 @@ public class Profile {
     }
 
 
-
-
-
-
-
 }
-
-
-        //maxBasal: maxBasal # pump's maximum basal setting
-        //#ic: ic, # Insulin to Carb Ratio (g/U)
-        //#csf: isf / ic, # Carb Sensitivity Factor (mg/dL/g)
-        //basals: basals # Basal Schedule (array of [start time of day, rate (U/hr)])

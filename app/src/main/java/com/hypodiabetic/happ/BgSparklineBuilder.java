@@ -7,7 +7,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 
-import com.hypodiabetic.happ.code.nightwatch.BgGraphBuilder;
+import com.hypodiabetic.happ.Graphs.BgGraph;
 
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
@@ -32,22 +32,22 @@ public class BgSparklineBuilder {
 
     private int width;
     private int height;
-    private ExtendedGraphBuilder bgGraphBuilder;
+    private BgGraph bgGraph;
     private LineChartView chart;
-    private float end = new Date().getTime() / (float) BgGraphBuilder.fuzz;
-    private float start = end - (60000*180 / (float) BgGraphBuilder.fuzz); // 3h
+    private float end = new Date().getTime() / (float) BgGraph.fuzz;
+    private float start = end - (60000*180 / (float) BgGraph.fuzz); // 3h
     private boolean showLowLine = false;
     private boolean showHighLine = false;
     private boolean showAxes = false;
     private boolean useSmallDots = false;
 
     public BgSparklineBuilder setStart(long start) {
-        this.start = start / (float) BgGraphBuilder.fuzz;
+        this.start = start / (float) BgGraph.fuzz;
         return this;
     }
 
     public BgSparklineBuilder setEnd(long end) {
-        this.end = end / (float) BgGraphBuilder.fuzz;
+        this.end = end / (float) BgGraph.fuzz;
         return this;
     }
 
@@ -107,8 +107,8 @@ public class BgSparklineBuilder {
         return this.setSmallDots(true);
     }
 
-    public BgSparklineBuilder setBgGraphBuilder(ExtendedGraphBuilder bgGraphBuilder) {
-        this.bgGraphBuilder = bgGraphBuilder;
+    public BgSparklineBuilder setBgGraphBuilder(BgGraph bgGraph) {
+        this.bgGraph = bgGraph;
         return this;
     }
 
@@ -164,22 +164,22 @@ public class BgSparklineBuilder {
 
     Bitmap build() {
         List<Line> lines = new ArrayList<>();
-        bgGraphBuilder.defaultLines();
-        lines.add(bgGraphBuilder.inRangeValuesLine());
-        lines.add(bgGraphBuilder.lowValuesLine());
-        lines.add(bgGraphBuilder.highValuesLine());
+        bgGraph.defaultLines();
+        lines.add(bgGraph.inRangeValuesLine());
+        lines.add(bgGraph.lowValuesLine());
+        lines.add(bgGraph.highValuesLine());
         if (showLowLine)
-            lines.add(bgGraphBuilder.lowLine());
+            lines.add(bgGraph.lowLine());
         if (showHighLine)
-            lines.add(bgGraphBuilder.highLine());
+            lines.add(bgGraph.highLine());
         if (useSmallDots) {
             for(Line line: lines)
                 line.setPointRadius(1);
         }
         LineChartData lineData = new LineChartData(lines);
         if (showAxes) {
-            lineData.setAxisYLeft(bgGraphBuilder.yAxis());
-            lineData.setAxisXBottom(bgGraphBuilder.xAxis());
+            lineData.setAxisYLeft(bgGraph.yAxis());
+            lineData.setAxisXBottom(bgGraph.xAxis());
         }
         //lines.add(bgGraphBuilder.rawInterpretedLine());
         chart.setLineChartData(lineData);

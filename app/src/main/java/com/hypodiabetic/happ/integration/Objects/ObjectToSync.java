@@ -3,6 +3,7 @@ package com.hypodiabetic.happ.integration.Objects;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.tools;
@@ -53,8 +54,10 @@ public class ObjectToSync {
                 break;
             case "temp_basal":
                 TempBasal tempBasal =   TempBasal.getTempBasalByID(integration.happ_object_id);
+                Pump pump = new Pump();
+                pump.setNewTempBasal(null, tempBasal);
                 value1      =   tempBasal.rate;
-                value2      =   tempBasal.ratePercent.toString();
+                value2      =   pump.temp_basal_percent.toString();
                 value3      =   tempBasal.duration.toString();
                 requested   =   tempBasal.start_time;
                 break;

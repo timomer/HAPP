@@ -7,17 +7,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.hypodiabetic.happ.code.nightwatch.Constants;
-import com.hypodiabetic.happ.integration.nightscout.NSUploader;
+import com.hypodiabetic.happ.Objects.Profile;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -119,8 +115,8 @@ public class tools {
     }
 
     //Converts BG between US and UK formats
-    public static String unitizedBG(Double value, Context c) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+    public static String unitizedBG(Double value) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         String unit = prefs.getString("units", "mgdl");
 
         if(unit.compareTo("mgdl") == 0) {
@@ -206,10 +202,7 @@ public class tools {
 
     //always returns value in mgdl
     public static String inmgdl(Double value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-        String unit = prefs.getString("units", "mgdl");
-
-        if(unit.compareTo("mgdl") == 0) {
+        if(bgUnitsFormat().equals("mgdl")) {
             return Integer.toString(value.intValue());
         } else {
             return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MMOLL_TO_MGDL));
@@ -217,80 +210,102 @@ public class tools {
     }
 
     //returns the bg units in use for the app right now
-    public static String bgUnitsFormat(Context c){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+    public static String bgUnitsFormat(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         return prefs.getString("units", "mgdl");
     }
 
     //exports shared Preferences
-    public static void exportSharedPreferences(Context c){
+    public static void exportSharedPreferences(final Context c){
 
         File path = new File(Environment.getExternalStorageDirectory().toString());
-        File file = new File(path, "HAPPSharedPreferences");
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        final File file = new File(path, "HAPPSharedPreferences");
 
-        try
-        {
-            FileWriter fw = new FileWriter(file);
-            PrintWriter pw = new PrintWriter(fw);
-            Map<String,?> prefsMap = prefs.getAll();
-            for(Map.Entry<String,?> entry : prefsMap.entrySet())
-            {
-                pw.println(entry.getKey() + "::" + entry.getValue().toString());
-            }
-            pw.close();
-            fw.close();
-            Toast.makeText(c, "Settings Exported to " + path + "/" + file, Toast.LENGTH_LONG).show();
-        }
-        catch (Exception e){
-            Crashlytics.logException(e);
-        }
+        new AlertDialog.Builder(c)
+                .setMessage("Export Settings to " + path + "/" + file)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+                        try
+                        {
+                            FileWriter fw = new FileWriter(file);
+                            PrintWriter pw = new PrintWriter(fw);
+                            Map<String,?> prefsMap = prefs.getAll();
+                            for(Map.Entry<String,?> entry : prefsMap.entrySet())
+                            {
+                                pw.println(entry.getKey() + "::" + entry.getValue().toString());
+                            }
+                            pw.close();
+                            fw.close();
+                            Toast.makeText(c, "Exported", Toast.LENGTH_LONG).show();
+                        }
+                        catch (Exception e){
+                            Crashlytics.logException(e);
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .show();
     }
     //imports shared Preferences
-    public static void importSharedPreferences(Context c){
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-        SharedPreferences.Editor editor = prefs.edit();
-
+    public static void importSharedPreferences(final Context c){
 
         File path = new File(Environment.getExternalStorageDirectory().toString());
-        File file = new File(path, "HAPPSharedPreferences");
-        String line;
-        String[] lineParts;
+        final File file = new File(path, "HAPPSharedPreferences");
 
-        try {
+        new AlertDialog.Builder(c)
+                .setMessage("Import Settings from " + path + "/" + file)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
 
-            //Clears all prefs before importing
-            editor.clear();
-            editor.commit();
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        String line;
+                        String[] lineParts;
 
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+                        try {
 
-            while( ( line = reader.readLine() ) != null)
-            {
-                lineParts = line.split("::");
-                if (lineParts.length == 2) {
-                    if (lineParts[1].equals("true") || lineParts[1].equals("false")){
-                        editor.putBoolean(lineParts[0], Boolean.parseBoolean(lineParts[1]));
-                    } else {
-                        editor.putString(lineParts[0], lineParts[1]);
+                            //Clears all prefs before importing
+                            editor.clear();
+                            editor.commit();
+
+                            BufferedReader reader = new BufferedReader(new FileReader(file));
+
+                            while ((line = reader.readLine()) != null) {
+                                lineParts = line.split("::");
+                                if (lineParts.length == 2) {
+                                    if (lineParts[1].equals("true") || lineParts[1].equals("false")) {
+                                        editor.putBoolean(lineParts[0], Boolean.parseBoolean(lineParts[1]));
+                                    } else {
+                                        editor.putString(lineParts[0], lineParts[1]);
+                                    }
+                                }
+                            }
+                            reader.close();
+                            editor.commit();
+                            Toast.makeText(c, "Settings Imported", Toast.LENGTH_LONG).show();
+
+                        } catch (FileNotFoundException e2) {
+                            Toast.makeText(c, "File not found " + file, Toast.LENGTH_LONG).show();
+                            e2.printStackTrace();
+
+                        } catch (IOException e2) {
+                            e2.printStackTrace();
+
+                        }
                     }
-                }
-            }
-            reader.close();
-            editor.commit();
-            Toast.makeText(c, "Settings Imported", Toast.LENGTH_LONG).show();
-
-        } catch (FileNotFoundException e2) {
-            // TODO Auto-generated catch block
-            Toast.makeText(c, "File not found " + file, Toast.LENGTH_LONG).show();
-            e2.printStackTrace();
-
-        } catch (IOException e2) {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
-
-        }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .show();
     }
 
     public static Double stringToDouble(String string){

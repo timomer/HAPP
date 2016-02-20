@@ -1,8 +1,6 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,14 +17,15 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
-import android.text.ClipboardManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,25 +44,25 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hypodiabetic.happ.Graphs.BasalVSTempBasalGraph;
+import com.hypodiabetic.happ.Graphs.BgGraph;
+import com.hypodiabetic.happ.Graphs.IOBCOBBarGraph;
+import com.hypodiabetic.happ.Graphs.IOBCOBLineGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
-import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.code.nightwatch.Bg;
-import com.hypodiabetic.happ.code.nightwatch.DataCollectionService;
+import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.integration.InsulinIntegrationApp;
-import com.hypodiabetic.happ.integration.dexdrip.Intents;
-import com.hypodiabetic.happ.integration.InsulinIntegrationAppNotification;
+import com.hypodiabetic.happ.integration.IntegrationsManager;
+import com.hypodiabetic.happ.integration.Objects.InsulinIntegrationNotify;
+import com.hypodiabetic.happ.services.APSService;
 
 
 import io.fabric.sdk.android.Fabric;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Viewport;
@@ -77,18 +76,12 @@ import lecho.lib.hellocharts.listener.ViewportChangeListener;
 public class MainActivity extends AppCompatActivity {
 
     private static MainActivity ins;
-    //private static APSResult currentAPSResult;
+    private static final String TAG = "MainActivity";
 
-    private TextView sysMsg;
-    private TextView iobValueTextView;
-    private TextView cobValueTextView;
-    private TextView statsAge;
-    private TextView eventualBGValue;
-    private TextView snoozeBGValue;
-    private TextView openAPSAgeTextView;
     private TextView insulinIntegrationApp_status;
     private ImageView insulinIntegrationApp_icon;
-    private ExtendedGraphBuilder extendedGraphBuilder;
+    private BgGraph bgGraph;
+    //private static final ExtendedGraphBuilder extendedGraphBuilder = new ExtendedGraphBuilder(MainApp.instance());
     public static Activity activity;
     private Toolbar toolbar;
 
@@ -99,12 +92,8 @@ public class MainActivity extends AppCompatActivity {
     Fragment iobcobFragmentObject;
     Fragment basalvsTempBasalObject;
 
-    private ListView mDrawerList;
-    private ArrayAdapter<String> mAdapter;
-    private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private LinearLayout mDrawerLinear;
-    private String mActivityTitle;
 
     private Drawable tickWhite;
     private Drawable clockWhite;
@@ -121,15 +110,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean updateStuff;
     public boolean updatingPreviewViewport = false;
     public boolean updatingChartViewport = false;
-    public SharedPreferences prefs;
-    BroadcastReceiver _broadcastReceiver;
-    BroadcastReceiver newDataReceiver;
     //xdrip end
-    BroadcastReceiver newStatsReceiver;
-    BroadcastReceiver newAPSUpdate;
-    BroadcastReceiver updateEvery60Seconds;
+
+    BroadcastReceiver newUIUpdate;
+    BroadcastReceiver refresh60Seconds;
     BroadcastReceiver insulinIntegrationAppUpdate;
-    BroadcastReceiver appNotification;
 
     public static MainActivity getInstace(){
         return ins;
@@ -143,33 +128,119 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         ins = this;
-        PreferenceManager.setDefaultValues(this, R.xml.pref_aps, false);                            //Sets default APS Preferences if the user has not
 
+        //Sets default Preferences
+        PreferenceManager.setDefaultValues(this, R.xml.pref_aps, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_notification, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_integration, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_misc, false);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_pump, false);
 
-        //xdrip start
-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         checkEula();
 
-        startService(new Intent(getApplicationContext(), DataCollectionService.class));
-
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_bg_notification, false);
-        //xdrip end
+        // TODO: 16/02/2016 why are we runing the service again?
+        //startService(new Intent(getApplicationContext(), DataCollectionService.class));
 
         setContentView(R.layout.activity_main);
-        extendedGraphBuilder = new ExtendedGraphBuilder(this);
 
+        setupMenuAndToolbar();
+
+        // Create the adapter that will return a fragment for each of the 4 primary sections of the app.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) this.findViewById(R.id.pager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        //Build Fragments
+        openAPSFragmentObject       = new openAPSFragment();
+        iobcobActiveFragmentObject  = new iobcobActiveFragment();
+        iobcobFragmentObject        = new iobcobFragment();
+        basalvsTempBasalObject      = new basalvsTempBasalFragment();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (newUIUpdate != null) {
+            LocalBroadcastManager.getInstance(MainApp.instance()).unregisterReceiver(newUIUpdate);
+        }
+        if (refresh60Seconds != null) {
+            unregisterReceiver(refresh60Seconds);
+        }
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        newUIUpdate = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+
+                switch (intent.getStringExtra("UPDATE")){
+                    case "NEW_BG":
+                        updateBGDetails();
+                        updateBGCharts();
+                        holdViewport.set(0, 0, 0, 0); // TODO: 16/02/2016 needed?
+                        break;
+                    case "NEW_APS_RESULT":
+                        APSResult apsResult = gson.fromJson(intent.getStringExtra("APSResult"), APSResult.class);
+                        updateAPSDetails(apsResult);
+                        updateBGCharts();
+                        break;
+                    case "NEW_STAT_UPDATE":
+                        Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
+                        updateStats(stat);
+                        break;
+                    case "UPDATE_RUNNING_TEMP":
+                        updateRunningTemp();
+                        break;
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(MainApp.instance()).registerReceiver(newUIUpdate, new IntentFilter(Intents.UI_UPDATE));
+
+        refresh60Seconds = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+                    holdViewport.set(0, 0, 0, 0); // TODO: 16/02/2016 needed?
+
+                    updateRunningTemp();
+                    updateAges();
+                }
+            }
+        };
+        registerReceiver(refresh60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
+
+        updateBGCharts();
+        updateBGDetails();
+        updateStats(null);
+        updateAPSDetails(null);
+        IntegrationsManager.updatexDripWatchFace();
+
+        //Checks if we have any Insulin Integration App errors we must warn the user about
+        Notifications.newInsulinUpdate();
+    }
+
+    public void setupMenuAndToolbar() {
         //Setup menu
-        tickWhite = getDrawable(R.drawable.checkbox_marked_circle);
-        clockWhite = getDrawable(R.drawable.clock);
+        insulinIntegrationApp_status    = (TextView) findViewById(R.id.insulinIntegrationApp_status);
+        insulinIntegrationApp_icon      = (ImageView) findViewById(R.id.insulinIntegrationApp_icon);
+        mDrawerLayout                   = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mDrawerLinear                   = (LinearLayout) findViewById(R.id.left_drawer);
+        toolbar                         = (Toolbar) findViewById(R.id.toolbar);
+        tickWhite                       = getDrawable(R.drawable.checkbox_marked_circle);
+        clockWhite                      = getDrawable(R.drawable.clock);
+        ListView mDrawerList            = (ListView)findViewById(R.id.navList);
+        String[] osArray                = { "Cancel Temp", "Settings", "Integration Report" };
+        ArrayAdapter<String> mAdapter   = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+
         tickWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
         clockWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        insulinIntegrationApp_status = (TextView) findViewById(R.id.insulinIntegrationApp_status);
-        insulinIntegrationApp_icon = (ImageView) findViewById(R.id.insulinIntegrationApp_icon);
-        mDrawerList = (ListView)findViewById(R.id.navList);
-        String[] osArray = { "Cancel Temp", "Settings", "Integration Report" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
         mDrawerList.setAdapter(mAdapter);
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -188,10 +259,8 @@ public class MainActivity extends AppCompatActivity {
                 mDrawerLayout.closeDrawers();
             }
         });
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        mDrawerLinear = (LinearLayout) findViewById(R.id.left_drawer);
-        mActivityTitle = getTitle().toString();
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,R.string.drawer_open, R.string.drawer_close) {
+
+        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,R.string.drawer_open, R.string.drawer_close) {
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -230,51 +299,26 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         mDrawerToggle.syncState();
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        // Create the adapter that will return a fragment for each of the 4 primary sections of the app.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) this.findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        //mViewPager.setOffscreenPageLimit(4);                                                        //Do not destroy any Fragments, // TODO: 14/09/2015 casues an issue with bvb chart rendering, not sure why
-        //Build Fragments
-        openAPSFragmentObject       = new openAPSFragment();
-        iobcobActiveFragmentObject  = new iobcobActiveFragment();
-        iobcobFragmentObject        = new iobcobFragment();
-        basalvsTempBasalObject      = new basalvsTempBasalFragment();
-
-
-        //Updates notifications every 60 seconds
-        updateEvery60Seconds = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                APSResult apsResult = APSResult.last();
-                Notifications.updateCard(context,apsResult);
-            }
-        };
-        registerReceiver(updateEvery60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
-
     }
 
-    public void setupBGCharts() {
+    public void updateBGCharts() {
 
-        //BG charts
-        updateStuff = false;
-        chart = (LineChartView) findViewById(R.id.chart);
+        bgGraph         =   new BgGraph(this);
+        chart           =   (LineChartView) findViewById(R.id.chart);
+        previewChart    =   (PreviewLineChartView) findViewById(R.id.chart_preview);
+        updateStuff     =   false;
+
         chart.setZoomType(ZoomType.HORIZONTAL);
-
-        previewChart = (PreviewLineChartView) findViewById(R.id.chart_preview);
         previewChart.setZoomType(ZoomType.HORIZONTAL);
 
-        chart.setLineChartData(extendedGraphBuilder.lineData());
-        previewChart.setLineChartData(extendedGraphBuilder.previewLineData());
+        chart.setLineChartData(bgGraph.lineData());
+        previewChart.setLineChartData(bgGraph.previewLineData());
         updateStuff = true;
 
         previewChart.setViewportCalculationEnabled(true);
@@ -284,18 +328,20 @@ public class MainActivity extends AppCompatActivity {
 
         setViewport();
 
+        Log.d(TAG, "bgGraph Updated");
     }
 
     public void test(View view){
          //TextView notificationText = (TextView)findViewById(R.id.notices);
         //notificationText.setTextColor(Color.WHITE);
 
-        InsulinIntegrationAppNotification popup = new InsulinIntegrationAppNotification();
+        InsulinIntegrationNotify popup = new InsulinIntegrationNotify();
         Snackbar snackbar = popup.getSnackbar(view);
-        Notification notification = popup.getErrorNotification();
+        NotificationCompat.Builder notification = popup.getErrorNotification();
 
         if (snackbar != null) snackbar.show();
-        if (notification != null) ((NotificationManager) MainApp.instance().getSystemService(Context.NOTIFICATION_SERVICE)).notify(58, notification);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
+        if (popup.foundError) notificationManager.notify(58, notification.build());
 
 
     }
@@ -331,28 +377,30 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void showAlgorithmJSON(View view){
-        Profile profileNow = new Profile(new Date());
+        // TODO: 15/02/2016 replace with Debug command
+        //Profile profileNow = new Profile(new Date());
 
         //Shows the JSON output of the selected Algorithm
-        String rawAPSJSON = APS.rawJSON(view.getContext(),profileNow).toString();
-        Snackbar snackbar = Snackbar
-                .make(view, "RAW JSON: " + rawAPSJSON, Snackbar.LENGTH_INDEFINITE);
+        //String rawAPSJSON = APS.rawJSON(view.getContext(),profileNow).toString();
+        //Snackbar snackbar = Snackbar
+        //        .make(view, "RAW JSON: " + rawAPSJSON, Snackbar.LENGTH_INDEFINITE);
 
-        View snackbarView = snackbar.getView();
-        TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-        textView.setMaxLines(5);  //set the max lines for textview to show multiple lines
+        //View snackbarView = snackbar.getView();
+        //TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        //textView.setMaxLines(5);  //set the max lines for textview to show multiple lines
 
-        snackbar.show();
+        //snackbar.show();
 
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        clipboard.setText(rawAPSJSON);
-        Toast.makeText(view.getContext(), "Raw JSON sent to clipboard", Toast.LENGTH_SHORT).show();
+        //ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        //clipboard.setText(rawAPSJSON);
+        //Toast.makeText(view.getContext(), "Raw JSON sent to clipboard", Toast.LENGTH_SHORT).show();
     }
 
 
     //xdrip functions start
 
     public void checkEula() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean IUnderstand = prefs.getBoolean("I_understand", false);
         if (!IUnderstand) {
             Intent intent = new Intent(getApplicationContext(), license_agreement.class);
@@ -426,168 +474,54 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             }
-            if (updateStuff == true) {
+            if (updateStuff) {
                 holdViewport.set(newViewport.left, newViewport.top, newViewport.right, newViewport.bottom);
             }
         }
     }
     public void setViewport() {
         if (tempViewport.left == 0.0 || holdViewport.left == 0.0 || holdViewport.right  >= (new Date().getTime())) {
-            previewChart.setCurrentViewport(extendedGraphBuilder.advanceViewport(chart, previewChart));
+            previewChart.setCurrentViewport(bgGraph.advanceViewport(chart, previewChart));
         } else {
             previewChart.setCurrentViewport(holdViewport);
         }
     }
-    public void displayCurrentInfo() {
-        final TextView currentBgValueText = (TextView)findViewById(R.id.currentBgValueRealTime);
-        final TextView notificationText = (TextView)findViewById(R.id.notices);
-        final TextView deltaText = (TextView)findViewById(R.id.bgDelta);
+    public void updateBGDetails() {
+        TextView currentBgValueText = (TextView)findViewById(R.id.currentBgValueRealTime);
+        TextView notificationText   = (TextView)findViewById(R.id.notices);
+        TextView deltaText          = (TextView)findViewById(R.id.bgDelta);
+        SharedPreferences prefs     = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+        Double highMark             = Double.parseDouble(prefs.getString("highValue", "170"));
+        Double lowMark              = Double.parseDouble(prefs.getString("lowValue", "70"));
+
         if ((currentBgValueText.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) > 0) {
             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-        Bg lastBgreading = Bg.last();
+        Bg lastBg = Bg.last();
 
-        if (lastBgreading != null) {
-            notificationText.setText(lastBgreading.readingAge());
-            String bgDelta = tools.unitizedBG(lastBgreading.bgdelta, MainApp.instance().getApplicationContext());
-            if (lastBgreading.bgdelta >= 0) bgDelta = "+" + bgDelta;
+        if (lastBg != null) {
+            notificationText.setText(lastBg.readingAge());
+            String bgDelta = tools.unitizedBG(lastBg.bgdelta);
+            if (lastBg.bgdelta >= 0) bgDelta = "+" + bgDelta;
             deltaText.setText(bgDelta);
-            currentBgValueText.setText(extendedGraphBuilder.unitized_string(lastBgreading.sgv_double()) + " " + lastBgreading.slopeArrow());
+            currentBgValueText.setText(lastBg.stringResult() + " " + lastBg.slopeArrow());
 
-            if ((new Date().getTime()) - (60000 * 16) - lastBgreading.datetime > 0) {
+            if ((new Date().getTime()) - (60000 * 16) - lastBg.datetime > 0) {
                 notificationText.setTextColor(Color.parseColor("#C30909"));
                 currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
-                notificationText.setTextColor(Color.WHITE);
+                notificationText.setTextColor(getResources().getColor(R.color.secondary_text_light));
             }
-            double estimate = lastBgreading.sgv_double();
-            if(extendedGraphBuilder.unitized(estimate) <= extendedGraphBuilder.lowMark) {
+            double estimate = lastBg.sgv_double();
+            if(Double.parseDouble(tools.unitizedBG(estimate)) <= lowMark) {
                 currentBgValueText.setTextColor(Color.parseColor("#C30909"));
-            } else if(extendedGraphBuilder.unitized(estimate) >= extendedGraphBuilder.highMark) {
+            } else if(Double.parseDouble(tools.unitizedBG(estimate)) >= highMark) {
                 currentBgValueText.setTextColor(Color.parseColor("#FFBB33"));
             } else {
                 currentBgValueText.setTextColor(Color.WHITE);
             }
         }
-
-        //Stats UI update
-        updateStats(null);
-
-        //OpenAPS UI update
-        updateOpenAPSDetails(null);
-
-        //Temp Basal running update
-        updateRunningTemp();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (_broadcastReceiver != null) {
-            unregisterReceiver(_broadcastReceiver);
-        }
-        if (newDataReceiver != null) {
-            unregisterReceiver(newDataReceiver);
-        }
-        if (newStatsReceiver != null){
-            unregisterReceiver(newStatsReceiver);
-        }
-        if (newAPSUpdate != null){
-            unregisterReceiver(newAPSUpdate);
-        }
-        if (appNotification != null){
-            unregisterReceiver(appNotification);
-        }
-    }
-    //xdrip functions ends
-
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-
-        //xdrip start
-        extendedGraphBuilder = new ExtendedGraphBuilder(getApplicationContext());
-
-        _broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context ctx, Intent intent) {
-                if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                    setupBGCharts();
-                    displayCurrentInfo();
-                    holdViewport.set(0, 0, 0, 0);
-                }
-            }
-        };
-        newDataReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context ctx, Intent intent) {
-                setupBGCharts();
-                displayCurrentInfo();
-                holdViewport.set(0, 0, 0, 0);
-            }
-        };
-        registerReceiver(_broadcastReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
-        registerReceiver(newDataReceiver, new IntentFilter(Intents.ACTION_NEW_BG));
-        setupBGCharts();
-        displayCurrentInfo();
-        holdViewport.set(0, 0, 0, 0);
-        //xdrip end
-
-        //listens out for new Stats
-        newStatsReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-                Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
-
-                updateStats(stat);
-                displayCurrentInfo();
-            }
-        };
-        registerReceiver(newStatsReceiver, new IntentFilter("ACTION_UPDATE_STATS"));
-        updateStats(null);
-
-        //listens out for openAPS updates
-        newAPSUpdate = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-                APSResult apsResult = gson.fromJson(intent.getStringExtra("APSResult"), APSResult.class);
-
-                updateOpenAPSDetails(apsResult);
-                setupBGCharts();
-                displayCurrentInfo();
-            }
-        };
-        registerReceiver(newAPSUpdate, new IntentFilter("APS_UPDATE"));
-
-        //listens out for app notifications
-        appNotification = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int snackbar_length;
-                snackbar_length                 = intent.getIntExtra("snackbar_length", Snackbar.LENGTH_INDEFINITE);
-                final String alertDialogText    = intent.getStringExtra("alertDialogText");
-                String snackBarMsg              = intent.getStringExtra("snackBarMsg");
-
-                Snackbar snackbar = Snackbar
-                        .make(MainActivity.activity.findViewById(R.id.mainActivity), snackBarMsg, snackbar_length)
-                        .setAction("DETAILS", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
-                                builder.setMessage(alertDialogText);
-                                builder.setPositiveButton("OK", null);
-                                builder.show();
-                            }
-                        });
-                snackbar.show();
-
-            }
-        };
-        registerReceiver(appNotification, new IntentFilter("NEW_APP_NOTIFICATION"));
-
+        Log.d(TAG, "Ran BG Update");
     }
 
 
@@ -625,85 +559,103 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    //Updates the OpenAPS Fragment
-    public void updateOpenAPSDetails(APSResult apsResult) {
-
+    //Updates the APS Fragment
+    public void updateAPSDetails(APSResult apsResult) {
+        //Toast.makeText(MainApp.instance(),"APS Update",Toast.LENGTH_SHORT).show();
         //Updates fragment UI with APS suggestion
         if (apsResult == null) apsResult = APSResult.last();
 
         if (apsResult != null) {
+            if (openAPSFragment.isLoaded) {
+                openAPSFragment.update(apsResult);
+                openAPSFragment.setRunAPSButton(true);
+            }
 
-            Fragment apsDash = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":0");
-            if (openAPSFragment.isLoaded) openAPSFragment.update(apsResult);
-
-            eventualBGValue = (TextView) findViewById(R.id.eventualBGValue);
-            snoozeBGValue = (TextView) findViewById(R.id.snoozeBGValue);
-            openAPSAgeTextView = (TextView) findViewById(R.id.openapsAge);
+            TextView eventualBGValue    = (TextView) findViewById(R.id.eventualBGValue);
+            TextView snoozeBGValue      = (TextView) findViewById(R.id.snoozeBGValue);
+            TextView apsAge             = (TextView) findViewById(R.id.openapsAge);
             //Updates main UI with last APS run
-            openAPSAgeTextView.setText(apsResult.ageFormatted());
-            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG, MainApp.instance().getApplicationContext()));
-            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG, MainApp.instance().getApplicationContext()));
+            apsAge.setText(apsResult.ageFormatted());
+            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG));
+            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG));
         }
 
         //Temp Basal running update
         updateRunningTemp();
+
+        Log.d(TAG, "Ran APS Update");
     }
+
+    public void updateAges(){
+        TextView statsAge           = (TextView) findViewById(R.id.statsAge);
+        TextView apsAge             = (TextView) findViewById(R.id.openapsAge);
+        TextView notificationText   = (TextView) findViewById(R.id.notices);
+
+        Stats stat          = Stats.last();
+        APSResult apsResult = APSResult.last();
+        Bg lastBg           = Bg.last();
+
+        if (stat != null)       statsAge.setText(stat.statAge());
+        if (apsResult != null)  apsAge.setText(apsResult.ageFormatted());
+        if (lastBg != null) {
+            notificationText.setText(lastBg.readingAge());
+            if ((new Date().getTime()) - (60000 * 16) - lastBg.datetime > 0) {
+                notificationText.setTextColor(Color.parseColor("#C30909"));
+            } else {
+                notificationText.setTextColor(getResources().getColor(R.color.secondary_text_light));
+            }
+        }
+
+        Log.d(TAG, "Stats, APS, BG ages updated");
+    }
+
     //Updates stats and stats Fragments charts
     public void updateStats(Stats stat) {
 
         if (stat == null) stat = Stats.last();
 
-        iobValueTextView = (TextView) findViewById(R.id.iobValue);
-        cobValueTextView = (TextView) findViewById(R.id.cobValue);
-        statsAge = (TextView) findViewById(R.id.statsAge);
-
-        Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":2");
-        if (iobcobActive != null) {                                                         //Check IOB COB Active fragment is loaded
-            iobcobActiveFragment.updateChart(MainActivity.activity);
-        }
         if (stat != null) {
-            iobValueTextView.setText(tools.formatDisplayInsulin(stat.iob, 1));//  String.format(Locale.ENGLISH, "%.2f", stat.iob));
-            cobValueTextView.setText(tools.formatDisplayCarbs(stat.cob)); //String.format(Locale.ENGLISH, "%.2f", stat.cob));
+            TextView iobValueTextView   = (TextView) findViewById(R.id.iobValue);
+            TextView cobValueTextView   = (TextView) findViewById(R.id.cobValue);
+            TextView statsAge           = (TextView) findViewById(R.id.statsAge);
+
+            //Update Dashboard
+            iobValueTextView.setText(tools.formatDisplayInsulin(stat.iob, 1));
+            cobValueTextView.setText(tools.formatDisplayCarbs(stat.cob));
             statsAge.setText(stat.statAge());
+
+            //Update IOB COB fragment Line Chart
+            Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
+            if (iobcob != null) iobcobFragment.updateChart();
+
+            //Update IOB COB Active fragment Bar Chart
+            Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":2");
+            if (iobcobActive != null) iobcobActiveFragment.updateChart(MainActivity.activity);
+
+            //Update Basal Vs Temp Basal fragment Chart
+            Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":3");
+            if (basalvstemp != null) basalvsTempBasalFragment.updateChart();
         }
 
-        Fragment iobcob = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":1");
-        if (iobcob != null) {                                                                //Check IOB COB fragment is loaded
-            iobcobFragment.updateChart();
-        }
-        Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":3");
-        if (basalvstemp != null) {                                                          //Check Basal Vs Temp Basal fragment is loaded
-            basalvsTempBasalFragment.updateChart();
-        }
+        Log.d(TAG, "Ran Stats Update");
     }
+
     public void updateRunningTemp(){
-        //sysMsg = (TextView) findViewById(R.id.sysmsg);
-        TempBasal lastTempBasal = TempBasal.last();
-        //String appStatus;
-        if (lastTempBasal.isactive(null)){                                                          //Active temp Basal
-            toolbar.setTitle(lastTempBasal.basal_adjustemnt + " Temp Active");
-            toolbar.setSubtitle(tools.formatDisplayBasal(lastTempBasal.rate, false) + "(" + lastTempBasal.ratePercent + "%) " + lastTempBasal.durationLeft() + "mins left");
-        } else {                                                                                    //No temp Basal running, show default
-            Double currentBasal = new Profile(new Date()).current_basal;
-            toolbar.setTitle("Default Basal");
-            toolbar.setSubtitle(tools.formatDisplayBasal(currentBasal, false));
-        }
+        Pump pump = new Pump();
+        toolbar.setTitle(pump.displayBasalDesc(false));
+        toolbar.setSubtitle(pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft());
     }
 
-
-    public void runOpenAPS(View view){
-        //Run openAPS
-        Intent intent = new Intent("com.hypodiabetic.happ.RUN_OPENAPS");
-        sendBroadcast(intent);
+    public void runAPS(View view){
+        //Run openAPS on demand
+        openAPSFragment.setRunAPSButton(false);
+        Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
+        MainApp.instance().startService(apsIntent);
     }
     public void apsstatusAccept (final View view){
         TempBasal suggestedBasal = APSResult.last().getBasal();
-        if (suggestedBasal.basal_adjustemnt.equals("Pump Default")){
-            pumpAction.cancelTempBasal();
-        } else {
-            pumpAction.setTempBasal(suggestedBasal, view.getContext());   //Action the suggested Temp
-        }
-        displayCurrentInfo();
+        pumpAction.setTempBasal(suggestedBasal);   //Action the suggested Temp
+        updateRunningTemp();
     }
 
 
@@ -744,7 +696,7 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "OpenAPS";
+                    return "APS Result";
                 case 1:
                     return "IOB & COB";
                 case 2:
@@ -763,6 +715,7 @@ public class MainActivity extends AppCompatActivity {
         private static TextView apsstatus_Action;
         //private static TextView apsstatus_temp;
         private static TextView apsstatus_algorithm;
+        private static Button   apsstatusRunButton;
         private static Button   apsstatusAcceptButton;
         private static TextView apsstatus_mode;
         private static TextView apsstatus_loop;
@@ -774,6 +727,7 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_openaps_dash, container, false);
             apsstatusAcceptButton   = (Button)   rootView.findViewById(R.id.apsstatusAcceptButton);
+            apsstatusRunButton      = (Button)   rootView.findViewById(R.id.apsstatusRunButton);
             apsstatus_reason        = (TextView) rootView.findViewById(R.id.apsstatus_reason);
             apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
             apsstatus_algorithm     = (TextView) rootView.findViewById(R.id.apsstatus_algorithm);
@@ -785,6 +739,17 @@ public class MainActivity extends AppCompatActivity {
             isLoaded=true;
             update(null);
             return rootView;
+        }
+
+        public static void setRunAPSButton(boolean enabled){
+            if (apsstatusRunButton != null){
+                if (enabled){
+                    apsstatusRunButton.setTextColor(Color.parseColor("#FFFFFF"));
+                } else {
+                    apsstatusRunButton.setTextColor(Color.parseColor("#939393"));
+                }
+                apsstatusRunButton.setEnabled(enabled);
+            }
         }
 
         public static void update(APSResult apsResult){
@@ -815,15 +780,15 @@ public class MainActivity extends AppCompatActivity {
     public static class iobcobFragment extends Fragment {
         public iobcobFragment(){}
         static LineChartView iobcobPastChart;
-        static ExtendedGraphBuilder extendedGraphBuilder;
         static PreviewLineChartView previewChart;
         static Viewport iobv;
+        static IOBCOBLineGraph iobcobLineGraph;
+        static View rootView;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
+            rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
             iobcobPastChart         = (LineChartView) rootView.findViewById(R.id.iobcobPast);
-            extendedGraphBuilder    = new ExtendedGraphBuilder(rootView.getContext());
             previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
 
             setupChart();
@@ -832,14 +797,16 @@ public class MainActivity extends AppCompatActivity {
 
         public void setupChart(){
             //Setup the chart and Viewpoint
+            iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext());
+
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setViewportCalculationEnabled(false);
 
-            iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+            iobcobPastChart.setLineChartData(iobcobLineGraph.iobcobPastLineData());
 
             iobv            = new Viewport(iobcobPastChart.getMaximumViewport());                   //Sets the min and max for Top and Bottom of the viewpoint
-            iobv.top        = Float.parseFloat(extendedGraphBuilder.yCOBMax.toString());
-            iobv.bottom     = Float.parseFloat(extendedGraphBuilder.yCOBMin.toString());
+            iobv.top        = Float.parseFloat(iobcobLineGraph.yCOBMax.toString());
+            iobv.bottom     = Float.parseFloat(iobcobLineGraph.yCOBMin.toString());
             iobv.left       = previewChart.getCurrentViewport().left;
             iobv.right      = previewChart.getCurrentViewport().right;
             iobcobPastChart.setMaximumViewport(iobv);
@@ -851,7 +818,8 @@ public class MainActivity extends AppCompatActivity {
             if (iobcobPastChart != null) {
 
                 //refreshes data and sets viewpoint
-                iobcobPastChart.setLineChartData(extendedGraphBuilder.iobcobPastLineData());
+                iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext());
+                iobcobPastChart.setLineChartData(iobcobLineGraph.iobcobPastLineData());
 
                 iobv.left       = previewChart.getCurrentViewport().left;
                 iobv.right      = previewChart.getCurrentViewport().right;
@@ -865,13 +833,11 @@ public class MainActivity extends AppCompatActivity {
         public iobcobActiveFragment(){}
 
         static ColumnChartView iobcobChart;
-        static ExtendedGraphBuilder extendedGraphBuilder;
-
+        static View rootView;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
-            extendedGraphBuilder = new ExtendedGraphBuilder(rootView.getContext());
+            rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
             iobcobChart = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
             iobcobChart.setViewportCalculationEnabled(false);
             Viewport view = iobcobChart.getMaximumViewport();
@@ -885,59 +851,28 @@ public class MainActivity extends AppCompatActivity {
             return rootView;
         }
 
-        //Get IOB and COB only, dont update chart
-        public static JSONObject getIOBCOB(Activity a) {
-
-            List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
-            JSONObject reply = new JSONObject();
-
-            if (statList.size() > 0) {
-                try {
-                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).iob));
-                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", statList.get(0).cob));
-                } catch (JSONException e) {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-                return reply;
-            } else {
-                try {
-                    reply.put("iob", String.format(Locale.ENGLISH, "%.2f", 0.00));
-                    reply.put("cob", String.format(Locale.ENGLISH, "%.2f", 0.00));
-                } catch (JSONException e) {
-                    Crashlytics.logException(e);
-                    e.printStackTrace();
-                }
-                return reply;
-            }
-        }
-
         //Updates Stats
         public static void updateChart(Activity a){
 
-            List<Stats> statList = Stats.updateActiveBarChart(a.getBaseContext());
-
-            if (iobcobChart != null && statList != null) {
-                if (statList.size() > 0) {
-                    //reloads charts with Treatment data
-                    iobcobChart.setColumnChartData(extendedGraphBuilder.iobcobFutureChart(statList));
-                }
+            if (iobcobChart != null) {
+                //reloads charts with Treatment data
+                IOBCOBBarGraph iobcobBarGraph = new IOBCOBBarGraph(rootView.getContext());
+                iobcobChart.setColumnChartData(iobcobBarGraph.iobcobFutureChart());
             }
-
         }
     }
     public static class basalvsTempBasalFragment extends Fragment {
         public basalvsTempBasalFragment(){}
 
         static LineChartView basalvsTempBasalChart;
-        static ExtendedGraphBuilder extendedGraphBuilder;
         static PreviewLineChartView previewChart;
         static Viewport iobv;
+        static BasalVSTempBasalGraph basalVSTempBasalGraph;
+        static View rootView;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_basalvstempbasal_linechart, container, false);
-            extendedGraphBuilder    = new ExtendedGraphBuilder(rootView.getContext());
+            rootView = inflater.inflate(R.layout.fragment_basalvstempbasal_linechart, container, false);
             basalvsTempBasalChart   = (LineChartView) rootView.findViewById(R.id.basalvsTempBasal_LineChart);
             previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
 
@@ -947,14 +882,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void setupChart(){
+            basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext());
+
             basalvsTempBasalChart.setZoomType(ZoomType.HORIZONTAL);
             basalvsTempBasalChart.setViewportCalculationEnabled(false);
 
-            basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
+            basalvsTempBasalChart.setLineChartData(basalVSTempBasalGraph.basalvsTempBasalData());
 
             iobv            = new Viewport(basalvsTempBasalChart.getMaximumViewport());             //Sets the min and max for Top and Bottom of the viewpoint
-            iobv.top        = extendedGraphBuilder.maxBasal.floatValue();
-            iobv.bottom     = -(extendedGraphBuilder.maxBasal.floatValue() - 1);
+            iobv.top        = basalVSTempBasalGraph.maxBasal.floatValue();
+            iobv.bottom     = -(basalVSTempBasalGraph.maxBasal.floatValue() - 1);
             iobv.left       = previewChart.getCurrentViewport().left;
             iobv.right      = previewChart.getCurrentViewport().right;
             basalvsTempBasalChart.setMaximumViewport(iobv);
@@ -965,7 +902,8 @@ public class MainActivity extends AppCompatActivity {
         //Updates Stats
         public static void updateChart(){
             if (basalvsTempBasalChart != null) {
-                basalvsTempBasalChart.setLineChartData(extendedGraphBuilder.basalvsTempBasalData());
+                basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext());
+                basalvsTempBasalChart.setLineChartData(basalVSTempBasalGraph.basalvsTempBasalData());
 
                 iobv.left       = previewChart.getCurrentViewport().left;
                 iobv.right      = previewChart.getCurrentViewport().right;

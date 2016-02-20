@@ -14,6 +14,8 @@
 
     <!-- To receive data from xdrip. -->
     <uses-permission android:name="com.eveningoutpost.dexdrip.permissions.RECEIVE_BG_ESTIMATE" />
+    <!-- To send data to xdrip watch face. -->
+    <permission android:name="com.eveningoutpost.dexdrip.permissions.RECEIVE_EXTERNAL_STATUSLINE" />
 
     <application
         android:name=".MainApp"
@@ -27,9 +29,8 @@
                             com.hypodiabetic.happ.Objects.APSResult,
                             com.hypodiabetic.happ.Objects.Treatments,
                             com.hypodiabetic.happ.Objects.TempBasal,
-                            com.hypodiabetic.happ.code.nightwatch.Bg,
-                            com.hypodiabetic.happ.Objects.Integration,
-                            com.hypodiabetic.happ.code.nightwatch.UserNotification" />
+                            com.hypodiabetic.happ.Objects.Bg,
+                            com.hypodiabetic.happ.Objects.Integration" />
         <meta-data
             android:name="AA_DB_NAME"
             android:value="HAPP.db" />
@@ -55,11 +56,17 @@
             android:label="@string/title_activity_settings"></activity>
 
         <service
-            android:name=".code.nightwatch.DataCollectionService"
+            android:name=".services.DataCollectionService"
             android:enabled="true"
             android:exported="true"></service>
         <service
             android:name=".integration.dexdrip.IntentService"
+            android:exported="false" />
+        <service
+            android:name=".services.APSService"
+            android:exported="false" />
+        <service
+            android:name=".services.FiveMinService"
             android:exported="false" />
         <service
             android:name=".services.TreatmentService"
@@ -71,7 +78,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".code.nightwatch.AutoStart">
+        <receiver android:name=".AutoStart">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -83,12 +90,6 @@
                 <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".Receivers.openAPSReceiver">
-            <intent-filter>
-                <action android:name="com.hypodiabetic.happ.RUN_OPENAPS" />
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".Receivers.statsReceiver"></receiver>
 
         <activity
             android:name=".BolusWizardActivity"

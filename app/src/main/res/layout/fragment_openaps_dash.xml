@@ -142,25 +142,24 @@
             android:orientation="horizontal">
 
             <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Accept Temp"
                 android:onClick="apsstatusAccept"
-                android:layout_weight=".5"
                 android:id="@+id/apsstatusAcceptButton"
                 android:enabled="false"/>
             <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:text="Run OpenAPS"
-                android:onClick="runOpenAPS"
-                android:layout_weight=".5"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Run APS"
+                android:onClick="runAPS"
+                android:id="@+id/apsstatusRunButton"/>
             <Button
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="TEST"
                 android:onClick="test"
-                android:layout_weight=".2"/>
+                />
 
         </LinearLayout>
 

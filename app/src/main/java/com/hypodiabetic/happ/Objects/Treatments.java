@@ -7,7 +7,7 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
-import com.hypodiabetic.happ.code.nightscout.cob;
+import com.hypodiabetic.happ.integration.nightscout.cob;
 
 import org.json.JSONObject;
 

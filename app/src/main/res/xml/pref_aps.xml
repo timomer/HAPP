@@ -18,11 +18,6 @@
                     android:summary="APS Loop Mode"
                     android:entries="@array/aps_modeArray"
                     android:entryValues="@array/aps_modeValues"/>
-                <SwitchPreference
-                    android:title="Temp Basal Notification"
-                    android:key="temp_basal_notification"
-                    android:summary="Suggested Temp Basal have to be confirmed by the user"
-                    android:defaultValue="true"/>
                 <ListPreference
                     android:title="APS Algorithm"
                     android:key="aps_algorithm"

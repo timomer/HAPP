@@ -1,14 +1,13 @@
 
 package com.hypodiabetic.happ;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.code.nightscout.cob;
-import com.hypodiabetic.happ.code.nightwatch.Bg;
+import com.hypodiabetic.happ.integration.nightscout.cob;
+import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONException;

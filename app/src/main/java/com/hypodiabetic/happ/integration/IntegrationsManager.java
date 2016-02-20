@@ -2,28 +2,42 @@ package com.hypodiabetic.happ.integration;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
+import com.google.gson.Gson;
+import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
+import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
+import com.hypodiabetic.happ.tools;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 /**
  * Created by Tim on 20/01/2016.
  */
 public class IntegrationsManager {
-
+    private static final String TAG = "IntegrationsManager";
 
     public static void syncIntegrations(Context c){
+        Log.d(TAG, "Running Sync");
+
         //Sends data from HAPP to Interactions
         ConnectivityManager cm = (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
@@ -81,6 +95,7 @@ public class IntegrationsManager {
 
         // TODO: 30/01/2016 NS Integrations
 
+        Log.d(TAG, "newBolus");
         syncIntegrations(MainApp.instance());
     }
 
@@ -100,7 +115,9 @@ public class IntegrationsManager {
 
         // TODO: 30/01/2016 NS Intergartions
 
+        Log.d(TAG, "newTempBasal");
         syncIntegrations(MainApp.instance());
+        updatexDripWatchFace();
     }
     public static void cancelTempBasal(TempBasal tempBasal){
         Profile p = new Profile(new Date());
@@ -115,8 +132,52 @@ public class IntegrationsManager {
 
         // TODO: 30/01/2016 NS Integrations
 
+        Log.d(TAG, "cancelTempBasal");
         syncIntegrations(MainApp.instance());
+        updatexDripWatchFace();
     }
 
+    public static void checkOldInsulinIntegration(){
+        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", null);
 
+        for (Integration integration : integrationsToSync) {
+            ObjectToSync insulinSync = new ObjectToSync(integration);
+
+            if (insulinSync.state.equals("delete_me")) {                                          //Treatment has been deleted, do not process it
+                integration.delete();
+
+            } else {
+
+                Long ageInMins = (new Date().getTime() - insulinSync.requested.getTime()) / 1000 / 60;
+                if (ageInMins > 4 || ageInMins < 0) {                                           //If Treatment is older than 4mins
+                    integration.state = "error";
+                    integration.details = "Not sent as older than 4mins or in the future (" + ageInMins + "mins old) ";
+                    integration.save();
+
+                }
+            }
+        }
+
+        Log.d(TAG, "Checking Insulin waiting to be sent, found: " + integrationsToSync.size());
+        Notifications.newInsulinUpdate();
+    }
+
+    public static void updatexDripWatchFace(){
+
+        Pump pump = new Pump();
+        Stats stat = Stats.last();
+        String statSummary = "basal:" + pump.displayBasalDesc(true) + pump.displayCurrentBasal(true) + " iob:" + tools.formatDisplayInsulin(stat.iob, 1) + " cob:" + tools.formatDisplayCarbs(stat.cob);
+        SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+
+        if (prefs.getBoolean("xdrip_wf_integration", false)) {
+            final Bundle bundle = new Bundle();
+            bundle.putString(Intents.EXTRA_STATUSLINE, statSummary);
+            Intent intent = new Intent(Intents.ACTION_NEW_EXTERNAL_STATUSLINE);
+            intent.putExtras(bundle);
+            intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            MainApp.instance().sendBroadcast(intent, Intents.RECEIVER_PERMISSION_STATUSLINE);
+
+            Log.d(TAG, "xDrip Watch Face Updated: " + statSummary);
+        }
+    }
 }

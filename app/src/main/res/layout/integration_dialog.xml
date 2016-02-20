@@ -6,11 +6,36 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-  <ListView
-      android:layout_width="match_parent"
-      android:minWidth="300dp"
-      android:layout_height="wrap_content"
-      android:id="@+id/integrationList">
-  </ListView>
+    <TextView
+        android:layout_width="match_parent"
+        android:minWidth="300dp"
+        android:layout_height="wrap_content"
+        android:text="msg"
+        android:visibility="gone"
+        android:id="@+id/integrationMsg"
+        android:textColor="#FF5722"
+        />
+
+
+    <ListView
+        android:layout_width="match_parent"
+        android:minWidth="300dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/integrationList">
+    </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="300dp"
+        android:gravity="right"
+        android:paddingTop="16dp">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/integrationOK"
+            android:text="OK"
+            android:visibility="gone"/>
+        </LinearLayout>
 
 </LinearLayout>

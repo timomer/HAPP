@@ -1,4 +1,4 @@
-package com.hypodiabetic.happ.integration.dexdrip;
+package com.hypodiabetic.happ;
 
 /**
  * Created by tim on 07/08/2015.
@@ -6,7 +6,6 @@ package com.hypodiabetic.happ.integration.dexdrip;
  */
 public interface Intents {
     String RECEIVER_PERMISSION = "com.eveningoutpost.dexdrip.permissions.RECEIVE_BG_ESTIMATE";
-
 
     String EXTRA_BG_ESTIMATE = "com.eveningoutpost.dexdrip.Extras.BgEstimate";
     String EXTRA_BG_SLOPE = "com.eveningoutpost.dexdrip.Extras.BgSlope";
@@ -16,4 +15,11 @@ public interface Intents {
 
     String ACTION_NEW_BG = "com.dexdrip.stephenblack.nightwatch.bg";
 
+
+    String UI_UPDATE = "com.hypodiabetic.happ.UI_Update";
+
+    //xDrip WF
+    String EXTRA_STATUSLINE = "com.eveningoutpost.dexdrip.Extras.Statusline";
+    String ACTION_NEW_EXTERNAL_STATUSLINE = "com.eveningoutpost.dexdrip.ExternalStatusline";
+    String RECEIVER_PERMISSION_STATUSLINE = "com.eveningoutpost.dexdrip.permissions.RECEIVE_EXTERNAL_STATUSLINE";
 }
