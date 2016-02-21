@@ -113,7 +113,7 @@ public class APSService extends IntentService {
         if (apsResult.checkIsCancelRequest() && pumpActive.temp_basal_active) {
             apsResult.action            =   "Cancel Active Temp Basal";
             apsResult.basal_adjustemnt  =   "Basal Default";
-            apsResult.rate              =   profile.current_basal;
+            //apsResult.rate              =   profile.current_basal;
             //apsResult.ratePercent       =   100;
 
         } else {

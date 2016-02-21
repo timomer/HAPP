@@ -88,8 +88,13 @@ public class Notifications {
         Pump pump = new Pump();
         pump.setNewTempBasal(null, basal);
 
-        title = "Set: " + pump.displayBasalDesc(false);
-        msg = pump.displayCurrentBasal(true) + " for " + pump.displayTempBasalMinsLeft();
+        if (basal.checkIsCancelRequest()){
+            title = "Set: " + basal.basal_adjustemnt;
+            msg = pump.displayCurrentBasal(true);
+        } else {
+            title = "Set: " + pump.displayBasalDesc(false);
+            msg = pump.displayCurrentBasal(true) + " for " + pump.displayTempBasalMinsLeft();
+        }
 
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
@@ -152,7 +157,7 @@ public class Notifications {
             //TempBasal lastTempBasal = TempBasal.last();
             Pump pump       = new Pump();
             String title    = pump.displayBasalDesc(false);
-            String msg      = pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft() + " left";
+            String msg      = pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft();
 
             Intent intent_open_activity = new Intent(c,MainActivity.class);
             PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 3, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);

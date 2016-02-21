@@ -77,8 +77,8 @@ public class APSResult extends Model{
 
 
     public void fromJSON(JSONObject apsJSON, Profile p) {
-        action      = apsJSON.optString("action");
-        reason      = apsJSON.optString("reason");
+        action      = apsJSON.optString("action", "error");
+        reason      = apsJSON.optString("reason", "error");
         eventualBG  = apsJSON.optDouble("eventualBG",0);
         snoozeBG    = apsJSON.optDouble("snoozeBG", 0);
         datetime    = new Date().getTime();
@@ -107,9 +107,7 @@ public class APSResult extends Model{
     public TempBasal getBasal(){
         TempBasal reply = new TempBasal();
         reply.rate              =   rate;
-        //reply.ratePercent       =   ratePercent;
         reply.duration          =   duration;
-        //reply.basal_type        =   basal_type;
         reply.basal_adjustemnt  =   basal_adjustemnt;
         reply.aps_mode          =   aps_mode;
 
@@ -167,6 +165,23 @@ public class APSResult extends Model{
             return last;
     }
 
+    @Override
+    public String toString(){
+        return  "action:" + action + "\n" +
+                " reason:" + reason + "\n" +
+                " deviation:" + deviation + "\n" +
+                " tempSuggested:" + tempSuggested + "\n" +
+                " eventualBG:" + eventualBG + "\n" +
+                " snoozeBG:" + snoozeBG + "\n" +
+                " datetime:" + datetime + "\n" +
+                " rate:" + rate + "\n" +
+                " duration:" + duration + "\n" +
+                " basal_adjustemnt:" + basal_adjustemnt + "\n" +
+                " aps_algorithm:" + aps_algorithm + "\n" +
+                " aps_mode:" + aps_mode + "\n" +
+                " current_pump_basal:" + current_pump_basal + "\n" +
+                " aps_loop:" + aps_loop;
+    }
 }
 
 

@@ -3,6 +3,7 @@ package com.hypodiabetic.happ.integration.Objects;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
@@ -27,6 +28,7 @@ public class ObjectToSync {
     public Double   value1;                     //Bolus Amount / Temp Basal Rate
     public String   value2;                     //bolusType (Standard / Square Wave) / Basal %
     public String   value3;                     //Bolus Type (Bolus / Correction) / Temp Basal Duration
+    public String   value4;                     //Pump
     public Date     requested;                  //Date requested
 
 
@@ -48,6 +50,7 @@ public class ObjectToSync {
                     value2      =   "standard";
                     requested   =   new Date(bolus.datetime);
                     value3      =   bolus.note;
+                    value4      =   new Profile(new Date()).pump_name;
                 } else {
                     state = "delete_me"; //cannot find this bolus, this integration should be deleted
                 }
@@ -59,6 +62,7 @@ public class ObjectToSync {
                 value1      =   tempBasal.rate;
                 value2      =   pump.temp_basal_percent.toString();
                 value3      =   tempBasal.duration.toString();
+                value4      =   new Profile(new Date()).pump_name;
                 requested   =   tempBasal.start_time;
                 break;
         }

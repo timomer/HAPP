@@ -134,5 +134,23 @@ public class Profile {
         return carbratioNow.intValue();                                                             //This converts Double values entered by the user into a Int, as expected
     }
 
+    @Override
+    public String toString(){
+        return "carbAbsorptionRate:" + carbAbsorptionRate + "\n" +
+                " dia:" + dia + "\n" +
+                " current_basal:" + current_basal + "\n" +
+                " max_bg:" + max_bg + "\n" +
+                " min_bg:" + min_bg + "\n" +
+                " isf:" + isf + "\n" +
+                " carbRatio:" + carbRatio + "\n" +
+                " target_bg:" + target_bg + "\n" +
+                " pump_name:" + pump_name + "\n" +
+                " aps_mode:" + aps_mode + "\n" +
+                " temp_basal_notification:" + temp_basal_notification + "\n" +
+                " send_bolus_allowed:" + send_bolus_allowed + "\n" +
+                " SYSTEM BOLUS_ALLOWED:" + Constants.BOLUS_ALLOWED + "\n" +
+                " aps_loop:" + aps_loop + "\n" +
+                " aps_algorithm:" + aps_algorithm;
+    }
 
 }

@@ -1,8 +1,10 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -19,12 +21,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -34,10 +38,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +56,7 @@ import com.hypodiabetic.happ.Graphs.IOBCOBBarGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBLineGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Stats;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -62,7 +69,10 @@ import com.hypodiabetic.happ.services.APSService;
 
 import io.fabric.sdk.android.Fabric;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Viewport;
@@ -225,6 +235,40 @@ public class MainActivity extends AppCompatActivity {
         Notifications.newInsulinUpdate();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_MENU:
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                } else {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+                return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(mDrawerLinear);
+                return true;
+            case R.id.miTreatments:
+                startActivity(new Intent(getApplicationContext(), EnterTreatment.class));
+                return true;
+            default:
+                return true;
+        }
+    }
+
     public void setupMenuAndToolbar() {
         //Setup menu
         insulinIntegrationApp_status    = (TextView) findViewById(R.id.insulinIntegrationApp_status);
@@ -234,29 +278,77 @@ public class MainActivity extends AppCompatActivity {
         toolbar                         = (Toolbar) findViewById(R.id.toolbar);
         tickWhite                       = getDrawable(R.drawable.checkbox_marked_circle);
         clockWhite                      = getDrawable(R.drawable.clock);
-        ListView mDrawerList            = (ListView)findViewById(R.id.navList);
-        String[] osArray                = { "Cancel Temp", "Settings", "Integration Report" };
-        ArrayAdapter<String> mAdapter   = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        Drawable reportWhite            = getDrawable(R.drawable.file_chart);
+        Drawable bugWhite               = getDrawable(R.drawable.bug);
+        Drawable stopWhite              = getDrawable(R.drawable.stop);
+        Drawable settingsWhite          = getDrawable(R.drawable.settings);
+        Drawable checkWhite             = getDrawable(R.drawable.exit_to_app);
 
         tickWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
         clockWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+        reportWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        bugWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        stopWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        settingsWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        checkWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
 
-        mDrawerList.setAdapter(mAdapter);
+        ListView mDrawerList            = (ListView)findViewById(R.id.navList);
+        ArrayList<NavItem> menuItems    = new ArrayList<>();
+        menuItems.add(new NavItem("Check Integration", checkWhite));
+        menuItems.add(new NavItem("Cancel Temp", stopWhite));
+        menuItems.add(new NavItem("Settings", settingsWhite));
+        menuItems.add(new NavItem("Integration Report", reportWhite));
+        menuItems.add(new NavItem("Debug Info", bugWhite));
+        DrawerListAdapter adapterMenu = new DrawerListAdapter(this, menuItems);
+        mDrawerList.setAdapter(adapterMenu);
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                        pumpAction.cancelTempBasal();
+                        checkInsulinAppIntegration(true);
                         break;
                     case 1:
-                        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                        pumpAction.cancelTempBasal();
+                        mDrawerLayout.closeDrawers();
                         break;
                     case 2:
+                        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                        mDrawerLayout.closeDrawers();
+                        break;
+                    case 3:
                         startActivity(new Intent(getApplicationContext(), Integration_Report.class));
+                        mDrawerLayout.closeDrawers();
+                        break;
+                    case 4:
+                        Profile profile = new Profile(new Date());
+                        Pump pump = new Pump();
+                        APSResult apsResult = APSResult.last();
+                        final String msg =  "Profile:" + "\n" +
+                                            profile.toString() + "\n\n" +
+                                            "Pump:" + "\n" +
+                                            pump.toString() + "\n\n" +
+                                            "APS Result:" + "\n" +
+                                            apsResult.toString();
+
+                        new AlertDialog.Builder(MainActivity.getInstace())
+                                .setMessage(msg)
+                                .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                                        clipboard.setText(msg);
+                                        Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // do nothing
+                                    }
+                                })
+                                .show();
+                        mDrawerLayout.closeDrawers();
                         break;
                 }
-                mDrawerLayout.closeDrawers();
             }
         });
 
@@ -265,32 +357,9 @@ public class MainActivity extends AppCompatActivity {
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
-                //Local device based Integrations
-                String insulin_Integration_App = prefs.getString("insulin_integration", "");
 
                 //Insulin Integration App, try and connect
-                if (!insulin_Integration_App.equals("")){
-                    InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST");
-                    insulinIntegrationApp.connectInsulinTreatmentApp();
-                    insulinIntegrationApp_status.setText("Connecting...");
-                    insulinIntegrationApp_icon.setBackground(clockWhite);
-
-                    //listens out for connection
-                    insulinIntegrationAppUpdate = new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            insulinIntegrationApp_status.setText(intent.getStringExtra("MSG"));
-                            insulinIntegrationApp_icon.setBackground(tickWhite);
-
-
-                        }
-                    };
-                    LocalBroadcastManager.getInstance(MainActivity.getInstace()).registerReceiver(insulinIntegrationAppUpdate, new IntentFilter("INSULIN_INTEGRATION_TEST"));
-                } else {
-                    insulinIntegrationApp_status.setText("No app selected or not in Closed Loop");
-                    insulinIntegrationApp_icon.setBackgroundResource(R.drawable.alert_circle);
-                }
+                checkInsulinAppIntegration(false);
             }
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
@@ -306,6 +375,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
+
 
     public void updateBGCharts() {
 
@@ -346,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void checkInsulinAppIntegration(View view){
+    public void checkInsulinAppIntegration(final boolean sendText){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
         //Local device based Integrations
         String insulin_Integration_App = prefs.getString("insulin_integration", "");
@@ -364,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onReceive(Context context, Intent intent) {
                     insulinIntegrationApp_status.setText(intent.getStringExtra("MSG"));
                     insulinIntegrationApp_icon.setBackground(tickWhite);
-                    insulinIntegrationApp.sendTest();
+                    if(sendText) insulinIntegrationApp.sendTest();
                     LocalBroadcastManager.getInstance(MainActivity.getInstace()).unregisterReceiver(insulinIntegrationAppUpdate);
                 }
             };
@@ -374,30 +444,6 @@ public class MainActivity extends AppCompatActivity {
             insulinIntegrationApp_icon.setBackgroundResource(R.drawable.alert_circle);
         }
     }
-
-
-    public void showAlgorithmJSON(View view){
-        // TODO: 15/02/2016 replace with Debug command
-        //Profile profileNow = new Profile(new Date());
-
-        //Shows the JSON output of the selected Algorithm
-        //String rawAPSJSON = APS.rawJSON(view.getContext(),profileNow).toString();
-        //Snackbar snackbar = Snackbar
-        //        .make(view, "RAW JSON: " + rawAPSJSON, Snackbar.LENGTH_INDEFINITE);
-
-        //View snackbarView = snackbar.getView();
-        //TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-        //textView.setMaxLines(5);  //set the max lines for textview to show multiple lines
-
-        //snackbar.show();
-
-        //ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-        //clipboard.setText(rawAPSJSON);
-        //Toast.makeText(view.getContext(), "Raw JSON sent to clipboard", Toast.LENGTH_SHORT).show();
-    }
-
-
-    //xdrip functions start
 
     public void checkEula() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -525,40 +571,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_MENU:
-                //menu1.toggle(true);
-                mDrawerLayout.closeDrawers();
-                return true;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(mDrawerLinear);
-                return true;
-            case R.id.miTreatments:
-                startActivity(new Intent(getApplicationContext(), EnterTreatment.class));
-                return true;
-            default:
-                return true;
-        }
-    }
-
-
-
-
     //Updates the APS Fragment
     public void updateAPSDetails(APSResult apsResult) {
         //Toast.makeText(MainApp.instance(),"APS Update",Toast.LENGTH_SHORT).show();
@@ -653,6 +665,7 @@ public class MainActivity extends AppCompatActivity {
         MainApp.instance().startService(apsIntent);
     }
     public void apsstatusAccept (final View view){
+        openAPSFragment.setAcceptAPSButton(false);
         TempBasal suggestedBasal = APSResult.last().getBasal();
         pumpAction.setTempBasal(suggestedBasal);   //Action the suggested Temp
         updateRunningTemp();
@@ -751,6 +764,16 @@ public class MainActivity extends AppCompatActivity {
                 apsstatusRunButton.setEnabled(enabled);
             }
         }
+        public static void setAcceptAPSButton(boolean enabled){
+            if (apsstatusAcceptButton != null){
+                if (enabled){
+                    apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
+                } else {
+                    apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
+                }
+                apsstatusAcceptButton.setEnabled(enabled);
+            }
+        }
 
         public static void update(APSResult apsResult){
 
@@ -768,11 +791,9 @@ public class MainActivity extends AppCompatActivity {
                 apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
                 if (apsResult.tempSuggested) {
-                    apsstatusAcceptButton.setEnabled(true);
-                    apsstatusAcceptButton.setTextColor(Color.parseColor("#FFFFFF"));
+                    setAcceptAPSButton(true);
                 } else {
-                    apsstatusAcceptButton.setEnabled(false);
-                    apsstatusAcceptButton.setTextColor(Color.parseColor("#939393"));
+                    setAcceptAPSButton(false);
                 }
             }
         }
@@ -913,4 +934,60 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+}
+
+class NavItem {
+    String mTitle;
+    Drawable mIcon;
+
+    public NavItem(String title, Drawable icon) {
+        mTitle = title;
+        mIcon = icon;
+    }
+}
+
+class DrawerListAdapter extends BaseAdapter {
+
+    Context mContext;
+    ArrayList<NavItem> mNavItems;
+
+    public DrawerListAdapter(Context context, ArrayList<NavItem> navItems) {
+        mContext = context;
+        mNavItems = navItems;
+    }
+
+    @Override
+    public int getCount() {
+        return mNavItems.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mNavItems.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view;
+
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.menu_item, null);
+        }
+        else {
+            view = convertView;
+        }
+
+        TextView titleView = (TextView) view.findViewById(R.id.menuText);
+        ImageView iconView = (ImageView) view.findViewById(R.id.menuIcon);
+
+        titleView.setText( mNavItems.get(position).mTitle);
+        iconView.setBackground(mNavItems.get(position).mIcon);
+        return view;
+    }
 }

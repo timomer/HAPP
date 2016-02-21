@@ -107,9 +107,7 @@ public class pumpAction {
             intent.putExtra("UPDATE", "UPDATE_RUNNING_TEMP");
             LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
 
-
         } else {
-
             //No temp Basal active
             Toast.makeText(MainApp.instance(), "No Active Temp Basal to Cancel", Toast.LENGTH_LONG).show();
         }

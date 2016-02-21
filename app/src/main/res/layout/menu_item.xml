@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="48dp">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/menuIcon"
+        android:background="@drawable/exit_to_app"
+        android:layout_gravity="center"/>
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:id="@+id/menuText"
+        android:text="-"
+        android:paddingLeft="16dp"
+        android:textColor="@color/white"
+        android:gravity="center_vertical"/>
+
+</LinearLayout>

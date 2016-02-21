@@ -139,8 +139,8 @@
     <orderEntry type="library" exported="" name="logback-android-classic-1.1.1-4" level="project" />
     <orderEntry type="library" exported="" name="support-v4-23.1.0" level="project" />
     <orderEntry type="library" exported="" name="okhttp-2.7.0" level="project" />
-    <orderEntry type="library" exported="" name="okhttp-ws-2.7.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.4" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-ws-2.7.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-location-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-appinvite-7.5.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-panorama-7.5.0" level="project" />

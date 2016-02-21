@@ -25,11 +25,9 @@ public class Pump {
     private Profile profile        =   new Profile(new Date());
     private TempBasal tempBasal    =   TempBasal.last();
 
-
-    private static final int ABSOLUTE               =  1;       //Absolute (U/hr)  Percent of Basal
+    private static final int ABSOLUTE               =  1;       //Absolute (U/hr)
     private static final int PERCENT                =  2;       //Percent of Basal
     private static final int BASAL_PLUS_PERCENT     =  3;       //hourly basal rate plus TBR percentage
-
 
     public Pump(){
 
@@ -42,19 +40,16 @@ public class Pump {
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
                 break;
-
             case "dana_r":
                 basal_mode              =   BASAL_PLUS_PERCENT;
                 min_low_basal_duration  =   60;
                 min_high_basal_duration =   30;
                 break;
-
             case "medtronic_absolute":
                 basal_mode              =   ABSOLUTE;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
                 break;
-
             case "medtronic_percent":
                 basal_mode              =   PERCENT;
                 min_low_basal_duration  =   30;
@@ -166,7 +161,6 @@ public class Pump {
         }
     }
 
-
     private int calcPercentOfBasal(){
         Double ratePercent = (activeRate() - profile.current_basal);
         ratePercent = (ratePercent / activeRate()) *100;
@@ -176,5 +170,32 @@ public class Pump {
         Double ratePercent = (activeRate() / profile.current_basal) * 100;
         ratePercent = (double) Math.round(ratePercent / 10) * 10; //round to closest 10
         return ratePercent.intValue();
+    }
+
+    private String displayBasalMode(){
+        switch (basal_mode){
+            case ABSOLUTE:
+                return "Absolute (U/hr)";
+            case PERCENT:
+                return "Percent of Basal";
+            case BASAL_PLUS_PERCENT:
+                return "hourly basal rate plus TBR percentage";
+            default:
+                return "cannot get basal mode: this is not good";
+        }
+    }
+
+    @Override
+    public String toString(){
+        return  "name: " + name + "\n" +
+                " basal_mode:" + displayBasalMode() + "\n" +
+                " min_low_basal_duration:" + min_low_basal_duration + "\n" +
+                " min_high_basal_duration:" + min_high_basal_duration + "\n" +
+                " default_basal_rate:" + default_basal_rate + "\n" +
+                " temp_basal_active:" + temp_basal_active + "\n" +
+                " temp_basal_rate:" + temp_basal_rate + "\n" +
+                " temp_basal_percent:" + temp_basal_percent + "\n" +
+                " temp_basal_duration:" + temp_basal_duration + "\n" +
+                " temp_basal_duration_left:" + temp_basal_duration_left;
     }
 }

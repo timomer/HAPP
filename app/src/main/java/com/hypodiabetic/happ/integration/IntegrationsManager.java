@@ -166,7 +166,10 @@ public class IntegrationsManager {
 
         Pump pump = new Pump();
         Stats stat = Stats.last();
-        String statSummary = "basal:" + pump.displayBasalDesc(true) + pump.displayCurrentBasal(true) + " iob:" + tools.formatDisplayInsulin(stat.iob, 1) + " cob:" + tools.formatDisplayCarbs(stat.cob);
+        String statSummary = "basal:" + pump.displayBasalDesc(true) + pump.displayCurrentBasal(true);
+        if (stat != null){
+            statSummary += " iob:" + tools.formatDisplayInsulin(stat.iob, 1) + " cob:" + tools.formatDisplayCarbs(stat.cob);
+        }
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("xdrip_wf_integration", false)) {
