@@ -143,7 +143,7 @@ public class TempBasal extends Model {
     }
 
     public boolean checkIsCancelRequest() {
-        if (rate == 0 && duration == 0){
+        if (rate.equals(0D) && duration.equals(0)){
             return true;
         } else {
             return false;

@@ -67,16 +67,18 @@ public class Pump {
     }
 
     public void setNewTempBasal(APSResult apsResult, TempBasal tempBasal){
+        temp_basal_active   =   true;
         if (apsResult != null){
             temp_basal_rate             =   apsResult.rate;
             temp_basal_duration         =   apsResult.duration;
             temp_basal_duration_left    =   apsResult.duration.longValue();
+            if (apsResult.checkIsCancelRequest()) temp_basal_active   =   false;
         } else {
             temp_basal_rate             =   tempBasal.rate;
             temp_basal_duration         =   tempBasal.duration;
             temp_basal_duration_left    =   tempBasal.durationLeft();
+            if (tempBasal.checkIsCancelRequest()) temp_basal_active   =   false;
         }
-        temp_basal_active   =   true;
         temp_basal_percent  =   getBasalPercent();
     }
 
