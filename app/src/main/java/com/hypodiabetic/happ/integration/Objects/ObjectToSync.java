@@ -54,6 +54,7 @@ public class ObjectToSync {
                 } else {
                     state = "delete_me"; //cannot find this bolus, this integration should be deleted
                 }
+
                 break;
             case "temp_basal":
                 TempBasal tempBasal =   TempBasal.getTempBasalByID(integration.happ_object_id);
@@ -64,6 +65,18 @@ public class ObjectToSync {
                 value3      =   tempBasal.duration.toString();
                 value4      =   new Profile(new Date()).pump_name;
                 requested   =   tempBasal.start_time;
+
+                break;
+            case "treatment_carbs":
+                Treatments treatment    =   Treatments.getTreatmentByID(integration.happ_object_id);
+                if (treatment != null) {
+                    value1      =   treatment.value;
+                    value2      =   treatment.type;
+                    value3      =   treatment.note;
+                    requested   =   new Date(treatment.datetime);
+                } else {
+                    state = "delete_me"; //cannot find this bolus, this integration should be deleted
+                }
                 break;
         }
     }
@@ -74,6 +87,8 @@ public class ObjectToSync {
                 return tools.formatDisplayInsulin(value1,2) + " " + value3;
             case "temp_basal":
                 return tools.formatDisplayInsulin(value1,2) + " (" + value2 + "%) " + value3 + "mins";
+            case "treatment_carbs":
+                return tools.formatDisplayCarbs(value1);
             default:
                 return "";
         }
@@ -93,19 +108,22 @@ public class ObjectToSync {
         if (integration != null) {
             //We have new sync data from remote system, populate this object
             integration.date_updated = new Date().getTime();
-            if (integration.auth_code.equals(integrationSecretCode)) {
-                integration.state       = state;
-                integration.details     = details;
-                integration.remote_id   = remote_id;
-                integration.save();
+            integration.state       = state;
+            integration.details     = details;
+            integration.remote_id   = remote_id;
 
-            } else {                                                                                //Auth codes do not match, something odd going along
-                state                   = "error";
-                details                 = "Auth codes do not match, was this the app we sent the request to!?";
-                integration.state       = state;
-                integration.details     = details;
-                integration.save();
+            if (integrationSecretCode != null){ //we have an auth code, lets check it
+                if (!integration.auth_code.equals(integrationSecretCode)) {
+                    //Auth codes do not match, something odd going along
+                    state = "error";
+                    details = "Auth codes do not match, was this the app we sent the request to!?";
+                    integration.state = state;
+                    integration.details = details;
+                    integration.save();
+                }
             }
+
+            integration.save();
         }
     }
 }

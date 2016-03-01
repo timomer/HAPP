@@ -12,6 +12,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.hypodiabetic.happ.Constants;
+import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.tools;
@@ -79,7 +81,7 @@ public class TreatmentService extends Service{
             //}
 
             //Send broadcast to Main App as we are running on a different thread
-            Intent intent = new Intent("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
+            Intent intent = new Intent(Intents.NOTIFICATION_UPDATE);
             intent.putExtra("NOTIFICATION_TYPE", "NEW_INSULIN_UPDATE");
             //intent.putExtra("snackbar_length", snackbar_length);
             //intent.putExtra("alertDialogText", details);

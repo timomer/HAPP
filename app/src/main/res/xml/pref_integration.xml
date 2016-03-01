@@ -16,34 +16,24 @@
             </PreferenceCategory>
 
             <PreferenceCategory
-                android:title="NightScout"
+                android:title="NightScout via NS Client"
+                android:summary="Uses Android NS Client App to support syncing data with NightScout site"
                 android:key="ns">
                 <SwitchPreference
                     android:key="nightscout_integration"
                     android:title="Integrate with NightScout"
                     android:summary="Send - Read data from your NightScout site."
                     android:defaultValue="false" />
-                <EditTextPreference
-                    android:dependency="nightscout_integration"
-                    android:key="nightscout_url"
-                    android:title="Nightscout URL"
-                    android:summary="URL for your nightscout site"
-                    android:defaultValue="https://{yoursecret}@{yoursite}/api/v1"/>
                 <SwitchPreference
                     android:dependency="nightscout_integration"
                     android:key="nightscout_treatments"
-                    android:title="Upload Treatments"
-                    android:defaultValue="false" />
-                <SwitchPreference
-                    android:dependency="nightscout_integration"
-                    android:key="nightscout_tempbasal"
-                    android:title="Upload Temp Basal"
+                    android:title="Upload Treatments and Temp Basal"
                     android:defaultValue="false" />
             </PreferenceCategory>
 
             <PreferenceCategory
                 android:key="ti"
-                android:title="Treatment">
+                android:title="Insulin Treatment Integration">
                 <SwitchPreference
                     android:title="Send Bolus"
                     android:key="insulin_integration_send_bolus"

@@ -83,6 +83,7 @@ public class InsulinIntegrationNotify {
                     detailListItem.put("details", integrationWithDetails.details);
                     detailListItem.put("action", "action:" + integrationWithDetails.action);
                     detailListItem.put("date", sdfDateTime.format(integration.date_updated));
+                    detailListItem.put("intID", "INT ID:" + integration.getId());
                     detailList.add(detailListItem);
                 }
             }
@@ -115,6 +116,7 @@ public class InsulinIntegrationNotify {
                 detailListItem.put("details", integrationWithDetails.details);
                 detailListItem.put("action", "action:" + integrationWithDetails.action);
                 detailListItem.put("date", sdfDateTime.format(integrationWithError.date_updated));
+                detailListItem.put("intID", "INT ID:" + integrationWithError.getId());
                 detailListErrorsOnly.add(detailListItem);
             }
         }
@@ -183,8 +185,8 @@ public class InsulinIntegrationNotify {
 
         ListView list = (ListView) dialog.findViewById(R.id.integrationList);
         mySimpleAdapter adapter = new mySimpleAdapter(MainActivity.getInstace(), detailListErrorsOnly, R.layout.integration_list_layout_insulin_summary,
-                new String[]{"value", "summary", "state", "details", "happObjectType", "action", "date"},
-                new int[]{R.id.insulinSummaryAmount, R.id.insulinSummarySummary, R.id.insulinSummaryState, R.id.insulinSummaryDetails, R.id.insulinSummaryHappObjectType, R.id.insulinSummaryAction, R.id.insulinSummaryDate});
+                new String[]{"value", "summary", "state", "details", "happObjectType", "action", "date", "intID"},
+                new int[]{R.id.insulinSummaryAmount, R.id.insulinSummarySummary, R.id.insulinSummaryState, R.id.insulinSummaryDetails, R.id.insulinSummaryHappObjectType, R.id.insulinSummaryAction, R.id.insulinSummaryDate, R.id.insulinSummaryINTID});
         list.setAdapter(adapter);
 
         return dialog;

@@ -226,7 +226,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             carbs.save();
             editText_treatment_value.setText("");
             wizardCarbs.setText("");
-            IntegrationsManager.syncIntegrations(MainApp.instance());
+            IntegrationsManager.newCarbs(carbs);
             Toast.makeText(this, carbs.value + " " + carbs.type + " entered", Toast.LENGTH_SHORT).show();
 
             refreshListFragments();

@@ -40,7 +40,7 @@ public class APSReceiver extends ResultReceiver {
                 if (apsResult.tempSuggested) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance());
 
                 //Send out updates of new APS run
-                Notifications.updateCard(MainApp.instance());
+                Notifications.updateCard();
                 Notifications.debugCard(MainApp.instance(), apsResult);
 
                 Intent intentUpdate = new Intent(Intents.UI_UPDATE);

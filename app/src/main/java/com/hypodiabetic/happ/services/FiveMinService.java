@@ -10,6 +10,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Stats;
@@ -87,6 +88,9 @@ public class FiveMinService extends IntentService {
             intent.putExtra("UPDATE", "NEW_STAT_UPDATE");
             intent.putExtra("stat", gson.toJson(stat, Stats.class));
             LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
+
+            //send results to xDrip WF
+            IntegrationsManager.updatexDripWatchFace();
 
             Log.d(TAG, "New Stat Saved");
         }

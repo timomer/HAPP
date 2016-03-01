@@ -60,6 +60,15 @@
                 android:orientation="horizontal"
                 android:layout_marginTop="0dp" >
                 <TextView
+                    android:id="@+id/integrationID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingRight="10dp"
+                    android:textSize="13sp"
+                    android:text="ID: 1"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"/>
+                <TextView
                     android:id="@+id/integrationState"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

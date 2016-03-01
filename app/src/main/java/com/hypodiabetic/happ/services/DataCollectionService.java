@@ -3,8 +3,10 @@ package com.hypodiabetic.happ.services;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -13,6 +15,7 @@ import android.util.Log;
 
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Intents;
 
@@ -35,6 +38,7 @@ public class DataCollectionService extends Service {
     Integer apsInterval;
     AlarmManager apsAlarm;
     PendingIntent apsService;
+    BroadcastReceiver notifyReceiver;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -48,6 +52,7 @@ public class DataCollectionService extends Service {
         listenForChangeInSettings();
         setHouseKeepingAlarm();
         setAPSAlarm();
+        setNotifyReceiver();
 
         Log.d(TAG, "Alarms Set");
     }
@@ -67,6 +72,7 @@ public class DataCollectionService extends Service {
         if(mPrefs != null && mPreferencesListener != null) {
             mPrefs.unregisterOnSharedPreferenceChangeListener(mPreferencesListener);
         }
+        if (notifyReceiver != null) unregisterReceiver(notifyReceiver);
         setFailoverTimer();
     }
 
@@ -84,6 +90,23 @@ public class DataCollectionService extends Service {
         Intent apsIntent = new Intent(this, APSService.class);
         apsService = PendingIntent.getService(this, 0, apsIntent, 0);
         apsAlarm.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), apsInterval, apsService);
+
+        MainApp.instance().startService(apsIntent);
+    }
+
+    public void setNotifyReceiver(){
+
+        if (mPrefs.getBoolean("summary_notification", true)) {
+            notifyReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
+                        Notifications.updateCard();
+                    }
+                }
+            };
+            registerReceiver(notifyReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        }
     }
 
     public void setSettings() {
@@ -111,9 +134,13 @@ public class DataCollectionService extends Service {
                     setSettings();
                     apsAlarm.cancel(apsService);                                                    //kills the current alarm
                     setAPSAlarm();                                                                  //and rebuilds it
+                    Log.d(TAG, "APS Loop set to: " + apsInterval);
                 } else {
                     setSettings();
                 }
+
+                if (notifyReceiver != null) unregisterReceiver(notifyReceiver);
+                setNotifyReceiver();
             }
         };
         mPrefs.registerOnSharedPreferenceChangeListener(mPreferencesListener);

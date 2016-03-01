@@ -17,9 +17,14 @@ public interface Intents {
 
 
     String UI_UPDATE = "com.hypodiabetic.happ.UI_Update";
+    String NOTIFICATION_UPDATE = "com.hypodiabetic.happ.NOTIFICATION_RECEIVER";
 
     //xDrip WF
     String EXTRA_STATUSLINE = "com.eveningoutpost.dexdrip.Extras.Statusline";
     String ACTION_NEW_EXTERNAL_STATUSLINE = "com.eveningoutpost.dexdrip.ExternalStatusline";
     String RECEIVER_PERMISSION_STATUSLINE = "com.eveningoutpost.dexdrip.permissions.RECEIVE_EXTERNAL_STATUSLINE";
+
+    //NSClient
+    String NSCLIENT_ACTION_DATABASE = "info.nightscout.client.DBACCESS";
+
 }

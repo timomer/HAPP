@@ -1,24 +1,19 @@
 package com.hypodiabetic.happ.integration.nightscout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.content.pm.ResolveInfo;
+import android.os.Bundle;
+import android.util.Log;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
-import com.hypodiabetic.happ.JSONArrayPOST;
-import com.hypodiabetic.happ.MainActivity;
-import com.hypodiabetic.happ.Objects.TempBasal;
+import com.hypodiabetic.happ.Intents;
+import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Treatments;
-import com.hypodiabetic.happ.tools;
-import com.hypodiabetic.happ.volleyQ;
+import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,189 +25,99 @@ import java.util.List;
  * Created by Tim on 19/10/2015.
  */
 public class NSUploader {
+    private static final String TAG = "NSUploader";
 
-    public static void uploadTempBasals(Context c, SharedPreferences prefs) {
-        //Will grab the last 20 suggested TempBasals and check they have all been uploaded to NS
+    public static void updateNSDBTreatments(){
+        DateFormat dateAsISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("ns_client", null);
 
-        List<TempBasal> tempBasals = TempBasal.latestTempBasals(20);
-        JSONArray tempBasalsJSONArray = new JSONArray();
-        String url = prefs.getString("nightscout_url", "") + "/treatments/";
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-        String dateAsISO8601;
+        Log.d(TAG, integrationsToSync.size() + " objects to upload");
 
-        for (TempBasal tempBasal : tempBasals) {
-            try {
+        for (Integration integration : integrationsToSync) {
+            ObjectToSync treatmentToSync = new ObjectToSync(integration);
 
-                JSONObject tempBasalJSON = new JSONObject();
-                JSONObject tempBasalIntegration = tools.getJSONO(tempBasal.integration);
+            if (treatmentToSync.state.equals("delete_me")) {                                          //Treatment has been deleted, do not process it
+                integration.delete();
 
-                if (!tempBasalIntegration.has("ns_upload_id")) {
+            } else {
 
-                    tempBasalJSON.put("happ_id", tempBasal.getId());
-                    tempBasalJSON.put("enterdBy", "HAPP_APP");
-                    dateAsISO8601 = df.format(tempBasal.start_time);
-                    tempBasalJSON.put("created_at", dateAsISO8601);
-                    tempBasalJSON.put("eventType", "Temp Basal");
-                    tempBasalJSON.put("duration", tempBasal.duration);
+                try {
+                    Context context = MainApp.instance().getApplicationContext();
+                    JSONObject data = new JSONObject();
 
-                    //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
-                    //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
-                    //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
-                        tempBasalJSON.put("absolute", tempBasal.rate);
-                    //}
+                    switch (treatmentToSync.happ_object_type){
+                        case "bolus_delivery":
+                            data.put("insulin", treatmentToSync.value1);
+                            data.put("note", treatmentToSync.value3);
+                            data.put("eventType", "Bolus");
 
-                    tempBasalsJSONArray.put(tempBasalJSON);
-                } else if (tempBasalIntegration.has("ns_temp_basal_stop")) {
-                    //This Temp Basal has been stopped, insert a record to NS so it knows
-                    if (tempBasalIntegration.getString("ns_temp_basal_stop").equals("dirty")) {
-                        tempBasalJSON.put("happ_id", tempBasal.getId());
-                        tempBasalJSON.put("enterdBy", "HAPP_APP");
-                        dateAsISO8601 = df.format(tempBasal.endDate());
-                        tempBasalJSON.put("created_at", dateAsISO8601);
-                        tempBasalJSON.put("eventType", "Temp Basal");
-                        //tempBasalJSON.put("happ_note", "temp_basal_stop");
+                            break;
+                        case "treatment_carbs":
+                            data.put("carbs", treatmentToSync.value1);
+                            data.put("eventType", "Carbs");
 
-                        tempBasalsJSONArray.put(tempBasalJSON);
+                            break;
+                        case "temp_basal":
+                            data.put("eventType", "Temp Basal");
+                            switch (treatmentToSync.action){
+                                case "new":
+                                    //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
+                                    //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
+                                    //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
+                                    data.put("absolute", treatmentToSync.value1);
+                                    //}
+                                    data.put("duration", treatmentToSync.value3);
+                                    break;
+                                case "cancel":
+                                    //No duration or rate, so NS knows to stop current Temp Basal
+                                    break;
+                            }
+
+                            break;
                     }
+
+                    data.put("created_at", dateAsISO8601.format(treatmentToSync.requested));
+                    data.put("enteredBy", "HAPP_App");
+                    data.put("HAPP_INTEGRATION_ID", treatmentToSync.happ_integration_id);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("action", "dbAdd");
+                    bundle.putString("collection", "treatments"); // "treatments" || "entries" || "devicestatus" || "profile" || "food"
+                    bundle.putString("data", data.toString());
+                    Intent intent = new Intent(Intents.NSCLIENT_ACTION_DATABASE);
+                    intent.putExtras(bundle);
+                    intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+                    context.sendBroadcast(intent);
+                    List<ResolveInfo> q = context.getPackageManager().queryBroadcastReceivers(intent, 0);
+                    if (q.size() < 1) {
+                        Log.d(TAG,"TEST DBADD No receivers");
+                    } else {
+                        Log.d(TAG,"TEST DBADD dbAdd " + q.size() + " receivers");
+                    }
+
+                } catch (JSONException e) {
+                    treatmentToSync.details   =   "Failed sending to NSClient: " + e.getLocalizedMessage();
+                    treatmentToSync.updateIntegration();
+                    Log.d(TAG,"ERROR sending Treatment to NSClient");
+                    Crashlytics.logException(e);
+                } finally {
+
+                    treatmentToSync.state   =   "sent";
+                    treatmentToSync.updateIntegration();
                 }
 
-            } catch (JSONException | NullPointerException e) {
-                Crashlytics.logException(e);
             }
-
         }
-
-        if (tempBasalsJSONArray.length() > 0) {
-            jsonPost(tempBasalsJSONArray, url, c);
-        }
-
     }
 
+
     public static boolean isNSIntegrationActive(String integrationItem, SharedPreferences prefs){
-        if (prefs.getBoolean("nightscout_integration", false)==true && prefs.getBoolean(integrationItem, false)==true && !prefs.getString("nightscout_url", "missing").equals("missing")){
+        if (prefs.getBoolean("nightscout_integration", false) && prefs.getBoolean(integrationItem, false)){
             return true;
         } else {
             return false;
         }
     }
 
-    public static void uploadTreatments(Context c, SharedPreferences prefs){
-        //Will grab the last 10 treatments and check they have all been uploaded to NS
-
-        List<Treatments> treatments = Treatments.latestTreatments(10, null);
-        JSONArray treatmentsJSONArray = new JSONArray();
-        String url = prefs.getString("nightscout_url", "") + "/treatments/";
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-        String dateAsISO8601;
-
-        for (Treatments treatment : treatments) {
-            try {
-                JSONObject treatmentJSON = new JSONObject();
-                JSONObject treatmentIntegration = tools.getJSONO(treatment.integration);
-
-                if (!treatmentIntegration.has("ns_upload_id")) {
-
-                    treatmentJSON.put("happ_id", treatment.getId());
-                    treatmentJSON.put("enterdBy", "HAPP_APP");
-                    treatmentJSON.put("display_date", treatment.datetime_display);
-                    dateAsISO8601 = df.format(treatment.datetime);
-                    treatmentJSON.put("created_at", dateAsISO8601);
-
-                    switch (treatment.type) {
-                        case "Insulin":
-                            treatmentJSON.put("insulin", treatment.value);
-                            treatmentJSON.put("units", tools.bgUnitsFormat());
-                            treatmentJSON.put("eventType", "Bolus");
-                            break;
-                        case "Carbs":
-                            treatmentJSON.put("carbs", treatment.value);
-                            treatmentJSON.put("eventType", "Carbs");
-                            break;
-                        default:
-                            //no idea what this treatment is, exit
-                            return;
-                    }
-                    treatmentsJSONArray.put(treatmentJSON);
-                }
-            } catch (JSONException e) {
-                Crashlytics.logException(e);
-            }
-        }
-
-        if (treatmentsJSONArray.length() > 0){
-            jsonPost(treatmentsJSONArray, url, c);
-        }
-
-    }
-
-    public static void jsonPost(JSONArray treatmentsJSONArray, String url, Context c) {
-
-        //RequestQueue queue = volleyQ.getInstance(c.getApplicationContext()).getRequestQueue();
-
-        JSONArrayPOST jsonArrayRequest = new JSONArrayPOST(Request.Method.POST, url, treatmentsJSONArray, new Response.Listener<JSONArray>() {
-
-            @Override
-            public void onResponse(JSONArray response) {
-
-                try {
-                    if (response.getJSONObject(0).has("ops")) {
-                        JSONArray reply_ops = response.getJSONObject(0).getJSONArray("ops");
-
-                        for (int i = 0; i < reply_ops.length(); i++) {
-
-                            String happ_id = "", ns_id = "";
-                            if (reply_ops.getJSONObject(i).has("happ_id"))
-                                happ_id = reply_ops.getJSONObject(i).getString("happ_id");
-                            if (reply_ops.getJSONObject(i).has("_id"))
-                                ns_id = reply_ops.getJSONObject(i).getString("_id");
-
-                            if (happ_id != "" && ns_id != "") {                                         //Updates the Object with the NS ID
-                                JSONObject integrationJSON;
-                                switch (reply_ops.getJSONObject(i).getString("eventType")) {
-                                    case "Carbs":
-                                    case "Bolus":
-                                        Treatments treatment = Treatments.load(Treatments.class, Long.parseLong(happ_id));
-                                        integrationJSON = tools.getJSONO(treatment.integration);
-                                        integrationJSON.put("ns_upload_id", ns_id);
-                                        treatment.integration = integrationJSON.toString();
-                                        treatment.save();
-                                        break;
-                                    case "Temp Basal":
-                                        TempBasal tempBasal = TempBasal.load(TempBasal.class, Long.parseLong(happ_id));
-                                        integrationJSON = tools.getJSONO(tempBasal.integration);
-                                        if (integrationJSON.has("ns_temp_basal_stop")) {
-                                            if (integrationJSON.getString("ns_temp_basal_stop").equals("dirty")) {
-                                                integrationJSON.remove("ns_temp_basal_stop");
-                                                integrationJSON.put("ns_temp_basal_stop", ns_id);
-                                            }
-                                        } else {
-                                            integrationJSON.put("ns_upload_id", ns_id);
-                                        }
-                                        tempBasal.integration = integrationJSON.toString();
-                                        tempBasal.save();
-                                        break;
-                                }
-                            }
-                        }
-                    }
-
-                }  catch (JSONException e) {
-                    Crashlytics.logException(e);
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //Log error, not OK // TODO: 20/10/2015
-
-           }
-        });
-
-        //jsonArrayRequest.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 4, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        volleyQ.getInstance(c.getApplicationContext()).addToRequestQueue(jsonArrayRequest);
-
-
-    }
 
     public static void delTreatment(Treatments treatment){
         // TODO: 27/10/2015 not possible via current NS API? 

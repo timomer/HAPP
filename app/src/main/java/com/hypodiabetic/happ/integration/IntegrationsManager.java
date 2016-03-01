@@ -58,13 +58,9 @@ public class IntegrationsManager {
         }
 
 
-        //WAN connection required Integrations
-        if(cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+        //NS Interaction
+        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.updateNSDBTreatments();
 
-            //NS Interaction
-            if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.uploadTreatments(c,prefs);
-            if (NSUploader.isNSIntegrationActive("nightscout_tempbasal",  prefs)) NSUploader.uploadTempBasals(c,prefs);
-        }
 
     }
 
@@ -72,11 +68,13 @@ public class IntegrationsManager {
         //Saves the treatments to the DB to be accessed later once we are connected to Insulin Integration App
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         Profile p               =   new Profile(new Date());
+        String happ_object      =   "bolus_delivery";
 
+        //Insulin Integration App
         //Are we allowed and able to send bolus?
         if (p.send_bolus_allowed ) {
             if (bolus != null) {
-                Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", "bolus_delivery", bolus.getId());
+                Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", happ_object, bolus.getId());
                 bolusIntegration.state          = "to_sync";
                 bolusIntegration.action         = "new";
                 bolusIntegration.auth_code      = new Random().toString();
@@ -84,7 +82,7 @@ public class IntegrationsManager {
                 bolusIntegration.save();
             }
             if (correction != null) {
-                Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", "bolus_delivery", correction.getId());
+                Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", happ_object, correction.getId());
                 correctionIntegration.state         = "to_sync";
                 correctionIntegration.action        = "new";
                 correctionIntegration.auth_code     = new Random().toString();
@@ -93,19 +91,53 @@ public class IntegrationsManager {
             }
         }
 
-        // TODO: 30/01/2016 NS Integrations
+        // NS Integrations
+        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
+            if (bolus != null) {
+                Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, bolus.getId());
+                bolusIntegration.state          = "to_sync";
+                bolusIntegration.action         = "new";
+                bolusIntegration.save();
+            }
+            if (correction != null) {
+                Integration correctionIntegration = Integration.getIntegration("ns_client", happ_object, correction.getId());
+                correctionIntegration.state         = "to_sync";
+                correctionIntegration.action        = "new";
+                correctionIntegration.save();
+            }
+        }
 
         Log.d(TAG, "newBolus");
+        syncIntegrations(MainApp.instance());
+    }
+
+    public static void newCarbs(Treatments carbs){
+        SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+        String happ_object      =   "treatment_carbs";
+
+        // NS Integrations
+        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
+            if (carbs != null) {
+                Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, carbs.getId());
+                bolusIntegration.state          = "to_sync";
+                bolusIntegration.action         = "new";
+                bolusIntegration.remote_var1    = "carbs";
+                bolusIntegration.save();
+            }
+        }
+
+        Log.d(TAG, "newCarbs");
         syncIntegrations(MainApp.instance());
     }
 
     public static void newTempBasal(TempBasal tempBasal){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         Profile p               =   new Profile(new Date());
+        String happ_object      =   "temp_basal";
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", "temp_basal", tempBasal.getId());
+            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
             basalIntegration.state          =   "to_sync";
             basalIntegration.action         =   "new";
             basalIntegration.auth_code      =   new Random().toString();
@@ -113,24 +145,39 @@ public class IntegrationsManager {
             basalIntegration.save();
         }
 
-        // TODO: 30/01/2016 NS Intergartions
+        // NS Interaction
+        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
+            Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
+            basalIntegration.state          =   "to_sync";
+            basalIntegration.action         =   "new";
+            basalIntegration.save();
+        }
+
 
         Log.d(TAG, "newTempBasal");
         syncIntegrations(MainApp.instance());
         updatexDripWatchFace();
     }
     public static void cancelTempBasal(TempBasal tempBasal){
-        Profile p = new Profile(new Date());
+        SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+        Profile p               =   new Profile(new Date());
+        String happ_object      =   "temp_basal";
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", "temp_basal", tempBasal.getId());
+            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
             basalIntegration.state          =   "to_sync";
             basalIntegration.action         =   "cancel";
             basalIntegration.save();
         }
 
-        // TODO: 30/01/2016 NS Integrations
+        // NS Interaction
+        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
+            Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
+            basalIntegration.state          =   "to_sync";
+            basalIntegration.action         =   "cancel";
+            basalIntegration.save();
+        }
 
         Log.d(TAG, "cancelTempBasal");
         syncIntegrations(MainApp.instance());

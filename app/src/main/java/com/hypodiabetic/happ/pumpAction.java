@@ -84,18 +84,9 @@ public class pumpAction {
 
         if (active_basal.isactive(null)) {
 
-            // TODO: 29/01/2016 NS integration to be replaced with WS
-            JSONObject tempBasalIntegration = tools.getJSONO(active_basal.integration);
-            try {
-                tempBasalIntegration.put("ns_temp_basal_stop", "dirty");        //Tells NSUploader that this Temp Basal needs to be updated
-            } catch (JSONException e){
-                Crashlytics.logException(e);
-            }
-            active_basal.integration = tempBasalIntegration.toString();
+            //stop the temp basal
             active_basal.duration = active_basal.age();
             active_basal.save();
-            // TODO: 29/01/2016 NS integration to be replaced with WS
-
 
             //Inform Integrations Manager
             IntegrationsManager.cancelTempBasal(active_basal);
@@ -205,6 +196,7 @@ public class pumpAction {
 
                 //inform Integration Manager
                 IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment);
+                IntegrationsManager.newCarbs(carbTreatment);
 
                 // TODO: 15/02/2016 why?
                 //Run openAPS again

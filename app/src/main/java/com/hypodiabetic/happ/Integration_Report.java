@@ -53,7 +53,7 @@ public class Integration_Report extends AppCompatActivity {
             }
         });
 
-        String[] integrationTypes = {"insulin_integration_app"};
+        String[] integrationTypes = {"insulin_integration_app", "ns_client"};
         ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, integrationTypes);
         integrationType.setAdapter(stringArrayAdapter);
         integrationType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -67,7 +67,7 @@ public class Integration_Report extends AppCompatActivity {
             }
         });
 
-        String[] happObjectTypes = {"bolus_delivery", "temp_basal"};
+        String[] happObjectTypes = {"bolus_delivery", "temp_basal", "treatment_carbs"};
         ArrayAdapter<String> stringArrayAdapter2= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, happObjectTypes);
         happObjectType.setAdapter(stringArrayAdapter2);
         happObjectType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -106,18 +106,19 @@ public class Integration_Report extends AppCompatActivity {
                 integrationItem.put("integrationType", integration.type);
                 integrationItem.put("integrationWhat", "Request sent: " + objectSyncDetails.getObjectSummary());
                 integrationItem.put("integrationDateTime", sdfDateTime.format(integrationDate.getTime()));
-                integrationItem.put("integrationState", "State: " + objectSyncDetails.state);
-                integrationItem.put("integrationAction", "Action: " + objectSyncDetails.action);
-                integrationItem.put("integrationRemoteID", "RemoteID: " + objectSyncDetails.remote_id);
+                integrationItem.put("integrationState", "state:" + objectSyncDetails.state);
+                integrationItem.put("integrationAction", "action:" + objectSyncDetails.action);
+                integrationItem.put("integrationRemoteID", "remote_id:" + objectSyncDetails.remote_id);
                 integrationItem.put("integrationDetails", objectSyncDetails.details);
+                integrationItem.put("integrationID", "id:" + objectSyncDetails.happ_integration_id.toString());
 
                 integrationList.add(integrationItem);
             }
         }
 
         SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
-                new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails"},
-                new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails});
+                new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails", "integrationID"},
+                new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails, R.id.integrationID});
         integrationReportList.setAdapter(adapter);
     }
 

@@ -45,10 +45,10 @@ public class Notifications {
     //Insulin Treatments Integration notification
     public static void newInsulinUpdate(){
 
-        InsulinIntegrationNotify insulinUpdate = new InsulinIntegrationNotify();
-        NotificationCompat.Builder errorNotification = insulinUpdate.getErrorNotification();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
-        View mainActivityView=null;
+        InsulinIntegrationNotify insulinUpdate          = new InsulinIntegrationNotify();
+        NotificationCompat.Builder errorNotification    = insulinUpdate.getErrorNotification();
+        NotificationManagerCompat notificationManager   = NotificationManagerCompat.from(MainApp.instance());
+        View mainActivityView                           = null;
 
         try {
             mainActivityView = MainActivity.activity.findViewById(R.id.mainActivity);
@@ -102,7 +102,7 @@ public class Notifications {
                 .create();
 
         Intent intent_accept_temp = new Intent();
-        intent_accept_temp.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
+        intent_accept_temp.setAction(Intents.NOTIFICATION_UPDATE);
         intent_accept_temp.putExtra("SUGGESTED_BASAL", gson.toJson(basal, TempBasal.class));
         intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
         PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(c,1,intent_accept_temp,PendingIntent.FLAG_CANCEL_CURRENT);
@@ -147,10 +147,10 @@ public class Notifications {
     }
 
 
-    //Update summary heads up card
-    public static void updateCard(Context c){
+    //Summary Card
+    public static void updateCard(){
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("summary_notification", true)) {
 
@@ -159,20 +159,20 @@ public class Notifications {
             String title    = pump.displayBasalDesc(false);
             String msg      = pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft();
 
-            Intent intent_open_activity = new Intent(c,MainActivity.class);
-            PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 3, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent_open_activity = new Intent(MainApp.instance(),MainActivity.class);
+            PendingIntent pending_intent_open_activity = PendingIntent.getActivity(MainApp.instance(), 3, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Intent intent_run_aps = new Intent();
-            intent_run_aps.setAction("com.hypodiabetic.happ.NOTIFICATION_RECEIVER");
+            intent_run_aps.setAction(Intents.NOTIFICATION_UPDATE);
             intent_run_aps.putExtra("NOTIFICATION_TYPE", "RUN_OPENAPS");
-            PendingIntent pending_intent_run_aps = PendingIntent.getBroadcast(c, 5, intent_run_aps, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pending_intent_run_aps = PendingIntent.getBroadcast(MainApp.instance(), 5, intent_run_aps, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Bitmap bitmap = Bitmap.createBitmap(320, 320, Bitmap.Config.ARGB_8888);
-            bitmap.eraseColor(c.getResources().getColor(R.color.secondary_text_light));
+            bitmap.eraseColor(MainApp.instance().getResources().getColor(R.color.secondary_text_light));
 
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c);
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(MainApp.instance());
             notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
-            notificationBuilder.setColor(c.getResources().getColor(R.color.primary));
+            notificationBuilder.setColor(MainApp.instance().getResources().getColor(R.color.primary));
             notificationBuilder.extend(new NotificationCompat.WearableExtender().setBackground(bitmap));
             notificationBuilder.setContentTitle(title);
             notificationBuilder.setContentText(msg);
