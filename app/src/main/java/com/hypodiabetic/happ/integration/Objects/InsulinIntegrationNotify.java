@@ -24,7 +24,6 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.R;
-import com.hypodiabetic.happ.WearDisplayActivity;
 import com.hypodiabetic.happ.tools;
 
 import java.text.SimpleDateFormat;
@@ -203,8 +202,6 @@ public class InsulinIntegrationNotify {
 
             Intent intent_open_activity = new Intent(c, MainActivity.class);
             PendingIntent pending_intent_open_activity = PendingIntent.getActivity(c, 2, intent_open_activity, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Intent displayIntent = new Intent(c, WearDisplayActivity.class);
 
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(c);
             notificationBuilder.setSmallIcon(R.drawable.alert_circle);

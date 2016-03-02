@@ -51,9 +51,11 @@ public class APSService extends IntentService {
         profile             =   new Profile(new Date());
         Bundle bundle       =   new Bundle();
         JSONObject apsJSON  =   new JSONObject();
+        APSResult apsResult =   new APSResult();
 
         try {
             apsJSON = getAPSJSON();
+            apsResult.fromJSON(apsJSON, profile);
 
         } catch (IOException i){
             bundle.putString("error", i.getLocalizedMessage());
@@ -62,8 +64,6 @@ public class APSService extends IntentService {
             Log.d(TAG, "Service error " + i.getLocalizedMessage());
 
         } finally {
-            APSResult apsResult =   new APSResult();
-            apsResult.fromJSON(apsJSON, profile);
 
             if (apsResult.tempSuggested){
                 apsResult = setTempBasalInfo(apsResult);

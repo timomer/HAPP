@@ -102,12 +102,6 @@
         <activity
             android:name=".license_agreement"
             android:label="@string/title_activity_license_agreement"></activity>
-        <activity
-            android:name=".WearDisplayActivity"
-            android:allowEmbedded="true"
-            android:exported="true"
-            android:taskAffinity=""
-            android:theme="@android:style/Theme.DeviceDefault.Light"></activity>
 
         <receiver
             android:name=".Receivers.notificationReceiver"

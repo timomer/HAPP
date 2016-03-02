@@ -324,19 +324,27 @@ public class MainActivity extends AppCompatActivity {
                         Profile profile = new Profile(new Date());
                         Pump pump = new Pump();
                         APSResult apsResult = APSResult.last();
-                        final String msg =  "Profile:" + "\n" +
-                                            profile.toString() + "\n\n" +
-                                            "Pump:" + "\n" +
-                                            pump.toString() + "\n\n" +
-                                            "APS Result:" + "\n" +
-                                            apsResult.toString();
+                        String msg =            "Profile:" + "\n" +
+                                                profile.toString() + "\n\n" +
+                                                "Pump:" + "\n" +
+                                                pump.toString();
+                        if (apsResult != null) {
+                                                msg += "\n\n" +
+                                                "APS Result:" + "\n" +
+                                                apsResult.toString();
+                        } else {
+                                                msg += "\n\n" +
+                                                "APS Result:" + "\n" +
+                                                "APS code has never been ran";
+                        }
+                        final String finalmsg = msg;
 
                         new AlertDialog.Builder(MainActivity.getInstace())
                                 .setMessage(msg)
                                 .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                                        clipboard.setText(msg);
+                                        clipboard.setText(finalmsg);
                                         Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
                                     }
                                 })
