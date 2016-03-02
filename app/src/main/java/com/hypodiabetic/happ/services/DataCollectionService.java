@@ -82,6 +82,8 @@ public class DataCollectionService extends Service {
         Intent houseKeepingIntent = new Intent(this, FiveMinService.class);
         PendingIntent pendingIntentTreatments = PendingIntent.getService(this, 0, houseKeepingIntent, 0);
         homeKeepingAlarm.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), Constants.HOUSE_KEEPING_INTERVAL, pendingIntentTreatments);
+
+        Log.d(TAG, "HouseKeepingAlarm Set: " + Constants.HOUSE_KEEPING_INTERVAL);
     }
 
     public void setAPSAlarm(){
@@ -92,6 +94,7 @@ public class DataCollectionService extends Service {
         apsAlarm.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), apsInterval, apsService);
 
         MainApp.instance().startService(apsIntent);
+        Log.d(TAG, "APSAlarm Set: " + apsInterval);
     }
 
     public void setNotifyReceiver(){
@@ -131,6 +134,7 @@ public class DataCollectionService extends Service {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 
                 String apsLoop = mPrefs.getString("aps_loop", "900000");
+                Log.d(TAG, "APS LOOP STRING: " + apsLoop);
                 if (Integer.parseInt(apsLoop) != apsInterval) {
                     setSettings();
                     apsAlarm.cancel(apsService);                                                    //kills the current alarm
