@@ -324,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
                         Profile profile = new Profile(new Date());
                         Pump pump = new Pump();
                         APSResult apsResult = APSResult.last();
+                        Stats stats = Stats.last();
                         String msg =            "Profile:" + "\n" +
                                                 profile.toString() + "\n\n" +
                                                 "Pump:" + "\n" +
@@ -336,6 +337,15 @@ public class MainActivity extends AppCompatActivity {
                                                 msg += "\n\n" +
                                                 "APS Result:" + "\n" +
                                                 "APS code has never been ran";
+                        }
+                        if (stats != null) {
+                            msg += "\n\n" +
+                                    "Stats Result:" + "\n" +
+                                    stats.toString();
+                        } else {
+                            msg += "\n\n" +
+                                    "Stats Result:" + "\n" +
+                                    "Stats code has never been ran";
                         }
                         final String finalmsg = msg;
 

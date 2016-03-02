@@ -143,5 +143,15 @@ public class Stats extends Model{
         return statList;
     }
 
+    @Override
+    public String toString(){
+        return  "datetime:" + datetime + "\n" +
+                " bolus_iob:" + bolus_iob + "\n" +
+                " iob:" + iob + "\n" +
+                " cob:" + cob + "\n" +
+                " basal:" + basal + "\n" +
+                " temp_basal:" + temp_basal;
+    }
+
 }
 

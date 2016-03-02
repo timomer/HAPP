@@ -130,7 +130,8 @@ public class DataCollectionService extends Service {
         mPreferencesListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 
-                if (Integer.parseInt(mPrefs.getString("aps_loop", "900000")) != apsInterval) {
+                String apsLoop = mPrefs.getString("aps_loop", "900000");
+                if (Integer.parseInt(apsLoop) != apsInterval) {
                     setSettings();
                     apsAlarm.cancel(apsService);                                                    //kills the current alarm
                     setAPSAlarm();                                                                  //and rebuilds it
