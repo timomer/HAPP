@@ -27,7 +27,8 @@
                 <SwitchPreference
                     android:dependency="nightscout_integration"
                     android:key="nightscout_treatments"
-                    android:title="Upload Treatments and Temp Basal"
+                    android:title="Upload Treatments"
+                    android:summary="Bolus, Temp Basal and Carbs"
                     android:defaultValue="false" />
             </PreferenceCategory>
 
@@ -37,12 +38,12 @@
                 <SwitchPreference
                     android:title="Send Bolus"
                     android:key="insulin_integration_send_bolus"
-                    android:summary="Send Bolus to Treatment Integration App"
+                    android:summary="App must be compiled with BOLUS_ALLOWED=TRUE for this to be supported"
                     android:defaultValue="false"/>
                 <SwitchPreference
                     android:title="Send Temp Basal"
                     android:key="insulin_integration_send_temp_basal"
-                    android:summary="Send Temp Basal to Treatment Integration App"
+                    android:summary=""
                     android:defaultValue="false"/>
                 <Preference
                     android:title="Insulin Treatments App"

@@ -61,7 +61,6 @@ public class BolusWizard {
             net_biob_correction_maths   = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
         }
 
-
         //Insulin required for carbs about to be consumed
         Double insulin_correction_carbs         = carbs / profile.carbRatio;
         if (insulin_correction_carbs.isNaN() || insulin_correction_carbs.isInfinite()) insulin_correction_carbs = 0D;
@@ -97,14 +96,14 @@ public class BolusWizard {
         suggested_correction_maths  = "BG Corr(" + tools.formatDisplayInsulin(insulin_correction_bg,2) + ") - Net Bolus(" + tools.formatDisplayInsulin(net_correction_biob,2) + ") = " + tools.formatDisplayInsulin(suggested_correction,2);
 
 
-        if (suggested_correction < 0) {
-            suggested_bolus = insulin_correction_carbs + suggested_correction;
-            suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayInsulin(insulin_correction_carbs, 2) + ") + " + "Neg Corr(" + tools.formatDisplayInsulin(suggested_correction,2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
-            suggested_correction = 0D;
-        } else {
+        //if (suggested_correction < 0) {
+        //    suggested_bolus = insulin_correction_carbs + suggested_correction;
+        //    suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayInsulin(insulin_correction_carbs, 2) + ") + " + "Neg Corr(" + tools.formatDisplayInsulin(suggested_correction,2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
+        //    suggested_correction = 0D;
+        //} else {
             suggested_bolus = insulin_correction_carbs;
             suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayInsulin(insulin_correction_carbs, 2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
-        }
+        //}
 
 
         JSONObject reply = new JSONObject();

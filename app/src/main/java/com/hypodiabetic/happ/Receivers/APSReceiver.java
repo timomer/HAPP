@@ -30,6 +30,7 @@ public class APSReceiver extends ResultReceiver {
     protected void onReceiveResult(int resultCode, Bundle resultData) {
 
         Notifications.clear("newTemp");                                         //Clears any open temp notifications
+        Intent intentUpdate = new Intent(Intents.UI_UPDATE);
 
         switch (resultCode){
             case Constants.STATUS_FINISHED:
@@ -43,14 +44,15 @@ public class APSReceiver extends ResultReceiver {
                 Notifications.updateCard();
                 Notifications.debugCard(MainApp.instance(), apsResult);
 
-                Intent intentUpdate = new Intent(Intents.UI_UPDATE);
                 intentUpdate.putExtra("UPDATE", "NEW_APS_RESULT");
                 intentUpdate.putExtra("APSResult", resultData.getString("APSResult"));
                 LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intentUpdate);
 
                 break;
             case Constants.STATUS_ERROR:
-
+                intentUpdate.putExtra("UPDATE", "ERROR_APS_RESULT");
+                intentUpdate.putExtra("error", resultData.getString("error"));
+                LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intentUpdate);
                 break;
         }
 

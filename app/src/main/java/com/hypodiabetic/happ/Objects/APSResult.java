@@ -48,23 +48,20 @@ public class APSResult extends Model{
     @Expose
     @Column(name = "rate")
     public Double   rate;                   //Temp Basal Rate for (U/hr) mode
-    //@Expose
-    //@Column(name = "ratePercent")
-    //public Integer  ratePercent;            //Temp Basal Rate for "percent" of normal basal
     @Expose
     @Column(name = "duration")
     public Integer  duration;               //Duration of Temp
     @Expose
     @Column(name = "basal_adjustemnt")
     public String   basal_adjustemnt;       //High or Low temp
+    @Expose
+    @Column(name = "accepted")
+    public Boolean  accepted;               //Has this APS Result been accepted?
 
     //User profile details
     @Expose
     @Column(name = "aps_algorithm")
     public String   aps_algorithm;          //APS algorithm these results where produced from
-    //@Expose
-    //@Column(name = "basal_type")
-    //public String   basal_type;             //"absolute" temp basel (U/hr) mode, "percent" of your normal basal
     @Expose
     @Column(name = "aps_mode")
     public String   aps_mode;               //Closed, Open, etc
@@ -77,14 +74,15 @@ public class APSResult extends Model{
 
 
     public void fromJSON(JSONObject apsJSON, Profile p) {
+
         action      = apsJSON.optString("action", "error");
         reason      = apsJSON.optString("reason", "error");
-        eventualBG  = apsJSON.optDouble("eventualBG",0);
+        eventualBG  = apsJSON.optDouble("eventualBG", 0);
         snoozeBG    = apsJSON.optDouble("snoozeBG", 0);
         datetime    = new Date().getTime();
+        accepted    = false;
 
         aps_algorithm       = p.aps_algorithm;
-        //basal_type          = p.basal_mode;
         aps_mode            = p.aps_mode;
         aps_loop            = p.aps_loop;
         current_pump_basal  = p.current_basal;
@@ -93,13 +91,11 @@ public class APSResult extends Model{
         if (apsJSON.has("rate")) {
             tempSuggested = true;
             rate = apsJSON.optDouble("rate");
-            //ratePercent = apsJSON.optInt("ratePercent");
             duration = apsJSON.optInt("duration");
             basal_adjustemnt = apsJSON.optString("basal_adjustemnt");
         } else {
             tempSuggested = false;
             rate = 0D;
-            //ratePercent = 0;
             duration = 0;  //ie, there is no temp
         }
     }
@@ -137,11 +133,12 @@ public class APSResult extends Model{
         return (int)(timeNow.getTime() - created.getTime()) /1000/60;                           //Age in Mins of the APS result
     }
 
-    public String getFormattedDeviation(Context c){
+    public String getFormattedDeviation(){
+        if (deviation == null) deviation=0D;
         if (deviation > 0) {
             return "+" + tools.unitizedBG(deviation);
         } else {
-            return tools.unitizedBG(deviation).toString();
+            return tools.unitizedBG(deviation);
         }
     }
 
@@ -162,7 +159,11 @@ public class APSResult extends Model{
                 .orderBy("datetime desc")
                 .executeSingle();
 
-            return last;
+        if (last != null){
+            if (last.accepted == null) last.accepted = false;
+        }
+
+        return last;
     }
 
     @Override

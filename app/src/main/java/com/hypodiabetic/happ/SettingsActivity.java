@@ -31,12 +31,18 @@ import java.util.prefs.Preferences;
 
 public class SettingsActivity extends PreferenceActivity {
     public static SharedPreferences prefs;
+    public static String aps_loop;
+    public static Boolean notify;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new AllPrefsFragment()).commit();
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+        //Save current values here, so later we can check if they have changed
+        aps_loop = prefs.getString("aps_loop", "900000");
+        notify = prefs.getBoolean("summary_notification", true);
     }
 
     @Override
@@ -76,20 +82,21 @@ public class SettingsActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_misc);
 
 
-            bindPreferenceSummaryToValue(findPreference("highValue"));
-            bindPreferenceSummaryToValue(findPreference("lowValue"));
-            bindPreferenceSummaryToValue(findPreference("units"));
-            bindPreferenceSummaryToValue(findPreference("target_bg"));
-            bindPreferenceSummaryToValue(findPreference("aps_loop"));
-            bindPreferenceSummaryToValue(findPreference("aps_mode"));
-            bindPreferenceSummaryToValue(findPreference("aps_algorithm"));
-            bindPreferenceSummaryToValue(findPreference("pump_name"));
+
+            setPreferenceListener(findPreference("highValue"));
+            setPreferenceListener(findPreference("lowValue"));
+            setPreferenceListener(findPreference("units"));
+            setPreferenceListener(findPreference("target_bg"));
+            setPreferenceListener(findPreference("aps_loop"));
+            setPreferenceListener(findPreference("aps_mode"));
+            setPreferenceListener(findPreference("aps_algorithm"));
+            setPreferenceListener(findPreference("pump_name"));
             findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory().toString());
 
             for (int x=0; x<24; x++ ){
-                bindPreferenceSummaryToValue(findPreference("basal_"+x));
-                bindPreferenceSummaryToValue(findPreference("isf_"+x));
-                bindPreferenceSummaryToValue(findPreference("carbratio_"+x));
+                setPreferenceListener(findPreference("basal_" + x));
+                setPreferenceListener(findPreference("isf_" + x));
+                setPreferenceListener(findPreference("carbratio_" + x));
             }
 
             Preference preference_export = findPreference("export");
@@ -109,7 +116,7 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
 
-            bindPreferenceSummaryToValue(findPreference("insulin_integration"));
+            setPreferenceListener(findPreference("insulin_integration"));
             Preference preference_insulin_integration = findPreference("insulin_integration");
             preference_insulin_integration.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -137,56 +144,42 @@ public class SettingsActivity extends PreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
-            if (preference.getKey().equals("highValue") || preference.getKey().equals("lowValue") || preference.getKey().equals("target_bg")){
-                preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue),true,MainApp.instance().getApplicationContext()));
-            } else if (preference instanceof ListPreference) {
-                ListPreference listPreference = (ListPreference) preference;
-                int index = listPreference.findIndexOfValue(stringValue);
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
-
-            } else if (preference instanceof RingtonePreference) {
-                if (TextUtils.isEmpty(stringValue)) {
-                    preference.setSummary("Silent");
-                } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                            preference.getContext(), Uri.parse(stringValue));
-
-                    if (ringtone == null) {
-                        preference.setSummary(null);
-                    } else {
-                        String name = ringtone.getTitle(preference.getContext());
-                        preference.setSummary(name);
-                    }
-                }
-            } else {
-                if (preference.getKey().contains("basal_") || preference.getKey().contains("carbratio_")){
+            switch (preference.getKey()){
+                case "highValue":
+                case "lowValue":
+                case "target_bg":
+                    preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue),true,MainApp.instance()));
+                    break;
+                case "basal_":
+                case "carbratio_":
+                case "isf_":
                     //24H Profile info, if preference has no value, get set summary to value of parent (this is what Profile code does)
                     if (stringValue.equals("")) {
                         preference.setSummary("<Inherits from parent, or defaults to 0>");
                     } else {
-                        preference.setSummary(stringValue);
+                        switch (preference.getKey()){
+                            case "basal_":
+                                preference.setSummary(tools.formatDisplayBasal(Double.parseDouble(stringValue), false));
+                            case "carbratio_":
+                                preference.setSummary(tools.formatDisplayCarbs(Double.parseDouble(stringValue)));
+                            case "isf_":
+                                preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue), true, MainApp.instance()));
+                        }
                     }
-
-                } if (preference.getKey().contains("isf_")){
-                    //24H Profile info, if preference has no value, get set summary to value of parent (this is what Profile code does)
-                    if (stringValue.equals("")) {
-                        preference.setSummary("<Inherits from parent, or defaults to 0>");
-                    } else {
-                        preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue),true,MainApp.instance()));
-                    }
-
-                }else {
+                    break;
+                case "aps_loop":
+                    int aps_loop_int = Integer.parseInt(stringValue);
+                    preference.setSummary("every " + (aps_loop_int / 60000) + " mins");
+                    break;
+                default:
                     preference.setSummary(stringValue);
-                }
             }
+
             return true;
         }
     };
 
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private static void setPreferenceListener(Preference preference) {
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager

@@ -19,8 +19,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="3"
+                    android:orientation="vertical">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="20dp"
@@ -34,6 +39,7 @@
                         android:text="action"
                         android:textSize="12sp"
                         android:textColor="#B8B8B8"/>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -132,6 +138,24 @@
                         android:textSize="12sp"
                         android:textColor="#B8B8B8"/>
                 </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:id="@+id/apsstatus_date"
+                        android:text="-"
+                        android:textColor="@color/primary_text"
+                        android:textSize="16sp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:text="last ran"
+                        android:textSize="12sp"
+                        android:textColor="#B8B8B8"/>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -156,12 +180,15 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/pauseAPS"
+                android:onClick="pauseAPSToast"
                 android:src="@drawable/ic_media_pause"/>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TEST"
                 android:onClick="test"
+                android:id="@+id/apsTest"
                 />
 
         </LinearLayout>

@@ -111,9 +111,7 @@ public class InsulinIntegrationApp {
 
         if (basalIntegration.remote_var1.equals(insulin_Integration_App) && basalIntegration.state.equals("to_sync")) {  //We have a temp basal waiting to be synced with our current insulin_integration app
 
-            String userMsg = "", errorSending = "";
-            Boolean treatmentsSentOK = false;
-
+            String errorSending = "";
             ObjectToSync basalSync = new ObjectToSync(basalIntegration);
 
             Message msg = Message.obtain();
@@ -121,11 +119,9 @@ public class InsulinIntegrationApp {
             switch (basalSync.action) {
                 case "new":
                     bundle.putString("ACTION", "temp_basal");
-                    //userMsg = tools.formatDisplayBasal(basalSync.value1, false) + " (" + basalSync.value2 + "%) Temp Basal";
                     break;
                 case "cancel":
                     bundle.putString("ACTION", "cancel_temp_basal");
-                    //userMsg = "Cancel Basal";
                     break;
             }
             bundle.putLong("DATE_REQUESTED", new Date().getTime());
@@ -150,9 +146,6 @@ public class InsulinIntegrationApp {
                 e.printStackTrace();
                 //userMsg = "Failed: " + userMsg;
                 errorSending = e.getLocalizedMessage() + " " + e.getCause();
-            } finally {
-                //userMsg = "Sent: " + userMsg;
-                //treatmentsSentOK = true;
             }
 
             if (!errorSending.equals("")) {
@@ -162,35 +155,6 @@ public class InsulinIntegrationApp {
             }
 
             Notifications.newInsulinUpdate();
-            //if (!treatmentsSentOK) {
-                //We had an error sending, update basal integration with details
-            //    final String msgText = "HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending;
-            //    basalIntegration.state = "error";
-            //    basalIntegration.details = msgText;
-            //    basalIntegration.save();
-
-                //notify user with indefinite snackbar
-            //    Snackbar snackbar = Snackbar
-            //            .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_INDEFINITE)
-            //            .setAction("DETAILS", new View.OnClickListener() {
-            //                @Override
-            //                public void onClick(View view) {
-            //                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.activity);
-            //                    builder.setMessage(msgText);
-            //                    builder.setPositiveButton("OK", null);
-            //                    builder.show();
-            //                }
-            //            });
-            //    snackbar.show();
-            //} else {
-
-                //Basal sent ok
-            //    Snackbar snackbar = Snackbar
-            //            .make(MainActivity.activity.findViewById(R.id.mainActivity), userMsg, Snackbar.LENGTH_LONG);
-            //    snackbar.show();
-
-            //}
-
         }
 
     }

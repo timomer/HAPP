@@ -37,13 +37,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,7 +54,6 @@ import com.hypodiabetic.happ.Graphs.BgGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBBarGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBLineGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
-import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Stats;
@@ -65,14 +63,17 @@ import com.hypodiabetic.happ.integration.InsulinIntegrationApp;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.integration.Objects.InsulinIntegrationNotify;
 import com.hypodiabetic.happ.services.APSService;
+import com.hypodiabetic.happ.services.BackgroundService;
 
 
 import io.fabric.sdk.android.Fabric;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Viewport;
@@ -108,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
     private Drawable tickWhite;
     private Drawable clockWhite;
 
-    //xdrip start
     private LineChartView chart;
     private PreviewLineChartView previewChart;
     Viewport tempViewport = new Viewport();
@@ -120,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean updateStuff;
     public boolean updatingPreviewViewport = false;
     public boolean updatingChartViewport = false;
-    //xdrip end
 
     BroadcastReceiver newUIUpdate;
     BroadcastReceiver refresh60Seconds;
@@ -149,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
 
         checkEula();
 
-        // TODO: 16/02/2016 why are we runing the service again?
-        //startService(new Intent(getApplicationContext(), DataCollectionService.class));
+        //Make sure BackgroundService is running, as this maybe first run
+        startService(new Intent(this, BackgroundService.class));
 
         setContentView(R.layout.activity_main);
 
@@ -166,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         iobcobActiveFragmentObject  = new iobcobActiveFragment();
         iobcobFragmentObject        = new iobcobFragment();
         basalvsTempBasalObject      = new basalvsTempBasalFragment();
-
     }
 
     @Override
@@ -199,6 +197,10 @@ public class MainActivity extends AppCompatActivity {
                         APSResult apsResult = gson.fromJson(intent.getStringExtra("APSResult"), APSResult.class);
                         updateAPSDetails(apsResult);
                         updateBGCharts();
+                        break;
+                    case "ERROR_APS_RESULT":
+                        String errorMsg = intent.getStringExtra("error");
+                        updateAPSError(errorMsg);
                         break;
                     case "NEW_STAT_UPDATE":
                         Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
@@ -283,6 +285,7 @@ public class MainActivity extends AppCompatActivity {
         Drawable stopWhite              = getDrawable(R.drawable.stop);
         Drawable settingsWhite          = getDrawable(R.drawable.settings);
         Drawable checkWhite             = getDrawable(R.drawable.exit_to_app);
+        Drawable catWhite               = getDrawable(R.drawable.cat);
 
         tickWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
         clockWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
@@ -291,6 +294,7 @@ public class MainActivity extends AppCompatActivity {
         stopWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
         settingsWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
         checkWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        catWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
 
         ListView mDrawerList            = (ListView)findViewById(R.id.navList);
         ArrayList<NavItem> menuItems    = new ArrayList<>();
@@ -299,6 +303,7 @@ public class MainActivity extends AppCompatActivity {
         menuItems.add(new NavItem("Settings", settingsWhite));
         menuItems.add(new NavItem("Integration Report", reportWhite));
         menuItems.add(new NavItem("Debug Info", bugWhite));
+        menuItems.add(new NavItem("View LogCat", catWhite));
         DrawerListAdapter adapterMenu = new DrawerListAdapter(this, menuItems);
         mDrawerList.setAdapter(adapterMenu);
         mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -321,49 +326,11 @@ public class MainActivity extends AppCompatActivity {
                         mDrawerLayout.closeDrawers();
                         break;
                     case 4:
-                        Profile profile = new Profile(new Date());
-                        Pump pump = new Pump();
-                        APSResult apsResult = APSResult.last();
-                        Stats stats = Stats.last();
-                        String msg =            "Profile:" + "\n" +
-                                                profile.toString() + "\n\n" +
-                                                "Pump:" + "\n" +
-                                                pump.toString();
-                        if (apsResult != null) {
-                                                msg += "\n\n" +
-                                                "APS Result:" + "\n" +
-                                                apsResult.toString();
-                        } else {
-                                                msg += "\n\n" +
-                                                "APS Result:" + "\n" +
-                                                "APS code has never been ran";
-                        }
-                        if (stats != null) {
-                            msg += "\n\n" +
-                                    "Stats Result:" + "\n" +
-                                    stats.toString();
-                        } else {
-                            msg += "\n\n" +
-                                    "Stats Result:" + "\n" +
-                                    "Stats code has never been ran";
-                        }
-                        final String finalmsg = msg;
-
-                        new AlertDialog.Builder(MainActivity.getInstace())
-                                .setMessage(msg)
-                                .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                                        clipboard.setText(finalmsg);
-                                        Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
-                                    }
-                                })
-                                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        // do nothing
-                                    }
-                                })
-                                .show();
+                        tools.showDebug();
+                        mDrawerLayout.closeDrawers();
+                        break;
+                    case 5:
+                        tools.showLogging();
                         mDrawerLayout.closeDrawers();
                         break;
                 }
@@ -393,7 +360,6 @@ public class MainActivity extends AppCompatActivity {
         mDrawerToggle.setDrawerIndicatorEnabled(true);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
-
 
     public void updateBGCharts() {
 
@@ -591,7 +557,6 @@ public class MainActivity extends AppCompatActivity {
 
     //Updates the APS Fragment
     public void updateAPSDetails(APSResult apsResult) {
-        //Toast.makeText(MainApp.instance(),"APS Update",Toast.LENGTH_SHORT).show();
         //Updates fragment UI with APS suggestion
         if (apsResult == null) apsResult = APSResult.last();
 
@@ -614,6 +579,13 @@ public class MainActivity extends AppCompatActivity {
         updateRunningTemp();
 
         Log.d(TAG, "Ran APS Update");
+    }
+    public void updateAPSError(String errMsg){
+        if (openAPSFragment.isLoaded) {
+            openAPSFragment.updateErr(errMsg);
+            openAPSFragment.setRunAPSButton(true);
+        }
+        Log.d(TAG, "Ran APS Update, had an error: " + errMsg);
     }
 
     public void updateAges(){
@@ -682,8 +654,13 @@ public class MainActivity extends AppCompatActivity {
         Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
         MainApp.instance().startService(apsIntent);
     }
+    public void pauseAPSToast(View view){
+        Toast.makeText(MainActivity.getInstace(), "Long press to Pause / Un-Pause APS", Toast.LENGTH_SHORT).show();
+    }
+
     public void apsstatusAccept (final View view){
         openAPSFragment.setAcceptAPSButton(false);
+
         TempBasal suggestedBasal = APSResult.last().getBasal();
         pumpAction.setTempBasal(suggestedBasal);   //Action the suggested Temp
         updateRunningTemp();
@@ -741,17 +718,18 @@ public class MainActivity extends AppCompatActivity {
 
     public static class openAPSFragment extends Fragment {
         public openAPSFragment(){}
-        private static TextView apsstatus_deviation;
-        private static TextView apsstatus_reason;
-        private static TextView apsstatus_Action;
-        //private static TextView apsstatus_temp;
-        private static TextView apsstatus_algorithm;
-        private static Button   apsstatusRunButton;
-        private static Button   apsstatusAcceptButton;
-        private static TextView apsstatus_mode;
-        private static TextView apsstatus_loop;
-        private static TempBasal Suggested_Temp_Basal = new TempBasal();
-        private static boolean isLoaded=false;
+        private static TextView     apsstatus_deviation;
+        private static TextView     apsstatus_reason;
+        private static TextView     apsstatus_Action;
+        private static TextView     apsstatus_algorithm;
+        private static Button       apsstatusRunButton;
+        private static Button       apsstatusAcceptButton;
+        private static Button       apsTestButton;
+        private static ImageButton  pasuseAPSButton;
+        private static TextView     apsstatus_mode;
+        private static TextView     apsstatus_loop;
+        private static TextView     apsstatus_date;
+        private static boolean      isLoaded=false;
 
 
         @Override
@@ -759,6 +737,7 @@ public class MainActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_openaps_dash, container, false);
             apsstatusAcceptButton   = (Button)   rootView.findViewById(R.id.apsstatusAcceptButton);
             apsstatusRunButton      = (Button)   rootView.findViewById(R.id.apsstatusRunButton);
+            apsTestButton           = (Button)   rootView.findViewById(R.id.apsTest);
             apsstatus_reason        = (TextView) rootView.findViewById(R.id.apsstatus_reason);
             apsstatus_Action        = (TextView) rootView.findViewById(R.id.apsstatus_Action);
             apsstatus_algorithm     = (TextView) rootView.findViewById(R.id.apsstatus_algorithm);
@@ -766,6 +745,24 @@ public class MainActivity extends AppCompatActivity {
             apsstatus_deviation     = (TextView) rootView.findViewById(R.id.apsstatus_deviation);
             apsstatus_mode          = (TextView) rootView.findViewById(R.id.apsstatus_mode);
             apsstatus_loop          = (TextView) rootView.findViewById(R.id.apsstatus_loop);
+            apsstatus_date          = (TextView) rootView.findViewById(R.id.apsstatus_date);
+            pasuseAPSButton         = (ImageButton) rootView.findViewById(R.id.pauseAPS);
+            pasuseAPSButton.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    pauseAPS();
+                    return true;
+                }
+            });
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+            boolean aps_paused = prefs.getBoolean("aps_paused", false);
+            if (aps_paused){
+                pasuseAPSButton.setImageResource(R.drawable.ic_media_play);
+            } else {
+                pasuseAPSButton.setImageResource(R.drawable.ic_media_pause);
+            }
+
+            if (!UserPrefs.APS_TEST_BUTTON) apsTestButton.setVisibility(View.GONE);
 
             isLoaded=true;
             update(null);
@@ -798,22 +795,51 @@ public class MainActivity extends AppCompatActivity {
             if (apsResult == null) apsResult = APSResult.last();
 
             if (apsResult != null) {
-                Suggested_Temp_Basal = apsResult.getBasal();
+                SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
 
-                apsstatus_reason.setText(apsResult.reason); //// TODO: 13/12/2015 poss bug, setting value to a Null TextView? 
+                apsstatus_date.setText(sdfTime.format(new Date(apsResult.datetime)));
+                apsstatus_reason.setText(apsResult.reason);
                 apsstatus_Action.setText(apsResult.action);
                 //apsstatus_temp.setText("None");
-                apsstatus_deviation.setText(apsResult.getFormattedDeviation(MainActivity.activity));
+                apsstatus_deviation.setText(apsResult.getFormattedDeviation());
                 apsstatus_mode.setText(apsResult.aps_mode);
                 apsstatus_loop.setText(apsResult.aps_loop + " mins");
                 apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
-                if (apsResult.tempSuggested) {
+                if (apsResult.tempSuggested & !apsResult.accepted) {
                     setAcceptAPSButton(true);
                 } else {
                     setAcceptAPSButton(false);
                 }
             }
+        }
+
+        public static void updateErr(String msg){
+
+            SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+
+            apsstatus_date.setText(sdfTime.format(new Date()));
+            apsstatus_reason.setText(msg);
+            apsstatus_Action.setText("APS was not run");
+            apsstatus_deviation.setText("-");
+            apsstatus_mode.setText("-");
+            apsstatus_loop.setText("-");
+            apsstatus_algorithm.setText("-");
+
+            setAcceptAPSButton(false);
+        }
+
+        public void pauseAPS(){
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+            boolean aps_paused = prefs.getBoolean("aps_paused", false);
+            if (aps_paused){
+                pasuseAPSButton.setImageResource(R.drawable.ic_media_pause);
+                prefs.edit().putBoolean("aps_paused", false).apply();
+            } else {
+                pasuseAPSButton.setImageResource(R.drawable.ic_media_play);
+                prefs.edit().putBoolean("aps_paused", true).apply();
+            }
+
         }
     }
     public static class iobcobFragment extends Fragment {

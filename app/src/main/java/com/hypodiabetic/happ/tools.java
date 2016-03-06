@@ -9,11 +9,16 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.text.ClipboardManager;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.Stats;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -39,80 +45,7 @@ import java.util.Map;
  * Created by Tim on 15/09/2015.
  */
 public class tools {
-
-    //Returns a JSON Object from String
-    public static JSONObject getJSONO(String stringJSON){
-        JSONObject returnJSON;
-        if (stringJSON == null || stringJSON.isEmpty()){
-            returnJSON = new JSONObject();
-            return returnJSON;                                              //Returns empty JSON Object
-        } else {
-            try {
-                returnJSON = new JSONObject(stringJSON);
-                return returnJSON;                                          //Returns a JSON Object from string
-            } catch (JSONException e){
-                returnJSON = new JSONObject();
-                return returnJSON;                                          //Did not like that string, return empty JSON Object
-            }
-        }
-    }
-    //Returns a JSON Array from String
-    public static JSONArray getJSONOArray(String stringJSONArray){
-        JSONArray returnJSONArray;
-        if (stringJSONArray == null || stringJSONArray.isEmpty()){
-            returnJSONArray = new JSONArray();
-            return returnJSONArray;                                              //Returns empty JSON Object
-        } else {
-            try {
-                returnJSONArray = new JSONArray(stringJSONArray);
-                return returnJSONArray;                                          //Returns a JSON Object from string
-            } catch (JSONException e){
-                returnJSONArray = new JSONArray();
-                return returnJSONArray;                                          //Did not like that string, return empty JSON Object
-            }
-        }
-    }
-    //Updates a JSON Array with a new / updated JSON Object via key as ID
-    public static JSONArray updateJSONArrayObject(JSONArray jsonArray, JSONObject jsonObject, String key){
-        if (jsonArray == null) return new JSONArray();
-        if (jsonObject == null) return jsonArray;
-        if (key == null) return jsonArray;
-
-        for(int n = 0; n < jsonArray.length(); n++)
-        {
-            try {
-                if (jsonArray.getJSONObject(n).has("KEY")) {                                        //We have a key ID for this JSONObject
-                    if (jsonArray.getJSONObject(n).optString("KEY", "").equals(key)) {              //key of this JSONObject is the one we want
-                        jsonArray.remove(n);
-                    }
-                }
-            } catch (JSONException e){
-                Crashlytics.logException(e);
-            }
-        }
-        jsonArray.put(jsonObject);
-        return jsonArray;
-    }
-    //gets a JSON Object from a JSON Array via key as ID
-    public static JSONObject getJSONArrayObject(JSONArray jsonArray,String key){
-        if (jsonArray == null) return new JSONObject();
-        if (key == null) return new JSONObject();
-
-        for(int n = 0; n < jsonArray.length(); n++)
-        {
-            try {
-                if (jsonArray.getJSONObject(n).has("KEY")) {                                          //We have a key ID for this JSONObject
-                    //if (jsonArray.getJSONObject(n).optString("KEY", key).equals(key)) {              //key of this JSONObject is the one we want
-                        return jsonArray.getJSONObject(n);
-                    //}
-                }
-            } catch (JSONException e){
-                Crashlytics.logException(e);
-            }
-        }
-
-        return new JSONObject();
-    }
+    final static String TAG = "Tools";
 
     //Converts BG between US and UK formats
     public static String unitizedBG(Double value) {
@@ -192,11 +125,6 @@ public class tools {
         } else {
             return elapsedMinutes + "m";
         }
-
-    }
-
-    //Clears all Integration data stored for all records
-    public static void clearIntegrationData(){
 
     }
 
@@ -311,11 +239,11 @@ public class tools {
     public static Double stringToDouble(String string){
         //Used to support locations where , is used as decimal separator
         if (string == null) {
-            Log.e("CORE", "stringToDouble Null value!");
+            Log.e(TAG, "stringToDouble Null value!");
             return 0.0;
         }
         if (string == "") {
-            Log.e("CORE", "stringToDouble Empty value!");
+            Log.e(TAG, "stringToDouble Empty value!");
             return 0.0;
         }
 
@@ -337,7 +265,7 @@ public class tools {
                 // This happens if we're trying (say) to parse a string that isn't a number, as though it were a number!
                 // If this happens, it should only be due to application logic problems.
                 // In this case, the safest thing to do is return 0, having first fired-off a log warning.
-                Log.w("CORE", "Warning: Value is not a number" + string);
+                Log.e(TAG, "Warning: Value is not a number" + string);
                 Crashlytics.logException(e2);
                 return 0.0;
             }
@@ -408,6 +336,78 @@ public class tools {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public static void showLogging(){
+        String logCat = "no logs";
+        final String processId = Integer.toString(android.os.Process.myPid());
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -d");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder log = new StringBuilder();
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                if(line.contains(processId)) log.append(line);
+            }
+            logCat = log.toString();
+
+        } catch (IOException e) {
+            logCat = e.getLocalizedMessage();
+        } finally {
+            showAlertText(logCat, MainActivity.getInstace());
+        }
+    }
+    public static void showDebug(){
+        Profile profile = new Profile(new Date());
+        Pump pump = new Pump();
+        APSResult apsResult = APSResult.last();
+        Stats stats = Stats.last();
+        String msg =            "Profile:" + "\n" +
+                profile.toString() + "\n\n" +
+                "Pump:" + "\n" +
+                pump.toString();
+        if (apsResult != null) {
+            msg += "\n\n" +
+                    "APS Result:" + "\n" +
+                    apsResult.toString();
+        } else {
+            msg += "\n\n" +
+                    "APS Result:" + "\n" +
+                    "APS code has never been ran";
+        }
+        if (stats != null) {
+            msg += "\n\n" +
+                    "Stats Result:" + "\n" +
+                    stats.toString();
+        } else {
+            msg += "\n\n" +
+                    "Stats Result:" + "\n" +
+                    "Stats code has never been ran";
+        }
+        showAlertText(msg, MainActivity.getInstace());
+    }
+    public static void showAlertText(final String msg, final Context context){
+        AlertDialog alertDialog = new AlertDialog.Builder(context)
+                .setMessage(msg)
+                .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                        clipboard.setText(msg);
+                        Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .show();
+
+        if (msg.length() > 100) {
+            TextView textView = (TextView) alertDialog.findViewById(android.R.id.message);
+            textView.setTextSize(10);
+        }
     }
 
 }

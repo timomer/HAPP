@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.UserPrefs;
 import com.hypodiabetic.happ.tools;
 
 import java.util.Calendar;
@@ -61,7 +62,7 @@ public class Profile {
         } else {
             aps_mode = "open";
         }
-        if (insulin_integration_send_bolus && !insulin_integration_prefs.equals("") && Constants.BOLUS_ALLOWED){
+        if (insulin_integration_send_bolus && !insulin_integration_prefs.equals("") && UserPrefs.BOLUS_ALLOWED){
             send_bolus_allowed = true;
         } else {
             send_bolus_allowed = false;
@@ -148,7 +149,7 @@ public class Profile {
                 " aps_mode:" + aps_mode + "\n" +
                 " temp_basal_notification:" + temp_basal_notification + "\n" +
                 " send_bolus_allowed:" + send_bolus_allowed + "\n" +
-                " SYSTEM BOLUS_ALLOWED:" + Constants.BOLUS_ALLOWED + "\n" +
+                " SYSTEM BOLUS_ALLOWED:" + UserPrefs.BOLUS_ALLOWED + "\n" +
                 " aps_loop:" + aps_loop + "\n" +
                 " aps_algorithm:" + aps_algorithm;
     }

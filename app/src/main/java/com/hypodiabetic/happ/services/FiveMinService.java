@@ -60,6 +60,7 @@ public class FiveMinService extends IntentService {
         JSONObject iobJSONValue     =   IOB.iobTotal(profile, date);
         JSONObject cobJSONValue     =   Treatments.getCOB(profile, date);
         TempBasal currentTempBasal  =   TempBasal.getCurrentActive(date);
+        Boolean error               =   false;
 
         try {
             stat.datetime           =   date.getTime();
@@ -71,28 +72,31 @@ public class FiveMinService extends IntentService {
             stat.temp_basal_type    =   currentTempBasal.basal_adjustemnt;
 
         } catch (Exception e)  {
+            error   = true;
             Crashlytics.logException(e);
             Log.d(TAG, "Service error " + e.getLocalizedMessage());
 
         } finally {
 
-            stat.save();
+            if (!error) {
+                stat.save();
 
-            Gson gson = new GsonBuilder()
-                    .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                    .serializeNulls()
-                    .create();
+                Gson gson = new GsonBuilder()
+                        .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
+                        .serializeNulls()
+                        .create();
 
-            //sends result to update UI if loaded
-            Intent intent = new Intent(Intents.UI_UPDATE);
-            intent.putExtra("UPDATE", "NEW_STAT_UPDATE");
-            intent.putExtra("stat", gson.toJson(stat, Stats.class));
-            LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
+                //sends result to update UI if loaded
+                Intent intent = new Intent(Intents.UI_UPDATE);
+                intent.putExtra("UPDATE", "NEW_STAT_UPDATE");
+                intent.putExtra("stat", gson.toJson(stat, Stats.class));
+                LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
 
-            //send results to xDrip WF
-            IntegrationsManager.updatexDripWatchFace();
+                //send results to xDrip WF
+                IntegrationsManager.updatexDripWatchFace();
 
-            Log.d(TAG, "New Stat Saved");
+                Log.d(TAG, "New Stat Saved");
+            }
         }
     }
 }

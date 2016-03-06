@@ -150,15 +150,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     }
 
     public void wizardShowCalc(View view){
-        if (bwpCalculations != ""){
-            Snackbar snackbar = Snackbar.make(view, bwpCalculations, Snackbar.LENGTH_INDEFINITE);
-            View snackbarView = snackbar.getView();
-            TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP,10F);
-            textView.setMaxLines(10);  //set the max lines for textview to show multiple lines
-
-            snackbar.show();
-        }
+        if (!bwpCalculations.equals("")) tools.showAlertText(bwpCalculations, this);
     }
     public void wizardAccept(View view){
 
@@ -236,17 +228,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         }
 
     }
-
-    //NOT IN USE
-    public void runBolusWizard(View view){
-        EditText editText_treatment_value;
-        editText_treatment_value    = (EditText) findViewById(R.id.treatmentValue);
-
-        Intent intent = new Intent(view.getContext(),BolusWizardActivity.class);
-        intent.putExtra("CARB_VALUE", editText_treatment_value.getText().toString());
-        startActivity(intent);
-    }
-
 
 
     @Override
@@ -343,7 +324,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    run_bw(rootView);
+                    run_bw();
                 }
 
                 @Override
@@ -351,10 +332,10 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 }
             });
 
-            run_bw(rootView);
+            run_bw();
             return rootView;
         }
-        public void run_bw(View v){
+        public void run_bw(){
             Double carbValue = 0D;
 
             if (!wizardCarbs.getText().toString().equals("")){
@@ -374,15 +355,15 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
             //Bolus Wizard Calculations
             bwpCalculations =   "carb correction \n" +
-                                    ">" + bw.optString("insulin_correction_carbs_maths", "") + "\n" +
+                                    bw.optString("insulin_correction_carbs_maths", "") + "\n\n" +
                                 bw.optString("bgCorrection", "") + " bg correction" + "\n" +
-                                    ">" + bw.optString("insulin_correction_bg_maths", "") + "\n" +
+                                    bw.optString("insulin_correction_bg_maths", "") + "\n\n" +
                                 "net bolus iob \n" +
-                                    ">" + bw.optString("net_biob_maths", "") + "\n" +
+                                    bw.optString("net_biob_maths", "") + "\n\n" +
                                 "suggested correction \n" +
-                                    ">" + bw.optString("suggested_correction_maths", "") + "\n" +
+                                    bw.optString("suggested_correction_maths", "") + "\n\n" +
                                 "suggested bolus \n" +
-                                    ">" + bw.optString("suggested_bolus_maths", "");
+                                    bw.optString("suggested_bolus_maths", "");
 
 
             Date dateNow = new Date();

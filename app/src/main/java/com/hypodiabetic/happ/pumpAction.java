@@ -48,7 +48,10 @@ public class pumpAction {
 
     public static void setTempBasal(TempBasal basal){
 
-        if (basal == null) basal = APSResult.last().getBasal();
+        APSResult apsResult = APSResult.last();
+        apsResult.accepted = true;
+        apsResult.save();
+        if (basal == null) basal = apsResult.getBasal();
 
         if (basal.checkIsCancelRequest()){
             cancelTempBasal();
@@ -71,9 +74,14 @@ public class pumpAction {
             //Inform Integrations Manager
             IntegrationsManager.newTempBasal(basal);
 
+            //Update UI
+            Intent intentUpdate = new Intent(Intents.UI_UPDATE);
+            intentUpdate.putExtra("UPDATE", "NEW_APS_RESULT");
+            LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intentUpdate);
+
             //Run openAPS again
-            Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
-            MainApp.instance().startService(apsIntent);
+            //Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
+            //MainApp.instance().startService(apsIntent);
         }
     }
 
@@ -112,6 +120,7 @@ public class pumpAction {
         Double totalBolus=0D, diffBolus=0D;
         if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
         if (correctionTrearment != null) totalBolus += correctionTrearment.value;
+        if (totalBolus < 0) totalBolus              = 0D;
         String warningMSG="";
 
         if (!safety.checkIsSafeMaxBolus(totalBolus)){
@@ -197,11 +206,6 @@ public class pumpAction {
                 //inform Integration Manager
                 IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment);
                 IntegrationsManager.newCarbs(carbTreatment);
-
-                // TODO: 15/02/2016 why?
-                //Run openAPS again
-                //Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
-                //MainApp.instance().startService(apsIntent);
 
                 //Return to the home screen (if not already on it)
                 Intent intentHome = new Intent(c, MainActivity.class);

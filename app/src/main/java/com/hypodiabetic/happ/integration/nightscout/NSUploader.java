@@ -95,14 +95,17 @@ public class NSUploader {
                     }
 
                 } catch (JSONException e) {
-                    treatmentToSync.details   =   "Failed sending to NSClient: " + e.getLocalizedMessage();
+                    treatmentToSync.state       =   "error";
+                    treatmentToSync.details     =   "Failed sending to NSClient: " + e.getLocalizedMessage();
                     treatmentToSync.updateIntegration();
                     Log.d(TAG,"ERROR sending Treatment to NSClient");
                     Crashlytics.logException(e);
                 } finally {
 
-                    treatmentToSync.state   =   "sent";
-                    treatmentToSync.updateIntegration();
+                    if (!treatmentToSync.state.equals("error")) {
+                        treatmentToSync.state = "sent";
+                        treatmentToSync.updateIntegration();
+                    }
                 }
 
             }

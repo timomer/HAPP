@@ -10,9 +10,6 @@ package com.hypodiabetic.happ;
 
 public class Constants {
 
-    //If True, HAPP will allow sending Bolus requests to Insulin Integration App
-    public static final boolean BOLUS_ALLOWED = false;
-
     public static final int HARDCODED_MAX_BOLUS = 15;
     public static final int BOLUS_MAX_AGE_IN_MINS = 5;
 

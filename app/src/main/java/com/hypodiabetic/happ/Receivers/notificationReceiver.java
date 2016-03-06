@@ -30,9 +30,7 @@ public class notificationReceiver extends BroadcastReceiver {
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
 
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-
                 TempBasal suggestedTemp = gson.fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
-
                 pumpAction.setTempBasal(suggestedTemp);   //Action the suggested Temp
 
                 Notifications.clear("updateCard");                                                  //Clears info card on current Basal

@@ -3,9 +3,11 @@ package com.hypodiabetic.happ.services;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -47,41 +49,52 @@ public class APSService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Service Started");
 
-        context             =   MainApp.instance();
-        profile             =   new Profile(new Date());
-        Bundle bundle       =   new Bundle();
-        JSONObject apsJSON  =   new JSONObject();
-        APSResult apsResult =   new APSResult();
+        Bundle bundle = new Bundle();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean aps_paused = prefs.getBoolean("aps_paused", false);
+        if (!aps_paused) {
 
-        try {
-            apsJSON = getAPSJSON();
-            apsResult.fromJSON(apsJSON, profile);
+            context = MainApp.instance();
+            profile = new Profile(new Date());
+            JSONObject apsJSON = new JSONObject();
+            APSResult apsResult = new APSResult();
 
-        } catch (IOException i){
-            bundle.putString("error", i.getLocalizedMessage());
-            receiver.send(Constants.STATUS_ERROR, bundle);
-            Crashlytics.logException(i);
-            Log.d(TAG, "Service error " + i.getLocalizedMessage());
+            try {
+                apsJSON = getAPSJSON();
+                apsResult.fromJSON(apsJSON, profile);
 
-        } finally {
+            } catch (IOException i) {
+                bundle.putString("error", i.getLocalizedMessage());
+                receiver.send(Constants.STATUS_ERROR, bundle);
+                Crashlytics.logException(i);
+                Log.d(TAG, "Service error " + i.getLocalizedMessage());
 
-            if (apsResult.tempSuggested){
-                apsResult = setTempBasalInfo(apsResult);
-            } else {
-                apsResult.action = "Wait and monitor";
+            } finally {
+
+                if (apsJSON != null) {
+                    if (apsResult.tempSuggested) {
+                        apsResult = setTempBasalInfo(apsResult);
+                    } else {
+                        apsResult.action = "Wait and monitor";
+                    }
+
+                    apsResult.save();
+
+                    Gson gson = new GsonBuilder()
+                            .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
+                            .serializeNulls()
+                            .create();
+                    bundle.putString("APSResult", gson.toJson(apsResult, APSResult.class));
+                    receiver.send(Constants.STATUS_FINISHED, bundle);
+                }
             }
+            Log.d(TAG, "Service Finished");
 
-            apsResult.save();
-
-            Gson gson = new GsonBuilder()
-                    .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                    .serializeNulls()
-                    .create();
-            bundle.putString("APSResult", gson.toJson(apsResult, APSResult.class));
-            receiver.send(Constants.STATUS_FINISHED, bundle);
+        } else {
+            bundle.putString("error", "APS is currently Paused");
+            receiver.send(Constants.STATUS_ERROR, bundle);
+            Log.d(TAG, "Paused, not running");
         }
-
-        Log.d(TAG, "Service Finished");
     }
 
     //Sets the suggested Temp Basal info as result of APS suggestion
@@ -141,16 +154,14 @@ public class APSService extends IntentService {
     public JSONObject getAPSJSON() throws IOException{
 
         switch (profile.aps_algorithm) {
-            case "openaps_oref0_master":
-                com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS oref0_master = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(context));
-                return oref0_master.invoke();
-
             case "openaps_oref0_dev":
                 com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS oref0_dev = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(context));
                 return oref0_dev.invoke();
 
+            case "openaps_oref0_master":
             default:
-                return null;
+                com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS oref0_master = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(context));
+                return oref0_master.invoke();
         }
     }
 
