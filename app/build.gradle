@@ -20,7 +20,7 @@ android {
         targetSdkVersion 22
 
         versionCode 36
-        versionName "1.7.5"
+        versionName "1.7.6"
 
         multiDexEnabled true
     }

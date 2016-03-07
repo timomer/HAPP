@@ -348,7 +348,7 @@ public class tools {
             String line;
 
             while ((line = bufferedReader.readLine()) != null) {
-                if(line.contains(processId)) log.append(line);
+                if(line.contains(processId)) log.append(line + "\n");
             }
             logCat = log.toString();
 

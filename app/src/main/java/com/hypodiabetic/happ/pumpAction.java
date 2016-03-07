@@ -118,10 +118,28 @@ public class pumpAction {
         Safety safety = new Safety();
         Profile p = new Profile(new Date());
         Double totalBolus=0D, diffBolus=0D;
-        if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
-        if (correctionTrearment != null) totalBolus += correctionTrearment.value;
-        if (totalBolus < 0) totalBolus              = 0D;
         String warningMSG="";
+
+        if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
+        if (correctionTrearment != null) {
+            totalBolus += correctionTrearment.value;
+            if (correctionTrearment.value < 0) {
+                if (bolusTreatment != null) {
+                    bolusTreatment.value = bolusTreatment.value + correctionTrearment.value;
+                    if (bolusTreatment.value < 0) bolusTreatment = null;
+                }
+                correctionTrearment = null;
+            }
+        }
+        if (totalBolus < 0)  {
+            totalBolus = 0D;
+            bolusTreatment = null;
+            correctionTrearment = null;
+            warningMSG = "No Bolus to Deliver";
+        }
+
+        if (bolusTreatment == null && correctionTrearment == null && carbTreatment == null) return;
+
 
         if (!safety.checkIsSafeMaxBolus(totalBolus)){
 
