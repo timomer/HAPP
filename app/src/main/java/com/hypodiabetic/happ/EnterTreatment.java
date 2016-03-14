@@ -47,6 +47,7 @@ import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.integration.openaps.IOB;
+import com.hypodiabetic.happ.services.FiveMinService;
 
 import org.json.JSONObject;
 
@@ -222,6 +223,9 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             Toast.makeText(this, carbs.value + " " + carbs.type + " entered", Toast.LENGTH_SHORT).show();
 
             refreshListFragments();
+
+            //update Stats
+            startService(new Intent(this, FiveMinService.class));
         } else {                                                                                    //We have insulin to deliver
 
             pumpAction.setBolus(bolus, carbs, correction, v.getContext());

@@ -58,7 +58,14 @@ public class BolusWizard {
         } else {
             net_correction_biob         =   (cob / profile.carbRatio) - iob;
             if (net_correction_biob.isNaN() || net_correction_biob.isInfinite()) net_correction_biob = 0D;
-            net_biob_correction_maths   = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
+
+            //Ignore positive correction if BG is low
+            if (lastBG <= profile.min_bg && net_correction_biob > 0) {
+                net_biob_correction_maths   = "Low BG: Suggested Corr " + tools.formatDisplayInsulin(net_correction_biob,2) + " Setting to 0";
+                net_correction_biob = 0D;
+            } else {
+                net_biob_correction_maths   = "(COB(" + cob + ") / Carb Ratio(" + profile.carbRatio + "g)) - IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
+            }
         }
 
         //Insulin required for carbs about to be consumed

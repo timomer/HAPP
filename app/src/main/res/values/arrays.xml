@@ -16,12 +16,14 @@
             <item>Medtronic - Basal Percent</item>
             <item>Roche Accu-Chek Spirit Combo</item>
             <item>SOOIL Dana R</item>
+            <item>Animas</item>
         </string-array>
         <string-array name="pump_nameValues">
             <item>medtronic_absolute</item>
             <item>medtronic_percent</item>
             <item>roche_combo</item>
             <item>dana_r</item>
+            <item>animas</item>
         </string-array>
 
     <string-array name="aps_modeArray">

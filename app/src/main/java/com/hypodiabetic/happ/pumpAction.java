@@ -19,6 +19,7 @@ import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.services.APSService;
+import com.hypodiabetic.happ.services.FiveMinService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -229,6 +230,9 @@ public class pumpAction {
                 //inform Integration Manager
                 IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment);
                 IntegrationsManager.newCarbs(carbTreatment);
+
+                //update Stats
+                MainApp.instance().startService(new Intent(MainApp.instance(), FiveMinService.class));
 
                 //Return to the home screen (if not already on it)
                 Intent intentHome = new Intent(c, MainActivity.class);

@@ -55,6 +55,11 @@ public class Pump {
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
                 break;
+            case "animas":
+                basal_mode              =   PERCENT;
+                min_low_basal_duration  =   30;
+                min_high_basal_duration =   30;
+                break;
         }
 
         temp_basal_active   =   tempBasal.isactive(new Date());
