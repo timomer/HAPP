@@ -10,9 +10,11 @@ import com.activeandroid.query.Select;
 import com.google.android.gms.wearable.DataMap;
 import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.Constants;
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.tools;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -315,6 +317,12 @@ public class Bg extends Model {
                     return "???";
             }
         }
+    }
+
+    @Override
+    public String toString(){
+        SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+        return  "date: " + sdfDateTime.format(datetime) + " sgv:" + sgv_double();
     }
 
 }

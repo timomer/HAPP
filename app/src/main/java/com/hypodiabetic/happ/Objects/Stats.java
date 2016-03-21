@@ -11,11 +11,13 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.annotations.Expose;
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.integration.openaps.IOB;
 
 import org.json.JSONObject;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -145,7 +147,8 @@ public class Stats extends Model{
 
     @Override
     public String toString(){
-        return  "datetime:" + datetime + "\n" +
+        SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+        return  "datetime:" + sdfDateTime.format(datetime) + "\n" +
                 " bolus_iob:" + bolus_iob + "\n" +
                 " iob:" + iob + "\n" +
                 " cob:" + cob + "\n" +

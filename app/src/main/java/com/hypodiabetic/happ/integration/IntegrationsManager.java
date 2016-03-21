@@ -38,8 +38,9 @@ public class IntegrationsManager {
     public static void syncIntegrations(Context c){
         Log.d(TAG, "Running Sync");
 
+        updatexDripWatchFace();
+
         //Sends data from HAPP to Interactions
-        ConnectivityManager cm = (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         Profile p = new Profile(new Date());
 
@@ -156,7 +157,7 @@ public class IntegrationsManager {
 
         Log.d(TAG, "newTempBasal");
         syncIntegrations(MainApp.instance());
-        updatexDripWatchFace();
+
     }
     public static void cancelTempBasal(TempBasal tempBasal){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
@@ -181,7 +182,6 @@ public class IntegrationsManager {
 
         Log.d(TAG, "cancelTempBasal");
         syncIntegrations(MainApp.instance());
-        updatexDripWatchFace();
     }
 
     public static void checkOldInsulinIntegration(){
@@ -210,16 +210,16 @@ public class IntegrationsManager {
     }
 
     public static void updatexDripWatchFace(){
-
-        Pump pump = new Pump();
-        Stats stat = Stats.last();
-        String statSummary = "basal:" + pump.displayBasalDesc(true) + pump.displayCurrentBasal(true);
-        if (stat != null){
-            statSummary += " iob:" + tools.formatDisplayInsulin(stat.iob, 1) + " cob:" + tools.formatDisplayCarbs(stat.cob);
-        }
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("xdrip_wf_integration", false)) {
+            Pump pump = new Pump();
+            Stats stat = Stats.last();
+            String statSummary = "basal:" + pump.displayBasalDesc(true) + pump.displayCurrentBasal(true);
+            if (stat != null){
+                statSummary += " iob:" + tools.formatDisplayInsulin(stat.iob, 1) + " cob:" + tools.formatDisplayCarbs(stat.cob);
+            }
+
             final Bundle bundle = new Bundle();
             bundle.putString(Intents.EXTRA_STATUSLINE, statSummary);
             Intent intent = new Intent(Intents.ACTION_NEW_EXTERNAL_STATUSLINE);

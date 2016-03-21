@@ -8,10 +8,12 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.tools;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -168,13 +170,14 @@ public class APSResult extends Model{
 
     @Override
     public String toString(){
+        SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
         return  "action:" + action + "\n" +
                 " reason:" + reason + "\n" +
                 " deviation:" + deviation + "\n" +
                 " tempSuggested:" + tempSuggested + "\n" +
                 " eventualBG:" + eventualBG + "\n" +
                 " snoozeBG:" + snoozeBG + "\n" +
-                " datetime:" + datetime + "\n" +
+                " datetime:" + sdfDateTime.format(datetime) + "\n" +
                 " rate:" + rate + "\n" +
                 " duration:" + duration + "\n" +
                 " basal_adjustemnt:" + basal_adjustemnt + "\n" +

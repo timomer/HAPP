@@ -117,11 +117,11 @@ public class IOB {
 
             for (Treatments treatment : treatments) {
 
-                //if (treatment.type == null) continue;                                               //bad treatment, missing data
+                //if (treatment.type == null) continue;                                             //bad treatment, missing data
 
-                if (treatment.datetime.longValue() <= time.getTime()) {      //Treatment is not in the future
+                if (treatment.datetime.longValue() <= time.getTime()) {                             //Treatment is not in the future
 
-                    Double dia = profile_data.dia;                                                            //How long Insulin stays active in your system
+                    Double dia = profile_data.dia;                                                  //How long Insulin stays active in your system
                     JSONObject tIOB = iobCalc(treatment, time, dia);
                     if (tIOB.has("iobContrib"))
                         iob += tIOB.getDouble("iobContrib");
@@ -130,7 +130,7 @@ public class IOB {
                     // keep track of bolus IOB separately for snoozes, but decay it twice as fast`
                     if (treatment.value >= 0.2) {
                         //use half the dia for double speed bolus snooze
-                        if (!(profile_data.aps_algorithm.equals("openaps_oref0_master") && treatment.note.equals("correction"))) { //Do not use correction for Bolus Snooze if using OpenAPS Master *HAPP Added*
+                        if (!(treatment.note.equals("correction"))) {                               //Do not use correction for Bolus Snooze
                             JSONObject bIOB = iobCalc(treatment, time, dia / 2);
                             //console.log(treatment);
                             //console.log(bIOB);

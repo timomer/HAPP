@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.APSResult;
+import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Stats;
@@ -385,6 +386,24 @@ public class tools {
                     "Stats Result:" + "\n" +
                     "Stats code has never been ran";
         }
+
+        String bgList="";
+        double fuzz = (1000 * 30 * 5);
+        double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
+        List<Bg> bgReadings = Bg.latestForGraph(4, start_time * fuzz);
+
+        for (Bg bg : bgReadings){
+            bgList += bg.toString() + "\n";
+        }
+
+        if (bgList.equals("")){
+            msg += "\n\n" +
+                    "Last BG Readings:" + "\n" + "no readings";
+        } else {
+            msg += "\n\n" +
+                    "Last BG Readings:" + "\n" + bgList;
+        }
+
         showAlertText(msg, MainActivity.getInstace());
     }
     public static void showAlertText(final String msg, final Context context){

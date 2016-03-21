@@ -51,11 +51,8 @@ public class Pump {
                 min_high_basal_duration =   30;
                 break;
             case "medtronic_percent":
-                basal_mode              =   PERCENT;
-                min_low_basal_duration  =   30;
-                min_high_basal_duration =   30;
-                break;
             case "animas":
+            case "omnipod":
                 basal_mode              =   PERCENT;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;

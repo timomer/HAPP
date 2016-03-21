@@ -71,6 +71,7 @@ public class pumpAction {
 
             //Clear notifications
             Notifications.clear("updateCard");
+            Notifications.clear("newTemp");
 
             //Inform Integrations Manager
             IntegrationsManager.newTempBasal(basal);

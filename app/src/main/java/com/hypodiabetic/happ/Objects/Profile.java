@@ -108,7 +108,7 @@ public class Profile {
                     break;
                 }
             } else {
-                isfNow = Double.parseDouble(prefs.getString("isf_" + hourNow, "0"));            //Found a Basal rate for this time or a time before
+                isfNow = Double.parseDouble(prefs.getString("isf_" + hourNow, "0"));                //Found a Basal rate for this time or a time before
                 break;
             }
         }
@@ -128,7 +128,7 @@ public class Profile {
                     break;
                 }
             } else {
-                carbratioNow = Double.parseDouble(prefs.getString("carbratio_" + hourNow, "0"));      //Found a Basal rate for this time or a time before
+                carbratioNow = Double.parseDouble(prefs.getString("carbratio_" + hourNow, "0"));    //Found a Basal rate for this time or a time before
                 break;
             }
         }
@@ -140,11 +140,12 @@ public class Profile {
         return "carbAbsorptionRate:" + carbAbsorptionRate + "\n" +
                 " dia:" + dia + "\n" +
                 " current_basal:" + current_basal + "\n" +
-                " max_bg:" + max_bg + "\n" +
-                " min_bg:" + min_bg + "\n" +
-                " isf:" + isf + "\n" +
+                " max_bg:" + max_bg + " mgdl" + "\n" +
+                " min_bg:" + min_bg + " mgdl" + "\n" +
+                " target_bg:" + target_bg + " mgdl" + "\n" +
+                " bg_units:" + tools.bgUnitsFormat() + "\n" +
+                " isf:" + isf + " mgdl" + "\n" +
                 " carbRatio:" + carbRatio + "\n" +
-                " target_bg:" + target_bg + "\n" +
                 " pump_name:" + pump_name + "\n" +
                 " aps_mode:" + aps_mode + "\n" +
                 " temp_basal_notification:" + temp_basal_notification + "\n" +

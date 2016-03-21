@@ -1,7 +1,7 @@
 # Hackabetes Artificial Pancreas Project
 **This code is highly experimental, all suggestions by the app must be reviewed**
 
-Native Android & JS implementation of the OpenAPS.org algorithm with additional functionality.
+Native Android Artificial Pancreas App with OpenAPS.org algorithm
 
 * Most recent apk: https://drive.google.com/uc?export=download&id=0BxE8lMx4AjLieDEwbHRLcTY2VGc
 * App Summary: https://sites.google.com/a/n-omer.co.uk/hackabetes/home/happ-overview
@@ -12,24 +12,25 @@ Native Android & JS implementation of the OpenAPS.org algorithm with additional 
 ![](https://github.com/timomer/HAPP/blob/master/wear-screen.png)
 ![](https://github.com/timomer/HAPP/blob/master/wear-set-temp.png)
 
-(Phone and Android Wear Notifications)
 
-Current features:
-* Open Loop system (requires user to review and enter data into pump)
+
+Features:
+* Native Open Loop system (requires user to review and enter data into pump)
 * Capture your Bolus and Carb Treatments
-* Bolus Wizard
-* Suggested Temp Basal based on OpenAPS.org algorithm
-* Notifications for Android and Android Wear when a new Temp Basal is suggested
+* Bolus Wizard utilising IOB, COB and CGM data
+* Ability to switch between OpenAPS.org Dev and Stable algorithms
+* Notifications for Android and Android Wear
 * Visuals showing Carb and IOB over time and Basal vs Temp Basal adjustments
-* Multiple algorithm support OpenAPS.org Android port, openaps-js & OpenAPS oref0 
-* Nightscout integration, Treatments & Temp Basal
+* Integration with Nightscout via NSClient and Pump Driver Apps for full Closed Loop operation
 
 As of now the App can be used to inform the user at a user set time interval suggested Temp Basal as calculated by the OpenAPS.org algorithm, this can then be manually set on the users pump.
 This allows a Diabetic with any pump to experiment with the OpenAPS algorithm.
 
 Requirements:
-* xDrip App for capturing blood sugar values
-* Android 5.0
+* Android 5.0+
+* xDrip App for CGM Data (use this xDrip build for integration with xDrip WF)
+* Android Wear for viewing current Basal & acknowledging Temp Basal Suggestions (optional but highly recommended)
+* NSClient for Nightscout uploads (optional)
 
 ### What's next?
 To integrate with the Roche Accu-Chek Combo pump. Any experience hacking Bluetooth? Please contact me.
