@@ -52,11 +52,11 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
+                android:layout_height="42dp"
                 android:id="@+id/bolusDialogBolusTreatment">
                 <TextView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
                     android:textSize="12sp"
                     android:gravity="center"
                     android:text="2.0u"
@@ -73,12 +73,12 @@
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
+                android:layout_height="42dp"
                 android:id="@+id/bolusDialogCorrTreatment"
                 android:layout_marginTop="6dp">
                 <TextView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
                     android:textSize="12sp"
                     android:gravity="center"
                     android:text="0.5u"
@@ -95,12 +95,12 @@
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
+                android:layout_height="42dp"
                 android:id="@+id/bolusDialogCarbTreatment"
                 android:layout_marginTop="6dp">
                 <TextView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
                     android:textSize="12sp"
                     android:gravity="center"
                     android:text="10g"

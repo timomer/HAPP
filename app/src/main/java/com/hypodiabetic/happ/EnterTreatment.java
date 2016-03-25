@@ -348,14 +348,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
             JSONObject bw = BolusWizard.bw(carbValue);
 
-            DecimalFormat df = new DecimalFormat("##0.0");
-
             //Bolus Wizard Display
             bwDisplayIOBCorr.setText(           bw.optString("net_biob", "error"));
             bwDisplayCarbCorr.setText(          bw.optString("insulin_correction_carbs", "error"));
             bwDisplayBGCorr.setText(            bw.optString("insulin_correction_bg", "error"));
-            wizardSuggestedBolus.setText(       df.format(bw.optDouble("suggested_bolus", 0)));
-            wizardSuggestedCorrection.setText(  df.format(bw.optDouble("suggested_correction", 0)));
+            wizardSuggestedBolus.setText(       tools.round(bw.optDouble("suggested_bolus", 0), 1));
+            wizardSuggestedCorrection.setText(  tools.round(bw.optDouble("suggested_correction", 0), 1));
 
             //Bolus Wizard Calculations
             bwpCalculations =   "carb correction \n" +

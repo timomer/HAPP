@@ -77,32 +77,46 @@ public class tools {
         }
     }
 
+    public static String round(Double value, int decPoints){
+        DecimalFormat df;
 
-    public static String formatDisplayInsulin(Double value, int decPoints){
         switch (decPoints){
             case 1:
-                return String.format(Locale.ENGLISH, "%.1f", value) + "u";
+                if (precisionRounding()){
+                    df = new DecimalFormat("##0.00");
+                } else {
+                    df = new DecimalFormat("##0.0");
+                }
+                break;
             case 2:
-                return String.format(Locale.ENGLISH, "%.2f", value) + "u";
+                df = new DecimalFormat("##0.00");
+                break;
             case 3:
-                return String.format(Locale.ENGLISH, "%.3f", value) + "u";
+                df = new DecimalFormat("##0.000");
+                break;
             default:
-                return value.toString() + "u";
+                df = new DecimalFormat("##0.0000");
         }
+        return df.format(value);
+    }
+
+
+    public static String formatDisplayInsulin(Double value, int decPoints){
+        return round(value,decPoints) + "u";
     }
     public static String formatDisplayBasal(Double value, Boolean doubleLine){
         if (doubleLine) {
-            return String.format(Locale.ENGLISH, "%.2f", value) + "\n" + "U/h";
+            return round(value, 2) + "\n" + "U/h";
         } else {
-            return String.format(Locale.ENGLISH, "%.2f", value) + "U/h";
+            return round(value, 2) + "U/h";
         }
     }
 
     public static String formatDisplayCarbs(Double value){
         if (value < 1){
-            return String.format(Locale.ENGLISH, "%.1f", value) + "g";
+            return round(value, 1) + "g";
         } else {
-            return String.format(Locale.ENGLISH, "%d", value.longValue()) + "g";
+            return round(value, 2) + "g";
         }
     }
 
@@ -134,7 +148,7 @@ public class tools {
         if(bgUnitsFormat().equals("mgdl")) {
             return Integer.toString(value.intValue());
         } else {
-            return String.format(Locale.ENGLISH, "%.2f", (value * Constants.MMOLL_TO_MGDL));
+            return round(value * Constants.MMOLL_TO_MGDL, 2);
         }
     }
 
@@ -144,6 +158,12 @@ public class tools {
         return prefs.getString("units", "mgdl");
     }
 
+    //returns if precision_rounding is enabled or not
+    public static Boolean precisionRounding(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+        return prefs.getBoolean("precision_rounding", false);
+    }
+
     //exports shared Preferences
     public static void exportSharedPreferences(final Context c){
 
@@ -151,7 +171,7 @@ public class tools {
         final File file = new File(path, "HAPPSharedPreferences");
 
         new AlertDialog.Builder(c)
-                .setMessage("Export Settings to " + path + "/" + file)
+                .setMessage("Export Settings to " + path + "/" + file + "?")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -188,7 +208,7 @@ public class tools {
         final File file = new File(path, "HAPPSharedPreferences");
 
         new AlertDialog.Builder(c)
-                .setMessage("Import Settings from " + path + "/" + file)
+                .setMessage("Import Settings from " + path + "/" + file + "?")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 

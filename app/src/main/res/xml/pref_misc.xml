@@ -3,6 +3,11 @@
     <PreferenceCategory
         android:title="Misc"
         android:key="misc">
+        <SwitchPreference
+            android:title="Precision Rounding"
+            android:key="precision_rounding"
+            android:summary="Round to two decimal places where applicable"
+            android:defaultValue="false"/>
         <PreferenceScreen
             android:key="export_import"
             android:title="Export \\ Import Settings">
