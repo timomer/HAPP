@@ -56,10 +56,18 @@
             android:gravity="center_vertical"/>
 
         <Spinner
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:id="@+id/HAPPObjectType"
             android:layout_gravity="center_horizontal"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="Count:0"
+            android:id="@+id/integrationItemCount"/>
+
     </LinearLayout>
 
     <ListView

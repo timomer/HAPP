@@ -11,16 +11,16 @@ import java.util.Date;
  */
 public class Pump {
 
-    public String name;                         //name of pump
-    public Integer basal_mode;                  //Basal adjustment mode
-    public Integer min_low_basal_duration;      //low basal duration supported
-    public Integer min_high_basal_duration;     //low basal duration supported
-    public Double default_basal_rate;           //What is the current default rate
-    public Boolean temp_basal_active=false;     //Is a temp basal active
-    public Double temp_basal_rate;              //Current temp basal rate
-    public Integer temp_basal_percent;          //Current temp basal percent
-    public Integer temp_basal_duration;         //Temp duration in Mins
-    public Long temp_basal_duration_left;       //Mins left of this Temp Basal
+    public String   name;                           //name of pump
+    public Integer  basal_mode;                     //Basal adjustment mode
+    public Integer  min_low_basal_duration;         //low basal duration supported
+    public Integer  min_high_basal_duration;        //low basal duration supported
+    public Double   default_basal_rate;             //What is the current default rate
+    public Boolean  temp_basal_active=false;        //Is a temp basal active
+    public Double   temp_basal_rate;                //Current temp basal rate
+    public Integer  temp_basal_percent;             //Current temp basal percent
+    public Integer  temp_basal_duration;            //Temp duration in Mins
+    public Long     temp_basal_duration_left;       //Mins left of this Temp Basal
 
     private Profile profile        =   new Profile(new Date());
     private TempBasal tempBasal    =   TempBasal.last();
@@ -65,6 +65,28 @@ public class Pump {
             temp_basal_percent          =   getBasalPercent();
             temp_basal_duration         =   tempBasal.duration;
             temp_basal_duration_left    =   tempBasal.durationLeft();
+        }
+    }
+
+    public Double checkSuggestedRate(Double rate){
+        switch (name) {
+            case "omnipod":
+                //limited to double current basal
+                if (rate > (2 * default_basal_rate)) {
+                    return 2 * default_basal_rate;
+                } else {
+                    return rate;
+                }
+            default:
+                return rate;
+        }
+    }
+
+    public int getSupportedDuration(Double rate){
+        if (rate > default_basal_rate){
+            return min_high_basal_duration;
+        } else {
+            return min_low_basal_duration;
         }
     }
 
@@ -166,9 +188,31 @@ public class Pump {
     }
 
     private int calcPercentOfBasal(){
-        Double ratePercent = (activeRate() - profile.current_basal);
-        ratePercent = (ratePercent / activeRate()) *100;
-        return ratePercent.intValue();
+        //Change = Suggested TBR - Current Basal
+        //% Change = Change / Current Basal * 100
+        //Examples:
+        //Current Basal: 1u u/hr
+        //Low TBR 0.5 u/hr suggested = -50%
+        //High TBR 1.5 u/hr suggested = 50%
+        if (activeRate() <=0){
+            return -100;
+        } else {
+            Double ratePercent = (activeRate() - profile.current_basal);
+            ratePercent = (ratePercent / profile.current_basal) * 100;
+
+            switch (name){
+                case "omnipod":
+                    //cap at max 100% and round to closet 5
+                    if (ratePercent >= 100) {
+                        return 100;
+                    } else {
+                        ratePercent = (double) Math.round(ratePercent / 5) * 5; //round to closest 5
+                        return ratePercent.intValue();
+                    }
+                default:
+                    return ratePercent.intValue();
+            }
+        }
     }
     private int calcBasalPlusPercent(){
         Double ratePercent = (activeRate() / profile.current_basal) * 100;

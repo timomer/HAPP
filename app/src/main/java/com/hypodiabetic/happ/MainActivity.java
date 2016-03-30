@@ -820,7 +820,7 @@ public class MainActivity extends AppCompatActivity {
 
             apsstatus_date.setText(sdfTime.format(new Date()));
             apsstatus_reason.setText(msg);
-            apsstatus_Action.setText("APS was not run");
+            apsstatus_Action.setText("There was an error running APS");
             apsstatus_deviation.setText("-");
             apsstatus_mode.setText("-");
             apsstatus_loop.setText("-");

@@ -113,6 +113,11 @@ public class DetermineBasalAdapterJS {
             if (v8ObjectReuslt.contains("snoozeBG"))    v8ObjectReusltJSON.put("snoozeBG",  v8ObjectReuslt.getDouble("snoozeBG"));
             if (v8ObjectReuslt.contains("reason"))      v8ObjectReusltJSON.put("reason",    v8ObjectReuslt.getString("reason"));
         } catch (JSONException e){
+            try {
+                v8ObjectReusltJSON.put("error", e.getLocalizedMessage());
+            } catch (JSONException j){
+                Crashlytics.logException(e);
+            }
             Crashlytics.logException(e);
         }
         v8ObjectReuslt.release();

@@ -12,8 +12,8 @@
         android:padding="24dp"
         android:orientation="vertical">
         <TextView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
             android:id="@+id/bolusDialogBolusAmount"
             android:text="11.0u"
             android:textSize="44sp"
@@ -104,6 +104,7 @@
                     android:textSize="12sp"
                     android:gravity="center"
                     android:text="10g"
+                    android:textColor="@color/primary_text"
                     android:id="@+id/bolusDialogCarbTreatmentValue"
                     android:background="@drawable/carb_treatment_round"/>
                 <TextView

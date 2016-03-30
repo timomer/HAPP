@@ -77,7 +77,7 @@ public class tools {
         }
     }
 
-    public static String round(Double value, int decPoints){
+    public static Double round(Double value, int decPoints){
         DecimalFormat df;
 
         switch (decPoints){
@@ -97,7 +97,7 @@ public class tools {
             default:
                 df = new DecimalFormat("##0.0000");
         }
-        return df.format(value);
+        return Double.parseDouble(df.format(value));
     }
 
 
@@ -148,7 +148,7 @@ public class tools {
         if(bgUnitsFormat().equals("mgdl")) {
             return Integer.toString(value.intValue());
         } else {
-            return round(value * Constants.MMOLL_TO_MGDL, 2);
+            return round(value * Constants.MMOLL_TO_MGDL, 2).toString();
         }
     }
 
@@ -281,7 +281,11 @@ public class tools {
             String valueWithDot = string.replaceAll(",",".");
 
             try {
-                return Double.valueOf(valueWithDot);
+                if(valueWithDot.equals("")) {
+                    return 0.0;
+                } else {
+                    return Double.valueOf(valueWithDot);
+                }
             } catch (NumberFormatException e2)  {
                 // This happens if we're trying (say) to parse a string that isn't a number, as though it were a number!
                 // If this happens, it should only be due to application logic problems.

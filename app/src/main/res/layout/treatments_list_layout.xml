@@ -18,9 +18,9 @@
 
         <TextView
             android:id="@+id/treatmentAmountLayout"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:textSize="14sp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:textSize="12sp"
             android:text="1.0u"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"

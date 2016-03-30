@@ -87,6 +87,7 @@ public class IOB {
 
             try {
                 returnValue.put("iobContrib", iobContrib);
+                if (activityContrib.isInfinite()) activityContrib = 0D;                             //*HAPP added*
                 returnValue.put("activityContrib", activityContrib);
                 returnValue.put("minsLeft", end-minAgo);                                            //mins left *HAPP added*
                 return returnValue;

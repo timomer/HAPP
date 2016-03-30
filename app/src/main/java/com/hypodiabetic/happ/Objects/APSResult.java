@@ -75,10 +75,14 @@ public class APSResult extends Model{
     public Integer  aps_loop;               //Loop in mins
 
 
-    public void fromJSON(JSONObject apsJSON, Profile p) {
+    public void fromJSON(JSONObject apsJSON, Profile p, Pump pump) {
 
         action      = apsJSON.optString("action", "error");
-        reason      = apsJSON.optString("reason", "error");
+        if (apsJSON.has("error")){
+            reason  = "Error: " + apsJSON.optString("error", "error");
+        } else {
+            reason  = apsJSON.optString("reason", "error");
+        }
         eventualBG  = apsJSON.optDouble("eventualBG", 0);
         snoozeBG    = apsJSON.optDouble("snoozeBG", 0);
         datetime    = new Date().getTime();
@@ -91,10 +95,13 @@ public class APSResult extends Model{
 
         if (apsJSON.has("deviation")) deviation = apsJSON.optDouble("deviation");
         if (apsJSON.has("rate")) {
-            tempSuggested = true;
-            rate = apsJSON.optDouble("rate");
-            duration = apsJSON.optInt("duration");
-            basal_adjustemnt = apsJSON.optString("basal_adjustemnt");
+            tempSuggested       = true;
+            basal_adjustemnt    = apsJSON.optString("basal_adjustemnt");
+
+            //check suggested rate and duration supported by the pump and adjust if needed
+            rate                = pump.checkSuggestedRate(apsJSON.optDouble("rate"));
+            duration            = pump.getSupportedDuration(apsJSON.optDouble("rate"));
+            //apsJSON.optInt("duration");
         } else {
             tempSuggested = false;
             rate = 0D;

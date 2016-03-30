@@ -40,6 +40,7 @@ public class APSService extends IntentService {
     private static final String TAG = "APService";
     private Context context;
     private Profile profile;
+    private Pump pumpActive = new Pump();
 
     public APSService() {
         super(APSService.class.getName());
@@ -61,21 +62,27 @@ public class APSService extends IntentService {
 
             try {
                 apsJSON = getAPSJSON();
-                apsResult.fromJSON(apsJSON, profile);
+                apsResult.fromJSON(apsJSON, profile, pumpActive);
 
             } catch (IOException i) {
                 bundle.putString("error", i.getLocalizedMessage());
-                receiver.send(Constants.STATUS_ERROR, bundle);
                 Crashlytics.logException(i);
                 Log.d(TAG, "Service error " + i.getLocalizedMessage());
 
             } finally {
 
                 if (apsJSON != null) {
-                    if (apsResult.tempSuggested) {
-                        apsResult = setTempBasalInfo(apsResult);
+                    if (apsJSON.has("error") || !bundle.getString("error", "").equals("") ) {
+                        if (apsJSON.has("error")) bundle.putString("error", apsResult.reason);
+                        receiver.send(Constants.STATUS_ERROR, bundle);
+                        Log.d(TAG, "Service APS error " + bundle.getString("error", ""));
+
                     } else {
-                        apsResult.action = "Wait and monitor";
+                        if (apsResult.tempSuggested) {
+                            apsResult = setTempBasalInfo(apsResult);
+                        } else {
+                            apsResult.action = "Wait and monitor";
+                        }
                     }
 
                     apsResult.save();
@@ -104,7 +111,7 @@ public class APSService extends IntentService {
 
         if (apsResult.rate < 0) { apsResult.rate = 0D; } // if >30m @ 0 required, zero temp will be extended to 30m instead
         else if (apsResult.rate > safety.getMaxBasal(profile)) { apsResult.rate = safety.getMaxBasal(profile); }
-        apsResult.rate = Double.parseDouble(String.format(Locale.ENGLISH, "%.2f", apsResult.rate));
+        apsResult.rate = tools.round(apsResult.rate, 2);
 
         Pump pumpWithProposedBasal = new Pump();
         pumpWithProposedBasal.setNewTempBasal(apsResult, null);
@@ -118,8 +125,6 @@ public class APSService extends IntentService {
         //    duration  = 30;
         //    canceledTemp = true;
         //}
-
-        Pump pumpActive = new Pump();
 
         //requestedTemp.put("duration", duration);
         //openAPSSuggest.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places

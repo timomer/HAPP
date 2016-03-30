@@ -352,8 +352,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             bwDisplayIOBCorr.setText(           bw.optString("net_biob", "error"));
             bwDisplayCarbCorr.setText(          bw.optString("insulin_correction_carbs", "error"));
             bwDisplayBGCorr.setText(            bw.optString("insulin_correction_bg", "error"));
-            wizardSuggestedBolus.setText(       tools.round(bw.optDouble("suggested_bolus", 0), 1));
-            wizardSuggestedCorrection.setText(  tools.round(bw.optDouble("suggested_correction", 0), 1));
+            wizardSuggestedBolus.setText(       tools.round(bw.optDouble("suggested_bolus", 0), 1).toString());
+            wizardSuggestedCorrection.setText(  tools.round(bw.optDouble("suggested_correction", 0), 1).toString());
 
             //Bolus Wizard Calculations
             bwpCalculations =   "carb correction \n" +
@@ -592,9 +592,11 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 if (treatmentListType.getText().equals("Carbs")){
                     treatmentListValue.setBackgroundResource(R.drawable.carb_treatment_round);
                     treatmentListValue.setText(tools.formatDisplayCarbs(Double.valueOf(treatmentListValue.getText().toString())));
+                    treatmentListValue.setTextColor(getResources().getColor( R.color.primary_text));
                 } else {
                     treatmentListValue.setBackgroundResource(R.drawable.insulin_treatment_round);
                     treatmentListValue.setText(tools.formatDisplayInsulin(Double.valueOf(treatmentListValue.getText().toString()), 1));
+                    treatmentListValue.setTextColor(getResources().getColor(R.color.primary_light));
                 }
 
                 //Shows Integration details, if any

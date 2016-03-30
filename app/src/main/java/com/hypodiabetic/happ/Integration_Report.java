@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
@@ -28,16 +29,18 @@ public class Integration_Report extends AppCompatActivity {
     Spinner happObjectType;
     Spinner numHours;
     ListView integrationReportList;
+    TextView integrationItemCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_integration__report);
 
-        integrationType = (Spinner) findViewById(R.id.integrationType);
-        happObjectType  = (Spinner) findViewById(R.id.HAPPObjectType);
-        numHours        = (Spinner) findViewById(R.id.integrationHours);
-        integrationReportList = (ListView) findViewById(R.id.integrationReportList);
+        integrationType         =   (Spinner) findViewById(R.id.integrationType);
+        happObjectType          =   (Spinner) findViewById(R.id.HAPPObjectType);
+        numHours                =   (Spinner) findViewById(R.id.integrationHours);
+        integrationReportList   =   (ListView) findViewById(R.id.integrationReportList);
+        integrationItemCount    =   (TextView) findViewById(R.id.integrationItemCount);
 
         String[] integrationHours = {"4", "8", "12", "24", "48"};
         ArrayAdapter<String> stringArrayAdapterHours= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, integrationHours);
@@ -120,6 +123,8 @@ public class Integration_Report extends AppCompatActivity {
                 new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails", "integrationID"},
                 new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails, R.id.integrationID});
         integrationReportList.setAdapter(adapter);
+
+        integrationItemCount.setText("Count: " + integrationList.size());
     }
 
 }
