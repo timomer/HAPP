@@ -22,7 +22,7 @@ Features:
 * Visuals showing Carb and IOB over time and Basal vs Temp Basal adjustments
 * Integration with Nightscout via NSClient and Pump Driver Apps for full Closed Loop operation
 
-As of now the App can be used to inform the user at a user set time interval suggested Temp Basal as calculated by the OpenAPS.org algorithm, this can then be manually set on the users pump.
+App can be used to inform the user at a user set time interval of suggested Temp Basal calculated by the OpenAPS.org algorithm, this can then be manually set on the users pump.
 This allows a Diabetic with any pump to experiment with the OpenAPS algorithm.
 
 Requirements:
