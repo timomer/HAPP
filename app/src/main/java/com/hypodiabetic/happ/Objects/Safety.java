@@ -40,7 +40,7 @@ public class Safety {
     }
     private Double getMaxDailyBasal(){
         Double basalMax     = 0D;
-        Double basalFound   = 0D;
+        Double basalFound;
         for(int h=0; h<=12; h++) {
             if (!prefs.getString("basal_" + h, "empty").equals("empty") && !prefs.getString("basal_" + h, "").equals("")) {
                 basalFound = Double.parseDouble(prefs.getString("basal_" + h, "0"));
@@ -71,4 +71,14 @@ public class Safety {
             return true;
         }
     }
+
+    @Override
+    public String toString(){
+        return  "user_max_bolus: " + user_max_bolus + "\n" +
+                " hardcoded_Max_Bolus:" + hardcoded_Max_Bolus + "\n" +
+                " max_basal:" + max_basal + "\n" +
+                " max_daily_basal:" + max_daily_basal + "\n" +
+                " max_iob:" + max_iob;
+    }
+
 }

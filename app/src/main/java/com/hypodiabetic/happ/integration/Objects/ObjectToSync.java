@@ -14,6 +14,7 @@ import java.util.Date;
 
 /**
  * Created by Tim on 02/02/2016.
+ * Object used to share Sync data with external app
  */
 public class ObjectToSync {
 
@@ -58,7 +59,7 @@ public class ObjectToSync {
                 break;
             case "temp_basal":
                 TempBasal tempBasal =   TempBasal.getTempBasalByID(integration.happ_object_id);
-                Pump pump = new Pump();
+                Pump pump = new Pump(new Date());
                 pump.setNewTempBasal(null, tempBasal);
                 value1      =   tempBasal.rate;
                 value2      =   pump.temp_basal_percent.toString();
@@ -86,7 +87,7 @@ public class ObjectToSync {
             case "bolus_delivery":
                 return tools.formatDisplayInsulin(value1,2) + " " + value3;
             case "temp_basal":
-                return tools.formatDisplayInsulin(value1,2) + " (" + value2 + "%) " + value3 + "mins";
+                return tools.formatDisplayInsulin(value1,2) + " (" + value2 + "%) " + value3 + "m duration";
             case "treatment_carbs":
                 return tools.formatDisplayCarbs(value1);
             default:

@@ -97,11 +97,14 @@ public class APSResult extends Model{
         if (apsJSON.has("rate")) {
             tempSuggested       = true;
             basal_adjustemnt    = apsJSON.optString("basal_adjustemnt");
-
             //check suggested rate and duration supported by the pump and adjust if needed
             rate                = pump.checkSuggestedRate(apsJSON.optDouble("rate"));
-            duration            = pump.getSupportedDuration(apsJSON.optDouble("rate"));
-            //apsJSON.optInt("duration");
+            Integer sugDuration = apsJSON.optInt("duration");
+            if (sugDuration > 0){
+                duration        = pump.getSupportedDuration(apsJSON.optDouble("rate"));
+            } else {
+                duration        = sugDuration;
+            }
         } else {
             tempSuggested = false;
             rate = 0D;

@@ -40,7 +40,7 @@ public class APSService extends IntentService {
     private static final String TAG = "APService";
     private Context context;
     private Profile profile;
-    private Pump pumpActive = new Pump();
+    private Pump pumpActive = new Pump(new Date());
 
     public APSService() {
         super(APSService.class.getName());
@@ -113,7 +113,7 @@ public class APSService extends IntentService {
         else if (apsResult.rate > safety.getMaxBasal(profile)) { apsResult.rate = safety.getMaxBasal(profile); }
         apsResult.rate = tools.round(apsResult.rate, 2);
 
-        Pump pumpWithProposedBasal = new Pump();
+        Pump pumpWithProposedBasal = new Pump(new Date());
         pumpWithProposedBasal.setNewTempBasal(apsResult, null);
 
         //apsResult.ratePercent =  pumpWithProposedBasal.temp_basal_percent;

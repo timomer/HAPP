@@ -8,9 +8,8 @@ Native Android Artificial Pancreas App with OpenAPS.org algorithm
 * Project blog: http://www.hypodiabetic.co.uk
 * Gitter chat group: https://gitter.im/timomer/HAPP
 
-![](https://github.com/timomer/HAPP/blob/master/screenshot.png)
-![](https://github.com/timomer/HAPP/blob/master/wear-screen.png)
-![](https://github.com/timomer/HAPP/blob/master/wear-set-temp.png)
+![](https://github.com/timomer/HAPP/blob/master/HAPP_Front_Page.png)
+![](https://github.com/timomer/HAPP/blob/master/HAPP_WF.png)
 
 
 
@@ -28,41 +27,20 @@ This allows a Diabetic with any pump to experiment with the OpenAPS algorithm.
 
 Requirements:
 * Android 5.0+
-* xDrip App for CGM Data (use this xDrip build for integration with xDrip WF)
+* xDrip App for CGM Data (use this xDrip build for integration with xDrip WF https://dl.dropboxusercontent.com/u/17867795/xdripbroadcast/xdripBroadcast21.apk)
 * Android Wear for viewing current Basal & acknowledging Temp Basal Suggestions (optional but highly recommended)
 * NSClient for Nightscout uploads (optional)
-
-### What's next?
-To integrate with the Roche Accu-Chek Combo pump. Any experience hacking Bluetooth? Please contact me.
-
-### Why would I be interested?
-As you can now play with the OpenAPS algorithm with any pump :)
-
-### Common questions
-* Q: Why have you not focused on the current Round Trip Android app?
-* A: Round Trip was ported from the native Java implementation of OpenAPS to Android by a hired developer along with all Medtronic integration. I wanted a ground up native port of the OpenAPS system, by doing it myself I can learn as much as possible and be sure I am porting over only the items I require.
-* Q: Why are you not reading Treatment Data from the pump
-* A: I am building the system to support Roche pumps where Treatment data is captured on the Bluetooth enabled Blood Meter not on the Pump. This App is a complete replacement of this meter that will I hope one day link to the pump via Bluetooth.
-* Q: Why do you not use the native OpenAPS Java files?
-* A: I hear this is possible on Android, but believe this would be difficult to debug. One aim of this project is to provide an easy to debug version of determine_basal to help me understand the OpenAPS algorithm
-* Q: Why have you done X and not Y in Android
-* A: I am not a developer and have been only working on Android development for the last 2 months, if there is a better way to do something please do let me know
-
-###To do
-* Fix UI bug in line charts where lines appear to loop back on themselves - done
-* Write up the core functions of the App 
-* Improve code comments
-* Lots and lots of debugging
-* Find a Bluetooth developer to help me hack the Roche Accu-Chek Combo pump
+* Pump Driver app for your pump (optional)
 
 ###Repos used
 I am utilising code from the following repos and porting them over to this app.
-* OpenAPS - https://github.com/timomer/openaps-js
 * OpenAPS oref0 - https://github.com/timomer/oref0
 * NightWatch - https://github.com/timomer/NightWatch
 * Nightscout - https://github.com/timomer/cgm-remote-monitor
+* xDrip with HAPP WF Support - https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/tree/status_happ
 
 ###Thanks to
-The community for all their code and advice to make this possible. Special thanks to StephenBlackWasAlreadyTaken, jasoncalabrese and scottleibrand.
+The community for all their code and advice to make this possible.
+Special thanks to StephenBlackWasAlreadyTaken, jasoncalabrese, AdrianLxM, Lorelai, MilosKozak and scottleibrand.
 
-WeAreNotWaiting
+#WeAreNotWaiting

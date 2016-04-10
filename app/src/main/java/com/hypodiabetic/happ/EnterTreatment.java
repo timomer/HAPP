@@ -445,7 +445,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
             //Type Spinner
             String[] treatmentTypes = {"Carbs", "Insulin"};
-            ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, treatmentTypes);
+            ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, treatmentTypes);
             Spinner treatmentSpinner= (Spinner)v.findViewById(R.id.treatmentSpinner);
             treatmentSpinner.setAdapter(stringArrayAdapter);
 
@@ -454,12 +454,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     if (parent.getSelectedItem().equals("Insulin")) {
                         String[] InsulinNotes = {"bolus", "correction"};
-                        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
+                        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, InsulinNotes);
                         Spinner notesSpinner = (Spinner) v.findViewById(R.id.noteSpinner);
                         notesSpinner.setAdapter(stringArrayAdapter);
                     } else {
                         String[] EmptyNotes = {""};
-                        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<String>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, EmptyNotes);
+                        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, EmptyNotes);
                         Spinner notesSpinner = (Spinner) v.findViewById(R.id.noteSpinner);
                         notesSpinner.setAdapter(stringArrayAdapter);
                     }
@@ -576,11 +576,9 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         }
 
         public class mySimpleAdapter extends SimpleAdapter {
-            private Context mContext;
 
             public mySimpleAdapter(Context context, List<HashMap<String, String>> items, int resource, String[] from, int[] to) {
                 super(context, items, resource, from, to);
-                this.mContext = context;
             }
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -647,16 +645,19 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 toLoad = bundle.getString("LOAD", "TODAY");
             }
 
-            if (toLoad.equals("TODAY")) {
-                treatments = Treatments.getTreatmentsDated(tools.getStartOfDayInMillis(calDate.getTime()),tools.getEndOfDayInMillis(calDate.getTime()), null);
-            } else if (toLoad.equals("YESTERDAY")){
-                treatments = Treatments.getTreatmentsDated(tools.getStartOfDayInMillis(calYesterday.getTime()),tools.getEndOfDayInMillis(calYesterday.getTime()), null);
-            } else { //all active
-                treatments = Treatments.getTreatmentsDated(calDate.getTimeInMillis() - (8 * 60 * 60000),calDate.getTimeInMillis(), null); //Grab all for the last 8 hours, we will look later if they are active
+            switch (toLoad){
+                case "TODAY":
+                    treatments = Treatments.getTreatmentsDated(tools.getStartOfDayInMillis(calDate.getTime()),tools.getEndOfDayInMillis(calDate.getTime()), null);
+                    break;
+                case "YESTERDAY":
+                    treatments = Treatments.getTreatmentsDated(tools.getStartOfDayInMillis(calYesterday.getTime()),tools.getEndOfDayInMillis(calYesterday.getTime()), null);
+                    break;
+                default: //all active
+                    treatments = Treatments.getTreatmentsDated(calDate.getTimeInMillis() - (8 * 60 * 60000),calDate.getTimeInMillis(), null); //Grab all for the last 8 hours, we will look later if they are active
             }
 
             for (Treatments treatment : treatments){                                                    //Convert from a List<Object> Array to ArrayList
-                HashMap<String, String> treatmentItem = new HashMap<String, String>();
+                HashMap<String, String> treatmentItem = new HashMap<>();
 
                 if (treatment.datetime != null){
                     treatmentDate.setTime(new Date(treatment.datetime));
@@ -672,16 +673,11 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
                 //Loads the remaining amount of activity for the treatment, if any
                 if (treatment.type.equals("Insulin")){
-                    if (lastInsulin == false) {
-                        JSONObject iobDetails = IOB.iobCalc(treatment, new Date(), profile.dia);
+                    if (!lastInsulin) {
+                        String is_active = treatment.isActive(profile);
 
-                        if (iobDetails.optDouble("iobContrib", 0) > 0) {                            //Still active Insulin
-                            String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0),2);
-                            Date now = new Date();
-                            Long calc = now.getTime() + (iobDetails.optLong("minsLeft", 0) * 60000);
-                            Date finish = new Date(calc);
-                            String timeLeft = tools.formatDisplayTimeLeft(new Date(), finish);
-                            treatmentItem.put("active", isLeft + " " + timeLeft + " remaining");
+                        if (!is_active.equals("Not Active")) {                                      //Still active Insulin
+                            treatmentItem.put("active", is_active);
                         } else {                                                                    //Not active
                             lastInsulin = true;
                         }
@@ -691,19 +687,11 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     treatmentItem.put("integration", integration.state);  //log STATUS of insulin_Integration_App
 
                 } else {
-                    if (lastCarb == false) {
-                        JSONObject cobDetails = Treatments.getCOBBetween(profile, treatment.datetime - (8 * 60 * 60000), treatment.datetime); //last 8 hours
+                    if (!lastCarb) {
+                        String is_active = treatment.isActive(profile);
 
-                        if (cobDetails.optDouble("cob", 0) > 0) {                                   //Still active carbs
-                            String isLeft;
-                            if (cobDetails.optDouble("cob", 0) > treatment.value) {
-                                isLeft = tools.formatDisplayCarbs(treatment.value);
-                            } else {
-                                isLeft = tools.formatDisplayCarbs(cobDetails.optDouble("cob", 0));
-                            }
-                            String timeLeft = tools.formatDisplayTimeLeft(new Date(), new Date(cobDetails.optLong("decayedBy", 0)));
-
-                            treatmentItem.put("active", isLeft + " " + timeLeft + " remaining");
+                        if (!is_active.equals("Not Active")) {                                      //Still active carbs
+                            treatmentItem.put("active", is_active);
                         } else {                                                                    //Not active
                             lastCarb = true;
                         }
@@ -798,7 +786,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
                             break;
                         case 3: //Integration Details
-                            String intergrationType="";
+                            String intergrationType;
                             if (treatment.type.equals("Insulin")){
                                 intergrationType="bolus_delivery";
                             } else {
@@ -818,7 +806,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
 
                             for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
-                                HashMap<String, String> integrationItem = new HashMap<String, String>();
+                                HashMap<String, String> integrationItem = new HashMap<>();
 
                                 ObjectToSync objectSyncDetails = new ObjectToSync(integration);
 

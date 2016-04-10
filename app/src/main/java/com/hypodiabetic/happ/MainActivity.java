@@ -643,7 +643,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateRunningTemp(){
-        Pump pump = new Pump();
+        Pump pump = new Pump(TempBasal.last().start_time);
         toolbar.setTitle(pump.displayBasalDesc(false));
         toolbar.setSubtitle(pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft());
     }

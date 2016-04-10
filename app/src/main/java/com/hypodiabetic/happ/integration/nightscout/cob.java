@@ -7,6 +7,7 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.openaps.IOB;
+import com.hypodiabetic.happ.tools;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import java.util.Locale;
 
 /**
  * Created by tim on 03/08/2015.
+ * COB Calculations
  */
 public class cob {
 
@@ -54,9 +56,7 @@ public class cob {
 
                 if (treatment.type.equals("Carbs") && treatment.datetime < timeNow.getTime()) {                             //Carbs only and Treatment is not in the future
 
-
-                            lastCarbs = treatment;
-                            JSONObject cCalc = new JSONObject();
+                            JSONObject cCalc;
                             cCalc = cobCalc(treatment, lastDecayedBy, profileNow, timeNow);
                             Date decayedByDate = new Date();
                              try {
@@ -124,7 +124,8 @@ public class cob {
             returnObject.put("isDecaying", isDecaying);                                             //Are these carbs being digested?
             returnObject.put("carbs_hr", profileNow.carbAbsorptionRate);                            //How many crabs / H are digested
             returnObject.put("rawCarbImpact", rawCarbImpact);                                       //?
-            returnObject.put("cob", String.format(Locale.ENGLISH, "%.2f",totalCOB));                //Total Carbs on board
+            returnObject.put("cob", tools.round(totalCOB, 2));                                      //Total Carbs on board
+            //returnObject.put("cob", String.format(Locale.ENGLISH, "%.2f",totalCOB));
             returnObject.put("display", display);
             returnObject.put("displayLine", "COB: " + display + "g");
             returnObject.put("as_of",timeNow.getTime());                                            //Time this was requested
@@ -160,7 +161,7 @@ public class cob {
     public static JSONObject cobCalc(Treatments treatment, Date lastDecayedBy, Profile profileNow, Date time) {
 
         Integer delay = 20;             //Delay in mins before carbs become active
-        Integer isDecaying = 0;
+        Integer isDecaying;
         Double initialCarbs;
 
         JSONObject returnObject = new JSONObject();
@@ -176,7 +177,7 @@ public class cob {
 
 
             Long decayedByTime = carbTime.getTime();
-            Double decayedByTime2Add = ((Math.max(delay.doubleValue(), minutesleft.doubleValue()) + treatment.value.doubleValue() / carbs_min.doubleValue()) * 60000);
+            Double decayedByTime2Add = ((Math.max(delay.doubleValue(), minutesleft.doubleValue()) + treatment.value / carbs_min) * 60000);
             Date decayedBy = new Date(decayedByTime + decayedByTime2Add.longValue());               //Final decayed by Date based on this Carb treatment and outstanding last carb treatment
 
 

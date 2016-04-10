@@ -28,7 +28,7 @@ public class BolusWizard {
         Profile profile = new Profile(dateNow);
         JSONObject iobNow       = IOB.iobTotal(profile, dateNow);
         JSONObject cobNow       = Treatments.getCOB(profile, dateNow);
-        String bgCorrection="";
+        String bgCorrection;
 
         Bg bg = Bg.last();
         Double lastBG = 0D;
@@ -224,7 +224,7 @@ public class BolusWizard {
 
         Double results_effect = iobValue * profile.isf;
         Double results_outcome = scaled.sgv_double() - results_effect;
-        Double delta = 0D;
+        Double delta;
 
         Double target_high = profile.max_bg;
         Double sens = profile.isf;
@@ -274,11 +274,11 @@ public class BolusWizard {
             results.put("scaledSGV",results_scaledSGV);
             results.put("iob",iobValue);
 
-            results.put("bolusEstimateDisplay", String.format(Locale.ENGLISH, "%.2f",results_bolusEstimate));
-            results.put("outcomeDisplay",       String.format(Locale.ENGLISH, "%.2f",results_outcome));
-            results.put("displayIOB",           String.format(Locale.ENGLISH, "%.2f",iobValue));
-            results.put("effectDisplay", String.format(Locale.ENGLISH, "%.2f",results_effect));
-            results.put("displayLine", "BWP: " + String.format(Locale.ENGLISH, "%.2f",results_bolusEstimate) + "U");
+            results.put("bolusEstimateDisplay",     tools.round(results_bolusEstimate, 2));         //String.format(Locale.ENGLISH, "%.2f",results_bolusEstimate));
+            results.put("outcomeDisplay",           tools.round(results_outcome, 2));               //String.format(Locale.ENGLISH, "%.2f", results_outcome));
+            results.put("displayIOB",               tools.round(iobValue, 2));                      //String.format(Locale.ENGLISH, "%.2f", iobValue));
+            results.put("effectDisplay",            tools.round(results_effect, 2));                //String.format(Locale.ENGLISH, "%.2f", results_effect));
+            results.put("displayLine", "BWP: " +    tools.formatDisplayInsulin(results_bolusEstimate, 2)); //String.format(Locale.ENGLISH, "%.2f",results_bolusEstimate) + "U");
         } catch (JSONException e) {
             Crashlytics.logException(e);
         }

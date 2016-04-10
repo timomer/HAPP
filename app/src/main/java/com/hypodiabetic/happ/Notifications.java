@@ -32,6 +32,7 @@ import java.util.Date;
 
 /**
  * Created by Tim on 07/10/2015.
+ * Creates system notifications
  */
 public class Notifications {
 
@@ -85,7 +86,7 @@ public class Notifications {
     public static void newTemp(TempBasal basal, Context c){
 
         String title, msg;
-        Pump pump = new Pump();
+        Pump pump = new Pump(new Date());
         pump.setNewTempBasal(null, basal);
 
         if (basal.checkIsCancelRequest()){
@@ -93,7 +94,7 @@ public class Notifications {
             msg = pump.displayCurrentBasal(true);
         } else {
             title = "Set: " + pump.displayBasalDesc(false);
-            msg = pump.displayCurrentBasal(true) + " for " + pump.displayTempBasalMinsLeft();
+            msg = pump.displayCurrentBasal(true) + " for " + pump.temp_basal_duration + " mins";
         }
 
         Gson gson = new GsonBuilder()
@@ -128,22 +129,6 @@ public class Notifications {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
         notificationManager.notify(NEW_TEMP, notificationBuilder.build());
-
-        //Notification notification = new Notification.Builder(c)
-        //        .setSmallIcon(R.drawable.exit_to_app)
-        //        .setContentTitle(title)
-        //        .setContentText(msg)
-        //        .setContentIntent(pending_intent_open_activity)
-        //        .setPriority(Notification.PRIORITY_MAX)
-        //        .setCategory(Notification.CATEGORY_ALARM)
-        //        .setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500})
-        //        .setVisibility(Notification.VISIBILITY_PUBLIC)
-        //        .extend(new Notification.WearableExtender()
-        //                .setBackground(createWearBitmap(2, c))
-        //                .setDisplayIntent(PendingIntent.getActivity(c, 1, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT)))
-        //        .addAction(R.drawable.ic_exit_to_app_white_24dp, "Accept Temp", pending_intent_accept_temp)
-        //        .build();
-        //((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).notify(NEW_TEMP, notification);
     }
 
 
@@ -155,7 +140,7 @@ public class Notifications {
         if (prefs.getBoolean("summary_notification", true)) {
 
             //TempBasal lastTempBasal = TempBasal.last();
-            Pump pump       = new Pump();
+            Pump pump       = new Pump(new Date());
             String title    = pump.displayBasalDesc(false);
             String msg      = pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft();
 
@@ -166,6 +151,11 @@ public class Notifications {
             intent_run_aps.setAction(Intents.NOTIFICATION_UPDATE);
             intent_run_aps.putExtra("NOTIFICATION_TYPE", "RUN_OPENAPS");
             PendingIntent pending_intent_run_aps = PendingIntent.getBroadcast(MainApp.instance(), 5, intent_run_aps, PendingIntent.FLAG_CANCEL_CURRENT);
+
+            Intent intent_cancel_tbr = new Intent();
+            intent_cancel_tbr.setAction(Intents.NOTIFICATION_UPDATE);
+            intent_cancel_tbr.putExtra("NOTIFICATION_TYPE", "CANCEL_TBR");
+            PendingIntent pending_intent_cancel_tbr = PendingIntent.getBroadcast(MainApp.instance(), 6, intent_cancel_tbr, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Bitmap bitmap = Bitmap.createBitmap(320, 320, Bitmap.Config.ARGB_8888);
             bitmap.eraseColor(MainApp.instance().getResources().getColor(R.color.secondary_text_light));
@@ -180,7 +170,8 @@ public class Notifications {
             notificationBuilder.setPriority(Notification.PRIORITY_DEFAULT);
             notificationBuilder.setCategory(Notification.CATEGORY_STATUS);
             notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
-            notificationBuilder.addAction(R.drawable.ic_media_play, "Run APS", pending_intent_run_aps);
+            notificationBuilder.addAction(R.drawable.ic_play_dark, "Run APS", pending_intent_run_aps);
+            if(pump.temp_basal_active) notificationBuilder.addAction(R.drawable.ic_stop, "Cancel TBR", pending_intent_cancel_tbr);
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
             notificationManager.notify(UPDATE_CARD, notificationBuilder.build());

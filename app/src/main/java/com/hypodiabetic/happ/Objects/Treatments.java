@@ -1,6 +1,7 @@
 package com.hypodiabetic.happ.Objects;
 
 import android.provider.BaseColumns;
+import android.widget.Switch;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
@@ -8,6 +9,8 @@ import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.integration.nightscout.cob;
+import com.hypodiabetic.happ.integration.openaps.IOB;
+import com.hypodiabetic.happ.tools;
 
 import org.json.JSONObject;
 
@@ -115,4 +118,43 @@ public class Treatments extends Model{
         }
     }
 
+    public String isActive(Profile profile){
+
+        switch(type){
+            case "Insulin":
+                JSONObject iobDetails = IOB.iobCalc(this, new Date(), profile.dia);
+
+                if (iobDetails.optDouble("iobContrib", 0) > 0) {                                    //Still active Insulin
+                    String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0), 2);
+                    Date now = new Date();
+                    Long calc = now.getTime() + (iobDetails.optLong("minsLeft", 0) * 60000);
+                    Date finish = new Date(calc);
+                    String timeLeft = tools.formatDisplayTimeLeft(new Date(), finish);
+                    return isLeft + " " + timeLeft + " remaining";
+                } else {                                                                            //Not active
+                    return "Not Active";
+                }
+
+            case "Carbs":
+                JSONObject cobDetails = Treatments.getCOBBetween(profile, this.datetime - (8 * 60 * 60000), this.datetime); //last 8 hours
+
+                    if (cobDetails.optDouble("cob", 0) > 0) {                                       //Still active carbs
+                        String isLeft;
+                        if (cobDetails.optDouble("cob", 0) > this.value) {
+                            isLeft = tools.formatDisplayCarbs(this.value);
+                        } else {
+                            isLeft = tools.formatDisplayCarbs(cobDetails.optDouble("cob", 0));
+                        }
+                        String timeLeft = tools.formatDisplayTimeLeft(new Date(), new Date(cobDetails.optLong("decayedBy", 0)));
+
+                        return isLeft + " " + timeLeft + " remaining";
+                    } else {                                                                        //Not active
+                        return "Not Active";
+                    }
+
+            default:
+                return "ERROR: unknown treatment type";
+        }
+
+    }
 }

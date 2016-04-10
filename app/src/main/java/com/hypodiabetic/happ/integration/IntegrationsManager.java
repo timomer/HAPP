@@ -31,6 +31,7 @@ import java.util.Random;
 
 /**
  * Created by Tim on 20/01/2016.
+ * Handles integrations with external apps
  */
 public class IntegrationsManager {
     private static final String TAG = "IntegrationsManager";
@@ -213,7 +214,7 @@ public class IntegrationsManager {
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("xdrip_wf_integration", false)) {
-            Pump pump = new Pump();
+            Pump pump = new Pump(new Date());
             Stats stat = Stats.last();
             String statSummary = "basal:" + pump.displayBasalDesc(true) + pump.displayCurrentBasal(true);
             if (stat != null){

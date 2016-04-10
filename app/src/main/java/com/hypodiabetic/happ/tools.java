@@ -19,6 +19,7 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.Safety;
 import com.hypodiabetic.happ.Objects.Stats;
 
 import org.json.JSONArray;
@@ -56,7 +57,8 @@ public class tools {
         if(unit.compareTo("mgdl") == 0) {
             return Integer.toString(value.intValue());
         } else {
-            return String.format(Locale.ENGLISH, "%.1f", (value * Constants.MGDL_TO_MMOLL));
+            return round(value * Constants.MGDL_TO_MMOLL, 1).toString();
+            //return String.format(Locale.ENGLISH, "%.1f", (value * Constants.MGDL_TO_MMOLL));
         }
     }
     //Returns BG in local and converted format
@@ -67,7 +69,8 @@ public class tools {
 
         if(unit.compareTo("mgdl") == 0) {
             reply = bgValue.intValue() + "mgdl";
-            if (showConverted) reply += " (" + String.format(Locale.ENGLISH, "%.1f", (bgValue * Constants.MGDL_TO_MMOLL)) + "mmol/l)";
+            //if (showConverted) reply += " (" + String.format(Locale.ENGLISH, "%.1f", (bgValue * Constants.MGDL_TO_MMOLL)) + "mmol/l)";
+            if (showConverted) reply += " (" + round(bgValue * Constants.MGDL_TO_MMOLL ,1) + "mmol/l)";
             return reply;
         } else {
             reply = bgValue + "mmol/l";
@@ -263,7 +266,7 @@ public class tools {
             Log.e(TAG, "stringToDouble Null value!");
             return 0.0;
         }
-        if (string == "") {
+        if (string.equals("")) {
             Log.e(TAG, "stringToDouble Empty value!");
             return 0.0;
         }
@@ -307,8 +310,7 @@ public class tools {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        long dateInMillis = ((calendar.getTimeInMillis()+calendar.getTimeZone().getOffset(calendar.getTimeInMillis())));
-        return dateInMillis;
+        return ((calendar.getTimeInMillis()+calendar.getTimeZone().getOffset(calendar.getTimeInMillis())));
     }
     /**
      * @param date the date in the format "yyyy-MM-dd"
@@ -385,31 +387,36 @@ public class tools {
     }
     public static void showDebug(){
         Profile profile = new Profile(new Date());
-        Pump pump = new Pump();
+        Pump pump = new Pump(new Date());
         APSResult apsResult = APSResult.last();
         Stats stats = Stats.last();
-        String msg =            "Profile:" + "\n" +
-                profile.toString() + "\n\n" +
-                "Pump:" + "\n" +
-                pump.toString();
+        Safety safety = new Safety();
+
+        String  msg =   "Profile:" + "\n" +
+                            profile.toString() + "\n\n" +
+                            "Pump:" + "\n" +
+                            pump.toString();
         if (apsResult != null) {
-            msg += "\n\n" +
-                    "APS Result:" + "\n" +
-                    apsResult.toString();
+                msg +=  "\n\n" +
+                        "APS Result:" + "\n" +
+                            apsResult.toString();
         } else {
-            msg += "\n\n" +
-                    "APS Result:" + "\n" +
-                    "APS code has never been ran";
+                msg +=  "\n\n" +
+                        "APS Result:" + "\n" +
+                            "APS code has never been ran";
         }
         if (stats != null) {
-            msg += "\n\n" +
-                    "Stats Result:" + "\n" +
-                    stats.toString();
+                msg +=  "\n\n" +
+                        "Stats Result:" + "\n" +
+                            stats.toString();
         } else {
-            msg += "\n\n" +
-                    "Stats Result:" + "\n" +
-                    "Stats code has never been ran";
+                msg +=  "\n\n" +
+                        "Stats Result:" + "\n" +
+                            "Stats code has never been ran";
         }
+                msg +=  "\n\n" +
+                        "Safety Result:" + "\n" +
+                            safety.toString();
 
         String bgList="";
         double fuzz = (1000 * 30 * 5);
@@ -421,35 +428,41 @@ public class tools {
         }
 
         if (bgList.equals("")){
-            msg += "\n\n" +
-                    "Last BG Readings:" + "\n" + "no readings";
+                msg +=  "\n\n" +
+                        "Last BG Readings:" + "\n" +
+                            "no readings";
         } else {
-            msg += "\n\n" +
-                    "Last BG Readings:" + "\n" + bgList;
+                msg +=  "\n\n" +
+                        "Last BG Readings:" + "\n" +
+                            bgList;
         }
 
         showAlertText(msg, MainActivity.getInstace());
     }
     public static void showAlertText(final String msg, final Context context){
-        AlertDialog alertDialog = new AlertDialog.Builder(context)
-                .setMessage(msg)
-                .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                        clipboard.setText(msg);
-                        Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .show();
+        try {
+            AlertDialog alertDialog = new AlertDialog.Builder(context)
+                    .setMessage(msg)
+                    .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                            clipboard.setText(msg);
+                            Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    })
+                    .show();
 
-        if (msg.length() > 100) {
-            TextView textView = (TextView) alertDialog.findViewById(android.R.id.message);
-            textView.setTextSize(10);
+            if (msg.length() > 100) {
+                TextView textView = (TextView) alertDialog.findViewById(android.R.id.message);
+                textView.setTextSize(10);
+            }
+        } catch (Exception e){
+            Crashlytics.logException(e);
         }
     }
 

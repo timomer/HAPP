@@ -17,6 +17,7 @@ import com.hypodiabetic.happ.services.APSService;
 
 /**
  * Created by Tim on 27/09/2015.
+ * Incoming app notification actions
  */
 
 public class notificationReceiver extends BroadcastReceiver {
@@ -44,6 +45,9 @@ public class notificationReceiver extends BroadcastReceiver {
             case "RUN_OPENAPS":
                 Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
                 MainApp.instance().startService(apsIntent);
+                break;
+            case "CANCEL_TBR":
+                pumpAction.cancelTempBasal();
                 break;
         }
 

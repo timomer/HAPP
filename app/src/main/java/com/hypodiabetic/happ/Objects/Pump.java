@@ -8,6 +8,7 @@ import java.util.Date;
 
 /**
  * Created by Tim on 16/02/2016.
+ * Pump object provides point in time info of users pump
  */
 public class Pump {
 
@@ -22,15 +23,17 @@ public class Pump {
     public Integer  temp_basal_duration;            //Temp duration in Mins
     public Long     temp_basal_duration_left;       //Mins left of this Temp Basal
 
-    private Profile profile        =   new Profile(new Date());
-    private TempBasal tempBasal    =   TempBasal.last();
+    private Profile profile;
+    private TempBasal tempBasal;
 
     private static final int ABSOLUTE               =  1;       //Absolute (U/hr)
     private static final int PERCENT                =  2;       //Percent of Basal
     private static final int BASAL_PLUS_PERCENT     =  3;       //hourly basal rate plus TBR percentage
 
-    public Pump(){
+    public Pump(Date profile_date){
 
+        profile             =   new Profile(profile_date);
+        tempBasal           =   TempBasal.last();
         name                =   profile.pump_name;
         default_basal_rate  =   profile.current_basal;
 
@@ -133,9 +136,9 @@ public class Pump {
     public String displayTempBasalMinsLeft(){
         if (temp_basal_active){
             if (temp_basal_duration_left > 1){
-                return temp_basal_duration_left + " mins";
+                return temp_basal_duration_left + " mins left";
             } else {
-                return temp_basal_duration_left + " min";
+                return temp_basal_duration_left + " min left";
             }
         } else {
             return "";
