@@ -14,7 +14,7 @@
                 <ListPreference
                     android:title="APS Mode"
                     android:key="aps_mode"
-                    android:defaultValue="notify"
+                    android:defaultValue="open"
                     android:summary="APS Loop Mode"
                     android:entries="@array/aps_modeArray"
                     android:entryValues="@array/aps_modeValues"/>
@@ -38,13 +38,11 @@
 
                 <EditTextPreference
                     android:title="Max Basal"
-                    android:defaultValue="2"
                     android:key="max_basal"
                     android:numeric="decimal"
                     android:summary="Max U/hr a Temp Basal can be set to" />
                 <EditTextPreference
                     android:title="Max Basal IOB"
-                    android:defaultValue="3"
                     android:key="max_iob"
                     android:numeric="decimal"
                     android:summary="Maximum amount of non-bolus IOB OpenAPS can deliver"/>
@@ -56,13 +54,11 @@
 
                 <EditTextPreference
                     android:title="DIA"
-                    android:defaultValue="1.5"
                     android:key="dia"
                     android:numeric="decimal"
                     android:summary="Duration of Insulin Action (hours)"/>
                 <EditTextPreference
                     android:title="Carb Absorption Rate"
-                    android:defaultValue="20"
                     android:key="CarbAbsorptionRate"
                     android:numeric="decimal"
                     android:summary="Amount of Carbs digested per hour (grams)"/>

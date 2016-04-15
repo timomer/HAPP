@@ -25,11 +25,11 @@ public class Safety {
 
     public Safety(){
 
-        user_max_bolus          = Double.parseDouble(prefs.getString("max_bolus", "4"));
+        user_max_bolus          = Double.parseDouble(prefs.getString("max_bolus", "0"));
         hardcoded_Max_Bolus     = Constants.HARDCODED_MAX_BOLUS;
-        max_basal               = Double.parseDouble(prefs.getString("max_basal", "2"));
+        max_basal               = Double.parseDouble(prefs.getString("max_basal", "0"));
         max_daily_basal         = getMaxDailyBasal();
-        max_iob                 = Double.parseDouble(prefs.getString("max_iob", "3"));
+        max_iob                 = Double.parseDouble(prefs.getString("max_iob", "0"));
     }
 
 

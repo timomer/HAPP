@@ -40,6 +40,7 @@ public class APSService extends IntentService {
     private static final String TAG = "APService";
     private Context context;
     private Profile profile;
+    private Safety safety;
     private Pump pumpActive = new Pump(new Date());
 
     public APSService() {
@@ -50,13 +51,24 @@ public class APSService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Service Started");
 
-        Bundle bundle = new Bundle();
+        Bundle bundle           = new Bundle();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        boolean aps_paused = prefs.getBoolean("aps_paused", false);
-        if (!aps_paused) {
+        boolean aps_paused      = prefs.getBoolean("aps_paused", false);
+        profile                 = new Profile(new Date());
+        safety                  = new Safety();
 
+        if (aps_paused) {
+            bundle.putString("error", "APS is currently Paused");
+            receiver.send(Constants.STATUS_ERROR, bundle);
+            Log.d(TAG, "Paused, not running");
+
+        } else if (!prefsOK()) {
+            bundle.putString("error", "User preferences missing, please check all APS & Pump settings are set");
+            receiver.send(Constants.STATUS_ERROR, bundle);
+            Log.d(TAG, "User preferences missing, not running");
+
+        } else {
             context = MainApp.instance();
-            profile = new Profile(new Date());
             JSONObject apsJSON = new JSONObject();
             APSResult apsResult = new APSResult();
 
@@ -97,17 +109,11 @@ public class APSService extends IntentService {
             }
             Log.d(TAG, "Service Finished");
 
-        } else {
-            bundle.putString("error", "APS is currently Paused");
-            receiver.send(Constants.STATUS_ERROR, bundle);
-            Log.d(TAG, "Paused, not running");
         }
     }
 
     //Sets the suggested Temp Basal info as result of APS suggestion
-    public APSResult setTempBasalInfo(APSResult apsResult){
-
-        Safety safety = new Safety();
+    private APSResult setTempBasalInfo(APSResult apsResult){
 
         if (apsResult.rate < 0) { apsResult.rate = 0D; } // if >30m @ 0 required, zero temp will be extended to 30m instead
         else if (apsResult.rate > safety.getMaxBasal(profile)) { apsResult.rate = safety.getMaxBasal(profile); }
@@ -156,7 +162,7 @@ public class APSService extends IntentService {
         return apsResult;
     }
 
-    public JSONObject getAPSJSON() throws IOException{
+    private JSONObject getAPSJSON() throws IOException{
 
         switch (profile.aps_algorithm) {
             case "openaps_oref0_dev":
@@ -170,5 +176,10 @@ public class APSService extends IntentService {
         }
     }
 
+    private Boolean prefsOK(){
+        if (profile.carbAbsorptionRate.equals(0D) || profile.dia.equals(0D) || profile.isf.equals(0D) || profile.current_basal.equals(0D) || profile.carbRatio.equals(0) || profile.pump_name.equals("none") || profile.aps_algorithm.equals("none")) return false;
+        if (safety.user_max_bolus.equals(0D) || safety.max_basal.equals(0D) || safety.max_iob.equals(0D)) return false;
+        return true;
+    }
 
 }

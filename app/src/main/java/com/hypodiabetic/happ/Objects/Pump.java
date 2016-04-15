@@ -110,6 +110,7 @@ public class Pump {
     }
 
     public String displayCurrentBasal(boolean small){
+        if (basal_mode == null) return "Could not detect basal mode";
         if (small) {
             switch (basal_mode) {
                 case ABSOLUTE:
@@ -170,6 +171,7 @@ public class Pump {
     }
 
     private int getBasalPercent(){
+        if (basal_mode == null) return 0;
         switch (basal_mode){
             case ABSOLUTE:
                 return 0;
@@ -224,6 +226,7 @@ public class Pump {
     }
 
     private String displayBasalMode(){
+        if (basal_mode == null) return "Could not detect basal mode";
         switch (basal_mode){
             case ABSOLUTE:
                 return "Absolute (U/hr)";

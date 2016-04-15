@@ -39,14 +39,19 @@ public class Profile {
     private Date date;
 
     public Profile(Date thisTime){
-        date = thisTime;
+        if (thisTime == null){
+            date = new Date();
+        } else {
+            date = thisTime;
+        }
 
         //OpenAPS expected Profile settings
         carbAbsorptionRate      = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
-        dia                     = Double.parseDouble(prefs.getString("dia", "1.5"));
+        dia                     = Double.parseDouble(prefs.getString("dia", "0"));
         current_basal           = getCurrent_basal();
         carbRatio               = getCurrent_carbratio();
-        pump_name               = prefs.getString("pump_name", "medtronic_absolute");
+        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf()));
+        pump_name               = prefs.getString("pump_name", "none");
         temp_basal_notification = prefs.getBoolean("temp_basal_notification", true);
 
         aps_loop                = Integer.parseInt(prefs.getString("aps_loop", "900000")) / 60000;
@@ -57,7 +62,7 @@ public class Profile {
         Boolean insulin_integration_send_temp_basal = prefs.getBoolean("insulin_integration_send_temp_basal", false);
         Boolean insulin_integration_send_bolus      = prefs.getBoolean("insulin_integration_send_bolus", false);
         if (aps_mode_prefs.equals("closed") && !insulin_integration_prefs.equals("") && insulin_integration_send_temp_basal){
-            //only run in Closed loop if APS mode is Closed, we have a Integration app and we allow sending Temp Basal
+            //only run in Closed loop if APS mode is Closed AND we have a Integration app AND we allow sending Temp Basal
             aps_mode = "closed";
         } else {
             aps_mode = "open";
@@ -71,7 +76,6 @@ public class Profile {
         max_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170"))));
         min_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70"))));
         target_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100"))));
-        isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf()));
     }
 
     private Double getCurrent_basal(){

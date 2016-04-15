@@ -81,6 +81,7 @@ public class tools {
     }
 
     public static Double round(Double value, int decPoints){
+        if (value == null || value.isInfinite() || value.isNaN()) return 0D;
         DecimalFormat df;
 
         switch (decPoints){

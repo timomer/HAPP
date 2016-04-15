@@ -167,7 +167,7 @@ public class Notifications {
             notificationBuilder.setContentTitle(title);
             notificationBuilder.setContentText(msg);
             notificationBuilder.setContentIntent(pending_intent_open_activity);
-            notificationBuilder.setPriority(Notification.PRIORITY_DEFAULT);
+            notificationBuilder.setPriority(Notification.PRIORITY_MIN);
             notificationBuilder.setCategory(Notification.CATEGORY_STATUS);
             notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
             notificationBuilder.addAction(R.drawable.ic_play_dark, "Run APS", pending_intent_run_aps);
