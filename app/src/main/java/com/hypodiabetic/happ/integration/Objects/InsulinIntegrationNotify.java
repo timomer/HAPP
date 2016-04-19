@@ -53,7 +53,8 @@ public class InsulinIntegrationNotify {
         snackbarMsg             =   "";
         errorMsg                =   "";
         foundError              =   false;
-        SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+        SimpleDateFormat sdfDateTime    = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+        SimpleDateFormat sdfTime        = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
 
         for (Integration integration : recentlyUpdated) {
             if (!integration.state.equals("error") && !integration.state.equals("error_ack")) {     //Deal with errors later
@@ -68,13 +69,13 @@ public class InsulinIntegrationNotify {
                         case "bolus_delivery":
                             detailListItem.put("value", tools.formatDisplayInsulin(integrationWithDetails.value1, 2));
                             detailListItem.put("summary", integrationWithDetails.value3);
-                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayInsulin(integrationWithDetails.value1, 2) + " " + integrationWithDetails.value3 + "\n";
+                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayInsulin(integrationWithDetails.value1, 2) + " " + integrationWithDetails.value3 + " " + sdfTime.format(integration.date_updated) + "\n";
                             break;
 
                         case "temp_basal":
                             detailListItem.put("value", tools.formatDisplayBasal(integrationWithDetails.value1, true));
                             detailListItem.put("summary", "(" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins");
-                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayBasal(integrationWithDetails.value1, false) + " (" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins\n";
+                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayBasal(integrationWithDetails.value1, false) + " (" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins " + sdfTime.format(integration.date_updated) + "\n";
                             break;
                     }
                     detailListItem.put("happObjectType", integrationWithDetails.happ_object_type);
