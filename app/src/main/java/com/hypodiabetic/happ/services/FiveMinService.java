@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
+import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Stats;
@@ -49,10 +50,23 @@ public class FiveMinService extends IntentService {
         profile             =   new Profile(date);
 
         newStat();                                                      //Save a new Stat Object
+        checkTBRNotify();                                               //checks if a Cancel TBR Notification is active and TBR is not running anymore
         IntegrationsManager.checkOldInsulinIntegration();               //Check if there are any old Insulin Integration requests waiting to be synced
         IntegrationsManager.updatexDripWatchFace();                     //Updates xDrip Watch Face
 
         Log.d(TAG, "Service Finished");
+    }
+
+    public void checkTBRNotify(){
+        if (profile.temp_basal_notification){
+            Pump pump = new Pump(new Date());
+            APSResult apsResult = APSResult.last();
+            if (!pump.temp_basal_active && !apsResult.accepted && apsResult.checkIsCancelRequest()) {
+                Notifications.clear("newTemp");
+                apsResult.accepted = true;
+                apsResult.save();
+            }
+        }
     }
 
     public void newStat(){
