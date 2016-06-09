@@ -61,10 +61,12 @@ public class FiveMinService extends IntentService {
         if (profile.temp_basal_notification){
             Pump pump = new Pump(new Date());
             APSResult apsResult = APSResult.last();
-            if (!pump.temp_basal_active && !apsResult.accepted && apsResult.checkIsCancelRequest()) {
-                Notifications.clear("newTemp");
-                apsResult.accepted = true;
-                apsResult.save();
+            if (apsResult != null) {
+                if (!pump.temp_basal_active && !apsResult.accepted && apsResult.checkIsCancelRequest()) {
+                    Notifications.clear("newTemp");
+                    apsResult.accepted = true;
+                    apsResult.save();
+                }
             }
         }
     }

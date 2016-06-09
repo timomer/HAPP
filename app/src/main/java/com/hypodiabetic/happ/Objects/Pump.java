@@ -39,6 +39,7 @@ public class Pump {
 
         switch (name){
             case "roche_combo":
+            case "medtronic_percent":
                 basal_mode              =   BASAL_PLUS_PERCENT;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
@@ -53,7 +54,6 @@ public class Pump {
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
                 break;
-            case "medtronic_percent":
             case "animas":
             case "omnipod":
                 basal_mode              =   PERCENT;
