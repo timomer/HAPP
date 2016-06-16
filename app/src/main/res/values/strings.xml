@@ -24,4 +24,9 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="title_activity_integration__report">Integration_Report</string>
+
+    <!-- InsulinIntegrationNotify -->
+    <string name="actions_failed">These actions failed, they will NOT be resent and must be manually actioned on your pump.</string>
+    <string name="acknowledge">Acknowledge</string>
+
 </resources>

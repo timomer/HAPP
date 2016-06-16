@@ -45,7 +45,7 @@ public class NSUploader {
                     Context context = MainApp.instance().getApplicationContext();
                     JSONObject data = new JSONObject();
 
-                    switch (treatmentToSync.happ_object_type){
+                    switch (treatmentToSync.aps_object_type){
                         case "bolus_delivery":
                             data.put("insulin", treatmentToSync.value1);
                             data.put("note", treatmentToSync.value3);
@@ -78,7 +78,7 @@ public class NSUploader {
 
                     data.put("created_at", dateAsISO8601.format(treatmentToSync.requested));
                     data.put("enteredBy", "HAPP_App");
-                    data.put("HAPP_INTEGRATION_ID", treatmentToSync.happ_integration_id);
+                    data.put("aps_integration_id", treatmentToSync.aps_integration_id);
                     Bundle bundle = new Bundle();
                     bundle.putString("action", "dbAdd");
                     bundle.putString("collection", "treatments"); // "treatments" || "entries" || "devicestatus" || "profile" || "food"

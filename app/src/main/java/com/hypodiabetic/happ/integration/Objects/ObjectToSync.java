@@ -18,11 +18,11 @@ import java.util.Date;
  */
 public class ObjectToSync {
 
-    public String   happ_object_type;           //bolus_delivery / temp_basal
+    public String   aps_object_type;            //bolus_delivery / temp_basal
     public String   action;                     //new / update / cancel
     public String   state;                      //to_sync / sent / received / delivered / error
     public String   details;                    //details of this item being synced
-    public Long     happ_integration_id;        //ID of the integration record HAPP has
+    public Long     aps_integration_id;         //ID of the integration record HAPP has
     public Long     remote_id;                  //ID of remote record
     public String   integrationSecretCode;      //Random string to UID this sync request
 
@@ -35,15 +35,15 @@ public class ObjectToSync {
 
     public ObjectToSync (Integration integration){
         //Prepares a integration to be sent
-        happ_object_type        =   integration.happ_object;
+        aps_object_type         =   integration.happ_object;
         action                  =   integration.action;
         state                   =   integration.state;
         details                 =   integration.details;
-        happ_integration_id     =   integration.getId();
+        aps_integration_id      =   integration.getId();
         remote_id               =   integration.remote_id;
         integrationSecretCode   =   integration.auth_code;
 
-        switch (happ_object_type){
+        switch (aps_object_type){
             case "bolus_delivery":
                 Treatments bolus    =   Treatments.getTreatmentByID(integration.happ_object_id);
                 if (bolus != null) {
@@ -83,7 +83,7 @@ public class ObjectToSync {
     }
 
     public String getObjectSummary(){
-        switch (happ_object_type){
+        switch (aps_object_type){
             case "bolus_delivery":
                 return tools.formatDisplayInsulin(value1,2) + " " + value3;
             case "temp_basal":
@@ -104,7 +104,7 @@ public class ObjectToSync {
     }
 
     public void updateIntegration(){
-        Integration integration = Integration.getIntegrationByID(happ_integration_id);
+        Integration integration = Integration.getIntegrationByID(aps_integration_id);
 
         if (integration != null) {
             //We have new sync data from remote system, populate this object

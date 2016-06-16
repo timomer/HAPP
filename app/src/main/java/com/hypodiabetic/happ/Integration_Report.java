@@ -113,7 +113,7 @@ public class Integration_Report extends AppCompatActivity {
                 integrationItem.put("integrationAction", "action:" + objectSyncDetails.action);
                 integrationItem.put("integrationRemoteID", "remote_id:" + objectSyncDetails.remote_id);
                 integrationItem.put("integrationDetails", objectSyncDetails.details);
-                integrationItem.put("integrationID", "id:" + objectSyncDetails.happ_integration_id.toString());
+                integrationItem.put("integrationID", "id:" + objectSyncDetails.aps_integration_id.toString());
 
                 integrationList.add(integrationItem);
             }
