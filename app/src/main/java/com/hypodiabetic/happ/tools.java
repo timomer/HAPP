@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -83,23 +84,26 @@ public class tools {
     public static Double round(Double value, int decPoints){
         if (value == null || value.isInfinite() || value.isNaN()) return 0D;
         DecimalFormat df;
+        DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
+        otherSymbols.setDecimalSeparator('.');
+        otherSymbols.setGroupingSeparator(',');
 
         switch (decPoints){
             case 1:
                 if (precisionRounding()){
-                    df = new DecimalFormat("##0.00");
+                    df = new DecimalFormat("##0.00", otherSymbols);
                 } else {
-                    df = new DecimalFormat("##0.0");
+                    df = new DecimalFormat("##0.0", otherSymbols);
                 }
                 break;
             case 2:
-                df = new DecimalFormat("##0.00");
+                df = new DecimalFormat("##0.00", otherSymbols);
                 break;
             case 3:
-                df = new DecimalFormat("##0.000");
+                df = new DecimalFormat("##0.000", otherSymbols);
                 break;
             default:
-                df = new DecimalFormat("##0.0000");
+                df = new DecimalFormat("##0.0000", otherSymbols);
         }
         return Double.parseDouble(df.format(value));
     }
