@@ -159,7 +159,7 @@ public class InsulinIntegrationNotify {
 
     public Dialog showErrorDetailsDialog(View view){
         final Dialog dialog = new Dialog(view.getContext());
-        dialog.setTitle("Error: Insulin Actions");
+        //dialog.setTitle("Error: Insulin Actions");
         dialog.setContentView(R.layout.integration_dialog);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);

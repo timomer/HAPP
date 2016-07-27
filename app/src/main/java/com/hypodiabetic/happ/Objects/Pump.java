@@ -5,6 +5,7 @@ import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.tools;
 
 import java.util.Date;
+import java.util.StringTokenizer;
 
 /**
  * Created by Tim on 16/02/2016.
@@ -111,27 +112,40 @@ public class Pump {
 
     public String displayCurrentBasal(boolean small){
         if (basal_mode == null) return "Could not detect basal mode";
+        String msg="";
         if (small) {
             switch (basal_mode) {
                 case ABSOLUTE:
-                    return tools.formatDisplayBasal(activeRate(), false);
+                    msg = tools.formatDisplayBasal(activeRate(), false);
+                    break;
                 case PERCENT:
-                    return calcPercentOfBasal() + "%";
+                    msg = calcPercentOfBasal() + "%";
+                    break;
                 case BASAL_PLUS_PERCENT:
-                    return calcBasalPlusPercent() + "%";
+                    msg = calcBasalPlusPercent() + "%";
+                    break;
             }
         } else {
             switch (basal_mode) {
                 case ABSOLUTE:
-                    return tools.formatDisplayBasal(activeRate(), false);
+                    msg = tools.formatDisplayBasal(activeRate(), false);
+                    break;
                 case PERCENT:
-                    return calcPercentOfBasal() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
+                    msg = calcPercentOfBasal() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
+                    break;
                 case BASAL_PLUS_PERCENT:
-                    return calcBasalPlusPercent() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
+                    msg = calcBasalPlusPercent() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
+                    break;
             }
         }
-        Crashlytics.log(1,"APSService","Could not get displayCurrentBasal: " + basal_mode + " " + name);
-        return "error";
+
+        if (msg.equals("")){
+            Crashlytics.log(1,"APSService","Could not get displayCurrentBasal: " + basal_mode + " " + name);
+            return "error";
+        } else {
+            if (temp_basal_active) msg = msg + " TBR";
+            return msg;
+        }
     }
 
     public String displayTempBasalMinsLeft(){
@@ -160,9 +174,9 @@ public class Pump {
         } else {
             if (temp_basal_active) {
                 if (temp_basal_rate > default_basal_rate) {
-                    return "High Temp";
+                    return "High TBR";
                 } else {
-                    return "Low Temp";
+                    return "Low TBR";
                 }
             } else {
                 return "Default Basal";

@@ -26,7 +26,7 @@
     <string name="title_activity_integration__report">Integration_Report</string>
 
     <!-- InsulinIntegrationNotify -->
-    <string name="actions_failed">These actions failed, they will NOT be resent and must be manually actioned on your pump.</string>
+    <string name="actions_failed">The following pump requests have failed and WILL NOT be resent. Review pump and manually action if needed.</string>
     <string name="acknowledge">Acknowledge</string>
 
 </resources>
