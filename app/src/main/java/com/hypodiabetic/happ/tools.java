@@ -175,48 +175,54 @@ public class tools {
     //exports shared Preferences
     public static void exportSharedPreferences(final Context c){
 
-        File path = new File(Environment.getExternalStorageDirectory().toString());
-        final File file = new File(path, "HAPPSharedPreferences");
+        final File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "HAPP_Settings");
+        File folder = new File(Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOCUMENTS);
 
-        new AlertDialog.Builder(c)
-                .setMessage("Export Settings to " + path + "/" + file + "?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
+        boolean dirExists = folder.exists();
+        if (!dirExists) dirExists = folder.mkdir();
 
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-                        try
-                        {
-                            FileWriter fw = new FileWriter(file);
-                            PrintWriter pw = new PrintWriter(fw);
-                            Map<String,?> prefsMap = prefs.getAll();
-                            for(Map.Entry<String,?> entry : prefsMap.entrySet())
-                            {
-                                pw.println(entry.getKey() + "::" + entry.getValue().toString());
+        if (dirExists) {
+            new AlertDialog.Builder(c)
+                    .setMessage("Export Settings to " + file + "?")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+                            try {
+                                FileWriter fw = new FileWriter(file);
+                                PrintWriter pw = new PrintWriter(fw);
+                                Map<String, ?> prefsMap = prefs.getAll();
+                                for (Map.Entry<String, ?> entry : prefsMap.entrySet()) {
+                                    pw.println(entry.getKey() + "::" + entry.getValue().toString());
+                                }
+                                pw.close();
+                                fw.close();
+                                Toast.makeText(c, "Exported", Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "Exported settings to " + file.toString());
+                            } catch (Exception e) {
+                                Crashlytics.logException(e);
+                                Log.e(TAG, "Error exporting settings to " + file.toString() + " " + e.getLocalizedMessage());
                             }
-                            pw.close();
-                            fw.close();
-                            Toast.makeText(c, "Exported", Toast.LENGTH_LONG).show();
                         }
-                        catch (Exception e){
-                            Crashlytics.logException(e);
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
                         }
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })
-                .show();
+                    })
+                    .show();
+        } else {
+            Toast.makeText(c, "Could not create export folder, export aborted", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Could not create export folder, export aborted " + file.toString());
+        }
     }
     //imports shared Preferences
     public static void importSharedPreferences(final Context c){
 
-        File path = new File(Environment.getExternalStorageDirectory().toString());
-        final File file = new File(path, "HAPPSharedPreferences");
+        final File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "HAPP_Settings");
 
         new AlertDialog.Builder(c)
-                .setMessage("Import Settings from " + path + "/" + file + "?")
+                .setMessage("Import Settings from " + file + "?")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -246,14 +252,15 @@ public class tools {
                             reader.close();
                             editor.commit();
                             Toast.makeText(c, "Settings Imported", Toast.LENGTH_LONG).show();
+                            Log.d(TAG, "Imported settings from " + file.toString());
+
 
                         } catch (FileNotFoundException e2) {
                             Toast.makeText(c, "File not found " + file, Toast.LENGTH_LONG).show();
-                            e2.printStackTrace();
+                            Log.e(TAG, "Settings File not found " + file.toString());
 
                         } catch (IOException e2) {
-                            e2.printStackTrace();
-
+                            Log.e(TAG, "Error importing settings " + file.toString() + " " + e2.getLocalizedMessage());
                         }
                     }
                 })

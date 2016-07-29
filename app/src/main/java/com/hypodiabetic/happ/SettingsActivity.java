@@ -91,7 +91,7 @@ public class SettingsActivity extends PreferenceActivity {
             setPreferenceListener(findPreference("aps_mode"));
             setPreferenceListener(findPreference("aps_algorithm"));
             setPreferenceListener(findPreference("pump_name"));
-            findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory().toString());
+            findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOCUMENTS + "/HAPP_Settings");
 
             for (int x=0; x<24; x++ ){
                 setPreferenceListener(findPreference("basal_" + x));
