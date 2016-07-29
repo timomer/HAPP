@@ -820,7 +820,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
                                 integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);
                                 integrationItem.put("integrationAction",    "Action: " + objectSyncDetails.action);
-                                integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id.toString());
+                                integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id);
                                 integrationItem.put("integrationDetails",   objectSyncDetails.details);
 
                                 integrationList.add(integrationItem);

@@ -5,6 +5,7 @@ import android.preference.PreferenceManager;
 
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.tools;
 
 import java.util.Date;
 
@@ -25,11 +26,11 @@ public class Safety {
 
     public Safety(){
 
-        user_max_bolus          = Double.parseDouble(prefs.getString("max_bolus", "0"));
+        user_max_bolus          = tools.stringToDouble(prefs.getString("max_bolus", "0"));
         hardcoded_Max_Bolus     = Constants.HARDCODED_MAX_BOLUS;
-        max_basal               = Double.parseDouble(prefs.getString("max_basal", "0"));
+        max_basal               = tools.stringToDouble(prefs.getString("max_basal", "0"));
         max_daily_basal         = getMaxDailyBasal();
-        max_iob                 = Double.parseDouble(prefs.getString("max_iob", "0"));
+        max_iob                 = tools.stringToDouble(prefs.getString("max_iob", "0"));
     }
 
 
@@ -43,7 +44,7 @@ public class Safety {
         Double basalFound;
         for(int h=0; h<=12; h++) {
             if (!prefs.getString("basal_" + h, "empty").equals("empty") && !prefs.getString("basal_" + h, "").equals("")) {
-                basalFound = Double.parseDouble(prefs.getString("basal_" + h, "0"));
+                basalFound = tools.stringToDouble(prefs.getString("basal_" + h, "0"));
                 if (basalFound > basalMax) basalMax = basalFound;
             }
         }

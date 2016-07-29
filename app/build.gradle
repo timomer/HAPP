@@ -19,8 +19,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 22
 
-        versionCode 40
-        versionName "1.8.1"
+        versionCode 43
+        versionName "1.10"
 
         multiDexEnabled true
     }
@@ -33,8 +33,12 @@ android {
 }
 
 repositories {
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    mavenCentral()
     maven { url 'https://maven.fabric.io/public' }
+}
+
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 dependencies {

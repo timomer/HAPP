@@ -6,7 +6,7 @@ package com.hypodiabetic.happ;
 public class UserPrefs {
 
     //If True, HAPP will allow sending Bolus requests to Insulin Integration App
-    public static final boolean BOLUS_ALLOWED   =   false;
+    public static final boolean BOLUS_ALLOWED   =   true;
 
     //If True, Shows the Test button on APS Dash, used for debugging
     public static final boolean APS_TEST_BUTTON =   false;

@@ -17,7 +17,7 @@
             <item>Roche Accu-Chek Spirit Combo</item>
             <item>SOOIL Dana R</item>
             <item>Animas</item>
-            <item>OmniPod</item>
+            <item>OmniPod - (U/hr Mode Only)</item>
         </string-array>
         <string-array name="pump_nameValues">
             <item>medtronic_absolute</item>

@@ -46,8 +46,8 @@ public class Profile {
         }
 
         //OpenAPS expected Profile settings
-        carbAbsorptionRate      = Double.parseDouble(prefs.getString("CarbAbsorptionRate", "0"));
-        dia                     = Double.parseDouble(prefs.getString("dia", "0"));
+        carbAbsorptionRate      = tools.stringToDouble(prefs.getString("CarbAbsorptionRate", "0"));
+        dia                     = tools.stringToDouble(prefs.getString("dia", "0"));
         current_basal           = getCurrent_basal();
         carbRatio               = getCurrent_carbratio();
         isf                     = Double.parseDouble(tools.inmgdl(getCurrent_isf()));
