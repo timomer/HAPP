@@ -27,6 +27,8 @@ import org.json.JSONObject;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 15/02/2016.
  */
@@ -36,6 +38,7 @@ public class FiveMinService extends IntentService {
     private Profile profile;
     private Bundle bundle;
     private Date date;
+    private Realm realm;
 
     public FiveMinService() {
         super(FiveMinService.class.getName());
@@ -48,6 +51,7 @@ public class FiveMinService extends IntentService {
         bundle              =   new Bundle();
         date                =   new Date();
         profile             =   new Profile(date);
+        realm               =   Realm.getDefaultInstance();
 
         newStat();                                                      //Save a new Stat Object
         checkTBRNotify();                                               //checks if a Cancel TBR Notification is active and TBR is not running anymore
@@ -60,12 +64,16 @@ public class FiveMinService extends IntentService {
     public void checkTBRNotify(){
         if (profile.temp_basal_notification){
             Pump pump = new Pump(new Date());
-            APSResult apsResult = APSResult.last();
+            APSResult apsResult = APSResult.last(realm);
             if (apsResult != null) {
-                if (!pump.temp_basal_active && !apsResult.accepted && apsResult.checkIsCancelRequest()) {
+                if (!pump.temp_basal_active && !apsResult.getAccepted() && apsResult.checkIsCancelRequest()) {
                     Notifications.clear("newTemp");
-                    apsResult.accepted = true;
-                    apsResult.save();
+
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+                    apsResult.setAccepted(true);
+                    realm.commitTransaction();
+                    realm.close();
                 }
             }
         }

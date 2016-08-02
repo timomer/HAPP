@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,10 +36,10 @@ public class APSReceiver extends ResultReceiver {
         switch (resultCode){
             case Constants.STATUS_FINISHED:
 
-                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                Gson gson = new GsonBuilder().create();
                 APSResult apsResult = gson.fromJson(resultData.getString("APSResult"), APSResult.class);
 
-                if (apsResult.tempSuggested) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance());
+                if (apsResult.getTempSuggested()) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance());
 
                 //Send out updates of new APS run
                 Notifications.updateCard();

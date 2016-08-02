@@ -191,7 +191,7 @@ public class Notifications {
 
             title = "Last run: " + df.format(timeNow);
             if (apsResult != null){
-                msg = "Eventual:" +  apsResult.eventualBG + " Snooze:" +  apsResult.snoozeBG + " Temp?:" + apsResult.tempSuggested;
+                msg = "Eventual:" +  apsResult.getEventualBG() + " Snooze:" +  apsResult.getSnoozeBG() + " Temp?:" + apsResult.getTempSuggested();
             }
 
             Intent intent_open_activity = new Intent(c,MainActivity.class);

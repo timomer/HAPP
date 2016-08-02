@@ -11,11 +11,14 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.APSResult;
+import com.hypodiabetic.happ.Objects.APSResultSerializer;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Safety;
@@ -29,6 +32,9 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.Locale;
+
+import io.realm.Realm;
+import io.realm.RealmObject;
 
 /**
  * Created by Tim on 14/02/2016.
@@ -85,25 +91,35 @@ public class APSService extends IntentService {
 
                 if (apsJSON != null) {
                     if (apsJSON.has("error") || !bundle.getString("error", "").equals("") ) {
-                        if (apsJSON.has("error")) bundle.putString("error", apsResult.reason);
+                        if (apsJSON.has("error")) bundle.putString("error", apsResult.getReason());
                         receiver.send(Constants.STATUS_ERROR, bundle);
                         Log.d(TAG, "Service APS error " + bundle.getString("error", ""));
 
                     } else {
-                        if (apsResult.tempSuggested) {
+                        if (apsResult.getTempSuggested()) {
                             apsResult = setTempBasalInfo(apsResult);
                         } else {
-                            apsResult.action = "Wait and monitor";
+                            apsResult.setAction("Wait and monitor");
                         }
                     }
 
-                    apsResult.save();
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+                    realm.copyToRealm(apsResult);
+                    Log.e(TAG, "SAVING: " + apsResult.toString() );
+                    realm.commitTransaction();
+                    realm.close();
 
-                    Gson gson = new GsonBuilder()
-                            .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                            .serializeNulls()
-                            .create();
-                    bundle.putString("APSResult", gson.toJson(apsResult, APSResult.class));
+                    try {
+                        Gson gson = new GsonBuilder()
+                                .registerTypeAdapter(Class.forName("io.realm.APSResultRealmProxy"), new APSResultSerializer())
+                                .create();
+
+                        bundle.putString("APSResult", gson.toJson(apsResult));
+                    } catch (ClassNotFoundException e){
+
+                    }
+
                     receiver.send(Constants.STATUS_FINISHED, bundle);
                 }
             }
@@ -115,9 +131,9 @@ public class APSService extends IntentService {
     //Sets the suggested Temp Basal info as result of APS suggestion
     private APSResult setTempBasalInfo(APSResult apsResult){
 
-        if (apsResult.rate < 0) { apsResult.rate = 0D; } // if >30m @ 0 required, zero temp will be extended to 30m instead
-        else if (apsResult.rate > safety.getMaxBasal(profile)) { apsResult.rate = safety.getMaxBasal(profile); }
-        apsResult.rate = tools.round(apsResult.rate, 2);
+        if (apsResult.getRate() < 0) { apsResult.setRate(0D); } // if >30m @ 0 required, zero temp will be extended to 30m instead
+        else if (apsResult.getRate() > safety.getMaxBasal(profile)) { apsResult.setRate(safety.getMaxBasal(profile)); }
+        apsResult.setRate(tools.round(apsResult.getRate(), 2));
 
         Pump pumpWithProposedBasal = new Pump(new Date());
         pumpWithProposedBasal.setNewTempBasal(apsResult, null);
@@ -135,26 +151,26 @@ public class APSService extends IntentService {
         //requestedTemp.put("duration", duration);
         //openAPSSuggest.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places
         if (apsResult.checkIsCancelRequest() && pumpActive.temp_basal_active) {
-            apsResult.action            =   "Cancel Active Temp Basal";
-            apsResult.basal_adjustemnt  =   "Basal Default";
+            apsResult.setAction                 ("Cancel Active Temp Basal");
+            apsResult.setBasal_adjustemnt       ("Basal Default");
             //apsResult.rate              =   profile.current_basal;
             //apsResult.ratePercent       =   100;
 
         } else {
-            if (apsResult.rate.equals(pumpActive.activeRate())){
-                apsResult.action            =   "Keep Current Temp Basal";
-                apsResult.basal_adjustemnt  =   "None";
-                apsResult.tempSuggested     =   false;
+            if (apsResult.getRate().equals(pumpActive.activeRate())){
+                apsResult.setAction             ("Keep Current Temp Basal");
+                apsResult.setBasal_adjustemnt   ("None");
+                apsResult.setTempSuggested      (false);
 
-            } else if (apsResult.rate > profile.current_basal && apsResult.duration != 0) {
-                apsResult.action            =   "High Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_high_basal_duration + "mins";
-                apsResult.basal_adjustemnt  =   "High";
-                apsResult.duration          =   pumpActive.min_high_basal_duration;
+            } else if (apsResult.getRate() > profile.current_basal && apsResult.getDuration() != 0) {
+                apsResult.setAction             ("High Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_high_basal_duration + "mins");
+                apsResult.setBasal_adjustemnt   ("High");
+                apsResult.setDuration           (pumpActive.min_high_basal_duration);
 
-            } else if (apsResult.rate < profile.current_basal && apsResult.duration != 0) {
-                apsResult.action            =   "Low Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_low_basal_duration + "mins";
-                apsResult.basal_adjustemnt  =   "Low";
-                apsResult.duration          =   pumpActive.min_low_basal_duration;
+            } else if (apsResult.getRate() < profile.current_basal && apsResult.getDuration() != 0) {
+                apsResult.setAction             ("Low Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_low_basal_duration + "mins");
+                apsResult.setBasal_adjustemnt   ("Low");
+                apsResult.setDuration           (pumpActive.min_low_basal_duration);
             }
         }
 

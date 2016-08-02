@@ -26,6 +26,8 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 08/09/2015.
  * Actions with the Pump, if offline mode notify only
@@ -48,10 +50,14 @@ public class pumpAction {
 
 
     public static void setTempBasal(TempBasal basal){
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
 
-        APSResult apsResult = APSResult.last();
-        apsResult.accepted = true;
-        apsResult.save();
+        APSResult apsResult = APSResult.last(realm);
+        apsResult.setAccepted(true);
+        realm.commitTransaction();
+        realm.close();
+
         if (basal == null) basal = apsResult.getBasal();
 
         if (basal.checkIsCancelRequest()){

@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import io.realm.Realm;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
@@ -25,8 +26,9 @@ import lecho.lib.hellocharts.view.Chart;
  */
 public class BgGraph extends CommonChartSupport {
 
-    public BgGraph(Context context) {
+    public BgGraph(Context context, Realm realm) {
         super(context);
+        this.realm = realm;
     }
 
     private final List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
@@ -34,14 +36,7 @@ public class BgGraph extends CommonChartSupport {
     private List<PointValue> inRangeValues = new ArrayList<PointValue>();
     private List<PointValue> highValues = new ArrayList<PointValue>();
     private List<PointValue> lowValues = new ArrayList<PointValue>();
-
-
-    public LineChartData lineData() {
-        LineChartData lineData = new LineChartData(defaultLines());
-        lineData.setAxisYLeft(yAxis());
-        lineData.setAxisXBottom(xAxis());
-        return lineData;
-    }
+    private Realm realm;
 
     public LineChartData previewLineData() {
         LineChartData previewLineData = new LineChartData(lineData());
@@ -51,6 +46,13 @@ public class BgGraph extends CommonChartSupport {
         previewLineData.getLines().get(5).setPointRadius(2);
         previewLineData.getLines().get(6).setPointRadius(2);
         return previewLineData;
+    }
+
+    public LineChartData lineData() {
+        LineChartData lineData = new LineChartData(defaultLines());
+        lineData.setAxisYLeft(yAxis());
+        lineData.setAxisXBottom(xAxis());
+        return lineData;
     }
 
     public List<Line> defaultLines() {
@@ -82,14 +84,14 @@ public class BgGraph extends CommonChartSupport {
 
     public void getOpenAPSPredictValues() {
         openAPSPredictValue.clear();                                                                //clears past values
-        APSResult apsResult = APSResult.last();
+        APSResult apsResult = APSResult.last(realm);
         Date timeeNow = new Date();
         Date in15mins = new Date(timeeNow.getTime() + 15 * 60000);
         Double snoozeBG = 0D, eventualBG = 0D;
 
         if (apsResult != null) {
-            snoozeBG = apsResult.snoozeBG;
-            eventualBG = apsResult.eventualBG;
+            snoozeBG = apsResult.getSnoozeBG();
+            eventualBG = apsResult.getEventualBG();
         }
 
         if (snoozeBG >= 400)    snoozeBG = 400D;

@@ -1,1 +1,0 @@
-ALTER TABLE Stats ADD COLUMN temp_basal_type TEXT;

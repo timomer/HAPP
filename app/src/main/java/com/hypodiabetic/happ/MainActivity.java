@@ -75,6 +75,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import io.realm.Realm;
 import lecho.lib.hellocharts.gesture.ZoomType;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean updateStuff;
     public boolean updatingPreviewViewport = false;
     public boolean updatingChartViewport = false;
+    public static Realm realm;
 
     BroadcastReceiver newUIUpdate;
     BroadcastReceiver refresh60Seconds;
@@ -153,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        realm = Realm.getDefaultInstance();
+
         setupMenuAndToolbar();
 
         // Create the adapter that will return a fragment for each of the 4 primary sections of the app.
@@ -179,13 +183,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onDestroy(){
+        super.onDestroy();
+        realm.close();
+    }
+
+    @Override
     protected void onResume(){
         super.onResume();
 
         newUIUpdate = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                Gson gson = new GsonBuilder().create();
 
                 switch (intent.getStringExtra("UPDATE")){
                     case "NEW_BG":
@@ -280,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar                         = (Toolbar) findViewById(R.id.toolbar);
         tickWhite                       = getDrawable(R.drawable.checkbox_marked_circle);
         clockWhite                      = getDrawable(R.drawable.clock);
-        Drawable reportWhite            = getDrawable(R.drawable.file_chart);
+        final Drawable reportWhite            = getDrawable(R.drawable.file_chart);
         Drawable bugWhite               = getDrawable(R.drawable.bug);
         Drawable stopWhite              = getDrawable(R.drawable.stop);
         Drawable settingsWhite          = getDrawable(R.drawable.settings);
@@ -326,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
                         mDrawerLayout.closeDrawers();
                         break;
                     case 4:
-                        tools.showDebug();
+                        tools.showDebug(realm);
                         mDrawerLayout.closeDrawers();
                         break;
                     case 5:
@@ -363,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateBGCharts() {
 
-        bgGraph         =   new BgGraph(this);
+        bgGraph         =   new BgGraph(this, realm);
         chart           =   (LineChartView) findViewById(R.id.chart);
         previewChart    =   (PreviewLineChartView) findViewById(R.id.chart_preview);
         updateStuff     =   false;
@@ -386,18 +396,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void test(View view){
-         //TextView notificationText = (TextView)findViewById(R.id.notices);
-        //notificationText.setTextColor(Color.WHITE);
+        //InsulinIntegrationNotify popup = new InsulinIntegrationNotify();
+        //Snackbar snackbar = popup.getSnackbar(view);
+        //NotificationCompat.Builder notification = popup.getErrorNotification();
 
-        InsulinIntegrationNotify popup = new InsulinIntegrationNotify();
-        Snackbar snackbar = popup.getSnackbar(view);
-        NotificationCompat.Builder notification = popup.getErrorNotification();
+        //if (snackbar != null) snackbar.show();
+        //NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
+        //if (popup.foundError) notificationManager.notify(58, notification.build());
 
-        if (snackbar != null) snackbar.show();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
-        if (popup.foundError) notificationManager.notify(58, notification.build());
-
-
+        APSResult read = APSResult.last(realm);
+        Snackbar.make(view,read.toString(),Snackbar.LENGTH_LONG).show();
     }
 
     public void checkInsulinAppIntegration(final boolean sendText){
@@ -558,7 +566,7 @@ public class MainActivity extends AppCompatActivity {
     //Updates the APS Fragment
     public void updateAPSDetails(APSResult apsResult) {
         //Updates fragment UI with APS suggestion
-        if (apsResult == null) apsResult = APSResult.last();
+        if (apsResult == null) apsResult = APSResult.last(realm);
 
         if (apsResult != null) {
             if (openAPSFragment.isLoaded) {
@@ -571,8 +579,8 @@ public class MainActivity extends AppCompatActivity {
             TextView apsAge             = (TextView) findViewById(R.id.openapsAge);
             //Updates main UI with last APS run
             apsAge.setText(apsResult.ageFormatted());
-            eventualBGValue.setText(tools.unitizedBG(apsResult.eventualBG));
-            snoozeBGValue.setText(tools.unitizedBG(apsResult.snoozeBG));
+            eventualBGValue.setText(tools.unitizedBG(apsResult.getEventualBG()));
+            snoozeBGValue.setText(tools.unitizedBG(apsResult.getSnoozeBG()));
         }
 
         //Temp Basal running update
@@ -594,8 +602,8 @@ public class MainActivity extends AppCompatActivity {
         TextView notificationText   = (TextView) findViewById(R.id.notices);
 
         Stats stat          = Stats.last();
-        APSResult apsResult = APSResult.last();
         Bg lastBg           = Bg.last();
+        APSResult apsResult = APSResult.last(realm);
 
         if (stat != null)       statsAge.setText(stat.statAge());
         if (apsResult != null)  apsAge.setText(apsResult.ageFormatted());
@@ -661,7 +669,7 @@ public class MainActivity extends AppCompatActivity {
     public void apsstatusAccept (final View view){
         openAPSFragment.setAcceptAPSButton(false);
 
-        TempBasal suggestedBasal = APSResult.last().getBasal();
+        TempBasal suggestedBasal = APSResult.last(realm).getBasal();
         pumpAction.setTempBasal(suggestedBasal);   //Action the suggested Temp
         updateRunningTemp();
     }
@@ -792,21 +800,24 @@ public class MainActivity extends AppCompatActivity {
 
         public static void update(APSResult apsResult){
 
-            if (apsResult == null) apsResult = APSResult.last();
+            if (apsResult == null) apsResult = APSResult.last(realm);
 
             if (apsResult != null) {
                 SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
 
-                apsstatus_date.setText(sdfTime.format(new Date(apsResult.datetime)));
-                apsstatus_reason.setText(apsResult.reason);
-                apsstatus_Action.setText(apsResult.action);
+                apsstatus_date.setText(sdfTime.format(apsResult.getTimestamp()));
+                apsstatus_reason.setText(apsResult.getReason());
+                apsstatus_Action.setText(apsResult.getAction());
                 //apsstatus_temp.setText("None");
-                apsstatus_deviation.setText(apsResult.getFormattedDeviation());
-                apsstatus_mode.setText(apsResult.aps_mode);
-                apsstatus_loop.setText(apsResult.aps_loop + " mins");
+                //apsstatus_deviation.setText(apsResult.getFormattedDeviation());
+                apsstatus_mode.setText(apsResult.getAps_mode());
+                apsstatus_loop.setText(apsResult.getAps_loop() + " mins");
+
+                Log.e(TAG, "update: " + apsResult.toString() );
+
                 apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
-                if (apsResult.tempSuggested & !apsResult.accepted) {
+                if (apsResult.getTempSuggested() && !apsResult.getAccepted()) {
                     setAcceptAPSButton(true);
                 } else {
                     setAcceptAPSButton(false);

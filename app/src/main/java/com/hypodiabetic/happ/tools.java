@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 15/09/2015.
  */
@@ -397,10 +399,10 @@ public class tools {
             showAlertText(logCat, MainActivity.getInstace());
         }
     }
-    public static void showDebug(){
+    public static void showDebug(Realm realm){
         Profile profile = new Profile(new Date());
         Pump pump = new Pump(new Date());
-        APSResult apsResult = APSResult.last();
+        APSResult apsResult = APSResult.last(realm);
         Stats stats = Stats.last();
         Safety safety = new Safety();
 

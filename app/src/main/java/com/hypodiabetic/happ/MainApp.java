@@ -20,6 +20,9 @@ import com.activeandroid.Configuration;
 import com.hypodiabetic.happ.services.APSService;
 import com.hypodiabetic.happ.services.FiveMinService;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 /**
  * Created by Tim on 06/01/2016.
  * This class is instantiated before any of the application's components
@@ -34,6 +37,9 @@ public class MainApp extends Application {
         super.onCreate();
         sInstance = this;
 
+        //initialize Realm
+        Realm.setDefaultConfiguration(getRealmConfig());
+
         //Manually initialize ActiveAndroid
         // TODO: 05/11/2015 appears to be a bug in Active Android where DB version is ignored in Manifest, must be added here as well
         // http://stackoverflow.com/questions/33164456/update-existing-database-table-with-new-column-not-working-in-active-android
@@ -44,6 +50,14 @@ public class MainApp extends Application {
 
     public static MainApp instance() {
         return sInstance;
+    }
+
+    public static RealmConfiguration getRealmConfig(){
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(instance())
+                .name("happ.realm")
+                .schemaVersion(0)
+                .build();
+        return realmConfiguration;
     }
 
 }

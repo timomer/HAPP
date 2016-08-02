@@ -1,1 +1,0 @@
-ALTER TABLE aps_results ADD COLUMN accepted INT;

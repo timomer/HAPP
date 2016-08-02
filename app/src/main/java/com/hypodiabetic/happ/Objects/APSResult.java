@@ -1,114 +1,161 @@
 package com.hypodiabetic.happ.Objects;
 
-import android.content.Context;
-import android.provider.BaseColumns;
 
-import com.activeandroid.Model;
-import com.activeandroid.annotation.Column;
-import com.activeandroid.annotation.Table;
-import com.activeandroid.query.Select;
-import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.MainApp;
-import com.hypodiabetic.happ.tools;
 
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import io.realm.Realm;
+import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.Sort;
+
 /**
  * Created by Tim on 24/11/2015.
  * Logs results of APS algorithm
  */
-@Table(name = "aps_results", id = BaseColumns._ID)
-public class APSResult extends Model{
+public class APSResult extends RealmObject {
+
+    public String getAction() {
+        return action;
+    }
+    public String getReason() {
+        return reason;
+    }
+    public Boolean getTempSuggested() {
+        return tempSuggested;
+    }
+    public double getEventualBG() {
+        return eventualBG;
+    }
+    public double getSnoozeBG() {
+        return snoozeBG;
+    }
+    public Date getTimestamp() {
+        return timestamp;
+    }
+    public Double getRate() {
+        return rate;
+    }
+    public Integer getDuration() {
+        return duration;
+    }
+    public String getBasal_adjustemnt() {
+        return basal_adjustemnt;
+    }
+    public Boolean getAccepted() {
+        return accepted;
+    }
+    public String getAps_algorithm() {
+        return aps_algorithm;
+    }
+    public String getAps_mode() {
+        return aps_mode;
+    }
+    public Double getCurrent_pump_basal() {
+        return current_pump_basal;
+    }
+    public Integer getAps_loop() {
+        return aps_loop;
+    }
+
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
+    }
+    public void setAction(String action) {
+        this.action = action;
+    }
+    public void setRate(Double rate) {
+        this.rate = rate;
+    }
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+    public void setEventualBG(double eventualBG) {
+        this.eventualBG = eventualBG;
+    }
+    public void setSnoozeBG(double snoozeBG) {
+        this.snoozeBG = snoozeBG;
+    }
+    public void setAps_algorithm(String aps_algorithm) {
+        this.aps_algorithm = aps_algorithm;
+    }
+    public void setAps_mode(String aps_mode) {
+        this.aps_mode = aps_mode;
+    }
+    public void setCurrent_pump_basal(Double current_pump_basal) {
+        this.current_pump_basal = current_pump_basal;
+    }
+    public void setAps_loop(Integer aps_loop) {
+        this.aps_loop = aps_loop;
+    }
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+    public void setBasal_adjustemnt(String basal_adjustemnt) {
+        this.basal_adjustemnt = basal_adjustemnt;
+    }
+    public void setTempSuggested(Boolean tempSuggested) {
+        this.tempSuggested = tempSuggested;
+    }
 
     //APS general results
-    @Expose
-    @Column(name = "action")
-    public String   action;                 //APS suggested Action
-    @Expose
-    @Column(name = "reason")
-    public String   reason;                 //APS reason for suggested action
-    @Expose
-    @Column(name = "deviation")
-    public Double   deviation=0D;
-    @Expose
-    @Column(name = "tempSuggested")
-    public boolean  tempSuggested=false;    //Has a temp basal been suggested?
-    @Expose
-    @Column(name = "eventualBG")
-    public double   eventualBG=0D;
-    @Expose
-    @Column(name = "snoozeBG")
-    public double   snoozeBG=0D;
-    @Expose
-    @Column(name = "datetime")
-    public Long     datetime;
+    private String   action;                     //APS suggested Action
+    private String   reason;                     //APS reason for suggested action
+
+    private Boolean  tempSuggested   =   false;  //Has a temp basal been suggested?
+    private double   eventualBG      =   0D;
+    private double   snoozeBG        =   0D;
+    private Date     timestamp       =   new Date();
 
     //Suggested Temp Basal details
-    @Expose
-    @Column(name = "rate")
-    public Double   rate;                   //Temp Basal Rate for (U/hr) mode
-    @Expose
-    @Column(name = "duration")
-    public Integer  duration;               //Duration of Temp
-    @Expose
-    @Column(name = "basal_adjustemnt")
-    public String   basal_adjustemnt;       //High or Low temp
-    @Expose
-    @Column(name = "accepted")
-    public Boolean  accepted;               //Has this APS Result been accepted?
+    private Double   rate;                       //Temp Basal Rate for (U/hr) mode
+    private Integer  duration;                   //Duration of Temp
+    private String   basal_adjustemnt;           //High or Low temp
+
+    private Boolean  accepted        =   false;  //Has this APS Result been accepted?
 
     //User profile details
-    @Expose
-    @Column(name = "aps_algorithm")
-    public String   aps_algorithm;          //APS algorithm these results where produced from
-    @Expose
-    @Column(name = "aps_mode")
-    public String   aps_mode;               //Closed, Open, etc
-    @Expose
-    @Column(name = "current_pump_basal")
-    public Double   current_pump_basal;     //Pumps current basal
-    @Expose
-    @Column(name = "aps_loop")
-    public Integer  aps_loop;               //Loop in mins
+    private String   aps_algorithm;              //APS algorithm these results where produced from
+    private String   aps_mode;                   //Closed, Open
+    private Double   current_pump_basal;         //Pumps current basal
+    private Integer  aps_loop;                   //Loop in mins
 
 
     public void fromJSON(JSONObject apsJSON, Profile p, Pump pump) {
 
-        action      = apsJSON.optString("action", "error");
+        setAction               (apsJSON.optString("action", "error"));
         if (apsJSON.has("error")){
-            reason  = "Error: " + apsJSON.optString("error", "error");
+            setReason       ("Error: " + apsJSON.optString("error", "error"));
         } else {
-            reason  = apsJSON.optString("reason", "error");
+            setReason           (apsJSON.optString("reason", "error"));
         }
-        eventualBG  = apsJSON.optDouble("eventualBG", 0);
-        snoozeBG    = apsJSON.optDouble("snoozeBG", 0);
-        datetime    = new Date().getTime();
-        accepted    = false;
+        setEventualBG           (apsJSON.optDouble("eventualBG", 0));
+        setSnoozeBG             (apsJSON.optDouble("snoozeBG", 0));
 
-        aps_algorithm       = p.aps_algorithm;
-        aps_mode            = p.aps_mode;
-        aps_loop            = p.aps_loop;
-        current_pump_basal  = p.current_basal;
+        setAps_algorithm        (p.aps_algorithm);
+        setAps_mode             (p.aps_mode);
+        setAps_loop             (p.aps_loop);
+        setCurrent_pump_basal   (p.current_basal);
 
-        if (apsJSON.has("deviation")) deviation = apsJSON.optDouble("deviation");
         if (apsJSON.has("rate")) {
-            tempSuggested       = true;
-            basal_adjustemnt    = apsJSON.optString("basal_adjustemnt");
+            setTempSuggested    (true);
+            setBasal_adjustemnt (apsJSON.optString("basal_adjustemnt"));
             //check suggested rate and duration supported by the pump and adjust if needed
-            rate                = pump.checkSuggestedRate(apsJSON.optDouble("rate"));
+            setRate             (pump.checkSuggestedRate(apsJSON.optDouble("rate")));
             Integer sugDuration = apsJSON.optInt("duration");
             if (sugDuration > 0){
-                duration        = pump.getSupportedDuration(apsJSON.optDouble("rate"));
+                setDuration     (pump.getSupportedDuration(apsJSON.optDouble("rate")));
             } else {
-                duration        = sugDuration;
+                setDuration     (sugDuration);
             }
         } else {
-            tempSuggested = false;
-            rate = 0D;
-            duration = 0;  //ie, there is no temp
+            setTempSuggested     (false);
+            setRate              (0D);
+            setDuration          (0);  //ie, there is no temp
         }
     }
 
@@ -140,21 +187,25 @@ public class APSResult extends Model{
     }
 
     public int age(){
-        Date timeNow = new Date();
-        Date created = new Date(datetime);
-        return (int)(timeNow.getTime() - created.getTime()) /1000/60;                           //Age in Mins of the APS result
-    }
-
-    public String getFormattedDeviation(){
-        if (deviation == null) deviation=0D;
-        if (deviation > 0) {
-            return "+" + tools.unitizedBG(deviation);
+        if (timestamp == null){
+            return 0;
         } else {
-            return tools.unitizedBG(deviation);
+            Date timeNow = new Date();
+            return (int) (timeNow.getTime() - timestamp.getTime()) / 1000 / 60;                           //Age in Mins of the APS result
         }
     }
 
+    //public String getFormattedDeviation(){
+    //    if (deviation == null) deviation=0D;
+    //    if (deviation > 0) {
+    //        return "+" + tools.unitizedBG(deviation);
+    //    } else {
+    //        return tools.unitizedBG(deviation);
+     //   }
+    //}
+
     public String getFormattedAlgorithmName(){
+        if (aps_algorithm == null) return "--";
         switch (aps_algorithm) {
             case "openaps_oref0_master":
                 return "OpenAPS Master";
@@ -165,17 +216,25 @@ public class APSResult extends Model{
         }
     }
 
-    public static APSResult last() {
-        APSResult last = new Select()
-                .from(APSResult.class)
-                .orderBy("datetime desc")
-                .executeSingle();
+    public static APSResult last(Realm realm) {
+        RealmResults<APSResult> results = realm.where(APSResult.class)
+                .findAllSorted("timestamp", Sort.DESCENDING);
 
-        if (last != null){
-            if (last.accepted == null) last.accepted = false;
+        if (results.isEmpty()) {
+            return null;
+        } else {
+            return results.first();
         }
+        //APSResult last = new Select()
+        //        .from(APSResult.class)
+        //        .orderBy("datetime desc")
+        //        .executeSingle();
 
-        return last;
+        //if (last != null){
+        //    if (last.accepted == null) last.accepted = false;
+        //}
+
+        //return last;
     }
 
     @Override
@@ -183,11 +242,10 @@ public class APSResult extends Model{
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
         return  "action:" + action + "\n" +
                 " reason:" + reason + "\n" +
-                " deviation:" + deviation + "\n" +
                 " tempSuggested:" + tempSuggested + "\n" +
                 " eventualBG:" + eventualBG + "\n" +
                 " snoozeBG:" + snoozeBG + "\n" +
-                " datetime:" + sdfDateTime.format(datetime) + "\n" +
+                " timestamp:" + sdfDateTime.format(timestamp) + "\n" +
                 " rate:" + rate + "\n" +
                 " duration:" + duration + "\n" +
                 " basal_adjustemnt:" + basal_adjustemnt + "\n" +
