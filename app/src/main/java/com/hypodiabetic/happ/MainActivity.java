@@ -213,8 +213,9 @@ public class MainActivity extends AppCompatActivity {
                         updateAPSError(errorMsg);
                         break;
                     case "NEW_STAT_UPDATE":
-                        Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
-                        updateStats(stat);
+                        // TODO: 03/08/2016 reenable once Stat is a Realm object 
+                        //Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
+                        //updateStats(stat);
                         break;
                     case "UPDATE_RUNNING_TEMP":
                         updateRunningTemp();
