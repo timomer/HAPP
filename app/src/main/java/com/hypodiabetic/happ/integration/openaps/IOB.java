@@ -9,6 +9,7 @@ import com.hypodiabetic.happ.Objects.TempBasal;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +25,7 @@ public class IOB {
 
     //Gets a list of Insulin treatments, converts Temp Basal treatments to Bolus events, called from iobTotal below
     public static List<Bolus> calcTempTreatments (Date time, Realm realm) {
-        List<Bolus> tempBoluses = Bolus.getBolusesBetween(new Date(time.getTime() - 8 * 60 * 60 * 1000), time, realm);              //last 8 hours of Insulin Bolus Treatments
+        List<Bolus> tempBoluses     = new ArrayList<>(Bolus.getBolusesBetween(new Date(time.getTime() - 8 * 60 * 60 * 1000), time, realm));              //last 8 hours of Insulin Bolus Treatments
         List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(new Date(time.getTime() - 8 * 60 * 60 * 1000), time, realm);     //last 8 hours of Temp Basals
 
         Double tempBolusSize;
