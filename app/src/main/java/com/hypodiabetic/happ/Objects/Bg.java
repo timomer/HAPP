@@ -18,51 +18,56 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.Sort;
+import io.realm.annotations.Ignore;
+
 /**
  * Created by tim on 07/08/2015.
  * Cloned from https://github.com/StephenBlackWasAlreadyTaken/NightWatch
  */
 
-//todo a Blood Glucose object?
-@Table(name = "Bg", id = BaseColumns._ID)
-public class Bg extends Model {
-    public SharedPreferences prefs;
+public class Bg extends RealmObject {
 
-    @Expose
-    @Column(name = "sgv")
-    public String sgv;
+    public String getSgv() {
+        return sgv;
+    }
+    public void setSgv(String sgv) {
+        this.sgv = sgv;
+    }
+    public double getBgdelta() {
+        return bgdelta;
+    }
+    public void setBgdelta(double bgdelta) {
+        this.bgdelta = bgdelta;
+    }
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+    public Date getDatetime() {
+        return datetime;
+    }
+    public void setDatetime(Date datetime) {
+        this.datetime = datetime;
+    }
+    public void setBattery(Integer battery) {
+        this.battery = battery;
+    }
 
-    @Expose
-    @Column(name = "bgdelta")
-    public double bgdelta;
+    private String sgv;
+    private double bgdelta;
+    private double trend;
+    private String direction;
+    private Date datetime;
+    private Integer battery;
+    private double filtered;
+    private double unfiltered;
+    private double noise;
 
-    @Expose
-    @Column(name = "trend")
-    public double trend;
-
-    @Expose
-    @Column(name = "direction")
-    public String direction;
-
-    @Expose
-    @Column(name = "datetime")
-    public double datetime;
-
-    @Expose
-    @Column(name = "battery")
-    public String battery;
-
-    @Expose
-    @Column(name = "filtered")
-    public double filtered;
-
-    @Expose
-    @Column(name = "unfiltered")
-    public double unfiltered;
-
-    @Expose
-    @Column(name = "noise")
-    public double noise;
+    @Ignore
+    private SharedPreferences prefs;
 
     public String unitized_string() {
         double value = sgv_double();
@@ -145,9 +150,9 @@ public class Bg extends Model {
         }
     }
 
-    public int battery_int() {
-        return Integer.parseInt(battery);
-    }
+    //public int battery_int() {
+    //    return Integer.parseInt(battery);
+    //}
 
     public String slopeArrow() {
         String arrow = "--";
@@ -178,28 +183,28 @@ public class Bg extends Model {
     }
 
     public double timeSince() {
-        return new Date().getTime() - datetime;
+        return new Date().getTime() - datetime.getTime();
     }
 
-    public DataMap dataMap(SharedPreferences sPrefs) {
-        prefs = sPrefs;
+    //public DataMap dataMap(SharedPreferences sPrefs) {
+    //    prefs = sPrefs;
 
-        Double highMark = Double.parseDouble(prefs.getString("highValue", "170"));
-        Double lowMark = Double.parseDouble(prefs.getString("lowValue", "70"));
-        DataMap dataMap = new DataMap();
-        dataMap.putString("sgvString", unitized_string());
-        dataMap.putString("slopeArrow", slopeArrow());
-        dataMap.putDouble("timestamp", datetime);
-        dataMap.putString("delta", unitizedDeltaString());
-        dataMap.putString("battery", battery);
-        dataMap.putLong("sgvLevel", sgvLevel(prefs));
-        dataMap.putInt("batteryLevel", batteryLevel());
+    //    Double highMark = Double.parseDouble(prefs.getString("highValue", "170"));
+    //    Double lowMark = Double.parseDouble(prefs.getString("lowValue", "70"));
+    //   DataMap dataMap = new DataMap();
+    //    dataMap.putString("sgvString", unitized_string());
+    //    dataMap.putString("slopeArrow", slopeArrow());
+    //    dataMap.putDouble("timestamp", datetime.getTime());
+    //    dataMap.putString("delta", unitizedDeltaString());
+    //    dataMap.putString("battery", battery);
+    //    dataMap.putLong("sgvLevel", sgvLevel(prefs));
+    //    dataMap.putInt("batteryLevel", batteryLevel());
 
-        dataMap.putDouble("sgvDouble", sgv_double());
-        dataMap.putDouble("high", inMgdl(highMark));
-        dataMap.putDouble("low", inMgdl(lowMark));
-        return dataMap;
-    }
+    //    dataMap.putDouble("sgvDouble", sgv_double());
+    //    dataMap.putDouble("high", inMgdl(highMark));
+    //    dataMap.putDouble("low", inMgdl(lowMark));
+    //    return dataMap;
+    //}
 
     public double inMgdl(double value) {
         if (!doMgdl()) {
@@ -231,8 +236,8 @@ public class Bg extends Model {
     }
 
     public int batteryLevel() {
-        int bat = battery != null ? Integer.valueOf(battery.replaceAll("[^\\d.]", "")) : 0;
-        if(bat >= 30) {
+        //int bat = battery != null ? Integer.valueOf(battery.replaceAll("[^\\d.]", "")) : 0;
+        if(battery >= 30) {
             return 1;
         } else {
             return 0;
@@ -247,37 +252,53 @@ public class Bg extends Model {
         }
     }
 
-    public static Bg last() {
-        return new Select()
-                .from(Bg.class)
-                .orderBy("datetime desc")
-                .executeSingle();
-    }
+    public static Bg last(Realm realm) {
+        RealmResults<Bg> results = realm.where(Bg.class)
+                .findAllSorted("datetime", Sort.DESCENDING);
 
-    public static List<Bg> latestForGraph(int number, double startTime) {
-        DecimalFormat df = new DecimalFormat("#");
-        df.setMaximumFractionDigits(1);
-
-        return new Select()
-                .from(Bg.class)
-                .where("datetime >= " + df.format(startTime))
-                .orderBy("datetime desc")
-                .limit(number)
-                .execute();
-    }
-
-    public static boolean alreadyExists(double timestamp) {
-        Bg bg = new Select()
-                .from(Bg.class)
-                .where("datetime <= ?", (timestamp + (2 * 1000)))
-                .orderBy("datetime desc")
-                .executeSingle();
-        if(bg != null && bg.datetime >= (timestamp - (2 * 1000))) {
-            return true;
+        if (results.isEmpty()) {
+            return null;
         } else {
-            return false;
+            return results.first();
         }
+        //return new Select()
+        //        .from(Bg.class)
+        //        .orderBy("datetime desc")
+        //        .executeSingle();
     }
+
+    public static List<Bg> latestSince(Date startTime, Realm realm) {
+        RealmResults<Bg> results = realm.where(Bg.class)
+                .greaterThanOrEqualTo("datetime", startTime)
+                .findAllSorted("datetime", Sort.DESCENDING);
+
+        return results;
+        //return new Select()
+        //        .from(Bg.class)
+        //        .where("datetime >= " + df.format(startTime))
+        //        .orderBy("datetime desc")
+        //        .limit(number)
+        //        .execute();
+    }
+
+    public static List<Bg> latest( Realm realm) {
+        RealmResults<Bg> results = realm.where(Bg.class)
+                .findAllSorted("datetime", Sort.DESCENDING);
+        return results;
+    }
+
+    //public static boolean alreadyExists(double timestamp) {
+    //    Bg bg = new Select()
+    //            .from(Bg.class)
+    //            .where("datetime <= ?", (timestamp + (2 * 1000)))
+    //            .orderBy("datetime desc")
+    //            .executeSingle();
+    //    if(bg != null && bg.datetime >= (timestamp - (2 * 1000))) {
+    //        return true;
+    //    } else {
+    //        return false;
+    //    }
+    //}
 
     public String stringResult() {
         Double value = sgv_double();

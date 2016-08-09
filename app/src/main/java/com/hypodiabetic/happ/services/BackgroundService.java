@@ -17,6 +17,8 @@ import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 06/03/2016.
  */
@@ -25,6 +27,7 @@ public class BackgroundService extends Service{
     SharedPreferences mPrefs;
     SharedPreferences.OnSharedPreferenceChangeListener mPrefListener;
     BroadcastReceiver mNotifyReceiver;
+    private Realm realm;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -42,6 +45,7 @@ public class BackgroundService extends Service{
         setAPSAlarm(Integer.parseInt(mPrefs.getString("aps_loop", "900000")));
         setNotifyReceiver();
         setSharedPrefListener();
+        realm = Realm.getDefaultInstance();
 
         Log.d(TAG, "onCreate Finished");
     }
@@ -51,6 +55,7 @@ public class BackgroundService extends Service{
         super.onDestroy();
         if (mPrefs != null && mPrefListener != null)    mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefListener);
         if (mNotifyReceiver != null)                    unregisterReceiver(mNotifyReceiver);
+        realm.close();
     }
 
     @Override
@@ -93,7 +98,7 @@ public class BackgroundService extends Service{
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                        Notifications.updateCard();
+                        Notifications.updateCard(realm);
                     }
                 }
             };

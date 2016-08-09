@@ -7,6 +7,8 @@ import com.hypodiabetic.happ.tools;
 import java.util.Date;
 import java.util.StringTokenizer;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 16/02/2016.
  * Pump object provides point in time info of users pump
@@ -31,10 +33,10 @@ public class Pump {
     private static final int PERCENT                =  2;       //Percent of Basal
     private static final int BASAL_PLUS_PERCENT     =  3;       //hourly basal rate plus TBR percentage
 
-    public Pump(Date profile_date){
+    public Pump(Date profile_date, Realm realm){
 
         profile             =   new Profile(profile_date);
-        tempBasal           =   TempBasal.last();
+        tempBasal           =   TempBasal.last(realm);
         name                =   profile.pump_name;
         default_basal_rate  =   profile.current_basal;
 
@@ -65,9 +67,9 @@ public class Pump {
 
         temp_basal_active   =   tempBasal.isactive(new Date());
         if (temp_basal_active){
-            temp_basal_rate             =   tempBasal.rate;
+            temp_basal_rate             =   tempBasal.getRate();
             temp_basal_percent          =   getBasalPercent();
-            temp_basal_duration         =   tempBasal.duration;
+            temp_basal_duration         =   tempBasal.getDuration();
             temp_basal_duration_left    =   tempBasal.durationLeft();
         }
     }
@@ -102,8 +104,8 @@ public class Pump {
             temp_basal_duration_left    =   apsResult.getDuration().longValue();
             if (apsResult.checkIsCancelRequest()) temp_basal_active   =   false;
         } else {
-            temp_basal_rate             =   tempBasal.rate;
-            temp_basal_duration         =   tempBasal.duration;
+            temp_basal_rate             =   tempBasal.getRate();
+            temp_basal_duration         =   tempBasal.getDuration();
             temp_basal_duration_left    =   tempBasal.durationLeft();
             if (tempBasal.checkIsCancelRequest()) temp_basal_active   =   false;
         }

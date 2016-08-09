@@ -11,18 +11,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.APSResult;
+import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Safety;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
-import com.hypodiabetic.happ.services.APSService;
 import com.hypodiabetic.happ.services.FiveMinService;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -34,16 +30,16 @@ import io.realm.Realm;
  */
 public class pumpAction {
 
-    public static void newTempBasal(TempBasal basal, Context c){
+    public static void newTempBasal(TempBasal basal, Context c, Realm realm){
         //A new Temp Basal has been suggested
         Profile p = new Profile(new Date());
 
         if (basal != null && c != null) {
-            if (basal.aps_mode.equals("closed") && !p.temp_basal_notification) {                    //Send Direct to pump
+            if (basal.getAps_mode().equals("closed") && !p.temp_basal_notification) {               //Send Direct to pump
                 setTempBasal(basal);
 
             } else {
-                Notifications.newTemp(basal, c);                                                    //Notify user
+                Notifications.newTemp(basal, c, realm);                                             //Notify user
             }
         }
     }
@@ -56,7 +52,6 @@ public class pumpAction {
         APSResult apsResult = APSResult.last(realm);
         apsResult.setAccepted(true);
         realm.commitTransaction();
-        realm.close();
 
         if (basal == null) basal = apsResult.getBasal();
 
@@ -69,11 +64,13 @@ public class pumpAction {
             Safety safety = new Safety();
 
             //Sanity check the suggested rate is safe
-            if (!safety.checkIsSafeMaxBolus(basal.rate)) basal.rate = safety.getMaxBasal(p);
+            if (!safety.checkIsSafeMaxBolus(basal.getRate())) basal.setRate(safety.getMaxBasal(p));
 
             //Save
-            basal.start_time = new Date();
-            basal.save();
+            basal.setStart_time(new Date());
+            realm.beginTransaction();
+            realm.copyToRealm(basal);
+            realm.commitTransaction();
 
             //Clear notifications
             Notifications.clear("updateCard");
@@ -91,18 +88,21 @@ public class pumpAction {
             //Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
             //MainApp.instance().startService(apsIntent);
         }
+        realm.close();
     }
 
     public static void cancelTempBasal(){
         //Cancels a Running Temp Basal and updates the DB with the Temp Basal new duration
-
-        final TempBasal active_basal = TempBasal.getCurrentActive(null);
+        Realm realm = Realm.getDefaultInstance();
+        final TempBasal active_basal = TempBasal.getCurrentActive(null, realm);
 
         if (active_basal.isactive(null)) {
 
             //stop the temp basal
-            active_basal.duration = active_basal.age();
-            active_basal.save();
+            realm.beginTransaction();
+            active_basal.setDuration(active_basal.age());
+            realm.copyToRealm(active_basal);
+            realm.commitTransaction();
 
             //Inform Integrations Manager
             IntegrationsManager.cancelTempBasal(active_basal);
@@ -126,32 +126,32 @@ public class pumpAction {
     }
 
 
-    public static void setBolus(Treatments bolusTreatment, final Treatments carbTreatment, Treatments correctionTrearment, final Context c){
+    public static void setBolus(Bolus bolus, final Carb carb, Bolus bolusCorrection, final Context c){
 
         Safety safety = new Safety();
         Profile p = new Profile(new Date());
         Double totalBolus=0D, diffBolus=0D;
         String warningMSG="";
 
-        if (bolusTreatment != null) totalBolus      += bolusTreatment.value;
-        if (correctionTrearment != null) {
-            totalBolus += correctionTrearment.value;
-            if (correctionTrearment.value < 0) {
-                if (bolusTreatment != null) {
-                    bolusTreatment.value = bolusTreatment.value + correctionTrearment.value;
-                    if (bolusTreatment.value < 0) bolusTreatment = null;
+        if (bolus != null) totalBolus      += bolus.getValue();
+        if (bolusCorrection != null) {
+            totalBolus += bolusCorrection.getValue();
+            if (bolusCorrection.getValue() < 0) {
+                if (bolus != null) {
+                    bolus.setValue(bolus.getValue() + bolusCorrection.getValue());
+                    if (bolus.getValue() < 0) bolus = null;
                 }
-                correctionTrearment = null;
+                bolusCorrection = null;
             }
         }
         if (totalBolus < 0)  {
             totalBolus = 0D;
-            bolusTreatment = null;
-            correctionTrearment = null;
+            bolus = null;
+            bolusCorrection = null;
             warningMSG = "No Bolus to Deliver";
         }
 
-        if (bolusTreatment == null && correctionTrearment == null && carbTreatment == null) return;
+        if (bolus == null && bolusCorrection == null && carb == null) return;
 
 
         if (!safety.checkIsSafeMaxBolus(totalBolus)){
@@ -160,24 +160,24 @@ public class pumpAction {
             diffBolus = totalBolus - safety.getSafeBolus();
             totalBolus = safety.getSafeBolus();
 
-            if (correctionTrearment != null){
+            if (bolusCorrection != null){
 
-                if (correctionTrearment.value <= diffBolus) {                                       //Delete the correction bolus and also reduce the bolus
-                    diffBolus = diffBolus - correctionTrearment.value;
-                    correctionTrearment = null;
-                    bolusTreatment.value = bolusTreatment.value - diffBolus;
-                    if (bolusTreatment.value < 0) bolusTreatment.value = 0D;
+                if (bolusCorrection.getValue() <= diffBolus) {                                       //Delete the correction bolus and also reduce the bolus
+                    diffBolus = diffBolus - bolusCorrection.getValue();
+                    bolusCorrection = null;
+                    bolus.setValue(bolus.getValue() - diffBolus);
+                    if (bolus.getValue() < 0) bolus.setValue(0D);
                 } else {                                                                            //Take the diff off the correction
-                    correctionTrearment.value = correctionTrearment.value - diffBolus;
+                    bolusCorrection.setValue(bolusCorrection.getValue() - diffBolus);
                 }
             } else {                                                                                //No correction, reset the bolus to safe value
-                bolusTreatment.value = totalBolus;
+                bolus.setValue(totalBolus);
             }
 
         }
 
-        final Treatments finalCorrectionTrearment = correctionTrearment;
-        final Treatments finalBolusTreatment = bolusTreatment;
+        final Bolus finalCorrectionTrearment = bolusCorrection;
+        final Bolus finalBolusTreatment = bolus;
         final Dialog dialog = new Dialog(c);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.bolus_dialog);
@@ -198,7 +198,7 @@ public class pumpAction {
 
         if (p.send_bolus_allowed){
             //Bolus allowed to send commend to pump
-            if (!safety.checkIsBolusSafeToSend(bolusTreatment,correctionTrearment)) {
+            if (!safety.checkIsBolusSafeToSend(bolus, bolusCorrection)) {
                 warningMSG += "\nBolus is in the past or future, will not be sent to Pump.";
             }
             bolusMsg.setText("deliver to pump");
@@ -211,15 +211,15 @@ public class pumpAction {
 
         bolusAmount.setText(tools.formatDisplayInsulin(totalBolus,1));
         if (finalBolusTreatment != null){
-            bolusTreatValue.setText(tools.formatDisplayInsulin(finalBolusTreatment.value, 1));
+            bolusTreatValue.setText(tools.formatDisplayInsulin(finalBolusTreatment.getValue(), 1));
             bolusTreatText.setText("Insulin Bolus");
         } else {bolusTreatLayout.setVisibility(View.GONE);}
         if (finalCorrectionTrearment != null){
-            corrTreatValue.setText(tools.formatDisplayInsulin(finalCorrectionTrearment.value, 1));
+            corrTreatValue.setText(tools.formatDisplayInsulin(finalCorrectionTrearment.getValue(), 1));
             corrTreatText.setText("Insulin Correction");
         } else {corrTreatLayout.setVisibility(View.GONE);}
-        if (carbTreatment != null){
-            carbTreatValue.setText(tools.formatDisplayCarbs(carbTreatment.value));
+        if (carb != null){
+            carbTreatValue.setText(tools.formatDisplayCarbs(carb.getValue()));
             carbTreatText.setText("Carbohydrates");
         } else {carbTreatLayout.setVisibility(View.GONE);}
         if (!warningMSG.equals("")) {
@@ -230,13 +230,17 @@ public class pumpAction {
             @Override
             public void onClick(View v) {
 
-                if (carbTreatment != null) carbTreatment.save();
-                if (finalBolusTreatment != null) finalBolusTreatment.save();
-                if (finalCorrectionTrearment != null) finalCorrectionTrearment.save();
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                if (carb != null) realm.copyToRealm(carb);
+                if (finalBolusTreatment != null) realm.copyToRealm(finalBolusTreatment);
+                if (finalCorrectionTrearment != null) realm.copyToRealm(finalCorrectionTrearment);
+                realm.commitTransaction();
+                realm.close();
 
                 //inform Integration Manager
                 IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment);
-                IntegrationsManager.newCarbs(carbTreatment);
+                IntegrationsManager.newCarbs(carb);
 
                 //update Stats
                 MainApp.instance().startService(new Intent(MainApp.instance(), FiveMinService.class));

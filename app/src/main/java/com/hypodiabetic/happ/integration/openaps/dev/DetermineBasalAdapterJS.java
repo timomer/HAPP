@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 21/11/2015.
  * Allows running native OpenAPS determine-basal.js in J2V8
@@ -49,11 +51,14 @@ public class DetermineBasalAdapterJS {
     private final String PARAM_profile = "profile";
     private final String PARM_meal_data = "meal_data";
 
+    private Realm realm;
+
     JSONObject bgCheck;
 
     public DetermineBasalAdapterJS(ScriptReader scriptReader) throws IOException {
         mV8rt = V8.createV8Runtime();
         mScriptReader  = scriptReader;
+        realm = Realm.getDefaultInstance();
 
         Profile profile = new Profile(new Date());
 
@@ -70,6 +75,8 @@ public class DetermineBasalAdapterJS {
         initModuleParent();
 
         loadScript();
+
+        realm.close();
     }
 
     public JSONObject invoke() {
@@ -187,10 +194,10 @@ public class DetermineBasalAdapterJS {
     private void initCurrentTemp() {
         mCurrentTemp = new V8Object(mV8rt);
 
-        TempBasal activeTemp = TempBasal.getCurrentActive(null);
+        TempBasal activeTemp = TempBasal.getCurrentActive(null, realm);
         //setCurrentTemp((double) activeTemp.duration,(double) activeTemp.rate);
-        mCurrentTemp.add("rate", activeTemp.rate);
-        mCurrentTemp.add("duration", activeTemp.duration);
+        mCurrentTemp.add("rate", activeTemp.getRate());
+        mCurrentTemp.add("duration", activeTemp.getDuration());
         //mCurrentTemp.add("temp", "absolute"); // TODO: 22/11/2015 what is this used for?
 
         mV8rt.add(PARAM_currentTemp, mCurrentTemp);
@@ -205,7 +212,7 @@ public class DetermineBasalAdapterJS {
         mIobData = new V8Object(mV8rt);
         //setIobData(0.0, 0.0, 0.0);
 
-        JSONObject iobJSON = IOB.iobTotal(p, new Date());
+        JSONObject iobJSON = IOB.iobTotal(p, new Date(), realm);
         try {
             mIobData.add("iob", iobJSON.getDouble("iob"));
             mIobData.add("activity", iobJSON.getDouble("activity"));
@@ -227,10 +234,7 @@ public class DetermineBasalAdapterJS {
         //setGlucoseStatus(100.0, 10.0, 10.0);
 
         mGlucoseStatus = new V8Array(mV8rt);
-
-        double fuzz = (1000 * 30 * 5);
-        double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
-        List<Bg> bgReadings = Bg.latestForGraph(4, start_time * fuzz);
+        List<Bg> bgReadings = Bg.latest(realm);
 
         bgCheck = checkGlucose(bgReadings);
         if (bgCheck == null) {
@@ -244,7 +248,7 @@ public class DetermineBasalAdapterJS {
             Double avg;
 
             //TODO: calculate average using system_time instead of assuming 1 data point every 5m
-            if (bgReadings.size() == 4) {
+            if (bgReadings.size() >= 4) {
                 minutes = 3 * 5;
                 change = now.sgv_double() - bgReadings.get(3).sgv_double();
             } else if (bgReadings.size() == 3) {
@@ -260,7 +264,7 @@ public class DetermineBasalAdapterJS {
             avg = change / minutes * 5;
 
 
-            mGlucoseStatus.add("delta", now.bgdelta);
+            mGlucoseStatus.add("delta", now.getBgdelta());
             mGlucoseStatus.add("glucose", now.sgv_double());
             mGlucoseStatus.add("avgdelta", avg);
 
@@ -280,8 +284,8 @@ public class DetermineBasalAdapterJS {
 
             Date systemTime = new Date();
             Date bgTime = new Date();
-            if (bgReadings.get(0).datetime != 0) {
-                bgTime = new Date((long) bgReadings.get(0).datetime);
+            if (bgReadings.get(0).getDatetime().getTime() != 0) {
+                bgTime = new Date((long) bgReadings.get(0).getDatetime().getTime());
                 Long minAgo = (systemTime.getTime() - bgTime.getTime()) / 60 / 1000;
 
                 if (minAgo > 10 || minAgo < -5) { // Dexcom data is too old, or way in the future

@@ -11,70 +11,114 @@ import com.google.gson.annotations.Expose;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+
+import io.realm.Realm;
+import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.Sort;
+import io.realm.annotations.Ignore;
 
 /**
  * Created by Tim on 03/09/2015.
  */
-@Table(name = "openaps_temp_basals", id = BaseColumns._ID)
-public class TempBasal extends Model {
+public class TempBasal extends RealmObject {
 
-    @Expose
-    @Column(name = "rate")
-    public Double   rate=0D;                //Temp Basal Rate for (U/hr) mode
-    //@Expose
-    //@Column(name = "ratePercent")
-    //public Integer  ratePercent=0;          //Temp Basal Rate for "percent" of normal basal
-    @Expose
-    @Column(name = "duration")
-    public Integer  duration=0;             //Duration of Temp
-    //@Expose
-    //@Column(name = "basal_type")
-    //public String   basal_type;             //Absolute or Percent
-    @Expose
-    @Column(name = "start_time")
-    public Date     start_time;             //When the Temp Basal started
-    @Expose
-    @Column(name = "basal_adjustemnt")
-    public String   basal_adjustemnt="";    //High or Low temp
-    //@Expose
-    //@Column(name = "current_pump_basal")
-    //public Double   current_pump_basal;     //Pumps current basal
-    @Expose
-    @Column(name = "integration")           //JSON String holding details of integration made with this record, NS upload, etc
-    public String integration;
-    @Expose
-    @Column(name = "aps_mode")
-    public String   aps_mode;
 
-    public Date     created_time = new Date();
-
-    public static TempBasal getTempBasalByID(Long dbid) {
-        TempBasal tempBasal = new Select()
-                .from(TempBasal.class)
-                .where("_id = " + dbid)
-                .executeSingle();
-        return tempBasal;
+    public Double getRate() {
+        return rate;
+    }
+    public void setRate(Double rate) {
+        this.rate = rate;
+    }
+    public Integer getDuration() {
+        return duration;
+    }
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+    public Date getStart_time() {
+        return start_time;
+    }
+    public void setStart_time(Date start_time) {
+        this.start_time = start_time;
+    }
+    public String getBasal_adjustemnt() {
+        return basal_adjustemnt;
+    }
+    public void setBasal_adjustemnt(String basal_adjustemnt) {
+        this.basal_adjustemnt = basal_adjustemnt;
+    }
+    public String getAps_mode() {
+        return aps_mode;
+    }
+    public void setAps_mode(String aps_mode) {
+        this.aps_mode = aps_mode;
+    }
+    public String getId() {
+        return id;
+    }
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public static TempBasal last() {
-        TempBasal last = new Select()
-                .from(TempBasal.class)
-                .orderBy("start_time desc")
-                .executeSingle();
+    private String   id                 = UUID.randomUUID().toString();
+    private Double   rate               = 0D;    //Temp Basal Rate for (U/hr) mode
+    private Integer  duration           = 0;     //Duration of Temp
+    private Date     start_time;                 //When the Temp Basal started
+    private String   basal_adjustemnt   = "";    //High or Low temp
+    private String   aps_mode;
 
-        if (last != null){
-            return last;
+    @Ignore
+    public Date     timestamp        = new Date();
+
+    public static TempBasal getTempBasalByID(String uuid, Realm realm) {
+        RealmResults<TempBasal> results = realm.where(TempBasal.class)
+                .equalTo("id", uuid)
+                .findAllSorted("start_time", Sort.DESCENDING);
+
+        if (results.isEmpty()) {
+            return null;
         } else {
-            return new TempBasal();     //returns an empty TempBasal, other than null
+            return results.first();
         }
+        //TempBasal tempBasal = new Select()
+        //        .from(TempBasal.class)
+        //        .where("_id = " + dbid)
+        //        .executeSingle();
+        //return tempBasal;
     }
 
-    public static TempBasal getCurrentActive(Date atThisDate) {
-        TempBasal last = new Select()
-                .from(TempBasal.class)
-                .orderBy("start_time desc")
-                .executeSingle();
+    public static TempBasal last(Realm realm) {
+        RealmResults<TempBasal> results = realm.where(TempBasal.class)
+                .findAllSorted("start_time", Sort.DESCENDING);
 
+        if (results.isEmpty()) {
+            return new TempBasal();     //returns an empty TempBasal, other than null
+        } else {
+            return results.first();
+        }
+        //TempBasal last = new Select()
+        //        .from(TempBasal.class)
+        //        .orderBy("start_time desc")
+        //        .executeSingle();
+
+        //if (last != null){
+        //    return last;
+        //} else {
+        //    return new TempBasal();     //returns an empty TempBasal, other than null
+        //}
+    }
+
+    public static TempBasal getCurrentActive(Date atThisDate, Realm realm) {
+        RealmResults<TempBasal> results = realm.where(TempBasal.class)
+                .findAllSorted("start_time", Sort.DESCENDING);
+        //TempBasal last = new Select()
+        //        .from(TempBasal.class)
+        //        .orderBy("start_time desc")
+        //        .executeSingle();
+        TempBasal last = null;
+        if (!results.isEmpty()) results.first();
         if (last != null && last.isactive(atThisDate)){
             return last;
         } else {
@@ -106,11 +150,11 @@ public class TempBasal extends Model {
 
     public int age(){
         Date timeNow = new Date();
-        return (int)(timeNow.getTime() - created_time.getTime()) /1000/60;                          //Age in Mins the Temp Basal was suggested
+        return (int)(timeNow.getTime() - timestamp.getTime()) /1000/60;                             //Age in Mins the Temp Basal was suggested
     }
 
     public Date endDate(){
-        Date endedAt = new Date(start_time.getTime() + (duration * 1000 * 60));                   //The date this Temp Basal ended
+        Date endedAt = new Date(start_time.getTime() + (duration * 1000 * 60));                     //The date this Temp Basal ended
         return endedAt;
     }
 
@@ -124,22 +168,27 @@ public class TempBasal extends Model {
         }
     }
 
-    public static List<TempBasal> latestTempBasals(int limit) {
+    //public static List<TempBasal> latestTempBasals(int limit) {
 
-        return new Select()
-                .from(TempBasal.class)
-                .orderBy("start_time desc")
-                .limit(limit)
-                .execute();
-    }
+    //    return new Select()
+    //            .from(TempBasal.class)
+    //            .orderBy("start_time desc")
+    //            .limit(limit)
+    //            .execute();
+    //}
 
-    public static List<TempBasal> getTempBasalsDated(Long dateFrom, Long dateTo) {
+    public static List<TempBasal> getTempBasalsDated(Date dateFrom, Date dateTo, Realm realm) {
+        RealmResults<TempBasal> results = realm.where(TempBasal.class)
+                .greaterThanOrEqualTo("start_time", dateFrom)
+                .lessThanOrEqualTo("start_time", dateTo)
+                .findAllSorted("start_time", Sort.DESCENDING);
+        return results;
 
-        return new Select()
-                .from(TempBasal.class)
-                .where("start_time >= ? and start_time <= ?", dateFrom, dateTo)
-                .orderBy("start_time desc")
-                .execute();
+        //return new Select()
+        //        .from(TempBasal.class)
+        //        .where("start_time >= ? and start_time <= ?", dateFrom, dateTo)
+        //        .orderBy("start_time desc")
+        //        .execute();
     }
 
     public boolean checkIsCancelRequest() {

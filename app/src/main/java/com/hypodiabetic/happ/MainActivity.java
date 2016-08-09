@@ -1,10 +1,8 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -19,16 +17,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
-import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -54,23 +49,18 @@ import com.hypodiabetic.happ.Graphs.BgGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBBarGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBLineGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
-import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
-import com.hypodiabetic.happ.Objects.Stats;
+import com.hypodiabetic.happ.Objects.Stat;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.integration.InsulinIntegrationApp;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
-import com.hypodiabetic.happ.integration.Objects.InsulinIntegrationNotify;
 import com.hypodiabetic.happ.services.APSService;
 import com.hypodiabetic.happ.services.BackgroundService;
 
 
 import io.fabric.sdk.android.Fabric;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -213,9 +203,8 @@ public class MainActivity extends AppCompatActivity {
                         updateAPSError(errorMsg);
                         break;
                     case "NEW_STAT_UPDATE":
-                        // TODO: 03/08/2016 reenable once Stat is a Realm object 
-                        //Stats stat = gson.fromJson(intent.getStringExtra("stat"), Stats.class);
-                        //updateStats(stat);
+                        Stat stat = gson.fromJson(intent.getStringExtra("stat"), Stat.class);
+                        updateStats(stat);
                         break;
                     case "UPDATE_RUNNING_TEMP":
                         updateRunningTemp();
@@ -242,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
         updateBGDetails();
         updateStats(null);
         updateAPSDetails(null);
-        IntegrationsManager.updatexDripWatchFace();
+        IntegrationsManager.updatexDripWatchFace(realm);
 
         //Checks if we have any Insulin Integration App errors we must warn the user about
         Notifications.newInsulinUpdate();
@@ -416,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Insulin Integration App, try and connect
         if (!insulin_Integration_App.equals("")){
-            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST");
+            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST", realm);
             insulinIntegrationApp.connectInsulinTreatmentApp();
             insulinIntegrationApp_status.setText("Connecting...");
             insulinIntegrationApp_icon.setBackground(clockWhite);
@@ -536,16 +525,16 @@ public class MainActivity extends AppCompatActivity {
         if ((currentBgValueText.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) > 0) {
             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-        Bg lastBg = Bg.last();
+        Bg lastBg = Bg.last(realm);
 
         if (lastBg != null) {
             notificationText.setText(lastBg.readingAge());
-            String bgDelta = tools.unitizedBG(lastBg.bgdelta);
-            if (lastBg.bgdelta >= 0) bgDelta = "+" + bgDelta;
+            String bgDelta = tools.unitizedBG(lastBg.getBgdelta());
+            if (lastBg.getBgdelta() >= 0) bgDelta = "+" + bgDelta;
             deltaText.setText(bgDelta);
             currentBgValueText.setText(lastBg.stringResult() + " " + lastBg.slopeArrow());
 
-            if ((new Date().getTime()) - (60000 * 16) - lastBg.datetime > 0) {
+            if ((new Date().getTime()) - (60000 * 16) - lastBg.getDatetime().getTime() > 0) {
                 notificationText.setTextColor(Color.parseColor("#C30909"));
                 currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
@@ -602,15 +591,15 @@ public class MainActivity extends AppCompatActivity {
         TextView apsAge             = (TextView) findViewById(R.id.openapsAge);
         TextView notificationText   = (TextView) findViewById(R.id.notices);
 
-        Stats stat          = Stats.last();
-        Bg lastBg           = Bg.last();
+        Stat stat          = Stat.last(realm);
+        Bg lastBg           = Bg.last(realm);
         APSResult apsResult = APSResult.last(realm);
 
         if (stat != null)       statsAge.setText(stat.statAge());
         if (apsResult != null)  apsAge.setText(apsResult.ageFormatted());
         if (lastBg != null) {
             notificationText.setText(lastBg.readingAge());
-            if ((new Date().getTime()) - (60000 * 16) - lastBg.datetime > 0) {
+            if ((new Date().getTime()) - (60000 * 16) - lastBg.getDatetime().getTime() > 0) {
                 notificationText.setTextColor(Color.parseColor("#C30909"));
             } else {
                 notificationText.setTextColor(getResources().getColor(R.color.secondary_text_light));
@@ -621,9 +610,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Updates stats and stats Fragments charts
-    public void updateStats(Stats stat) {
+    public void updateStats(Stat stat) {
 
-        if (stat == null) stat = Stats.last();
+        if (stat == null) stat = Stat.last(realm);
 
         if (stat != null) {
             TextView iobValueTextView   = (TextView) findViewById(R.id.iobValue);
@@ -631,8 +620,8 @@ public class MainActivity extends AppCompatActivity {
             TextView statsAge           = (TextView) findViewById(R.id.statsAge);
 
             //Update Dashboard
-            iobValueTextView.setText(tools.formatDisplayInsulin(stat.iob, 1));
-            cobValueTextView.setText(tools.formatDisplayCarbs(stat.cob));
+            iobValueTextView.setText(tools.formatDisplayInsulin(stat.getIob(), 1));
+            cobValueTextView.setText(tools.formatDisplayCarbs(stat.getCob()));
             statsAge.setText(stat.statAge());
 
             //Update IOB COB fragment Line Chart
@@ -652,7 +641,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateRunningTemp(){
-        Pump pump = new Pump(new Date());
+        Pump pump = new Pump(new Date(), realm);
         toolbar.setTitle(pump.displayBasalDesc(false));
         toolbar.setSubtitle(pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft());
     }
@@ -813,9 +802,6 @@ public class MainActivity extends AppCompatActivity {
                 //apsstatus_deviation.setText(apsResult.getFormattedDeviation());
                 apsstatus_mode.setText(apsResult.getAps_mode());
                 apsstatus_loop.setText(apsResult.getAps_loop() + " mins");
-
-                Log.e(TAG, "update: " + apsResult.toString() );
-
                 apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
                 if (apsResult.getTempSuggested() && !apsResult.getAccepted()) {
@@ -874,7 +860,7 @@ public class MainActivity extends AppCompatActivity {
 
         public void setupChart(){
             //Setup the chart and Viewpoint
-            iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext());
+            iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realm);
 
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setViewportCalculationEnabled(false);
@@ -895,7 +881,7 @@ public class MainActivity extends AppCompatActivity {
             if (iobcobPastChart != null) {
 
                 //refreshes data and sets viewpoint
-                iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext());
+                iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realm);
                 iobcobPastChart.setLineChartData(iobcobLineGraph.iobcobPastLineData());
 
                 iobv.left       = previewChart.getCurrentViewport().left;
@@ -933,7 +919,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (iobcobChart != null) {
                 //reloads charts with Treatment data
-                IOBCOBBarGraph iobcobBarGraph = new IOBCOBBarGraph(rootView.getContext());
+                IOBCOBBarGraph iobcobBarGraph = new IOBCOBBarGraph(rootView.getContext(), realm);
                 iobcobChart.setColumnChartData(iobcobBarGraph.iobcobFutureChart());
             }
         }
@@ -959,7 +945,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void setupChart(){
-            basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext());
+            basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realm);
 
             basalvsTempBasalChart.setZoomType(ZoomType.HORIZONTAL);
             basalvsTempBasalChart.setViewportCalculationEnabled(false);
@@ -979,7 +965,7 @@ public class MainActivity extends AppCompatActivity {
         //Updates Stats
         public static void updateChart(){
             if (basalvsTempBasalChart != null) {
-                basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext());
+                basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realm);
                 basalvsTempBasalChart.setLineChartData(basalVSTempBasalGraph.basalvsTempBasalData());
 
                 iobv.left       = previewChart.getCurrentViewport().left;

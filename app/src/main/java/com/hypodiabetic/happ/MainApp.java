@@ -56,8 +56,12 @@ public class MainApp extends Application {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(instance())
                 .name("happ.realm")
                 .schemaVersion(0)
+                .deleteRealmIfMigrationNeeded() // TODO: 03/08/2016 remove
                 .build();
         return realmConfiguration;
     }
+
+
+
 
 }

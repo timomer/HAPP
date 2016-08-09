@@ -1,16 +1,17 @@
 package com.hypodiabetic.happ.integration.openaps.dev;
 
-import android.widget.Switch;
-
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Profile;
-import com.hypodiabetic.happ.Objects.Treatments;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
+
+import io.realm.Realm;
 
 /**
  * Created by Tim on 13/02/2016.
@@ -21,37 +22,41 @@ public class meal {
 
     public static JSONObject generate () {
 
-        Profile profile_data = new Profile(new Date());
-        Long now = new Date().getTime();
+        Date now = new Date();
+        Realm realm = Realm.getDefaultInstance();
 
-        List<Treatments> treatments = findMealInputs(profile_data, now);
+        //List<Carb> carbs = findMealInputs(profile_data, now);
 
-        JSONObject meal_data = diaCarbs(treatments, now);
+        JSONObject meal_data = diaCarbs(now, realm);
+        realm.close();
         return meal_data;
     }
 
-    public static List<Treatments> findMealInputs (Profile profile_data, Long now) {
+    public static List<Carb> findMealInputs (Profile profile_data, Date now, Realm realm) {
 
-        Long lastDIAAgo = now - (profile_data.dia.longValue() *60 * 60 * 1000);
-        List<Treatments> mealInputs   =   Treatments.getTreatmentsDated(lastDIAAgo, now, null);
+        Date lastDIAAgo = new Date(now.getTime() - (profile_data.dia.longValue() *60 * 60 * 1000));
+        List<Carb> mealInputs   =   Carb.getCarbsBetween(lastDIAAgo, now, null);
 
         return mealInputs;
     }
 
-    public static JSONObject diaCarbs(List<Treatments> treatments, Long time) {
-        Double carbs = 0D;
-        Double boluses = 0D;
+    public static JSONObject diaCarbs(Date time, Realm realm) {
+        Profile profile_data = new Profile(new Date());
+        Date lastDIAAgo = new Date(time.getTime() - (profile_data.dia.longValue() *60 * 60 * 1000));
 
-        for (Treatments treatment : treatments){
-            switch(treatment.type){
-                case "Insulin":
-                        boluses +=  treatment.value;
-                    break;
-                case "Carbs":
-                        carbs   +=  treatment.value;
-                    break;
-            }
-        }
+        Double carbs    =   Carb.getCarbCountBetween(lastDIAAgo, time, realm);
+        Double boluses  =   Bolus.getBolusCountBetween(lastDIAAgo, time, realm);
+
+        //for (Carb carb : carbsList){
+        //    switch(treatment.type){
+        //        case "Insulin":
+        //                boluses +=  treatment.value;
+        //            break;
+        //        case "Carbs":
+        //                carbs   +=  treatment.value;
+        //            break;
+        //    }
+        //}
 
         JSONObject reply = new JSONObject();
         try {

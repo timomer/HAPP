@@ -11,7 +11,6 @@ import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Integration;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 
 import org.json.JSONException;
@@ -122,7 +121,4 @@ public class NSUploader {
     }
 
 
-    public static void delTreatment(Treatments treatment){
-        // TODO: 27/10/2015 not possible via current NS API? 
-    }
 }

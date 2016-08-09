@@ -63,7 +63,7 @@ public class Integration extends Model {
         state       =   "";
     }
 
-    public static Integration getIntegration(String type, String happ_object, Long happ_id){
+    public static Integration getIntegration(String type, String happ_object, String happ_id){
         Integration integration = new Select()
                 .from(Integration.class)
                 .where("type = '" + type + "'")
@@ -75,7 +75,7 @@ public class Integration extends Model {
             Integration newIntegration = new Integration();
             newIntegration.type             = type;
             newIntegration.happ_object      = happ_object;
-            newIntegration.happ_object_id   = happ_id;
+            //newIntegration.happ_object_id   = happ_id;
             return newIntegration;
 
         } else {                                                                                    //Found an Integration, return it
@@ -83,7 +83,7 @@ public class Integration extends Model {
         }
     }
 
-    public static List<Integration> getIntegrationsFor(String happ_object, Long happ_object_id) {
+    public static List<Integration> getIntegrationsFor(String happ_object, String happ_object_id) {
         return new Select()
                 .from(Integration.class)
                 .where("happ_object = '" + happ_object + "'")

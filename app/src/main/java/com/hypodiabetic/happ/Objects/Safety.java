@@ -62,10 +62,10 @@ public class Safety {
         }
     }
 
-    public boolean checkIsBolusSafeToSend(Treatments bolus, Treatments correction){
+    public boolean checkIsBolusSafeToSend(Bolus bolus, Bolus correction){
         Long bolusDiffInMins=0L, corrDiffInMins=0L;
-        if (bolus != null) bolusDiffInMins = (new Date().getTime() - bolus.datetime) /1000/60;
-        if (correction != null) corrDiffInMins = (new Date().getTime() - correction.datetime) /1000/60;
+        if (bolus != null) bolusDiffInMins = (new Date().getTime() - bolus.getTimestamp().getTime()) /1000/60;
+        if (correction != null) corrDiffInMins = (new Date().getTime() - correction.getTimestamp().getTime()) /1000/60;
         if (bolusDiffInMins > Constants.BOLUS_MAX_AGE_IN_MINS || bolusDiffInMins < 0 || corrDiffInMins > Constants.BOLUS_MAX_AGE_IN_MINS || corrDiffInMins < 0) {
             return false;
         } else {

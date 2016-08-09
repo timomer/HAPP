@@ -2,11 +2,12 @@ package com.hypodiabetic.happ.Graphs;
 
 import android.content.Context;
 
-import com.hypodiabetic.happ.Objects.Stats;
+import com.hypodiabetic.happ.Objects.Stat;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
@@ -20,9 +21,9 @@ import lecho.lib.hellocharts.util.ChartUtils;
  */
 public class BasalVSTempBasalGraph extends CommonChartSupport{
 
-    public BasalVSTempBasalGraph(Context context){super(context); }
+    public BasalVSTempBasalGraph(Context context, Realm realm){super(context, realm); }
 
-    private List<Stats> statsReadings = Stats.statsList(numValues, start_time * fuzz);
+    private List<Stat> statsReadings = Stat.statsList(start_time, realm);
     private List<PointValue> tempBasalValues = new ArrayList<>();
 
 
@@ -76,14 +77,14 @@ public class BasalVSTempBasalGraph extends CommonChartSupport{
     public void addBasalvsTempBasalValues(){
         tempBasalValues.clear();                                                                    //clears past data
         Double basalDelta;
-        for (Stats tempBasalReading : statsReadings) {
+        for (Stat tempBasalReading : statsReadings) {
             if (tempBasalReading != null) {
-                if (tempBasalReading.temp_basal_type.equals("High") || tempBasalReading.temp_basal_type.equals("Low")) {  //Has a Temp Basal been set?
-                    basalDelta = tempBasalReading.temp_basal - tempBasalReading.basal;                  //Delta between normal Basal and Temp Basal set
+                if (tempBasalReading.getTemp_basal_type().equals("High") || tempBasalReading.getTemp_basal_type().equals("Low")) {  //Has a Temp Basal been set?
+                    basalDelta = tempBasalReading.getTemp_basal() - tempBasalReading.getBasal();                  //Delta between normal Basal and Temp Basal set
                 } else {
                     basalDelta = 0D;                                                                    //No Temp Basal set
                 }
-                tempBasalValues.add(new PointValue((float) (tempBasalReading.datetime / fuzz), basalDelta.floatValue()));
+                tempBasalValues.add(new PointValue((float) (tempBasalReading.getTimestamp().getTime()), basalDelta.floatValue()));
             }
         }
     }

@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 24/01/2016.
  */
@@ -39,6 +41,7 @@ public class InsulinIntegrationApp {
     public Context context;
     public String insulin_Integration_App;
     public String toSync;
+    public Realm realm;
 
     //Service Connection to the insulin_Integration_App
     private  Messenger insulin_Integration_App_Service = null;
@@ -65,14 +68,16 @@ public class InsulinIntegrationApp {
         public void onServiceDisconnected(ComponentName className) {
             insulin_Integration_App_Service = null;
             insulin_Integration_App_isBound = false;
+            realm.close();
         }
     };
 
 
-    public InsulinIntegrationApp(Context context, String insulin_Integration_App, String toSync) {
-        this.context = context;
-        this.insulin_Integration_App = insulin_Integration_App;
-        this.toSync = toSync;
+    public InsulinIntegrationApp(Context context, String insulin_Integration_App, String toSync, Realm realm) {
+        this.context                    = context;
+        this.insulin_Integration_App    = insulin_Integration_App;
+        this.toSync                     = toSync;
+        this.realm                      = realm;
     }
 
 
@@ -107,30 +112,30 @@ public class InsulinIntegrationApp {
 
     public void sendTempBasal() {
         //Send suggested Temp Basal to connected app
-        Integration basalIntegration = Integration.getIntegration("insulin_integration_app", "temp_basal", TempBasal.last().getId());
+    //    Integration basalIntegration = Integration.getIntegration("insulin_integration_app", "temp_basal", TempBasal.last(realm).getId());
 
-        if (basalIntegration.remote_var1.equals(insulin_Integration_App) && basalIntegration.state.equals("to_sync")) {  //We have a temp basal waiting to be synced with our current insulin_integration app
+    //    if (basalIntegration.remote_var1.equals(insulin_Integration_App) && basalIntegration.state.equals("to_sync")) {  //We have a temp basal waiting to be synced with our current insulin_integration app
 
             String errorSending = "";
-            ObjectToSync basalSync = new ObjectToSync(basalIntegration);
+    //        ObjectToSync basalSync = new ObjectToSync(basalIntegration);
 
             Message msg = Message.obtain();
             Bundle bundle = new Bundle();
-            switch (basalSync.action) {
-                case "new":
-                    bundle.putString("ACTION", "temp_basal");
-                    break;
-                case "cancel":
-                    bundle.putString("ACTION", "cancel_temp_basal");
-                    break;
-            }
-            bundle.putLong("DATE_REQUESTED", new Date().getTime());
-            bundle.putString("DATA", basalSync.asJSONString());
+    //        switch (basalSync.action) {
+    //            case "new":
+    //                bundle.putString("ACTION", "temp_basal");
+    //                break;
+    //            case "cancel":
+    //                bundle.putString("ACTION", "cancel_temp_basal");
+    //                break;
+    //        }
+    //        bundle.putLong("DATE_REQUESTED", new Date().getTime());
+    //        bundle.putString("DATA", basalSync.asJSONString());
             msg.setData(bundle);
 
             //Update details for this Integration, do this now as even if it fails to send HAPP should not resend it - leave user to resolve
-            basalIntegration.state = "sent";
-            basalIntegration.save();
+    //        basalIntegration.state = "sent";
+    //        basalIntegration.save();
 
 
             try {
@@ -149,13 +154,13 @@ public class InsulinIntegrationApp {
             }
 
             if (!errorSending.equals("")) {
-                    basalIntegration.state = "error";
-                    basalIntegration.details = "HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending;
-                    basalIntegration.save();
+    //                basalIntegration.state = "error";
+    //                basalIntegration.details = "HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending;
+    //                basalIntegration.save();
             }
 
             Notifications.newInsulinUpdate();
-        }
+    //   }
 
     }
 

@@ -4,9 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
-import com.hypodiabetic.happ.Objects.Pump;
-import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.tools;
 
 import java.lang.reflect.Modifier;
@@ -45,39 +42,39 @@ public class ObjectToSync {
 
         switch (aps_object_type){
             case "bolus_delivery":
-                Treatments bolus    =   Treatments.getTreatmentByID(integration.happ_object_id);
-                if (bolus != null) {
-                    value1      =   bolus.value;
-                    value2      =   "standard";
-                    requested   =   new Date(bolus.datetime);
-                    value3      =   bolus.note;
-                    value4      =   new Profile(new Date()).pump_name;
-                } else {
-                    state = "delete_me"; //cannot find this bolus, this integration should be deleted
-                }
+            //    TreatmentsOLD bolus    =   TreatmentsOLD.getTreatmentByID(integration.happ_object_id);
+            //    if (bolus != null) {
+            //        value1      =   bolus.value;
+            //        value2      =   "standard";
+            //        requested   =   new Date(bolus.datetime);
+            //        value3      =   bolus.note;
+            //        value4      =   new Profile(new Date()).pump_name;
+            //    } else {
+            //        state = "delete_me"; //cannot find this bolus, this integration should be deleted
+            //    }
 
                 break;
             case "temp_basal":
-                TempBasal tempBasal =   TempBasal.getTempBasalByID(integration.happ_object_id);
-                Pump pump = new Pump(new Date());
-                pump.setNewTempBasal(null, tempBasal);
-                value1      =   tempBasal.rate;
-                value2      =   pump.temp_basal_percent.toString();
-                value3      =   tempBasal.duration.toString();
+            //    TempBasal tempBasal =   TempBasal.getTempBasalByID(integration.happ_object_id);
+            //    Pump pump = new Pump(new Date());
+            //    pump.setNewTempBasal(null, tempBasal);
+            //    value1      =   tempBasal.rate;
+            //    value2      =   pump.temp_basal_percent.toString();
+            //    value3      =   tempBasal.duration.toString();
                 value4      =   new Profile(new Date()).pump_name;
-                requested   =   tempBasal.start_time;
+            //    requested   =   tempBasal.start_time;
 
                 break;
             case "treatment_carbs":
-                Treatments treatment    =   Treatments.getTreatmentByID(integration.happ_object_id);
-                if (treatment != null) {
-                    value1      =   treatment.value;
-                    value2      =   treatment.type;
-                    value3      =   treatment.note;
-                    requested   =   new Date(treatment.datetime);
-                } else {
-                    state = "delete_me"; //cannot find this bolus, this integration should be deleted
-                }
+            //    TreatmentsOLD treatment    =   TreatmentsOLD.getTreatmentByID(integration.happ_object_id);
+            //    if (treatment != null) {
+            //        value1      =   treatment.value;
+            //        value2      =   treatment.type;
+            //        value3      =   treatment.note;
+            //        requested   =   new Date(treatment.datetime);
+            //    } else {
+            //        state = "delete_me"; //cannot find this bolus, this integration should be deleted
+            //    }
                 break;
         }
     }

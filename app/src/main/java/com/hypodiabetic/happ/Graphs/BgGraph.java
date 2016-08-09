@@ -27,16 +27,14 @@ import lecho.lib.hellocharts.view.Chart;
 public class BgGraph extends CommonChartSupport {
 
     public BgGraph(Context context, Realm realm) {
-        super(context);
-        this.realm = realm;
+        super(context, realm);
     }
 
-    private final List<Bg> bgReadings = Bg.latestForGraph(numValues, start_time * fuzz);
+    private List<Bg> bgReadings = Bg.latestSince(start_time, realm);
     private List<PointValue> openAPSPredictValue = new ArrayList<PointValue>();
     private List<PointValue> inRangeValues = new ArrayList<PointValue>();
     private List<PointValue> highValues = new ArrayList<PointValue>();
     private List<PointValue> lowValues = new ArrayList<PointValue>();
-    private Realm realm;
 
     public LineChartData previewLineData() {
         LineChartData previewLineData = new LineChartData(lineData());
@@ -100,8 +98,8 @@ public class BgGraph extends CommonChartSupport {
         if (eventualBG < 0D)    eventualBG = 0D;
 
         //openAPSPredictValue.add(new PointValue((float) (timeeNow.getTime() / fuzz), (float) Bg.last().sgv_double()));
-        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz), (float) unitized(snoozeBG.floatValue())));
-        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime() / fuzz), (float) unitized(eventualBG.floatValue())));
+        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime()), (float) unitized(snoozeBG.floatValue())));
+        openAPSPredictValue.add(new PointValue((float) (in15mins.getTime()), (float) unitized(eventualBG.floatValue())));
     }
 
     public Line highValuesLine() {
@@ -134,22 +132,22 @@ public class BgGraph extends CommonChartSupport {
     public void addBgReadingValues() {
         for (Bg bgReading : bgReadings) {
             if (bgReading.sgv_double() >= 400) {
-                highValues.add(new PointValue((float) (bgReading.datetime / fuzz), (float) unitized(400)));
+                highValues.add(new PointValue((float) (bgReading.getDatetime().getTime()), (float) unitized(400)));
             } else if (unitized(bgReading.sgv_double()) >= highMark) {
-                highValues.add(new PointValue((float) (bgReading.datetime / fuzz), (float) unitized(bgReading.sgv_double())));
+                highValues.add(new PointValue((float) (bgReading.getDatetime().getTime()), (float) unitized(bgReading.sgv_double())));
             } else if (unitized(bgReading.sgv_double()) >= lowMark) {
-                inRangeValues.add(new PointValue((float) (bgReading.datetime / fuzz), (float) unitized(bgReading.sgv_double())));
+                inRangeValues.add(new PointValue((float) (bgReading.getDatetime().getTime()), (float) unitized(bgReading.sgv_double())));
             } else if (bgReading.sgv_double() >= 40) {
-                lowValues.add(new PointValue((float) (bgReading.datetime / fuzz), (float) unitized(bgReading.sgv_double())));
+                lowValues.add(new PointValue((float) (bgReading.getDatetime().getTime()), (float) unitized(bgReading.sgv_double())));
             } else if (bgReading.sgv_double() >= 13) {
-                lowValues.add(new PointValue((float) (bgReading.datetime / fuzz), (float) unitized(40)));
+                lowValues.add(new PointValue((float) (bgReading.getDatetime().getTime()), (float) unitized(40)));
             }
         }
     }
 
     public Line highLine() {
         List<PointValue> highLineValues = new ArrayList<PointValue>();
-        highLineValues.add(new PointValue((float) start_time, (float) highMark));
+        highLineValues.add(new PointValue((float) start_time.getTime(), (float) highMark));
         highLineValues.add(new PointValue((float) end_time, (float) highMark));
         Line highLine = new Line(highLineValues);
         highLine.setHasPoints(false);
@@ -160,7 +158,7 @@ public class BgGraph extends CommonChartSupport {
 
     public Line lowLine() {
         List<PointValue> lowLineValues = new ArrayList<PointValue>();
-        lowLineValues.add(new PointValue((float) start_time, (float) lowMark));
+        lowLineValues.add(new PointValue((float) start_time.getTime(), (float) lowMark));
         lowLineValues.add(new PointValue((float) end_time, (float) lowMark));
         Line lowLine = new Line(lowLineValues);
         lowLine.setHasPoints(false);
@@ -173,7 +171,7 @@ public class BgGraph extends CommonChartSupport {
 
     public Line maxShowLine() {
         List<PointValue> maxShowValues = new ArrayList<PointValue>();
-        maxShowValues.add(new PointValue((float) start_time, (float) defaultMaxY));
+        maxShowValues.add(new PointValue((float) start_time.getTime(), (float) defaultMaxY));
         maxShowValues.add(new PointValue((float) end_time, (float) defaultMaxY));
         Line maxShowLine = new Line(maxShowValues);
         maxShowLine.setHasLines(false);
@@ -208,7 +206,7 @@ public class BgGraph extends CommonChartSupport {
         timeFormat.setTimeZone(TimeZone.getDefault());
         for (int l = 0; l <= 26; l += hoursPreviewStep) {                                                  //Added 2 hours for future readings
             double timestamp = (endHour - (60000 * 60 * l));
-            previewXaxisValues.add(new AxisValue((long) (timestamp / fuzz), (timeFormat.format(timestamp)).toCharArray()));
+            previewXaxisValues.add(new AxisValue((long) (timestamp), (timeFormat.format(timestamp)).toCharArray()));
         }
         Axis previewXaxis = new Axis();
         previewXaxis.setValues(previewXaxisValues);
@@ -220,8 +218,8 @@ public class BgGraph extends CommonChartSupport {
     /////////VIEWPORT RELATED//////////////
     public Viewport advanceViewport(Chart chart, Chart previewChart) {
         viewport = new Viewport(previewChart.getMaximumViewport());
-        viewport.inset((float) ((86400000 / 2.5) / fuzz), 0);
-        double distance_to_move = ((new Date().getTime()) / fuzz) - viewport.left - (((viewport.right - viewport.left) / 2));
+        viewport.inset((float) (86400000 / 2.5), 0);
+        double distance_to_move = (new Date().getTime()) - viewport.left - (((viewport.right - viewport.left) / 2));
         viewport.offset((float) distance_to_move, 0);
         return viewport;
     }

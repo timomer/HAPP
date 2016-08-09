@@ -12,19 +12,18 @@ import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.APSResult;
+import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
-import com.hypodiabetic.happ.Objects.Stats;
+import com.hypodiabetic.happ.Objects.Stat;
+import com.hypodiabetic.happ.Objects.StatSerializer;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.integration.openaps.IOB;
-import com.hypodiabetic.happ.tools;
 
 import org.json.JSONObject;
 
-import java.lang.reflect.Modifier;
 import java.util.Date;
 
 import io.realm.Realm;
@@ -56,14 +55,14 @@ public class FiveMinService extends IntentService {
         newStat();                                                      //Save a new Stat Object
         checkTBRNotify();                                               //checks if a Cancel TBR Notification is active and TBR is not running anymore
         IntegrationsManager.checkOldInsulinIntegration();               //Check if there are any old Insulin Integration requests waiting to be synced
-        IntegrationsManager.updatexDripWatchFace();                     //Updates xDrip Watch Face
+        IntegrationsManager.updatexDripWatchFace(realm);                //Updates xDrip Watch Face
 
         Log.d(TAG, "Service Finished");
     }
 
     public void checkTBRNotify(){
         if (profile.temp_basal_notification){
-            Pump pump = new Pump(new Date());
+            Pump pump = new Pump(new Date(), realm);
             APSResult apsResult = APSResult.last(realm);
             if (apsResult != null) {
                 if (!pump.temp_basal_active && !apsResult.getAccepted() && apsResult.checkIsCancelRequest()) {
@@ -80,20 +79,19 @@ public class FiveMinService extends IntentService {
     }
 
     public void newStat(){
-        Stats stat                  =   new Stats();
-        JSONObject iobJSONValue     =   IOB.iobTotal(profile, date);
-        JSONObject cobJSONValue     =   Treatments.getCOB(profile, date);
-        TempBasal currentTempBasal  =   TempBasal.getCurrentActive(date);
+        Stat stat                  =   new Stat();
+        JSONObject iobJSONValue     =   IOB.iobTotal(profile, date, realm);
+        JSONObject cobJSONValue     =   Carb.getCOB(profile, date, realm);
+        TempBasal currentTempBasal  =   TempBasal.getCurrentActive(date, realm);
         Boolean error               =   false;
 
         try {
-            stat.datetime           =   date.getTime();
-            stat.iob                =   iobJSONValue.getDouble("iob");
-            stat.bolus_iob          =   iobJSONValue.getDouble("bolusiob");
-            stat.cob                =   cobJSONValue.getDouble("display");
-            stat.basal              =   profile.current_basal;
-            stat.temp_basal         =   currentTempBasal.rate;
-            stat.temp_basal_type    =   currentTempBasal.basal_adjustemnt;
+            stat.setIob             (iobJSONValue.getDouble("iob"));
+            stat.setBolus_iob       (iobJSONValue.getDouble("bolusiob"));
+            stat.setCob             (cobJSONValue.getDouble("display"));
+            stat.setBasal           (profile.current_basal);
+            stat.setTemp_basal      (currentTempBasal.getRate());
+            stat.setTemp_basal_type (currentTempBasal.getBasal_adjustemnt());
 
         } catch (Exception e)  {
             error   = true;
@@ -103,21 +101,28 @@ public class FiveMinService extends IntentService {
         } finally {
 
             if (!error) {
-                stat.save();
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                realm.copyToRealm(stat);
+                realm.commitTransaction();
+                realm.close();
 
-                Gson gson = new GsonBuilder()
-                        .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                        .serializeNulls()
-                        .create();
+                try {
+                    Gson gson = new GsonBuilder()
+                            .registerTypeAdapter(Class.forName("io.realm.StatRealmProxy"), new StatSerializer())
+                            .create();
 
-                //sends result to update UI if loaded
-                Intent intent = new Intent(Intents.UI_UPDATE);
-                intent.putExtra("UPDATE", "NEW_STAT_UPDATE");
-                intent.putExtra("stat", gson.toJson(stat, Stats.class));
-                LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
+                    //sends result to update UI if loaded
+                    Intent intent = new Intent(Intents.UI_UPDATE);
+                    intent.putExtra("UPDATE", "NEW_STAT_UPDATE");
+                    intent.putExtra("stat", gson.toJson(stat, Stat.class));
+                    LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
+                } catch (ClassNotFoundException e){
+                    Log.e(TAG, "Error creating gson object: " + e.getLocalizedMessage());
+                }
 
                 //send results to xDrip WF
-                IntegrationsManager.updatexDripWatchFace();
+                IntegrationsManager.updatexDripWatchFace(realm);
 
                 Log.d(TAG, "New Stat Saved");
             }

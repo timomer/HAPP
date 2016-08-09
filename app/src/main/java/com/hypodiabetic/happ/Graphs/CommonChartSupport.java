@@ -8,6 +8,7 @@ import android.text.format.DateFormat;
 
 import com.hypodiabetic.happ.Constants;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,6 +17,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import io.realm.Realm;
 import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
@@ -33,9 +35,8 @@ public class CommonChartSupport {
     public Double yCOBMax = 80D;
     public Double yCOBMin = 0D;
 
-    public static final double fuzz = (1000 * 30 * 5);
-    public double  end_time = (new Date().getTime() + (60000 * 130))/fuzz;                          //Added 120 mins to this time for future values
-    public double  start_time = (new Date().getTime() - ((60000 * 60 * 24)))/fuzz;
+    public double  end_time         = (new Date().getTime() + (60000 * 130));                       //Added 120 mins to this time for future values
+    public Date start_time          = new Date(new Date().getTime() - ((60000 * 60 * 24)));         //24 Hours ago
     public Context context;
     public SharedPreferences prefs;
     public double highMark;
@@ -54,8 +55,10 @@ public class CommonChartSupport {
 
     public Double maxBasal;                                                                         //Added Max user bolus
 
+    public Realm realm;
 
-    public CommonChartSupport(Context context){
+    public CommonChartSupport(Context context, Realm realm){
+        this.realm          = realm;
         this.context        = context;
         this.prefs          = PreferenceManager.getDefaultSharedPreferences(context);
         this.highMark       = Double.parseDouble(prefs.getString("highValue", "170"));
@@ -72,7 +75,7 @@ public class CommonChartSupport {
 
     public Line minShowLine() {
         List<PointValue> minShowValues = new ArrayList<PointValue>();
-        minShowValues.add(new PointValue((float) start_time, (float) defaultMinY));
+        minShowValues.add(new PointValue((float) start_time.getTime(), (float) defaultMinY));
         minShowValues.add(new PointValue((float) end_time, (float) defaultMinY));
         Line minShowLine = new Line(minShowValues);
         minShowLine.setHasPoints(false);
@@ -100,7 +103,7 @@ public class CommonChartSupport {
         }
         for(int l=0; l<=26; l++) {                                                                  //2 Hours into the future
             double timestamp = (endHour - (60000 * 60 * l));
-            xAxisValues.add(new AxisValue((long)(timestamp/fuzz), (timeFormat.format(timestamp)).toCharArray()));
+            xAxisValues.add(new AxisValue((long)(timestamp), (timeFormat.format(timestamp)).toCharArray()));
         }
         xAxis.setValues(xAxisValues);
         xAxis.setHasLines(true);

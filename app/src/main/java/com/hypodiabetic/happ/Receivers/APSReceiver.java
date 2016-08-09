@@ -17,6 +17,8 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.pumpAction;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 14/02/2016.
  */
@@ -26,12 +28,14 @@ public class APSReceiver extends ResultReceiver {
     public APSReceiver(Handler handler) {
         super(handler);
     }
+    public Realm realm;
 
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
 
         Notifications.clear("newTemp");                                         //Clears any open temp notifications
         Intent intentUpdate = new Intent(Intents.UI_UPDATE);
+        realm = Realm.getDefaultInstance();
 
         switch (resultCode){
             case Constants.STATUS_FINISHED:
@@ -39,10 +43,10 @@ public class APSReceiver extends ResultReceiver {
                 Gson gson = new GsonBuilder().create();
                 APSResult apsResult = gson.fromJson(resultData.getString("APSResult"), APSResult.class);
 
-                if (apsResult.getTempSuggested()) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance());
+                if (apsResult.getTempSuggested()) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance(), realm);
 
                 //Send out updates of new APS run
-                Notifications.updateCard();
+                Notifications.updateCard(realm);
                 Notifications.debugCard(MainApp.instance(), apsResult);
 
                 intentUpdate.putExtra("UPDATE", "NEW_APS_RESULT");
@@ -57,5 +61,6 @@ public class APSReceiver extends ResultReceiver {
                 break;
         }
 
+        realm.close();
     }
 }

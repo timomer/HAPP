@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Environment;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
 import android.util.Log;
@@ -20,11 +22,7 @@ import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.Safety;
-import com.hypodiabetic.happ.Objects.Stats;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.hypodiabetic.happ.Objects.Stat;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -317,23 +315,23 @@ public class tools {
     /**
      * @param date the date in the format "yyyy-MM-dd"
      */
-    public static long getStartOfDayInMillis(Date date) {
+    public static Date getStartOfDay(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        return ((calendar.getTimeInMillis()+calendar.getTimeZone().getOffset(calendar.getTimeInMillis())));
+        return new Date(calendar.getTimeInMillis()+calendar.getTimeZone().getOffset(calendar.getTimeInMillis()));
     }
     /**
      * @param date the date in the format "yyyy-MM-dd"
      */
-    public static long getEndOfDayInMillis(Date date) {
+    public static Date getEndOfDay(Date date) {
         // Add one day's time to the beginning of the day.
         // 24 hours * 60 minutes * 60 seconds * 1000 milliseconds = 1 day
-        long time =getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
-        return getStartOfDayInMillis(date) + (24 * 60 * 60 * 1000) - 1000;
+        long time =getStartOfDay(date).getTime() + (24 * 60 * 60 * 1000) - 1000;
+        return new Date(getStartOfDay(date).getTime() + (24 * 60 * 60 * 1000) - 1000);
     }
 
     //Allows user to select an external app for an action and saves to prefs
@@ -401,12 +399,20 @@ public class tools {
     }
     public static void showDebug(Realm realm){
         Profile profile = new Profile(new Date());
-        Pump pump = new Pump(new Date());
+        Pump pump = new Pump(new Date(), realm);
         APSResult apsResult = APSResult.last(realm);
-        Stats stats = Stats.last();
+        Stat stat = Stat.last(realm);
         Safety safety = new Safety();
+        String msg = "";
 
-        String  msg =   "Profile:" + "\n" +
+        PackageManager manager = MainActivity.activity.getPackageManager();
+        try {
+            PackageInfo info = manager.getPackageInfo(MainActivity.activity.getPackageName(), 0);
+                msg =   "HAPP Version: Code:" + info.versionCode + " Name:" + info.versionName + "\n\n";
+        } catch (PackageManager.NameNotFoundException n){
+
+        }
+                msg +=  "Profile:" + "\n" +
                             profile.toString() + "\n\n" +
                             "Pump:" + "\n" +
                             pump.toString();
@@ -419,10 +425,10 @@ public class tools {
                         "APS Result:" + "\n" +
                             "APS code has never been ran";
         }
-        if (stats != null) {
+        if (stat != null) {
                 msg +=  "\n\n" +
                         "Stats Result:" + "\n" +
-                            stats.toString();
+                            stat.toString();
         } else {
                 msg +=  "\n\n" +
                         "Stats Result:" + "\n" +
@@ -433,14 +439,13 @@ public class tools {
                             safety.toString();
 
         String bgList="";
-        double fuzz = (1000 * 30 * 5);
-        double start_time = (new Date().getTime() - ((60000 * 60 * 24))) / fuzz;
-        List<Bg> bgReadings = Bg.latestForGraph(4, start_time * fuzz);
-
+        int bgCount=0;
+        List<Bg> bgReadings = Bg.latest(realm);
         for (Bg bg : bgReadings){
             bgList += bg.toString() + "\n";
+            bgCount++;
+            if (bgCount == 5) break;
         }
-
         if (bgList.equals("")){
                 msg +=  "\n\n" +
                         "Last BG Readings:" + "\n" +

@@ -4,30 +4,29 @@ package com.hypodiabetic.happ.integration;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
+import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
-import com.hypodiabetic.happ.Objects.Stats;
+import com.hypodiabetic.happ.Objects.Stat;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.integration.nightscout.NSUploader;
 import com.hypodiabetic.happ.tools;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+
+import io.realm.Realm;
 
 /**
  * Created by Tim on 20/01/2016.
@@ -35,11 +34,13 @@ import java.util.Random;
  */
 public class IntegrationsManager {
     private static final String TAG = "IntegrationsManager";
+    private static Realm realm;
 
     public static void syncIntegrations(Context c){
         Log.d(TAG, "Running Sync");
+        realm = Realm.getInstance(MainApp.getRealmConfig());
 
-        updatexDripWatchFace();
+        updatexDripWatchFace(realm);
 
         //Sends data from HAPP to Interactions
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
@@ -50,12 +51,12 @@ public class IntegrationsManager {
 
         //Insulin Integration App: Temp Basal if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BASAL");
+            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BASAL", realm);
             insulinIntegrationApp_Basal.connectInsulinTreatmentApp();
         }
         //Insulin Integration App: Bolus if allowed
         if (p.send_bolus_allowed){
-            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BOLUS");
+            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BOLUS", realm);
             insulinIntegrationApp_Bolus.connectInsulinTreatmentApp();
         }
 
@@ -63,10 +64,10 @@ public class IntegrationsManager {
         //NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.updateNSDBTreatments();
 
-
+        realm.close();
     }
 
-    public static void newBolus(Treatments bolus, Treatments correction){
+    public static void newBolus(Bolus bolus, Bolus correction){
         //Saves the treatments to the DB to be accessed later once we are connected to Insulin Integration App
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         Profile p               =   new Profile(new Date());
@@ -76,36 +77,36 @@ public class IntegrationsManager {
         //Are we allowed and able to send bolus?
         if (p.send_bolus_allowed ) {
             if (bolus != null) {
-                Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", happ_object, bolus.getId());
-                bolusIntegration.state          = "to_sync";
-                bolusIntegration.action         = "new";
-                bolusIntegration.auth_code      = new Random().toString();
-                bolusIntegration.remote_var1    = prefs.getString("insulin_integration", "");
-                bolusIntegration.save();
+        //        Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", happ_object, bolus.getId());
+        //        bolusIntegration.state          = "to_sync";
+        //        bolusIntegration.action         = "new";
+        //        bolusIntegration.auth_code      = new Random().toString();
+        //        bolusIntegration.remote_var1    = prefs.getString("insulin_integration", "");
+        //        bolusIntegration.save();
             }
             if (correction != null) {
-                Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", happ_object, correction.getId());
-                correctionIntegration.state         = "to_sync";
-                correctionIntegration.action        = "new";
-                correctionIntegration.auth_code     = new Random().toString();
-                correctionIntegration.remote_var1   = prefs.getString("insulin_integration", "");
-                correctionIntegration.save();
+        //        Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", happ_object, correction.getId());
+        //        correctionIntegration.state         = "to_sync";
+        //        correctionIntegration.action        = "new";
+        //        correctionIntegration.auth_code     = new Random().toString();
+        //        correctionIntegration.remote_var1   = prefs.getString("insulin_integration", "");
+        //        correctionIntegration.save();
             }
         }
 
         // NS Integrations
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (bolus != null) {
-                Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, bolus.getId());
-                bolusIntegration.state          = "to_sync";
-                bolusIntegration.action         = "new";
-                bolusIntegration.save();
+        //        Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, bolus.getId());
+        //        bolusIntegration.state          = "to_sync";
+        //        bolusIntegration.action         = "new";
+        //        bolusIntegration.save();
             }
             if (correction != null) {
-                Integration correctionIntegration = Integration.getIntegration("ns_client", happ_object, correction.getId());
-                correctionIntegration.state         = "to_sync";
-                correctionIntegration.action        = "new";
-                correctionIntegration.save();
+        //        Integration correctionIntegration = Integration.getIntegration("ns_client", happ_object, correction.getId());
+        //        correctionIntegration.state         = "to_sync";
+        //        correctionIntegration.action        = "new";
+        //        correctionIntegration.save();
             }
         }
 
@@ -113,18 +114,18 @@ public class IntegrationsManager {
         syncIntegrations(MainApp.instance());
     }
 
-    public static void newCarbs(Treatments carbs){
+    public static void newCarbs(Carb carb){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         String happ_object      =   "treatment_carbs";
 
         // NS Integrations
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
-            if (carbs != null) {
-                Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, carbs.getId());
-                bolusIntegration.state          = "to_sync";
-                bolusIntegration.action         = "new";
-                bolusIntegration.remote_var1    = "carbs";
-                bolusIntegration.save();
+            if (carb != null) {
+            //    Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, carb.getId());
+            //    bolusIntegration.state          = "to_sync";
+            //    bolusIntegration.action         = "new";
+            //    bolusIntegration.remote_var1    = "carbs";
+            //    bolusIntegration.save();
             }
         }
 
@@ -139,20 +140,20 @@ public class IntegrationsManager {
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
-            basalIntegration.state          =   "to_sync";
-            basalIntegration.action         =   "new";
-            basalIntegration.auth_code      =   new Random().toString();
-            basalIntegration.remote_var1    =   prefs.getString("insulin_integration", "");
-            basalIntegration.save();
+    //        Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
+    //        basalIntegration.state          =   "to_sync";
+    //        basalIntegration.action         =   "new";
+    //        basalIntegration.auth_code      =   new Random().toString();
+    //        basalIntegration.remote_var1    =   prefs.getString("insulin_integration", "");
+    //        basalIntegration.save();
         }
 
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
-            Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
-            basalIntegration.state          =   "to_sync";
-            basalIntegration.action         =   "new";
-            basalIntegration.save();
+    //        Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
+    //        basalIntegration.state          =   "to_sync";
+    //        basalIntegration.action         =   "new";
+    //        basalIntegration.save();
         }
 
 
@@ -167,18 +168,18 @@ public class IntegrationsManager {
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
-            basalIntegration.state          =   "to_sync";
-            basalIntegration.action         =   "cancel";
-            basalIntegration.save();
+    //        Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
+    //        basalIntegration.state          =   "to_sync";
+    //        basalIntegration.action         =   "cancel";
+    //        basalIntegration.save();
         }
 
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
-            Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
-            basalIntegration.state          =   "to_sync";
-            basalIntegration.action         =   "cancel";
-            basalIntegration.save();
+    //        Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
+    //        basalIntegration.state          =   "to_sync";
+    //        basalIntegration.action         =   "cancel";
+    //        basalIntegration.save();
         }
 
         Log.d(TAG, "cancelTempBasal");
@@ -210,15 +211,15 @@ public class IntegrationsManager {
         Notifications.newInsulinUpdate();
     }
 
-    public static void updatexDripWatchFace(){
+    public static void updatexDripWatchFace(Realm realm){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("xdrip_wf_integration", false)) {
-            Pump pump = new Pump(new Date());
-            Stats stat = Stats.last();
+            Pump pump = new Pump(new Date(), realm);
+            Stat stat = Stat.last(realm);
             String statSummary = pump.displayBasalDesc(true) + pump.displayCurrentBasal(true);
             if (stat != null){
-                statSummary += " iob:" + tools.formatDisplayInsulin(stat.iob, 1) + " cob:" + tools.formatDisplayCarbs(stat.cob);
+                statSummary += " iob:" + tools.formatDisplayInsulin(stat.getIob(), 1) + " cob:" + tools.formatDisplayCarbs(stat.getCob());
             }
 
             final Bundle bundle = new Bundle();

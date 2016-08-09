@@ -4,8 +4,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Profile;
-import com.hypodiabetic.happ.Objects.Treatments;
 import com.hypodiabetic.happ.integration.openaps.IOB;
 import com.hypodiabetic.happ.tools;
 
@@ -14,7 +14,8 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+
+import io.realm.Realm;
 
 /**
  * Created by tim on 03/08/2015.
@@ -32,13 +33,12 @@ public class cob {
 
 
     //main function
-    public static JSONObject cobTotal(List<Treatments> treatments, Profile profileNow, Date timeNow) {
+    public static JSONObject cobTotal(List<Carb> carbs, Profile profileNow, Date timeNow, Realm realm) {
         //Var treatments        - Array of Insulin and Carb treatments over X time period
 
         //Collections.reverse(Arrays.asList(treatments));                                             //Sort the Treatments from oldest to newest **we do this before calling this function, dont do it again**
         Integer liverSensRatio = 1;
         Double totalCOB = 0D;
-        Treatments lastCarbs = null;
 
         //Calendar newCalendar = Calendar.getInstance();
         //Date timeNow = newCalendar.getTime();
@@ -50,14 +50,14 @@ public class cob {
         //iob iob = new iob(this);
 
 
-            for(Treatments treatment : treatments) {
+            for(Carb carb : carbs) {
 
-                if (treatment.type == null) continue;                                               //bad treatment, missing data
+                //if (treatment.type == null) continue;                                             //bad treatment, missing data
 
-                if (treatment.type.equals("Carbs") && treatment.datetime < timeNow.getTime()) {                             //Carbs only and Treatment is not in the future
+                if (carb.getTimestamp().getTime() < timeNow.getTime()) {                            //Treatment is not in the future
 
                             JSONObject cCalc;
-                            cCalc = cobCalc(treatment, lastDecayedBy, profileNow, timeNow);
+                            cCalc = cobCalc(carb, lastDecayedBy, profileNow, timeNow);
                             Date decayedByDate = new Date();
                              try {
                                 decayedByDate = new Date(cCalc.getLong("decayedBy"));                                       //Date when this Treatment will be fully digested
@@ -69,8 +69,8 @@ public class cob {
                             if (decaysin_hr > -10) {                                                                        //Carbs have been active within at least the last 10 hours!? // TODO: 27/08/2015    
                                 Double actStart=0D, actEnd=0D;
                                 try {
-                                    actStart = IOB.iobTotal(profileNow, timeNow).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
-                                    actEnd = IOB.iobTotal(profileNow, decayedByDate).getDouble("activity");
+                                    actStart = IOB.iobTotal(profileNow, timeNow, realm).getDouble("activity");                         // TODO: 14/08/2015 appears to be getting the amount of insulin active for this carb treatment??
+                                    actEnd = IOB.iobTotal(profileNow, decayedByDate, realm).getDouble("activity");
                                 } catch (JSONException e){
                                     Toast.makeText(MainApp.instance(), "Error getting COB activity " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 }
@@ -98,7 +98,7 @@ public class cob {
 
                             if (decaysin_hr > 0) {                                                  //Current carbs are still be digested
                                 //console.info('Adding ' + delayMinutes + ' minutes to decay of ' + treatment.carbs + 'g bolus at ' + treatment.mills);
-                                totalCOB += Math.min(treatment.value, decaysin_hr * profileNow.carbAbsorptionRate);     //Amount of carbs left to be digested
+                                totalCOB += Math.min(carb.getValue(), decaysin_hr * profileNow.carbAbsorptionRate);     //Amount of carbs left to be digested
                                 //console.log("cob:", Math.min(cCalc.initialCarbs, decaysin_hr * profileNow.carbAbsorptionRate(treatment.mills)),cCalc.initialCarbs,decaysin_hr,profileNow.carbAbsorptionRate(treatment.mills));
                                 try {
                                     isDecaying = cCalc.getInt("isDecaying");
@@ -158,7 +158,7 @@ public class cob {
         return returnObject;
     }
 
-    public static JSONObject cobCalc(Treatments treatment, Date lastDecayedBy, Profile profileNow, Date time) {
+    public static JSONObject cobCalc(Carb carb, Date lastDecayedBy, Profile profileNow, Date time) {
 
         Integer delay = 20;             //Delay in mins before carbs become active
         Integer isDecaying;
@@ -166,28 +166,28 @@ public class cob {
 
         JSONObject returnObject = new JSONObject();
 
-        if (treatment.type.equals("Carbs")) {
+        //if (treatment.type.equals("Carbs")) {
 
-            Date carbTime = new Date(treatment.datetime);
+            //Date carbTime = new Date(treatment.datetime);
 
             Double carbs_hr = profileNow.carbAbsorptionRate;                                        //Carbs digested per hour
             Double carbs_min = carbs_hr / 60;                                                       //Carbs digested per min
 
-            Double minutesleft = ((double)(lastDecayedBy.getTime() - carbTime.getTime()) ) / 1000 / 60;       //Number of mins left for the Carb treatment before this one
+            Double minutesleft = ((double)(lastDecayedBy.getTime() - carb.getTimestamp().getTime()) ) / 1000 / 60;       //Number of mins left for the Carb treatment before this one
 
 
-            Long decayedByTime = carbTime.getTime();
-            Double decayedByTime2Add = ((Math.max(delay.doubleValue(), minutesleft.doubleValue()) + treatment.value / carbs_min) * 60000);
-            Date decayedBy = new Date(decayedByTime + decayedByTime2Add.longValue());               //Final decayed by Date based on this Carb treatment and outstanding last carb treatment
+            Long decayedByTime = carb.getTimestamp().getTime();
+            Double decayedByTime2Add = ((Math.max(delay.doubleValue(), minutesleft.doubleValue()) + carb.getValue() / carbs_min) * 60000);
+            Date decayedBy = new Date(decayedByTime + decayedByTime2Add.longValue());                                   //Final decayed by Date based on this Carb treatment and outstanding last carb treatment
 
 
             if (delay > minutesleft) {
-                initialCarbs = treatment.value;                                                     //Last Carb treatment is not active, just take the current carb treatment
+                initialCarbs = carb.getValue();                                                                         //Last Carb treatment is not active, just take the current carb treatment
             } else {
-                initialCarbs = treatment.value + (minutesleft * carbs_min);                         //Last Carb is active, add it to this Crab treatment
+                initialCarbs = carb.getValue() + (minutesleft * carbs_min);                                             //Last Carb is active, add it to this Crab treatment
             }
 
-            Date startDecay = new Date(carbTime.getTime() + (delay.longValue() * 60000));           //When this Crab treatment starts to decay, after initial delay
+            Date startDecay = new Date(carb.getTimestamp().getTime() + (delay.longValue() * 60000));                    //When this Crab treatment starts to decay, after initial delay
 
             if (time.before(lastDecayedBy) || time.after(startDecay)) {
                 isDecaying = 1;                                                                     //We are decaying
@@ -200,15 +200,15 @@ public class cob {
                 returnObject.put("initialCarbs", initialCarbs);                                     //Carbs being processed as of now
                 returnObject.put("decayedBy", decayedBy.getTime());                                 //When these carbs will be fully digested
                 returnObject.put("isDecaying", isDecaying);                                         //Are we digesting these crabs now?
-                returnObject.put("carbTime", carbTime.getTime());                                   //Time this treatment started
+                returnObject.put("carbTime", carb.getTimestamp().getTime());                        //Time this treatment started
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             return returnObject;
 
-        } else {
-            return returnObject;
-        }
+        //} else {
+        //    return returnObject;
+        //}
     }
 
 

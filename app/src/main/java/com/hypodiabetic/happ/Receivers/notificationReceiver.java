@@ -30,7 +30,7 @@ public class notificationReceiver extends BroadcastReceiver {
             case "newTemp":
                 ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(55);  //Kills the notification
 
-                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                Gson gson = new GsonBuilder().create();
                 TempBasal suggestedTemp = gson.fromJson(bundle.getString("SUGGESTED_BASAL", ""), TempBasal.class);
                 pumpAction.setTempBasal(suggestedTemp);   //Action the suggested Temp
 

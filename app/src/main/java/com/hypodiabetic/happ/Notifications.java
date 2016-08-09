@@ -13,6 +13,7 @@ import android.support.design.widget.Snackbar;
 
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -22,6 +23,7 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
+import com.hypodiabetic.happ.Objects.TempBasalSerializer;
 import com.hypodiabetic.happ.integration.Objects.InsulinIntegrationNotify;
 
 
@@ -29,6 +31,8 @@ import java.lang.reflect.Modifier;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import io.realm.Realm;
 
 /**
  * Created by Tim on 07/10/2015.
@@ -42,6 +46,7 @@ public class Notifications {
     static int INSULIN_UPDATE  =   58;
 
     static Dialog activeErrorDialog;
+    static String TAG = "Notifications";
 
     //Insulin Treatments Integration notification
     public static void newInsulinUpdate(){
@@ -83,28 +88,30 @@ public class Notifications {
 
 
     //New Temp has been suggested
-    public static void newTemp(TempBasal basal, Context c){
+    public static void newTemp(TempBasal basal, Context c, Realm realm){
 
         String title, msg;
-        Pump pump = new Pump(new Date());
+        Pump pump = new Pump(new Date(), realm);
         pump.setNewTempBasal(null, basal);
 
         if (basal.checkIsCancelRequest()){
-            title = "Set: " + basal.basal_adjustemnt;
+            title = "Set: " + basal.getBasal_adjustemnt();
             msg = pump.displayCurrentBasal(true);
         } else {
             title = "Set: " + pump.displayBasalDesc(false);
             msg = pump.displayCurrentBasal(true) + " for " + pump.temp_basal_duration + " mins";
         }
 
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                .serializeNulls()
-                .create();
-
         Intent intent_accept_temp = new Intent();
+        try {
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Class.forName("io.realm.TempBasalRealmProxy"), new TempBasalSerializer())
+                    .create();
+            intent_accept_temp.putExtra("SUGGESTED_BASAL", gson.toJson(basal, TempBasal.class));
+        } catch (ClassNotFoundException e){
+            Log.e(TAG, "Error creating gson object: " + e.getLocalizedMessage());
+        }
         intent_accept_temp.setAction(Intents.NOTIFICATION_UPDATE);
-        intent_accept_temp.putExtra("SUGGESTED_BASAL", gson.toJson(basal, TempBasal.class));
         intent_accept_temp.putExtra("NOTIFICATION_TYPE", "newTemp");
         PendingIntent pending_intent_accept_temp = PendingIntent.getBroadcast(c,1,intent_accept_temp,PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -133,14 +140,14 @@ public class Notifications {
 
 
     //Summary Card
-    public static void updateCard(){
+    public static void updateCard(Realm realm){
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("summary_notification", true)) {
 
             //TempBasal lastTempBasal = TempBasal.last();
-            Pump pump       = new Pump(new Date());
+            Pump pump       = new Pump(new Date(), realm);
             String title    = pump.displayBasalDesc(false);
             String msg      = pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft();
 

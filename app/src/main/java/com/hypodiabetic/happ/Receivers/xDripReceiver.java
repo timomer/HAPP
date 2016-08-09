@@ -12,6 +12,8 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Bg;
 import java.util.Date;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 05/03/2016.
  */
@@ -37,12 +39,17 @@ public class xDripReceiver extends BroadcastReceiver {
             if (bgEstimate == 0) return;
 
             final Bg bg = new Bg();
-            bg.direction    =   bundle.getString(Intents.EXTRA_BG_SLOPE_NAME);
-            bg.battery      =   bundle.getString(Intents.EXTRA_SENSOR_BATTERY);
-            bg.bgdelta      =   bundle.getDouble(Intents.EXTRA_BG_SLOPE, 0) * 1000 * 60 * 5;
-            bg.datetime     =   bundle.getLong(Intents.EXTRA_TIMESTAMP, new Date().getTime());
-            bg.sgv          =   Integer.toString((int) bgEstimate, 10);
-            bg.save();
+            bg.setDirection     (bundle.getString(Intents.EXTRA_BG_SLOPE_NAME));
+            bg.setBattery       (bundle.getInt(Intents.EXTRA_SENSOR_BATTERY));
+            bg.setBgdelta       (bundle.getDouble(Intents.EXTRA_BG_SLOPE, 0) * 1000 * 60 * 5);
+            bg.setDatetime      (new Date(bundle.getLong(Intents.EXTRA_TIMESTAMP, new Date().getTime())));
+            bg.setSgv           (Integer.toString((int) bgEstimate, 10));
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.copyToRealm(bg);
+        realm.commitTransaction();
+        realm.close();
 
             Log.d(TAG, "New BG saved, sending out UI Update");
 

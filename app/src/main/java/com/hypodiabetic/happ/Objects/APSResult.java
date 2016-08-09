@@ -105,7 +105,6 @@ public class APSResult extends RealmObject {
     //APS general results
     private String   action;                     //APS suggested Action
     private String   reason;                     //APS reason for suggested action
-
     private Boolean  tempSuggested   =   false;  //Has a temp basal been suggested?
     private double   eventualBG      =   0D;
     private double   snoozeBG        =   0D;
@@ -115,7 +114,6 @@ public class APSResult extends RealmObject {
     private Double   rate;                       //Temp Basal Rate for (U/hr) mode
     private Integer  duration;                   //Duration of Temp
     private String   basal_adjustemnt;           //High or Low temp
-
     private Boolean  accepted        =   false;  //Has this APS Result been accepted?
 
     //User profile details
@@ -161,10 +159,10 @@ public class APSResult extends RealmObject {
 
     public TempBasal getBasal(){
         TempBasal reply = new TempBasal();
-        reply.rate              =   rate;
-        reply.duration          =   duration;
-        reply.basal_adjustemnt  =   basal_adjustemnt;
-        reply.aps_mode          =   aps_mode;
+        reply.setRate               (rate);
+        reply.setDuration           (duration);
+        reply.setBasal_adjustemnt   (basal_adjustemnt);
+        reply.setAps_mode           (aps_mode);
 
         return reply;
     }

@@ -47,7 +47,8 @@ public class APSService extends IntentService {
     private Context context;
     private Profile profile;
     private Safety safety;
-    private Pump pumpActive = new Pump(new Date());
+    private Realm realm;
+    private Pump pumpActive;
 
     public APSService() {
         super(APSService.class.getName());
@@ -62,6 +63,8 @@ public class APSService extends IntentService {
         boolean aps_paused      = prefs.getBoolean("aps_paused", false);
         profile                 = new Profile(new Date());
         safety                  = new Safety();
+        realm                   = Realm.getDefaultInstance();
+        pumpActive              = new Pump(new Date(), realm);
 
         if (aps_paused) {
             bundle.putString("error", "APS is currently Paused");
@@ -106,7 +109,6 @@ public class APSService extends IntentService {
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
                     realm.copyToRealm(apsResult);
-                    Log.e(TAG, "SAVING: " + apsResult.toString() );
                     realm.commitTransaction();
                     realm.close();
 
@@ -117,14 +119,15 @@ public class APSService extends IntentService {
 
                         bundle.putString("APSResult", gson.toJson(apsResult));
                     } catch (ClassNotFoundException e){
-
+                        Log.e(TAG, "Error creating gson object: " + e.getLocalizedMessage());
                     }
 
                     receiver.send(Constants.STATUS_FINISHED, bundle);
                 }
             }
-            Log.d(TAG, "Service Finished");
 
+            realm.close();
+            Log.d(TAG, "Service Finished");
         }
     }
 
@@ -135,7 +138,7 @@ public class APSService extends IntentService {
         else if (apsResult.getRate() > safety.getMaxBasal(profile)) { apsResult.setRate(safety.getMaxBasal(profile)); }
         apsResult.setRate(tools.round(apsResult.getRate(), 2));
 
-        Pump pumpWithProposedBasal = new Pump(new Date());
+        Pump pumpWithProposedBasal = new Pump(new Date(), realm);
         pumpWithProposedBasal.setNewTempBasal(apsResult, null);
 
         //apsResult.ratePercent =  pumpWithProposedBasal.temp_basal_percent;
