@@ -60,7 +60,7 @@ public class IntegrationsManager {
 
 
         //NS Interaction
-        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.updateNSDBTreatments(realm);
+//        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.updateNSDBTreatments(realm);
     }
 
     public static void newBolus(Bolus bolus, Bolus correction, Realm realm){
@@ -69,26 +69,26 @@ public class IntegrationsManager {
         Profile p               =   new Profile(new Date());
         String happ_object      =   "bolus_delivery";
 
-        realm.beginTransaction();
-
         //Insulin Integration App
         //Are we allowed and able to send bolus?
         if (p.send_bolus_allowed ) {
             if (bolus != null) {
                 Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", happ_object, bolus.getId(), realm);
+                realm.beginTransaction();
                 bolusIntegration.setState           ("to_sync");
                 bolusIntegration.setAction          ("new");
                 bolusIntegration.setAuth_code       (new Random().toString());
                 bolusIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
-                realm.copyToRealm(bolusIntegration);
+                realm.commitTransaction();
             }
             if (correction != null) {
                 Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", happ_object, correction.getId(), realm);
+                realm.beginTransaction();
                 correctionIntegration.setState           ("to_sync");
                 correctionIntegration.setAction          ("new");
                 correctionIntegration.setAuth_code       (new Random().toString());
                 correctionIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
-                realm.copyToRealm(correctionIntegration);
+                realm.commitTransaction();
             }
         }
 
@@ -96,19 +96,19 @@ public class IntegrationsManager {
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (bolus != null) {
                 Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, bolus.getId(), realm);
+                realm.beginTransaction();
                 bolusIntegration.setState           ("to_sync");
                 bolusIntegration.setAction          ("new");
-                realm.copyToRealm(bolusIntegration);
+                realm.commitTransaction();
             }
             if (correction != null) {
                 Integration correctionIntegration = Integration.getIntegration("ns_client", happ_object, correction.getId(), realm);
+                realm.beginTransaction();
                 correctionIntegration.setState           ("to_sync");
                 correctionIntegration.setAction          ("new");
-                realm.copyToRealm(correctionIntegration);
+                realm.commitTransaction();
             }
         }
-
-        realm.commitTransaction();
 
         Log.d(TAG, "newBolus");
         syncIntegrations(MainApp.instance(), realm);
@@ -118,20 +118,17 @@ public class IntegrationsManager {
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         String happ_object      =   "treatment_carbs";
 
-        realm.beginTransaction();
-
         // NS Integrations
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (carb != null) {
                 Integration carbIntegration = Integration.getIntegration("ns_client", happ_object, carb.getId(), realm);
+                realm.beginTransaction();
                 carbIntegration.setState        ("to_sync");
                 carbIntegration.setAction       ("new");
                 carbIntegration.setRemote_var1  ("carbs");
-                realm.copyToRealm(carbIntegration);
+                realm.commitTransaction();
             }
         }
-
-        realm.commitTransaction();
 
         Log.d(TAG, "newCarbs");
         syncIntegrations(MainApp.instance(), realm);
@@ -142,27 +139,25 @@ public class IntegrationsManager {
         Profile p               =   new Profile(new Date());
         String happ_object      =   "temp_basal";
 
-        realm.beginTransaction();
-
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
             Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId(), realm);
+            realm.beginTransaction();
             basalIntegration.setState           ("to_sync");
             basalIntegration.setAction          ("new");
             basalIntegration.setAuth_code       (new Random().toString());
             basalIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
-            realm.copyToRealm(basalIntegration);
+            realm.commitTransaction();
         }
 
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId(), realm);
+            realm.beginTransaction();
             basalIntegration.setState           ("to_sync");
             basalIntegration.setAction          ("new");
-            realm.copyToRealm(basalIntegration);
+            realm.commitTransaction();
         }
-
-        realm.commitTransaction();
 
         Log.d(TAG, "newTempBasal");
         syncIntegrations(MainApp.instance(), realm);
@@ -173,25 +168,23 @@ public class IntegrationsManager {
         Profile p               =   new Profile(new Date());
         String happ_object      =   "temp_basal";
 
-        realm.beginTransaction();
-
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
             Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId(), realm);
+            realm.beginTransaction();
             basalIntegration.setState       ("to_sync");
             basalIntegration.setAction      ("cancel");
-            realm.copyToRealm(basalIntegration);
+            realm.commitTransaction();
         }
 
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId(), realm);
+            realm.beginTransaction();
             basalIntegration.setState       ("to_sync");
             basalIntegration.setAction      ("cancel");
-            realm.copyToRealm(basalIntegration);
+            realm.commitTransaction();
         }
-
-        realm.commitTransaction();
 
         Log.d(TAG, "cancelTempBasal");
         syncIntegrations(MainApp.instance(), realm);

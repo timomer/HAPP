@@ -45,14 +45,15 @@ public class pumpAction {
     }
 
 
-    public static void setTempBasal(TempBasal basal, Realm realm){
+    public static void setTempBasal(TempBasal newTempBasal, Realm realm){
         APSResult apsResult = APSResult.last(realm);
+        realm.beginTransaction();
         apsResult.setAccepted(true);
         realm.commitTransaction();
 
-        if (basal == null) basal = apsResult.getBasal();
+        if (newTempBasal == null) newTempBasal = apsResult.getBasal();
 
-        if (basal.checkIsCancelRequest()){
+        if (newTempBasal.checkIsCancelRequest()){
             cancelTempBasal(realm);
 
         } else {
@@ -61,12 +62,12 @@ public class pumpAction {
             Safety safety = new Safety();
 
             //Sanity check the suggested rate is safe
-            if (!safety.checkIsSafeMaxBolus(basal.getRate())) basal.setRate(safety.getMaxBasal(p));
+            if (!safety.checkIsSafeMaxBolus(newTempBasal.getRate())) newTempBasal.setRate(safety.getMaxBasal(p));
 
             //Save
-            basal.setStart_time(new Date());
+            newTempBasal.setStart_time(new Date());
             realm.beginTransaction();
-            realm.copyToRealm(basal);
+            realm.copyToRealm(newTempBasal);
             realm.commitTransaction();
 
             //Clear notifications
@@ -74,7 +75,7 @@ public class pumpAction {
             Notifications.clear("newTemp");
 
             //Inform Integrations Manager
-            IntegrationsManager.newTempBasal(basal, realm);
+            IntegrationsManager.newTempBasal(newTempBasal, realm);
 
             //Update UI
             Intent intentUpdate = new Intent(Intents.UI_UPDATE);

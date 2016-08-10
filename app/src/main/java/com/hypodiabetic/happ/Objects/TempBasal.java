@@ -109,7 +109,7 @@ public class TempBasal extends RealmObject {
         //        .orderBy("start_time desc")
         //        .executeSingle();
         TempBasal last = null;
-        if (!results.isEmpty()) results.first();
+        if (!results.isEmpty()) last = results.first();
         if (last != null && last.isactive(atThisDate)){
             return last;
         } else {
