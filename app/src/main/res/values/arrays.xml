@@ -4,12 +4,19 @@
         <item>mgdl</item>
         <item>mmol</item>
     </string-array>
-
     <string-array name="bgUnitValues">
         <item>mgdl</item>
         <item>mmol</item>
     </string-array>
 
+    <string-array name="cgmsources">
+        <item>xDrip</item>
+        <item>Nightscout (NSClient)</item>
+    </string-array>
+    <string-array name="cgmsourcesValues">
+        <item>xdrip</item>
+        <item>nsclient</item>
+    </string-array>
 
         <string-array name="pump_nameArray">
             <item>Medtronic - Basal Absolute (U/hr)</item>

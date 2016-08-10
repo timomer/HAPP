@@ -26,6 +26,18 @@ public interface Intents {
     String RECEIVER_PERMISSION_STATUSLINE   = "com.eveningoutpost.dexdrip.permissions.RECEIVE_EXTERNAL_STATUSLINE";
 
     //NSClient
-    String NSCLIENT_ACTION_DATABASE     = "info.nightscout.client.DBACCESS";
+    String NSCLIENT_ACTION_DATABASE             = "info.nightscout.client.DBACCESS";
+    String NSCLIENT_ACTION_NEW_SGV              = "info.nightscout.client.NEW_SGV";
+    String NSCLIENT_ACTION_NEW_TREATMENT        = "info.nightscout.client.NEW_TREATMENT";
+    String NSCLIENT_ACTION_CHANGED_TREATMENT    = "info.nightscout.client.CHANGED_TREATMENT";
+    String NSCLIENT_ACTION_REMOVED_TREATMENT    = "info.nightscout.client.REMOVED_TREATMENT";
+    String NSCLIENT_ACTION_NEW_PROFILE          = "info.nightscout.client.NEW_PROFILE";
+    String NSCLIENT_ACTION_NEW_STATUS           = "info.nightscout.client.NEW_STATUS";
+    String NSCLIENT_ACTION_NEW_MBG              = "info.nightscout.client.NEW_MBG";
+    String NSCLIENT_ACTION_NEW_DEVICESTATUS     = "info.nightscout.client.NEW_DEVICESTATUS";
+    String NSCLIENT_ACTION_NEW_CAL              = "info.nightscout.client.NEW_CAL";
+
+    //xDrip
+    String XDRIP_BGESTIMATE     = "com.eveningoutpost.dexdrip.BgEstimate";
 
 }

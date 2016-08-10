@@ -273,6 +273,17 @@ public class Bg extends RealmObject {
         //        .execute();
     }
 
+    public static boolean haveBGTimestamped(Date timestamp, Realm realm){
+        RealmResults<Bg> results = realm.where(Bg.class)
+                .equalTo("datetime", timestamp)
+                .findAllSorted("datetime", Sort.DESCENDING);
+        if (results.isEmpty()){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public static List<Bg> latest( Realm realm) {
         RealmResults<Bg> results = realm.where(Bg.class)
                 .findAllSorted("datetime", Sort.DESCENDING);

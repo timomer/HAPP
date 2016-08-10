@@ -82,7 +82,6 @@ public class SettingsActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_misc);
 
 
-
             setPreferenceListener(findPreference("highValue"));
             setPreferenceListener(findPreference("lowValue"));
             setPreferenceListener(findPreference("units"));
@@ -91,6 +90,7 @@ public class SettingsActivity extends PreferenceActivity {
             setPreferenceListener(findPreference("aps_mode"));
             setPreferenceListener(findPreference("aps_algorithm"));
             setPreferenceListener(findPreference("pump_name"));
+            setPreferenceListener(findPreference("cgm_source"));
             findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOCUMENTS + "/HAPP_Settings");
 
             for (int x=0; x<24; x++ ){

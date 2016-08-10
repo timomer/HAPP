@@ -27,6 +27,7 @@ public class Profile {
     public Double   isf;                            //Insulin sensitivity factor, how much one unit of Insulin will lower your BG
     public Integer  carbRatio;                      //How many grams of carbohydrate are covered by one unit of insulin
 
+    public String   cgm_source;                     //Source of CGM data
     public Double   target_bg;                      //OpenAPS Target BG
     public String   pump_name;                      //Pump Selected
     public String   aps_mode;                       //Open - do not send to pump \ Closed - send to pump
@@ -76,6 +77,7 @@ public class Profile {
         max_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("highValue", "170"))));
         min_bg                  = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("lowValue", "70"))));
         target_bg               = Double.parseDouble(tools.inmgdl(Double.parseDouble(prefs.getString("target_bg", "100"))));
+        cgm_source              = prefs.getString("cgm_source", "");
     }
 
     private Double getCurrent_basal(){
@@ -141,22 +143,23 @@ public class Profile {
 
     @Override
     public String toString(){
-        return "carbAbsorptionRate:" + carbAbsorptionRate + "\n" +
-                " dia:" + dia + "\n" +
-                " current_basal:" + current_basal + "\n" +
-                " max_bg:" + max_bg + " mgdl" + "\n" +
-                " min_bg:" + min_bg + " mgdl" + "\n" +
-                " target_bg:" + target_bg + " mgdl" + "\n" +
-                " bg_units:" + tools.bgUnitsFormat() + "\n" +
-                " isf:" + isf + " mgdl" + "\n" +
-                " carbRatio:" + carbRatio + "\n" +
-                " pump_name:" + pump_name + "\n" +
-                " aps_mode:" + aps_mode + "\n" +
-                " temp_basal_notification:" + temp_basal_notification + "\n" +
-                " send_bolus_allowed:" + send_bolus_allowed + "\n" +
-                " SYSTEM BOLUS_ALLOWED:" + UserPrefs.BOLUS_ALLOWED + "\n" +
-                " aps_loop:" + aps_loop + "\n" +
-                " aps_algorithm:" + aps_algorithm;
+        return "carbAbsorptionRate: "           + carbAbsorptionRate + "\n" +
+                " dia: "                        + dia + "\n" +
+                " current_basal: "              + current_basal + "\n" +
+                " cgm_source: "                 + cgm_source + "\n" +
+                " max_bg: "                     + max_bg + " mgdl" + "\n" +
+                " min_bg: "                     + min_bg + " mgdl" + "\n" +
+                " target_bg: "                  + target_bg + " mgdl" + "\n" +
+                " bg_units: "                   + tools.bgUnitsFormat() + "\n" +
+                " isf: "                        + isf + " mgdl" + "\n" +
+                " carbRatio: "                  + carbRatio + "\n" +
+                " pump_name: "                  + pump_name + "\n" +
+                " aps_mode: "                   + aps_mode + "\n" +
+                " temp_basal_notification: "    + temp_basal_notification + "\n" +
+                " send_bolus_allowed: "         + send_bolus_allowed + "\n" +
+                " SYSTEM BOLUS_ALLOWED: "       + UserPrefs.BOLUS_ALLOWED + "\n" +
+                " aps_loop: "                   + aps_loop + "\n" +
+                " aps_algorithm: "              + aps_algorithm;
     }
 
 }

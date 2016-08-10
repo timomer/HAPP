@@ -198,6 +198,7 @@ public class APSService extends IntentService {
     private Boolean prefsOK(){
         if (profile.carbAbsorptionRate.equals(0D) || profile.dia.equals(0D) || profile.isf.equals(0D) || profile.current_basal.equals(0D) || profile.carbRatio.equals(0) || profile.pump_name.equals("none") || profile.aps_algorithm.equals("none")) return false;
         if (safety.user_max_bolus.equals(0D) || safety.max_basal.equals(0D) || safety.max_iob.equals(0D)) return false;
+        if (profile.cgm_source.equals("")) return false;
         return true;
     }
 

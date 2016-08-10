@@ -89,14 +89,6 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".Receivers.xDripReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.eveningoutpost.dexdrip.BgEstimate" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name=".Receivers.notificationReceiver"
             android:exported="true">
             <intent-filter>

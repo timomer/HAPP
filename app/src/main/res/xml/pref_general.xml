@@ -26,5 +26,10 @@
             android:entries="@array/bgUnitEntries"
             android:entryValues="@array/bgUnitValues"
             android:defaultValue="mgdl"/>
+        <ListPreference
+            android:key="cgm_source"
+            android:title="CGM Source"
+            android:entries="@array/cgmsources"
+            android:entryValues="@array/cgmsourcesValues"/>
     </PreferenceCategory>
 </PreferenceScreen>
