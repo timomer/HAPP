@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import io.realm.Realm;

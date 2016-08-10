@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import io.realm.Realm;
+
 public class Integration_Report extends AppCompatActivity {
 
     Spinner integrationType;
@@ -30,11 +32,14 @@ public class Integration_Report extends AppCompatActivity {
     Spinner numHours;
     ListView integrationReportList;
     TextView integrationItemCount;
+    Realm realm;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_integration__report);
+        realm = Realm.getDefaultInstance();
 
         integrationType         =   (Spinner) findViewById(R.id.integrationType);
         happObjectType          =   (Spinner) findViewById(R.id.HAPPObjectType);
@@ -86,11 +91,17 @@ public class Integration_Report extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        realm.close();
+    }
+
     public void reloadList(String intergartion, String happObject, int hoursOld){
         ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
         Calendar integrationDate  = Calendar.getInstance();
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
-        List<Integration> integrations = Integration.getIntegrationsHoursOld(intergartion, happObject, hoursOld);
+        List<Integration> integrations = Integration.getIntegrationsHoursOld(intergartion, happObject, hoursOld, realm);
 
         for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
             HashMap<String, String> integrationItem = new HashMap<String, String>();
@@ -98,7 +109,9 @@ public class Integration_Report extends AppCompatActivity {
             ObjectToSync objectSyncDetails = new ObjectToSync(integration);
 
             if (objectSyncDetails.state.equals("delete_me")) {
-                integration.delete();
+                realm.beginTransaction();
+                integration.deleteFromRealm();
+                realm.commitTransaction();
             } else {
 
                 if (objectSyncDetails.requested != null) {
@@ -106,7 +119,7 @@ public class Integration_Report extends AppCompatActivity {
                 } else {
                     integrationDate.setTime(new Date(0));                                                 //Bad integration
                 }
-                integrationItem.put("integrationType", integration.type);
+                integrationItem.put("integrationType", integration.getType());
                 integrationItem.put("integrationWhat", "Request sent: " + objectSyncDetails.getObjectSummary());
                 integrationItem.put("integrationDateTime", sdfDateTime.format(integrationDate.getTime()));
                 integrationItem.put("integrationState", "state:" + objectSyncDetails.state);

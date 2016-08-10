@@ -54,7 +54,7 @@ public class FiveMinService extends IntentService {
 
         newStat();                                                      //Save a new Stat Object
         checkTBRNotify();                                               //checks if a Cancel TBR Notification is active and TBR is not running anymore
-        IntegrationsManager.checkOldInsulinIntegration();               //Check if there are any old Insulin Integration requests waiting to be synced
+        IntegrationsManager.checkOldInsulinIntegration(realm);          //Check if there are any old Insulin Integration requests waiting to be synced
         IntegrationsManager.updatexDripWatchFace(realm);                //Updates xDrip Watch Face
 
         Log.d(TAG, "Service Finished");

@@ -1,14 +1,6 @@
 package com.hypodiabetic.happ.Objects;
 
 import android.content.SharedPreferences;
-import android.provider.BaseColumns;
-
-import com.activeandroid.Model;
-import com.activeandroid.annotation.Column;
-import com.activeandroid.annotation.Table;
-import com.activeandroid.query.Select;
-import com.google.android.gms.wearable.DataMap;
-import com.google.gson.annotations.Expose;
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.tools;

@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 14/02/2016.
  * This class collects and reviews updates from Insulin Integration App, as multiple updates may hit HAPP at once, this class combines them
@@ -44,12 +46,14 @@ public class InsulinIntegrationNotify {
     String snackbarMsg;                                                                             //Summary String for Snackbar
     String errorMsg;                                                                                //Summary String of error items
     public Boolean foundError;                                                                      //Where errors found?
+    private Realm realm;
 
-    public InsulinIntegrationNotify(){
+    public InsulinIntegrationNotify(Realm realm){
+        this.realm              =   realm;
         detailList              =   new ArrayList<>();
         detailListErrorsOnly    =   new ArrayList<>();
-        recentlyUpdated         =   Integration.getUpdatedInLastMins(1,"insulin_integration_app");
-        withErrors              =   Integration.getIntegrationsWithErrors("insulin_integration_app");
+        recentlyUpdated         =   Integration.getUpdatedInLastMins(1,"insulin_integration_app", realm);
+        withErrors              =   Integration.getIntegrationsWithErrors("insulin_integration_app", realm);
         snackbarMsg             =   "";
         errorMsg                =   "";
         foundError              =   false;
@@ -57,32 +61,34 @@ public class InsulinIntegrationNotify {
         SimpleDateFormat sdfTime        = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
 
         for (Integration integration : recentlyUpdated) {
-            if (!integration.state.equals("error") && !integration.state.equals("error_ack")) {     //Deal with errors later
+            if (!integration.getState().equals("error") && !integration.getState().equals("error_ack")) {     //Deal with errors later
                 ObjectToSync integrationWithDetails = new ObjectToSync(integration);
                 HashMap<String, String> detailListItem = new HashMap<String, String>();
 
                 if (integrationWithDetails.state.equals("delete_me")) {
-                    integration.delete();
+                    realm.beginTransaction();
+                    integration.deleteFromRealm();
+                    realm.commitTransaction();
                 } else {
 
                     switch (integrationWithDetails.aps_object_type) {
                         case "bolus_delivery":
                             detailListItem.put("value", tools.formatDisplayInsulin(integrationWithDetails.value1, 2));
                             detailListItem.put("summary", integrationWithDetails.value3);
-                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayInsulin(integrationWithDetails.value1, 2) + " " + integrationWithDetails.value3 + " " + sdfTime.format(integration.date_updated) + "\n";
+                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayInsulin(integrationWithDetails.value1, 2) + " " + integrationWithDetails.value3 + " " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
 
                         case "temp_basal":
                             detailListItem.put("value", tools.formatDisplayBasal(integrationWithDetails.value1, true));
                             detailListItem.put("summary", "(" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins");
-                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayBasal(integrationWithDetails.value1, false) + " (" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins " + sdfTime.format(integration.date_updated) + "\n";
+                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayBasal(integrationWithDetails.value1, false) + " (" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
                     }
                     detailListItem.put("happObjectType", integrationWithDetails.aps_object_type);
                     detailListItem.put("state", integrationWithDetails.state.toUpperCase());
                     detailListItem.put("details", integrationWithDetails.details);
                     detailListItem.put("action", "action:" + integrationWithDetails.action);
-                    detailListItem.put("date", sdfDateTime.format(integration.date_updated));
+                    detailListItem.put("date", sdfDateTime.format(integration.getDate_updated()));
                     detailListItem.put("intID", "INT ID:" + integration.getId());
                     detailList.add(detailListItem);
                 }
@@ -95,7 +101,9 @@ public class InsulinIntegrationNotify {
             HashMap<String, String> detailListItem = new HashMap<String, String>();
 
             if (integrationWithDetails.state.equals("delete_me")) {
-                integrationWithError.delete();
+                realm.beginTransaction();
+                integrationWithError.deleteFromRealm();
+                realm.commitTransaction();
             } else {
 
                 switch (integrationWithDetails.aps_object_type) {
@@ -115,7 +123,7 @@ public class InsulinIntegrationNotify {
                 detailListItem.put("state", integrationWithDetails.state.toUpperCase());
                 detailListItem.put("details", integrationWithDetails.details);
                 detailListItem.put("action", "action:" + integrationWithDetails.action);
-                detailListItem.put("date", sdfDateTime.format(integrationWithError.date_updated));
+                detailListItem.put("date", sdfDateTime.format(integrationWithError.getDate_updated()));
                 detailListItem.put("intID", "INT ID:" + integrationWithError.getId());
                 detailListErrorsOnly.add(detailListItem);
             }
@@ -175,8 +183,9 @@ public class InsulinIntegrationNotify {
             @Override
             public void onClick(View v) {
                 for (Integration integrationWithError : withErrors) {
-                    integrationWithError.state  =   "error_ack";                                    //User has Acknowledged the errors
-                    integrationWithError.save();
+                    realm.beginTransaction();
+                    integrationWithError.setState   ("error_ack");                                    //User has Acknowledged the errors
+                    realm.commitTransaction();
                 }
                 Notifications.clear("INSULIN_UPDATE");
                 dialog.dismiss();

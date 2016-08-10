@@ -36,7 +36,7 @@ public class pumpAction {
 
         if (basal != null && c != null) {
             if (basal.getAps_mode().equals("closed") && !p.temp_basal_notification) {               //Send Direct to pump
-                setTempBasal(basal);
+                setTempBasal(basal, realm);
 
             } else {
                 Notifications.newTemp(basal, c, realm);                                             //Notify user
@@ -45,10 +45,7 @@ public class pumpAction {
     }
 
 
-    public static void setTempBasal(TempBasal basal){
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-
+    public static void setTempBasal(TempBasal basal, Realm realm){
         APSResult apsResult = APSResult.last(realm);
         apsResult.setAccepted(true);
         realm.commitTransaction();
@@ -56,7 +53,7 @@ public class pumpAction {
         if (basal == null) basal = apsResult.getBasal();
 
         if (basal.checkIsCancelRequest()){
-            cancelTempBasal();
+            cancelTempBasal(realm);
 
         } else {
 
@@ -77,23 +74,18 @@ public class pumpAction {
             Notifications.clear("newTemp");
 
             //Inform Integrations Manager
-            IntegrationsManager.newTempBasal(basal);
+            IntegrationsManager.newTempBasal(basal, realm);
 
             //Update UI
             Intent intentUpdate = new Intent(Intents.UI_UPDATE);
             intentUpdate.putExtra("UPDATE", "NEW_APS_RESULT");
             LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intentUpdate);
 
-            //Run openAPS again
-            //Intent apsIntent = new Intent(MainApp.instance(), APSService.class);
-            //MainApp.instance().startService(apsIntent);
         }
-        realm.close();
     }
 
-    public static void cancelTempBasal(){
+    public static void cancelTempBasal(Realm realm){
         //Cancels a Running Temp Basal and updates the DB with the Temp Basal new duration
-        Realm realm = Realm.getDefaultInstance();
         final TempBasal active_basal = TempBasal.getCurrentActive(null, realm);
 
         if (active_basal.isactive(null)) {
@@ -105,9 +97,9 @@ public class pumpAction {
             realm.commitTransaction();
 
             //Inform Integrations Manager
-            IntegrationsManager.cancelTempBasal(active_basal);
+            IntegrationsManager.cancelTempBasal(active_basal, realm);
 
-            Notifications.newInsulinUpdate();
+            Notifications.newInsulinUpdate(realm);
 
             //Update Main Activity of Current Temp Change
             Intent intent = new Intent(Intents.UI_UPDATE);
@@ -126,7 +118,7 @@ public class pumpAction {
     }
 
 
-    public static void setBolus(Bolus bolus, final Carb carb, Bolus bolusCorrection, final Context c){
+    public static void setBolus(Bolus bolus, final Carb carb, Bolus bolusCorrection, final Context c, final Realm realm){
 
         Safety safety = new Safety();
         Profile p = new Profile(new Date());
@@ -230,7 +222,6 @@ public class pumpAction {
             @Override
             public void onClick(View v) {
 
-                Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
                 if (carb != null) realm.copyToRealm(carb);
                 if (finalBolusTreatment != null) realm.copyToRealm(finalBolusTreatment);
@@ -239,8 +230,8 @@ public class pumpAction {
                 realm.close();
 
                 //inform Integration Manager
-                IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment);
-                IntegrationsManager.newCarbs(carb);
+                IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment, realm);
+                IntegrationsManager.newCarbs(carb, realm);
 
                 //update Stats
                 MainApp.instance().startService(new Intent(MainApp.instance(), FiveMinService.class));

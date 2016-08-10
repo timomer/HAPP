@@ -32,13 +32,13 @@ public class ObjectToSync {
 
     public ObjectToSync (Integration integration){
         //Prepares a integration to be sent
-        aps_object_type         =   integration.happ_object;
-        action                  =   integration.action;
-        state                   =   integration.state;
-        details                 =   integration.details;
-        aps_integration_id      =   integration.getId();
-        remote_id               =   integration.remote_id;
-        integrationSecretCode   =   integration.auth_code;
+    //    aps_object_type         =   integration.happ_object;
+    //    action                  =   integration.action;
+    //    state                   =   integration.state;
+    //    details                 =   integration.details;
+    //    aps_integration_id      =   integration.getId();
+    //    remote_id               =   integration.remote_id;
+    //    integrationSecretCode   =   integration.auth_code;
 
         switch (aps_object_type){
             case "bolus_delivery":
@@ -101,27 +101,27 @@ public class ObjectToSync {
     }
 
     public void updateIntegration(){
-        Integration integration = Integration.getIntegrationByID(aps_integration_id);
+    //    Integration integration = Integration.getIntegrationByID(aps_integration_id);
 
-        if (integration != null) {
+    //    if (integration != null) {
             //We have new sync data from remote system, populate this object
-            integration.date_updated = new Date().getTime();
-            integration.state       = state;
-            integration.details     = details;
-            integration.remote_id   = remote_id;
+    //        integration.date_updated = new Date().getTime();
+    //        integration.state       = state;
+    //        integration.details     = details;
+    //        integration.remote_id   = remote_id;
 
             if (integrationSecretCode != null){ //we have an auth code, lets check it
-                if (!integration.auth_code.equals(integrationSecretCode)) {
+    //            if (!integration.auth_code.equals(integrationSecretCode)) {
                     //Auth codes do not match, something odd going along
                     state = "error";
                     details = "Auth codes do not match, was this the app we sent the request to!?";
-                    integration.state = state;
-                    integration.details = details;
-                    integration.save();
-                }
+    //                integration.state = state;
+    //                integration.details = details;
+    //                integration.save();
+               // }
             }
 
-            integration.save();
-        }
+    //        integration.save();
+    //    }
     }
 }

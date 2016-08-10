@@ -170,15 +170,15 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
         if (carb != null){
             carb.setValue(tools.stringToDouble(wizardCarbs.getText().toString()));
-            if (carb.getValue().equals(0))              carb = null;
+            if (carb.getValue().equals(0D))              carb = null;
         }
         if (bolus != null){
             bolus.setValue(tools.stringToDouble(wizardSuggestedBolus.getText().toString()));
-            if (bolus.getValue().equals(0))             bolus = null;
+            if (bolus.getValue().equals(0D))             bolus = null;
         }
         if (bolusCorrection != null){
             bolusCorrection.setValue(tools.stringToDouble(wizardSuggestedCorrection.getText().toString()));
-            if (bolusCorrection.getValue().equals(0))   bolusCorrection = null;
+            if (bolusCorrection.getValue().equals(0D))   bolusCorrection = null;
         }
 
         saveTreatment(carb, bolus, bolusCorrection, view);
@@ -231,7 +231,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             realm.commitTransaction();
             editText_treatment_value.setText("");
             wizardCarbs.setText("");
-            IntegrationsManager.newCarbs(carbs);
+            IntegrationsManager.newCarbs(carbs, realm);
             Toast.makeText(this, carbs.getValue() + " Carbs entered", Toast.LENGTH_SHORT).show();
 
             refreshListFragments();
@@ -240,7 +240,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             startService(new Intent(this, FiveMinService.class));
         } else {                                                                                    //We have insulin to deliver
 
-            pumpAction.setBolus(bolus, carbs, correction, v.getContext());
+            pumpAction.setBolus(bolus, carbs, correction, v.getContext(), realm);
         }
 
     }
@@ -675,8 +675,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     }
                 }
 
-//                Integration integration = Integration.getIntegration("insulin_integration_app","bolus_delivery",bolus.getId());
-//                treatmentItem.put("integration", integration.state);  //log STATUS of insulin_Integration_App
+                Integration integration = Integration.getIntegration("insulin_integration_app","bolus_delivery",bolus.getId(), realm);
+                treatmentItem.put("integration", integration.getState());                           //log STATUS of insulin_Integration_App
 
                 if (toLoad.equals("ACTIVE")){
                     if (!lastInsulin ) treatmentsList.add(treatmentItem);
@@ -830,10 +830,10 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             List<Integration> integrations;
                             if (selectedListType.equals("bolus")) {
                                 intergrationType="bolus_delivery";
-                                integrations = Integration.getIntegrationsFor(intergrationType,bolus.getId());
+                                integrations = Integration.getIntegrationsFor(intergrationType,bolus.getId(), realm);
                             } else {
                                 intergrationType="carbs";
-                                integrations = Integration.getIntegrationsFor(intergrationType,carb.getId());
+                                integrations = Integration.getIntegrationsFor(intergrationType,carb.getId(), realm);
                             }
 
                             final Dialog dialog = new Dialog(parentsView.getContext());
@@ -857,7 +857,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 } else {
                                     integrationDate.setTime(new Date(0));                                                 //Bad integration
                                 }
-                                integrationItem.put("integrationType",      integration.type);
+                                integrationItem.put("integrationType",      integration.getType());
                                 integrationItem.put("integrationWhat",      "Request sent: " + objectSyncDetails.getObjectSummary());
                                 integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
                                 integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);

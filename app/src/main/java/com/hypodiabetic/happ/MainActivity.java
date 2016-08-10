@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
         IntegrationsManager.updatexDripWatchFace(realm);
 
         //Checks if we have any Insulin Integration App errors we must warn the user about
-        Notifications.newInsulinUpdate();
+        Notifications.newInsulinUpdate(realm);
     }
 
     @Override
@@ -314,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
                         checkInsulinAppIntegration(true);
                         break;
                     case 1:
-                        pumpAction.cancelTempBasal();
+                        pumpAction.cancelTempBasal(realm);
                         mDrawerLayout.closeDrawers();
                         break;
                     case 2:
@@ -660,7 +660,7 @@ public class MainActivity extends AppCompatActivity {
         openAPSFragment.setAcceptAPSButton(false);
 
         TempBasal suggestedBasal = APSResult.last(realm).getBasal();
-        pumpAction.setTempBasal(suggestedBasal);   //Action the suggested Temp
+        pumpAction.setTempBasal(suggestedBasal, realm);   //Action the suggested Temp
         updateRunningTemp();
     }
 

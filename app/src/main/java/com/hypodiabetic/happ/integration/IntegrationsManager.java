@@ -34,11 +34,9 @@ import io.realm.Realm;
  */
 public class IntegrationsManager {
     private static final String TAG = "IntegrationsManager";
-    private static Realm realm;
 
-    public static void syncIntegrations(Context c){
+    public static void syncIntegrations(Context c, Realm realm){
         Log.d(TAG, "Running Sync");
-        realm = Realm.getInstance(MainApp.getRealmConfig());
 
         updatexDripWatchFace(realm);
 
@@ -62,153 +60,168 @@ public class IntegrationsManager {
 
 
         //NS Interaction
-        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.updateNSDBTreatments();
-
-        realm.close();
+        if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) NSUploader.updateNSDBTreatments(realm);
     }
 
-    public static void newBolus(Bolus bolus, Bolus correction){
+    public static void newBolus(Bolus bolus, Bolus correction, Realm realm){
         //Saves the treatments to the DB to be accessed later once we are connected to Insulin Integration App
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         Profile p               =   new Profile(new Date());
         String happ_object      =   "bolus_delivery";
 
+        realm.beginTransaction();
+
         //Insulin Integration App
         //Are we allowed and able to send bolus?
         if (p.send_bolus_allowed ) {
             if (bolus != null) {
-        //        Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", happ_object, bolus.getId());
-        //        bolusIntegration.state          = "to_sync";
-        //        bolusIntegration.action         = "new";
-        //        bolusIntegration.auth_code      = new Random().toString();
-        //        bolusIntegration.remote_var1    = prefs.getString("insulin_integration", "");
-        //        bolusIntegration.save();
+                Integration bolusIntegration = Integration.getIntegration("insulin_integration_app", happ_object, bolus.getId(), realm);
+                bolusIntegration.setState           ("to_sync");
+                bolusIntegration.setAction          ("new");
+                bolusIntegration.setAuth_code       (new Random().toString());
+                bolusIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
+                realm.copyToRealm(bolusIntegration);
             }
             if (correction != null) {
-        //        Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", happ_object, correction.getId());
-        //        correctionIntegration.state         = "to_sync";
-        //        correctionIntegration.action        = "new";
-        //        correctionIntegration.auth_code     = new Random().toString();
-        //        correctionIntegration.remote_var1   = prefs.getString("insulin_integration", "");
-        //        correctionIntegration.save();
+                Integration correctionIntegration = Integration.getIntegration("insulin_integration_app", happ_object, correction.getId(), realm);
+                correctionIntegration.setState           ("to_sync");
+                correctionIntegration.setAction          ("new");
+                correctionIntegration.setAuth_code       (new Random().toString());
+                correctionIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
+                realm.copyToRealm(correctionIntegration);
             }
         }
 
         // NS Integrations
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (bolus != null) {
-        //        Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, bolus.getId());
-        //        bolusIntegration.state          = "to_sync";
-        //        bolusIntegration.action         = "new";
-        //        bolusIntegration.save();
+                Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, bolus.getId(), realm);
+                bolusIntegration.setState           ("to_sync");
+                bolusIntegration.setAction          ("new");
+                realm.copyToRealm(bolusIntegration);
             }
             if (correction != null) {
-        //        Integration correctionIntegration = Integration.getIntegration("ns_client", happ_object, correction.getId());
-        //        correctionIntegration.state         = "to_sync";
-        //        correctionIntegration.action        = "new";
-        //        correctionIntegration.save();
+                Integration correctionIntegration = Integration.getIntegration("ns_client", happ_object, correction.getId(), realm);
+                correctionIntegration.setState           ("to_sync");
+                correctionIntegration.setAction          ("new");
+                realm.copyToRealm(correctionIntegration);
             }
         }
 
+        realm.commitTransaction();
+
         Log.d(TAG, "newBolus");
-        syncIntegrations(MainApp.instance());
+        syncIntegrations(MainApp.instance(), realm);
     }
 
-    public static void newCarbs(Carb carb){
+    public static void newCarbs(Carb carb, Realm realm){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         String happ_object      =   "treatment_carbs";
+
+        realm.beginTransaction();
 
         // NS Integrations
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (carb != null) {
-            //    Integration bolusIntegration = Integration.getIntegration("ns_client", happ_object, carb.getId());
-            //    bolusIntegration.state          = "to_sync";
-            //    bolusIntegration.action         = "new";
-            //    bolusIntegration.remote_var1    = "carbs";
-            //    bolusIntegration.save();
+                Integration carbIntegration = Integration.getIntegration("ns_client", happ_object, carb.getId(), realm);
+                carbIntegration.setState        ("to_sync");
+                carbIntegration.setAction       ("new");
+                carbIntegration.setRemote_var1  ("carbs");
+                realm.copyToRealm(carbIntegration);
             }
         }
 
+        realm.commitTransaction();
+
         Log.d(TAG, "newCarbs");
-        syncIntegrations(MainApp.instance());
+        syncIntegrations(MainApp.instance(), realm);
     }
 
-    public static void newTempBasal(TempBasal tempBasal){
+    public static void newTempBasal(TempBasal tempBasal, Realm realm){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         Profile p               =   new Profile(new Date());
         String happ_object      =   "temp_basal";
 
+        realm.beginTransaction();
+
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-    //        Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
-    //        basalIntegration.state          =   "to_sync";
-    //        basalIntegration.action         =   "new";
-    //        basalIntegration.auth_code      =   new Random().toString();
-    //        basalIntegration.remote_var1    =   prefs.getString("insulin_integration", "");
-    //        basalIntegration.save();
+            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId(), realm);
+            basalIntegration.setState           ("to_sync");
+            basalIntegration.setAction          ("new");
+            basalIntegration.setAuth_code       (new Random().toString());
+            basalIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
+            realm.copyToRealm(basalIntegration);
         }
 
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
-    //        Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
-    //        basalIntegration.state          =   "to_sync";
-    //        basalIntegration.action         =   "new";
-    //        basalIntegration.save();
+            Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId(), realm);
+            basalIntegration.setState           ("to_sync");
+            basalIntegration.setAction          ("new");
+            realm.copyToRealm(basalIntegration);
         }
 
+        realm.commitTransaction();
 
         Log.d(TAG, "newTempBasal");
-        syncIntegrations(MainApp.instance());
+        syncIntegrations(MainApp.instance(), realm);
 
     }
-    public static void cancelTempBasal(TempBasal tempBasal){
+    public static void cancelTempBasal(TempBasal tempBasal, Realm realm){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         Profile p               =   new Profile(new Date());
         String happ_object      =   "temp_basal";
 
+        realm.beginTransaction();
+
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-    //        Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId());
-    //        basalIntegration.state          =   "to_sync";
-    //        basalIntegration.action         =   "cancel";
-    //        basalIntegration.save();
+            Integration basalIntegration    =   Integration.getIntegration("insulin_integration_app", happ_object, tempBasal.getId(), realm);
+            basalIntegration.setState       ("to_sync");
+            basalIntegration.setAction      ("cancel");
+            realm.copyToRealm(basalIntegration);
         }
 
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
-    //        Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId());
-    //        basalIntegration.state          =   "to_sync";
-    //        basalIntegration.action         =   "cancel";
-    //        basalIntegration.save();
+            Integration basalIntegration    =   Integration.getIntegration("ns_client", happ_object, tempBasal.getId(), realm);
+            basalIntegration.setState       ("to_sync");
+            basalIntegration.setAction      ("cancel");
+            realm.copyToRealm(basalIntegration);
         }
 
+        realm.commitTransaction();
+
         Log.d(TAG, "cancelTempBasal");
-        syncIntegrations(MainApp.instance());
+        syncIntegrations(MainApp.instance(), realm);
     }
 
-    public static void checkOldInsulinIntegration(){
-        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", null);
+    public static void checkOldInsulinIntegration(Realm realm){
+        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", null, realm);
 
         for (Integration integration : integrationsToSync) {
             ObjectToSync insulinSync = new ObjectToSync(integration);
 
-            if (insulinSync.state.equals("delete_me")) {                                          //Treatment has been deleted, do not process it
-                integration.delete();
+            realm.beginTransaction();
+
+            if (insulinSync.state.equals("delete_me")) {                                            //Treatment has been deleted, do not process it
+                integration.deleteFromRealm();
 
             } else {
 
                 Long ageInMins = (new Date().getTime() - insulinSync.requested.getTime()) / 1000 / 60;
-                if (ageInMins > 4 || ageInMins < 0) {                                           //If Treatment is older than 4mins
-                    integration.state = "error";
-                    integration.details = "Not sent as older than 4mins or in the future (" + ageInMins + "mins old) ";
-                    integration.save();
-
+                if (ageInMins > 4 || ageInMins < 0) {                                               //If Treatment is older than 4mins
+                    integration.setState    ("error");
+                    integration.setDetails  ("Not sent as older than 4mins or in the future (" + ageInMins + "mins old) ");
                 }
             }
+
+            realm.commitTransaction();
         }
 
         Log.d(TAG, "Checking Insulin waiting to be sent, found: " + integrationsToSync.size());
-        Notifications.newInsulinUpdate();
+        Notifications.newInsulinUpdate(realm);
     }
 
     public static void updatexDripWatchFace(Realm realm){

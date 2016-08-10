@@ -159,44 +159,46 @@ public class InsulinIntegrationApp {
     //                basalIntegration.save();
             }
 
-            Notifications.newInsulinUpdate();
+            Notifications.newInsulinUpdate(realm);
     //   }
 
     }
 
     public void sendInsulinBolusTreatments() {
         //Send Bolus Treatment to connected app
-        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", "bolus_delivery");
+        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", "bolus_delivery", realm);
         List<ObjectToSync> integration_payload = new ArrayList<ObjectToSync>();
         Gson gson = new Gson();
 
         for (Integration integration : integrationsToSync) {
 
-            if (integration.remote_var1.equals(insulin_Integration_App)) {
+            realm.beginTransaction();
+
+            if (integration.getRemote_var1().equals(insulin_Integration_App)) {
                 //This integration is waiting to be synced to the insulin_Integration_App we have
                 ObjectToSync bolusSync = new ObjectToSync(integration);
 
                 if (bolusSync.state.equals("delete_me")) {                                          //Treatment has been deleted, do not process it
-                    integration.delete();
+                    integration.deleteFromRealm();
 
                 } else {
 
                     Long ageInMins = (new Date().getTime() - bolusSync.requested.getTime()) / 1000 / 60;
                     if (ageInMins > 4 || ageInMins < 0) {                                           //If Treatment is older than 4mins
-                        integration.state       = "error";
-                        integration.details     = "Not sent as older than 4mins or in the future (" + ageInMins + "mins old) ";
-                        integration.save();
+                        integration.setState    ("error");
+                        integration.setDetails  ("Not sent as older than 4mins or in the future (" + ageInMins + "mins old) ");
 
                     } else {
 
                         //Update details for this Integration, do this now as even if it fails to send HAPP should not resend it - leave user to resolve
-                        integration.state = "sent";
-                        integration.save();
+                        integration.setState    ("sent");
 
                         integration_payload.add(bolusSync);
                     }
                 }
             }
+
+            realm.commitTransaction();
         }
 
         if (integration_payload.size() > 0){
@@ -234,7 +236,7 @@ public class InsulinIntegrationApp {
                 }
             }
 
-            Notifications.newInsulinUpdate();
+            Notifications.newInsulinUpdate(realm);
         }
 
     }

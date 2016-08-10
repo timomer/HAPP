@@ -49,9 +49,9 @@ public class Notifications {
     static String TAG = "Notifications";
 
     //Insulin Treatments Integration notification
-    public static void newInsulinUpdate(){
+    public static void newInsulinUpdate(Realm realm){
 
-        InsulinIntegrationNotify insulinUpdate          = new InsulinIntegrationNotify();
+        InsulinIntegrationNotify insulinUpdate          = new InsulinIntegrationNotify(realm);
         NotificationCompat.Builder errorNotification    = insulinUpdate.getErrorNotification();
         NotificationManagerCompat notificationManager   = NotificationManagerCompat.from(MainApp.instance());
         View mainActivityView                           = null;

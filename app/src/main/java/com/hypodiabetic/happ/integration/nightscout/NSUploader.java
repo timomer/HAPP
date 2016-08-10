@@ -20,15 +20,18 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import io.realm.Realm;
+
 /**
  * Created by Tim on 19/10/2015.
+ * Date sent to NSClient for uploading to NS
  */
 public class NSUploader {
     private static final String TAG = "NSUploader";
 
-    public static void updateNSDBTreatments(){
+    public static void updateNSDBTreatments(Realm realm){
         DateFormat dateAsISO8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("ns_client", null);
+        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("ns_client", null, realm);
 
         Log.d(TAG, integrationsToSync.size() + " objects to upload");
 
@@ -36,7 +39,9 @@ public class NSUploader {
             ObjectToSync treatmentToSync = new ObjectToSync(integration);
 
             if (treatmentToSync.state.equals("delete_me")) {                                          //Treatment has been deleted, do not process it
-                integration.delete();
+                realm.beginTransaction();
+                integration.deleteFromRealm();
+                realm.commitTransaction();
 
             } else {
 

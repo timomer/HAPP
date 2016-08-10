@@ -1,14 +1,5 @@
 package com.hypodiabetic.happ.Objects;
 
-import android.provider.BaseColumns;
-
-import com.activeandroid.Model;
-import com.activeandroid.annotation.Column;
-import com.activeandroid.annotation.Table;
-import com.activeandroid.query.Select;
-import com.google.gson.annotations.Expose;
-
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
