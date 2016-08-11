@@ -9,6 +9,7 @@ import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Safety;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Bg;
@@ -50,12 +51,12 @@ public class DetermineBasalAdapterJS {
     private final String PARAM_profile = "profile";
 
     JSONObject bgCheck;
-    private Realm realm;
+    private RealmManager realmManager;
 
     public DetermineBasalAdapterJS(ScriptReader scriptReader) throws IOException {
         mV8rt = V8.createV8Runtime();
         mScriptReader  = scriptReader;
-        realm = Realm.getDefaultInstance();
+        realmManager = new RealmManager();
 
         Date dateVar = new Date();
         Profile profile = new Profile(dateVar);
@@ -72,7 +73,7 @@ public class DetermineBasalAdapterJS {
         initModuleParent();
 
         loadScript();
-        realm.close();
+        realmManager.closeRealm();
     }
 
     public JSONObject invoke() {
@@ -187,7 +188,7 @@ public class DetermineBasalAdapterJS {
     private void initCurrentTemp() {
         mCurrentTemp = new V8Object(mV8rt);
 
-        TempBasal activeTemp = TempBasal.getCurrentActive(null, realm);
+        TempBasal activeTemp = TempBasal.getCurrentActive(null, realmManager.getRealm());
         //setCurrentTemp((double) activeTemp.duration,(double) activeTemp.rate);
         mCurrentTemp.add("rate", activeTemp.getRate());
         mCurrentTemp.add("duration", activeTemp.getDuration());
@@ -205,7 +206,7 @@ public class DetermineBasalAdapterJS {
         mIobData = new V8Object(mV8rt);
         //setIobData(0.0, 0.0, 0.0);
 
-        JSONObject iobJSON = IOB.iobTotal(p, new Date(), realm);
+        JSONObject iobJSON = IOB.iobTotal(p, new Date(), realmManager.getRealm());
         try {
             mIobData.add("iob", iobJSON.getDouble("iob"));
             mIobData.add("activity", iobJSON.getDouble("activity"));
@@ -227,7 +228,7 @@ public class DetermineBasalAdapterJS {
         //setGlucoseStatus(100.0, 10.0, 10.0);
 
         mGlucoseStatus = new V8Array(mV8rt);
-        List<Bg> bgReadings = Bg.latest(realm);
+        List<Bg> bgReadings = Bg.latest(realmManager.getRealm());
 
         bgCheck = checkGlucose(bgReadings);
         if (bgCheck == null) {

@@ -1,10 +1,7 @@
 package com.hypodiabetic.happ;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,7 +11,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.hypodiabetic.happ.Objects.Integration;
-import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
+import com.hypodiabetic.happ.Objects.RealmManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,14 +29,14 @@ public class Integration_Report extends AppCompatActivity {
     Spinner numHours;
     ListView integrationReportList;
     TextView integrationItemCount;
-    Realm realm;
+    RealmManager realmManager;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_integration__report);
-        realm = Realm.getDefaultInstance();
+        realmManager = new RealmManager();
 
         integrationType         =   (Spinner) findViewById(R.id.integrationType);
         happObjectType          =   (Spinner) findViewById(R.id.HAPPObjectType);
@@ -94,39 +91,39 @@ public class Integration_Report extends AppCompatActivity {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        realm.close();
+        realmManager.closeRealm();
     }
 
     public void reloadList(String intergartion, String happObject, int hoursOld){
         ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
         Calendar integrationDate  = Calendar.getInstance();
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
-        List<Integration> integrations = Integration.getIntegrationsHoursOld(intergartion, happObject, hoursOld, realm);
+        List<Integration> integrations = Integration.getIntegrationsHoursOld(intergartion, happObject, hoursOld, realmManager.getRealm());
 
         for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
             HashMap<String, String> integrationItem = new HashMap<String, String>();
 
-            ObjectToSync objectSyncDetails = new ObjectToSync(integration);
+            //ObjectToSync objectSyncDetails = new ObjectToSync(integration);
 
-            if (objectSyncDetails.state.equals("delete_me")) {
-                realm.beginTransaction();
+            if (integration.getState().equals("delete_me")) {
+                realmManager.getRealm().beginTransaction();
                 integration.deleteFromRealm();
-                realm.commitTransaction();
+                realmManager.getRealm().commitTransaction();
             } else {
 
-                if (objectSyncDetails.requested != null) {
-                    integrationDate.setTime(objectSyncDetails.requested);
+                if (integration.getTimestamp() != null) {
+                    integrationDate.setTime(integration.getTimestamp());
                 } else {
                     integrationDate.setTime(new Date(0));                                                 //Bad integration
                 }
-                integrationItem.put("integrationType", integration.getType());
-                integrationItem.put("integrationWhat", "Request sent: " + objectSyncDetails.getObjectSummary());
-                integrationItem.put("integrationDateTime", sdfDateTime.format(integrationDate.getTime()));
-                integrationItem.put("integrationState", "state:" + objectSyncDetails.state);
-                integrationItem.put("integrationAction", "action:" + objectSyncDetails.action);
-                integrationItem.put("integrationRemoteID", "remote_id:" + objectSyncDetails.remote_id);
-                integrationItem.put("integrationDetails", objectSyncDetails.details);
-                integrationItem.put("integrationID", "id:" + objectSyncDetails.aps_integration_id.toString());
+                integrationItem.put("integrationType",      integration.getType());
+                integrationItem.put("integrationWhat",      "Request sent: " + integration.getObjectSummary(realmManager.getRealm()));
+                integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
+                integrationItem.put("integrationState",     "state:" + integration.getState());
+                integrationItem.put("integrationAction",    "action:" + integration.getAction());
+                integrationItem.put("integrationRemoteID",  "remote_id:" + integration.getRemote_id());
+                integrationItem.put("integrationDetails",   integration.getDetails());
+                integrationItem.put("integrationID",        "id:" + integration.getId());
 
                 integrationList.add(integrationItem);
             }

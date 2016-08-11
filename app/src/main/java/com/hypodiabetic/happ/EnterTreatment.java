@@ -43,8 +43,8 @@ import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
-import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
 import com.hypodiabetic.happ.services.FiveMinService;
 
 import org.json.JSONObject;
@@ -53,16 +53,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.realm.Realm;
-import io.realm.Sort;
 
 
 public class EnterTreatment extends android.support.v4.app.FragmentActivity {
@@ -99,12 +96,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     public static String selectedListType;                                                          //Tracks the selected items Type
     public static Boolean listDirty=false;                                                          //Tracks if treatment lists are dirty and need to be reloaded
 
-    public static Realm realm;
+    public static RealmManager realmManager;
 
     @Override
     public void onDestroy(){
         super.onDestroy();
-        realm.close();
+        realmManager.closeRealm();
     }
 
     @Override
@@ -113,7 +110,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_treatment);
 
-        realm = Realm.getDefaultInstance();
+        realmManager = new RealmManager();
 
         //Treatment Lists
         // Create the adapter that will return a fragment .
@@ -226,12 +223,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     public void saveTreatment(final Carb carbs, final Bolus bolus, final Bolus correction, final View v){
 
         if (bolus == null && correction == null && carbs != null){                                  //carbs to save only
-            realm.beginTransaction();
-            realm.copyToRealm(carbs);
-            realm.commitTransaction();
+            realmManager.getRealm().beginTransaction();
+            realmManager.getRealm().copyToRealm(carbs);
+            realmManager.getRealm().commitTransaction();
             editText_treatment_value.setText("");
             wizardCarbs.setText("");
-            IntegrationsManager.newCarbs(carbs, realm);
+            IntegrationsManager.newCarbs(carbs, realmManager.getRealm());
             Toast.makeText(this, carbs.getValue() + " Carbs entered", Toast.LENGTH_SHORT).show();
 
             refreshListFragments();
@@ -240,7 +237,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             startService(new Intent(this, FiveMinService.class));
         } else {                                                                                    //We have insulin to deliver
 
-            pumpAction.setBolus(bolus, carbs, correction, v.getContext(), realm);
+            pumpAction.setBolus(bolus, carbs, correction, v.getContext(), realmManager.getRealm());
         }
 
     }
@@ -358,7 +355,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 carbValue = tools.stringToDouble(wizardCarbs.getText().toString());
             }
 
-            JSONObject bw = BolusWizard.bw(carbValue, realm);
+            JSONObject bw = BolusWizard.bw(carbValue, realmManager.getRealm());
 
             //Bolus Wizard Display
             bwDisplayIOBCorr.setText(           bw.optString("net_biob", "error"));
@@ -642,17 +639,17 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
             switch (toLoad){
                 case "TODAY":
-                    boluses = Bolus.getBolusesBetween(  tools.getStartOfDay(calDate.getTime()), tools.getEndOfDay(calDate.getTime()), realm);
-                    carbs   = Carb.getCarbsBetween(     tools.getStartOfDay(calDate.getTime()), tools.getEndOfDay(calDate.getTime()), realm);
+                    boluses = Bolus.getBolusesBetween(  tools.getStartOfDay(calDate.getTime()), tools.getEndOfDay(calDate.getTime()), realmManager.getRealm());
+                    carbs   = Carb.getCarbsBetween(     tools.getStartOfDay(calDate.getTime()), tools.getEndOfDay(calDate.getTime()), realmManager.getRealm());
                     break;
                 case "YESTERDAY":
-                    boluses = Bolus.getBolusesBetween(  tools.getStartOfDay(calYesterday.getTime()), tools.getEndOfDay(calYesterday.getTime()), realm);
-                    carbs   = Carb.getCarbsBetween(     tools.getStartOfDay(calYesterday.getTime()), tools.getEndOfDay(calYesterday.getTime()), realm);
+                    boluses = Bolus.getBolusesBetween(  tools.getStartOfDay(calYesterday.getTime()), tools.getEndOfDay(calYesterday.getTime()), realmManager.getRealm());
+                    carbs   = Carb.getCarbsBetween(     tools.getStartOfDay(calYesterday.getTime()), tools.getEndOfDay(calYesterday.getTime()), realmManager.getRealm());
                     break;
                 default: //all active
                     //Grab all for the last 8 hours, we will look later if they are active
-                    boluses = Bolus.getBolusesBetween(  new Date(calDate.getTimeInMillis() - (8 * 60 * 60000)), new Date(), realm);
-                    carbs   = Carb.getCarbsBetween(     new Date(calDate.getTimeInMillis() - (8 * 60 * 60000)), new Date(), realm);
+                    boluses = Bolus.getBolusesBetween(  new Date(calDate.getTimeInMillis() - (8 * 60 * 60000)), new Date(), realmManager.getRealm());
+                    carbs   = Carb.getCarbsBetween(     new Date(calDate.getTimeInMillis() - (8 * 60 * 60000)), new Date(), realmManager.getRealm());
             }
 
             for (Bolus bolus : boluses){
@@ -660,13 +657,17 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 treatmentItem.put("id",     bolus.getId());
                 treatmentItem.put("time",   sdfTime.format(bolus.getTimestamp()));
                 treatmentItem.put("value",  bolus.getValue().toString());
-                treatmentItem.put("type",   bolus.getType());
+                if (bolus.getType().equals("bolus")){
+                    treatmentItem.put("note",   "");
+                } else {
+                    treatmentItem.put("note",   bolus.getType());
+                }
                 treatmentItem.put("type",   "bolus");
                 treatmentItem.put("active", "");
 
                 //Loads the remaining amount of activity for the treatment, if any
                 if (!lastInsulin) {
-                    String is_active = bolus.isActive(profile, realm);
+                    String is_active = bolus.isActive(profile, realmManager.getRealm());
 
                     if (!is_active.equals("Not Active")) {                                      //Still active Insulin
                         treatmentItem.put("active", is_active);
@@ -675,8 +676,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     }
                 }
 
-                Integration integration = Integration.getIntegration("insulin_integration_app","bolus_delivery",bolus.getId(), realm);
-                treatmentItem.put("integration", integration.getState());                           //log STATUS of insulin_Integration_App
+                Integration integration = Integration.getIntegration("insulin_integration_app","bolus_delivery",bolus.getId(), realmManager.getRealm());
+                if (integration != null) {
+                    treatmentItem.put("integration", integration.getState());                           //log STATUS of insulin_Integration_App
+                } else {
+                    treatmentItem.put("integration", "");
+                }
 
                 if (toLoad.equals("ACTIVE")){
                     if (!lastInsulin ) treatmentsList.add(treatmentItem);
@@ -690,12 +695,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 treatmentItem.put("id",     carb.getId());
                 treatmentItem.put("time",   sdfTime.format(carb.getTimestamp()));
                 treatmentItem.put("value",  carb.getValue().toString());
-                treatmentItem.put("type",   "");
+                treatmentItem.put("note",   "");
                 treatmentItem.put("type",   "carb");
                 treatmentItem.put("active", "");
 
                 if (!lastCarb) {
-                    String is_active = carb.isActive(profile, realm);
+                    String is_active = carb.isActive(profile, realmManager.getRealm());
 
                     if (!is_active.equals("Not Active")) {                                      //Still active carbs
                         treatmentItem.put("active", is_active);
@@ -772,9 +777,9 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 Carb carb = new Carb();
 
                 if (selectedListType.equals("bolus")) {
-                    bolus = Bolus.getBolus(selectedListItemDB_ID, realm);
+                    bolus = Bolus.getBolus(selectedListItemDB_ID, realmManager.getRealm());
                 } else {
-                    carb = Carb.getCarb(selectedListItemDB_ID, realm);
+                    carb = Carb.getCarb(selectedListItemDB_ID, realmManager.getRealm());
                 }
 
                 if (selectedListType != null) {
@@ -782,7 +787,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     switch (itemId) {
                         case 1: //Edit - loads the treatment to be edited and delete the original
                             Date treatmentDate = new Date();
-                            realm.beginTransaction();
+                            realmManager.getRealm().beginTransaction();
                             if (selectedListType.equals("bolus")) {
                                 treatmentDate = bolus.getTimestamp();
                                 editText_treatment_value.setText(bolus.getValue().toString());
@@ -796,7 +801,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 spinner_treatment_type.setSelection(getIndex(spinner_treatment_type, ""));
                                 carb.deleteFromRealm();
                             }
-                            realm.commitTransaction();
+                            realmManager.getRealm().commitTransaction();
                             SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
                             SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
                             editText_treatment_date.setText(sdfDate.format(treatmentDate));
@@ -811,13 +816,13 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             Toast.makeText(parentsView.getContext(), "Original Treatment Deleted, re-save to add back", Toast.LENGTH_SHORT).show();
                             break;
                         case 2: //Delete
-                            realm.beginTransaction();
+                            realmManager.getRealm().beginTransaction();
                             if (selectedListType.equals("bolus")) {
                                 bolus.deleteFromRealm();
                             } else {
                                 carb.deleteFromRealm();
                             }
-                            realm.commitTransaction();
+                            realmManager.getRealm().commitTransaction();
                             treatmentsList.remove(selectedListItemID);
                             adapter.notifyDataSetChanged();
                             adapter.notifyDataSetInvalidated();
@@ -830,10 +835,10 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             List<Integration> integrations;
                             if (selectedListType.equals("bolus")) {
                                 intergrationType="bolus_delivery";
-                                integrations = Integration.getIntegrationsFor(intergrationType,bolus.getId(), realm);
+                                integrations = Integration.getIntegrationsFor(intergrationType,bolus.getId(), realmManager.getRealm());
                             } else {
                                 intergrationType="carbs";
-                                integrations = Integration.getIntegrationsFor(intergrationType,carb.getId(), realm);
+                                integrations = Integration.getIntegrationsFor(intergrationType,carb.getId(), realmManager.getRealm());
                             }
 
                             final Dialog dialog = new Dialog(parentsView.getContext());
@@ -850,20 +855,20 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
                                 HashMap<String, String> integrationItem = new HashMap<>();
 
-                                ObjectToSync objectSyncDetails = new ObjectToSync(integration);
+                                //ObjectToSync objectSyncDetails = new ObjectToSync(integration);
 
-                                if (objectSyncDetails.requested != null){
-                                    integrationDate.setTime(objectSyncDetails.requested);
+                                if (integration.getTimestamp() != null){
+                                    integrationDate.setTime(integration.getTimestamp());
                                 } else {
                                     integrationDate.setTime(new Date(0));                                                 //Bad integration
                                 }
                                 integrationItem.put("integrationType",      integration.getType());
-                                integrationItem.put("integrationWhat",      "Request sent: " + objectSyncDetails.getObjectSummary());
+                                integrationItem.put("integrationWhat",      "Request sent: " + integration.getObjectSummary(realmManager.getRealm()));
                                 integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
-                                integrationItem.put("integrationState",     "State: " + objectSyncDetails.state);
-                                integrationItem.put("integrationAction",    "Action: " + objectSyncDetails.action);
-                                integrationItem.put("integrationRemoteID",  "RemoteID: " + objectSyncDetails.remote_id);
-                                integrationItem.put("integrationDetails",   objectSyncDetails.details);
+                                integrationItem.put("integrationState",     "State: " + integration.getState());
+                                integrationItem.put("integrationAction",    "Action: " + integration.getAction());
+                                integrationItem.put("integrationRemoteID",  "RemoteID: " + integration.getRemote_id());
+                                integrationItem.put("integrationDetails",   integration.getDetails());
 
                                 integrationList.add(integrationItem);
                             }

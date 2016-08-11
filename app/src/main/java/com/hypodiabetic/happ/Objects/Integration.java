@@ -1,5 +1,7 @@
 package com.hypodiabetic.happ.Objects;
 
+import com.hypodiabetic.happ.tools;
+
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -98,11 +100,22 @@ public class Integration extends RealmObject {
     private String auth_code;                   //auth_code if required
 
     public Integration(){
-        id              = UUID.randomUUID().toString();
-        timestamp       = new Date();
-        date_updated    = new Date();
-        remote_var1     =   "";
-        state           =   "";
+        id                  = UUID.randomUUID().toString();
+        timestamp           = new Date();
+        date_updated        = new Date();
+        remote_var1         =   "";
+        state               =   "";
+    }
+
+    public Integration(String type, String happ_object, String happ_id){
+        id                  = UUID.randomUUID().toString();
+        timestamp           = new Date();
+        date_updated        = new Date();
+        remote_var1         =   "";
+        state               =   "";
+        this.type           =   type;
+        this.happ_object    =   happ_object;
+        this.happ_object_id =   happ_id;
     }
 
     public static Integration getIntegration(String type, String happ_object, String happ_id, Realm realm){
@@ -118,16 +131,8 @@ public class Integration extends RealmObject {
     //            .where("happ_object_id = " + happ_id)
     //            .executeSingle();
 
-        if (results.isEmpty()) {                                                                    //We dont have an Integration for this item, return a new one
-            Integration newIntegration = new Integration();
-            newIntegration.type             = type;
-            newIntegration.happ_object      = happ_object;
-            newIntegration.happ_object_id   = happ_id;
-
-            realm.beginTransaction();
-            realm.copyToRealm(newIntegration);
-            realm.commitTransaction();
-            return newIntegration;
+        if (results.isEmpty()) {                                                                    //We dont have an Integration for this item
+            return null;
 
         } else {                                                                                    //Found an Integration, return it
             return results.first();
@@ -254,6 +259,24 @@ public class Integration extends RealmObject {
         //        .where("state = 'error'")
         //        .orderBy("date_updated desc")
         //        .execute();
+    }
+
+    public String getObjectSummary(Realm realm){
+        switch (happ_object){
+            case "bolus_delivery":
+                Bolus bolus = Bolus.getBolus(happ_object_id, realm);
+                return tools.formatDisplayInsulin(bolus.getValue(),2) + " " + bolus.getType();
+            case "temp_basal":
+                TempBasal tempBasal = TempBasal.getTempBasalByID(happ_object_id, realm);
+                Pump pump = new Pump(new Date(), realm);
+                pump.setNewTempBasal(null, tempBasal);
+                return tools.formatDisplayInsulin(tempBasal.getRate(),2) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "m duration";
+            case "treatment_carbs":
+                Carb carb = Carb.getCarb(happ_object_id, realm);
+                return tools.formatDisplayCarbs(carb.getValue());
+            default:
+                return "";
+        }
     }
 
 }

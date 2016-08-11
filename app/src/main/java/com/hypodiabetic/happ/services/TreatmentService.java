@@ -12,11 +12,18 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
-import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
+import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.RealmManager;
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.tools;
+
+import java.util.Date;
+
+import io.realm.Realm;
 
 /**
  * Created by Tim on 09/01/2016.
@@ -52,46 +59,42 @@ public class TreatmentService extends Service{
 
     public void insulinDeliveryUpdate(String update, String action){
 
+        RealmManager realmManager = new RealmManager();
+
         if (update != null){
 
-            //String objectDetails="", state="", details="";
+            Integration integration = new Gson().fromJson(update, Integration.class);
+            String objectDetails="";
             switch (action){
                 case "bolus_delivery":
-                    ObjectToSync bolusUpdate = new Gson().fromJson(update, ObjectToSync.class);
-                    bolusUpdate.updateIntegration();
-                    //state = bolusUpdate.state;
-                    //details = bolusUpdate.details;
-                    //objectDetails = bolusUpdate.state.toUpperCase() + ": " + tools.formatDisplayInsulin(bolusUpdate.value1,1) + " " + bolusUpdate.value3;
+                    Bolus bolus = Bolus.getBolus(integration.getHapp_object_id(), realmManager.getRealm());
+                    objectDetails = integration.getState().toUpperCase() + ": " + tools.formatDisplayInsulin(bolus.getValue(),1) + " " + bolus.getType();
                     break;
                 case "temp_basal":
-                    ObjectToSync basalUpdate = new Gson().fromJson(update, ObjectToSync.class);
-                    basalUpdate.updateIntegration();
-                    //state = basalUpdate.state;
-                    //details = basalUpdate.details;
-                    //objectDetails = basalUpdate.state.toUpperCase() + ": Temp Basal " + tools.formatDisplayBasal(basalUpdate.value1, false) + " (" + basalUpdate.value2 + "%)";
+                    TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getHapp_object_id(), realmManager.getRealm());
+                    Pump pump = new Pump(new Date(), realmManager.getRealm());
+                    pump.setNewTempBasal(null, tempBasal);
+                    objectDetails = integration.getState().toUpperCase() + ": Temp Basal " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%)";
                     break;
             }
 
-            //final String userMsg = objectDetails;
-            //int snackbar_length = Snackbar.LENGTH_LONG;
-
-            //if (state.equals("error")){
+            int snackbar_length = Snackbar.LENGTH_LONG;
+            if (integration.getState().equals("error")){
                 //Something went wrong, inform user with INDEFINITE snackbar
-            //    snackbar_length = Snackbar.LENGTH_INDEFINITE;
-            //}
+                snackbar_length = Snackbar.LENGTH_INDEFINITE;
+            }
 
             //Send broadcast to Main App as we are running on a different thread
             Intent intent = new Intent(Intents.NOTIFICATION_UPDATE);
             intent.putExtra("NOTIFICATION_TYPE", "NEW_INSULIN_UPDATE");
-            //intent.putExtra("snackbar_length", snackbar_length);
-            //intent.putExtra("alertDialogText", details);
-            //intent.putExtra("snackBarMsg", userMsg);
+            intent.putExtra("snackbar_length", snackbar_length);
+            intent.putExtra("alertDialogText", integration.getDetails());
+            intent.putExtra("snackBarMsg", objectDetails);
             MainApp.instance().sendBroadcast(intent);
 
         }
 
-
-
+        realmManager.closeRealm();
     }
 
     final Messenger myMessenger = new Messenger(new IncomingHandler());

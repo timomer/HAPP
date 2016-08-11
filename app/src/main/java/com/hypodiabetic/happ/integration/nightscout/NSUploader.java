@@ -10,8 +10,10 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Integration;
-import com.hypodiabetic.happ.integration.Objects.ObjectToSync;
+import com.hypodiabetic.happ.Objects.TempBasal;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,9 +38,9 @@ public class NSUploader {
         Log.d(TAG, integrationsToSync.size() + " objects to upload");
 
         for (Integration integration : integrationsToSync) {
-            ObjectToSync treatmentToSync = new ObjectToSync(integration);
+            //ObjectToSync treatmentToSync = new ObjectToSync(integration);
 
-            if (treatmentToSync.state.equals("delete_me")) {                                          //Treatment has been deleted, do not process it
+            if (integration.getState().equals("delete_me")) {                                       //Treatment has been deleted, do not process it
                 realm.beginTransaction();
                 integration.deleteFromRealm();
                 realm.commitTransaction();
@@ -49,28 +51,31 @@ public class NSUploader {
                     Context context = MainApp.instance().getApplicationContext();
                     JSONObject data = new JSONObject();
 
-                    switch (treatmentToSync.aps_object_type){
+                    switch (integration.getHapp_object()){
                         case "bolus_delivery":
-                            data.put("insulin", treatmentToSync.value1);
-                            data.put("note", treatmentToSync.value3);
+                            Bolus bolus = Bolus.getBolus(integration.getHapp_object_id(), realm);
+                            data.put("insulin", bolus.getValue());
+                            data.put("note", bolus.getType());
                             data.put("eventType", "Bolus");
 
                             break;
                         case "treatment_carbs":
-                            data.put("carbs", treatmentToSync.value1);
+                            Carb carb = Carb.getCarb(integration.getHapp_object_id(), realm);
+                            data.put("carbs", carb.getValue());
                             data.put("eventType", "Carbs");
 
                             break;
                         case "temp_basal":
                             data.put("eventType", "Temp Basal");
-                            switch (treatmentToSync.action){
+                            switch (integration.getAction()){
                                 case "new":
+                                    TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getHapp_object_id(), realm);
                                     //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
                                     //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
                                     //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
-                                    data.put("absolute", treatmentToSync.value1);
+                                    data.put("absolute", tempBasal.getRate());
                                     //}
-                                    data.put("duration", treatmentToSync.value3);
+                                    data.put("duration", tempBasal.getDuration());
                                     break;
                                 case "cancel":
                                     //No duration or rate, so NS knows to stop current Temp Basal
@@ -80,9 +85,9 @@ public class NSUploader {
                             break;
                     }
 
-                    data.put("created_at", dateAsISO8601.format(treatmentToSync.requested));
+                    data.put("created_at", dateAsISO8601.format(integration.getTimestamp()));
                     data.put("enteredBy", "HAPP_App");
-                    data.put("aps_integration_id", treatmentToSync.aps_integration_id);
+                    data.put("aps_integration_id", integration.getId());
                     Bundle bundle = new Bundle();
                     bundle.putString("action", "dbAdd");
                     bundle.putString("collection", "treatments"); // "treatments" || "entries" || "devicestatus" || "profile" || "food"
@@ -99,16 +104,18 @@ public class NSUploader {
                     }
 
                 } catch (JSONException e) {
-                    treatmentToSync.state       =   "error";
-                    treatmentToSync.details     =   "Failed sending to NSClient: " + e.getLocalizedMessage();
-                    treatmentToSync.updateIntegration();
+                    realm.beginTransaction();
+                    integration.setState    ("error");
+                    integration.setDetails  ("Failed sending to NSClient: " + e.getLocalizedMessage());
+                    realm.commitTransaction();
                     Log.d(TAG,"ERROR sending Treatment to NSClient");
                     Crashlytics.logException(e);
                 } finally {
 
-                    if (!treatmentToSync.state.equals("error")) {
-                        treatmentToSync.state = "sent";
-                        treatmentToSync.updateIntegration();
+                    if (!integration.getState().equals("error")) {
+                        realm.beginTransaction();
+                        integration.setState    ("sent");
+                        realm.commitTransaction();
                     }
                 }
 

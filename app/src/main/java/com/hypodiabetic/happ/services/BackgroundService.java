@@ -16,6 +16,7 @@ import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.integration.nsclient.NSClientIncoming;
 import com.hypodiabetic.happ.integration.xDrip.xDripIncoming;
 
@@ -30,7 +31,7 @@ public class BackgroundService extends Service{
     SharedPreferences.OnSharedPreferenceChangeListener mPrefListener;
     BroadcastReceiver mNotifyReceiver;
     BroadcastReceiver mCGMReceiver;
-    private Realm realm;
+    private RealmManager realmManager;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -43,7 +44,7 @@ public class BackgroundService extends Service{
     public void onCreate() {
         super.onCreate();
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        realm = Realm.getDefaultInstance();
+        realmManager = new RealmManager();
 
         setHouseKeepingAlarm();
         setAPSAlarm(Integer.parseInt(mPrefs.getString("aps_loop", "900000")));
@@ -60,7 +61,7 @@ public class BackgroundService extends Service{
         if (mPrefs != null && mPrefListener != null)    mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefListener);
         if (mNotifyReceiver != null)                    unregisterReceiver(mNotifyReceiver);
         if (mCGMReceiver != null)                       unregisterReceiver(mCGMReceiver);
-        realm.close();
+        realmManager.closeRealm();
     }
 
     @Override
@@ -95,7 +96,7 @@ public class BackgroundService extends Service{
                 mCGMReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        xDripIncoming.New_data(intent, realm);
+                        xDripIncoming.New_data(intent, realmManager.getRealm());
                     }
                 };
                 MainApp.instance().registerReceiver(mCGMReceiver, new IntentFilter(Intents.XDRIP_BGESTIMATE));
@@ -105,7 +106,7 @@ public class BackgroundService extends Service{
                 mCGMReceiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        NSClientIncoming.New_sgv(intent, realm);
+                        NSClientIncoming.New_sgv(intent, realmManager.getRealm());
                     }
                 };
                 MainApp.instance().registerReceiver(mCGMReceiver, new IntentFilter(Intents.NSCLIENT_ACTION_NEW_SGV));
@@ -133,7 +134,7 @@ public class BackgroundService extends Service{
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) {
-                        Notifications.updateCard(realm);
+                        Notifications.updateCard(realmManager.getRealm());
                     }
                 }
             };

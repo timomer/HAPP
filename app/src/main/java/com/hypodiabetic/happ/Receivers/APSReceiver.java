@@ -15,6 +15,7 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Intents;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.pumpAction;
 
 import io.realm.Realm;
@@ -28,14 +29,14 @@ public class APSReceiver extends ResultReceiver {
     public APSReceiver(Handler handler) {
         super(handler);
     }
-    public Realm realm;
+    public RealmManager realmManager;
 
     @Override
     protected void onReceiveResult(int resultCode, Bundle resultData) {
 
         Notifications.clear("newTemp");                                         //Clears any open temp notifications
         Intent intentUpdate = new Intent(Intents.UI_UPDATE);
-        realm = Realm.getDefaultInstance();
+        realmManager = new RealmManager();
 
         switch (resultCode){
             case Constants.STATUS_FINISHED:
@@ -43,10 +44,10 @@ public class APSReceiver extends ResultReceiver {
                 Gson gson = new GsonBuilder().create();
                 APSResult apsResult = gson.fromJson(resultData.getString("APSResult"), APSResult.class);
 
-                if (apsResult.getTempSuggested()) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance(), realm);
+                if (apsResult.getTempSuggested()) pumpAction.newTempBasal(apsResult.getBasal(), MainApp.instance(), realmManager.getRealm());
 
                 //Send out updates of new APS run
-                Notifications.updateCard(realm);
+                Notifications.updateCard(realmManager.getRealm());
                 Notifications.debugCard(MainApp.instance(), apsResult);
 
                 intentUpdate.putExtra("UPDATE", "NEW_APS_RESULT");
@@ -61,6 +62,6 @@ public class APSReceiver extends ResultReceiver {
                 break;
         }
 
-        realm.close();
+        realmManager.closeRealm();
     }
 }

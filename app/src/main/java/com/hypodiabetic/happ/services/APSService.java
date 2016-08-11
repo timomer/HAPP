@@ -21,6 +21,7 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.APSResultSerializer;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Safety;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Receivers.APSReceiver;
@@ -47,7 +48,7 @@ public class APSService extends IntentService {
     private Context context;
     private Profile profile;
     private Safety safety;
-    private Realm realm;
+    private RealmManager realmManager;
     private Pump pumpActive;
 
     public APSService() {
@@ -63,8 +64,8 @@ public class APSService extends IntentService {
         boolean aps_paused      = prefs.getBoolean("aps_paused", false);
         profile                 = new Profile(new Date());
         safety                  = new Safety();
-        realm                   = Realm.getDefaultInstance();
-        pumpActive              = new Pump(new Date(), realm);
+        realmManager            = new RealmManager();
+        pumpActive              = new Pump(new Date(), realmManager.getRealm());
 
         if (aps_paused) {
             bundle.putString("error", "APS is currently Paused");
@@ -106,11 +107,9 @@ public class APSService extends IntentService {
                         }
                     }
 
-                    Realm realm = Realm.getDefaultInstance();
-                    realm.beginTransaction();
-                    realm.copyToRealm(apsResult);
-                    realm.commitTransaction();
-                    realm.close();
+                    realmManager.getRealm().beginTransaction();
+                    realmManager.getRealm().copyToRealm(apsResult);
+                    realmManager.getRealm().commitTransaction();
 
                     try {
                         Gson gson = new GsonBuilder()
@@ -126,7 +125,7 @@ public class APSService extends IntentService {
                 }
             }
 
-            realm.close();
+            realmManager.closeRealm();
             Log.d(TAG, "Service Finished");
         }
     }
@@ -138,7 +137,7 @@ public class APSService extends IntentService {
         else if (apsResult.getRate() > safety.getMaxBasal(profile)) { apsResult.setRate(safety.getMaxBasal(profile)); }
         apsResult.setRate(tools.round(apsResult.getRate(), 2));
 
-        Pump pumpWithProposedBasal = new Pump(new Date(), realm);
+        Pump pumpWithProposedBasal = new Pump(new Date(), realmManager.getRealm());
         pumpWithProposedBasal.setNewTempBasal(apsResult, null);
 
         //apsResult.ratePercent =  pumpWithProposedBasal.temp_basal_percent;

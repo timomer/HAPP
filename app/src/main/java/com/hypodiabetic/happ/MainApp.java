@@ -19,21 +19,19 @@ public class MainApp extends Application {
         sInstance = this;
 
         //initialize Realm
-        Realm.setDefaultConfiguration(getRealmConfig());
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(instance())
+                .name("happ.realm")
+                .schemaVersion(0)
+                .deleteRealmIfMigrationNeeded() // TODO: 03/08/2016 remove
+                .build();
+        Realm.setDefaultConfiguration(realmConfiguration);
     }
 
     public static MainApp instance() {
         return sInstance;
     }
 
-    public static RealmConfiguration getRealmConfig(){
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(instance())
-                .name("happ.realm")
-                .schemaVersion(0)
-                .deleteRealmIfMigrationNeeded() // TODO: 03/08/2016 remove
-                .build();
-        return realmConfiguration;
-    }
+
 
 
 

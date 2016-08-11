@@ -50,6 +50,7 @@ import com.hypodiabetic.happ.Graphs.IOBCOBBarGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBLineGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Stat;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Bg;
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean updateStuff;
     public boolean updatingPreviewViewport = false;
     public boolean updatingChartViewport = false;
-    public static Realm realm;
+    public static RealmManager realmManager;
 
     BroadcastReceiver newUIUpdate;
     BroadcastReceiver refresh60Seconds;
@@ -145,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        realm = Realm.getDefaultInstance();
+        realmManager = new RealmManager();
 
         setupMenuAndToolbar();
 
@@ -175,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        realm.close();
+        realmManager.closeRealm();
     }
 
     @Override
@@ -231,10 +232,10 @@ public class MainActivity extends AppCompatActivity {
         updateBGDetails();
         updateStats(null);
         updateAPSDetails(null);
-        IntegrationsManager.updatexDripWatchFace(realm);
+        IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());
 
         //Checks if we have any Insulin Integration App errors we must warn the user about
-        Notifications.newInsulinUpdate(realm);
+        Notifications.newInsulinUpdate(realmManager.getRealm());
     }
 
     @Override
@@ -314,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                         checkInsulinAppIntegration(true);
                         break;
                     case 1:
-                        pumpAction.cancelTempBasal(realm);
+                        pumpAction.cancelTempBasal(realmManager.getRealm());
                         mDrawerLayout.closeDrawers();
                         break;
                     case 2:
@@ -326,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
                         mDrawerLayout.closeDrawers();
                         break;
                     case 4:
-                        tools.showDebug(realm);
+                        tools.showDebug(realmManager.getRealm());
                         mDrawerLayout.closeDrawers();
                         break;
                     case 5:
@@ -363,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateBGCharts() {
 
-        bgGraph         =   new BgGraph(this, realm);
+        bgGraph         =   new BgGraph(this, realmManager.getRealm());
         chart           =   (LineChartView) findViewById(R.id.chart);
         previewChart    =   (PreviewLineChartView) findViewById(R.id.chart_preview);
         updateStuff     =   false;
@@ -394,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
         //NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
         //if (popup.foundError) notificationManager.notify(58, notification.build());
 
-        APSResult read = APSResult.last(realm);
+        APSResult read = APSResult.last(realmManager.getRealm());
         Snackbar.make(view,read.toString(),Snackbar.LENGTH_LONG).show();
     }
 
@@ -405,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Insulin Integration App, try and connect
         if (!insulin_Integration_App.equals("")){
-            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST", realm);
+            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST", realmManager.getRealm());
             insulinIntegrationApp.connectInsulinTreatmentApp();
             insulinIntegrationApp_status.setText("Connecting...");
             insulinIntegrationApp_icon.setBackground(clockWhite);
@@ -525,7 +526,7 @@ public class MainActivity extends AppCompatActivity {
         if ((currentBgValueText.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) > 0) {
             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-        Bg lastBg = Bg.last(realm);
+        Bg lastBg = Bg.last(realmManager.getRealm());
 
         if (lastBg != null) {
             notificationText.setText(lastBg.readingAge());
@@ -556,7 +557,7 @@ public class MainActivity extends AppCompatActivity {
     //Updates the APS Fragment
     public void updateAPSDetails(APSResult apsResult) {
         //Updates fragment UI with APS suggestion
-        if (apsResult == null) apsResult = APSResult.last(realm);
+        if (apsResult == null) apsResult = APSResult.last(realmManager.getRealm());
 
         if (apsResult != null) {
             if (openAPSFragment.isLoaded) {
@@ -591,9 +592,9 @@ public class MainActivity extends AppCompatActivity {
         TextView apsAge             = (TextView) findViewById(R.id.openapsAge);
         TextView notificationText   = (TextView) findViewById(R.id.notices);
 
-        Stat stat          = Stat.last(realm);
-        Bg lastBg           = Bg.last(realm);
-        APSResult apsResult = APSResult.last(realm);
+        Stat stat           = Stat.last(realmManager.getRealm());
+        Bg lastBg           = Bg.last(realmManager.getRealm());
+        APSResult apsResult = APSResult.last(realmManager.getRealm());
 
         if (stat != null)       statsAge.setText(stat.statAge());
         if (apsResult != null)  apsAge.setText(apsResult.ageFormatted());
@@ -612,7 +613,7 @@ public class MainActivity extends AppCompatActivity {
     //Updates stats and stats Fragments charts
     public void updateStats(Stat stat) {
 
-        if (stat == null) stat = Stat.last(realm);
+        if (stat == null) stat = Stat.last(realmManager.getRealm());
 
         if (stat != null) {
             TextView iobValueTextView   = (TextView) findViewById(R.id.iobValue);
@@ -641,7 +642,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateRunningTemp(){
-        Pump pump = new Pump(new Date(), realm);
+        Pump pump = new Pump(new Date(), realmManager.getRealm());
         toolbar.setTitle(pump.displayBasalDesc(false));
         toolbar.setSubtitle(pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft());
     }
@@ -659,8 +660,8 @@ public class MainActivity extends AppCompatActivity {
     public void apsstatusAccept (final View view){
         openAPSFragment.setAcceptAPSButton(false);
 
-        TempBasal suggestedBasal = APSResult.last(realm).getBasal();
-        pumpAction.setTempBasal(suggestedBasal, realm);   //Action the suggested Temp
+        TempBasal suggestedBasal = APSResult.last(realmManager.getRealm()).getBasal();
+        pumpAction.setTempBasal(suggestedBasal, realmManager.getRealm());   //Action the suggested Temp
         updateRunningTemp();
     }
 
@@ -790,7 +791,7 @@ public class MainActivity extends AppCompatActivity {
 
         public static void update(APSResult apsResult){
 
-            if (apsResult == null) apsResult = APSResult.last(realm);
+            if (apsResult == null) apsResult = APSResult.last(realmManager.getRealm());
 
             if (apsResult != null) {
                 SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
@@ -860,7 +861,7 @@ public class MainActivity extends AppCompatActivity {
 
         public void setupChart(){
             //Setup the chart and Viewpoint
-            iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realm);
+            iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realmManager.getRealm());
 
             iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
             iobcobPastChart.setViewportCalculationEnabled(false);
@@ -881,7 +882,7 @@ public class MainActivity extends AppCompatActivity {
             if (iobcobPastChart != null) {
 
                 //refreshes data and sets viewpoint
-                iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realm);
+                iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realmManager.getRealm());
                 iobcobPastChart.setLineChartData(iobcobLineGraph.iobcobPastLineData());
 
                 iobv.left       = previewChart.getCurrentViewport().left;
@@ -919,7 +920,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (iobcobChart != null) {
                 //reloads charts with Treatment data
-                IOBCOBBarGraph iobcobBarGraph = new IOBCOBBarGraph(rootView.getContext(), realm);
+                IOBCOBBarGraph iobcobBarGraph = new IOBCOBBarGraph(rootView.getContext(), realmManager.getRealm());
                 iobcobChart.setColumnChartData(iobcobBarGraph.iobcobFutureChart());
             }
         }
@@ -945,7 +946,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void setupChart(){
-            basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realm);
+            basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realmManager.getRealm());
 
             basalvsTempBasalChart.setZoomType(ZoomType.HORIZONTAL);
             basalvsTempBasalChart.setViewportCalculationEnabled(false);
@@ -965,7 +966,7 @@ public class MainActivity extends AppCompatActivity {
         //Updates Stats
         public static void updateChart(){
             if (basalvsTempBasalChart != null) {
-                basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realm);
+                basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realmManager.getRealm());
                 basalvsTempBasalChart.setLineChartData(basalVSTempBasalGraph.basalvsTempBasalData());
 
                 iobv.left       = previewChart.getCurrentViewport().left;

@@ -20,15 +20,12 @@ import io.realm.Realm;
  */
 public class meal {
 
-    public static JSONObject generate () {
+    public static JSONObject generate (Realm realm) {
 
         Date now = new Date();
-        Realm realm = Realm.getDefaultInstance();
-
         //List<Carb> carbs = findMealInputs(profile_data, now);
 
         JSONObject meal_data = diaCarbs(now, realm);
-        realm.close();
         return meal_data;
     }
 

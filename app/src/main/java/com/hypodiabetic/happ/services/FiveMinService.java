@@ -15,6 +15,7 @@ import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Stat;
 import com.hypodiabetic.happ.Objects.StatSerializer;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -37,7 +38,7 @@ public class FiveMinService extends IntentService {
     private Profile profile;
     private Bundle bundle;
     private Date date;
-    private Realm realm;
+    private RealmManager realmManager;
 
     public FiveMinService() {
         super(FiveMinService.class.getName());
@@ -50,29 +51,28 @@ public class FiveMinService extends IntentService {
         bundle              =   new Bundle();
         date                =   new Date();
         profile             =   new Profile(date);
-        realm               =   Realm.getDefaultInstance();
+        realmManager        =   new RealmManager();
 
-        newStat();                                                      //Save a new Stat Object
-        checkTBRNotify();                                               //checks if a Cancel TBR Notification is active and TBR is not running anymore
-        IntegrationsManager.checkOldInsulinIntegration(realm);          //Check if there are any old Insulin Integration requests waiting to be synced
-        IntegrationsManager.updatexDripWatchFace(realm);                //Updates xDrip Watch Face
+        newStat();                                                                  //Save a new Stat Object
+        checkTBRNotify();                                                           //checks if a Cancel TBR Notification is active and TBR is not running anymore
+        IntegrationsManager.checkOldInsulinIntegration(realmManager.getRealm());    //Check if there are any old Insulin Integration requests waiting to be synced
+        IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());          //Updates xDrip Watch Face
 
+        realmManager.closeRealm();
         Log.d(TAG, "Service Finished");
     }
 
     public void checkTBRNotify(){
         if (profile.temp_basal_notification){
-            Pump pump = new Pump(new Date(), realm);
-            APSResult apsResult = APSResult.last(realm);
+            Pump pump = new Pump(new Date(), realmManager.getRealm());
+            APSResult apsResult = APSResult.last(realmManager.getRealm());
             if (apsResult != null) {
                 if (!pump.temp_basal_active && !apsResult.getAccepted() && apsResult.checkIsCancelRequest()) {
                     Notifications.clear("newTemp");
 
-                    Realm realm = Realm.getDefaultInstance();
-                    realm.beginTransaction();
+                    realmManager.getRealm().beginTransaction();
                     apsResult.setAccepted(true);
-                    realm.commitTransaction();
-                    realm.close();
+                    realmManager.getRealm().commitTransaction();
                 }
             }
         }
@@ -80,9 +80,9 @@ public class FiveMinService extends IntentService {
 
     public void newStat(){
         Stat stat                  =   new Stat();
-        JSONObject iobJSONValue     =   IOB.iobTotal(profile, date, realm);
-        JSONObject cobJSONValue     =   Carb.getCOB(profile, date, realm);
-        TempBasal currentTempBasal  =   TempBasal.getCurrentActive(date, realm);
+        JSONObject iobJSONValue     =   IOB.iobTotal(profile, date, realmManager.getRealm());
+        JSONObject cobJSONValue     =   Carb.getCOB(profile, date, realmManager.getRealm());
+        TempBasal currentTempBasal  =   TempBasal.getCurrentActive(date, realmManager.getRealm());
         Boolean error               =   false;
 
         try {
@@ -101,11 +101,9 @@ public class FiveMinService extends IntentService {
         } finally {
 
             if (!error) {
-                Realm realm = Realm.getDefaultInstance();
-                realm.beginTransaction();
-                realm.copyToRealm(stat);
-                realm.commitTransaction();
-                realm.close();
+                realmManager.getRealm().beginTransaction();
+                realmManager.getRealm().copyToRealm(stat);
+                realmManager.getRealm().commitTransaction();
 
                 try {
                     Gson gson = new GsonBuilder()
@@ -122,7 +120,7 @@ public class FiveMinService extends IntentService {
                 }
 
                 //send results to xDrip WF
-                IntegrationsManager.updatexDripWatchFace(realm);
+                IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());
 
                 Log.d(TAG, "New Stat Saved");
             }

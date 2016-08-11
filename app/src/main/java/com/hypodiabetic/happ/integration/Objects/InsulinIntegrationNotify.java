@@ -22,12 +22,16 @@ import android.widget.TextView;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
+import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Pump;
+import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.R;
 import com.hypodiabetic.happ.tools;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -62,34 +66,38 @@ public class InsulinIntegrationNotify {
 
         for (Integration integration : recentlyUpdated) {
             if (!integration.getState().equals("error") && !integration.getState().equals("error_ack")) {     //Deal with errors later
-                ObjectToSync integrationWithDetails = new ObjectToSync(integration);
+                //ObjectToSync integrationWithDetails = new ObjectToSync(integration);
                 HashMap<String, String> detailListItem = new HashMap<String, String>();
 
-                if (integrationWithDetails.state.equals("delete_me")) {
+                if (integration.getState().equals("delete_me")) {
                     realm.beginTransaction();
                     integration.deleteFromRealm();
                     realm.commitTransaction();
                 } else {
 
-                    switch (integrationWithDetails.aps_object_type) {
+                    switch (integration.getHapp_object()) {
                         case "bolus_delivery":
-                            detailListItem.put("value", tools.formatDisplayInsulin(integrationWithDetails.value1, 2));
-                            detailListItem.put("summary", integrationWithDetails.value3);
-                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayInsulin(integrationWithDetails.value1, 2) + " " + integrationWithDetails.value3 + " " + sdfTime.format(integration.getDate_updated()) + "\n";
+                            Bolus bolus = Bolus.getBolus(integration.getHapp_object_id(), realm);
+                            detailListItem.put("value", tools.formatDisplayInsulin(bolus.getValue(), 2));
+                            detailListItem.put("summary", bolus.getType());
+                            snackbarMsg += integration.getState().toUpperCase() + ": " + tools.formatDisplayInsulin(bolus.getValue(), 2) + " " + integration.getType() + " " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
 
                         case "temp_basal":
-                            detailListItem.put("value", tools.formatDisplayBasal(integrationWithDetails.value1, true));
-                            detailListItem.put("summary", "(" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins");
-                            snackbarMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayBasal(integrationWithDetails.value1, false) + " (" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins " + sdfTime.format(integration.getDate_updated()) + "\n";
+                            TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getHapp_object_id(), realm);
+                            Pump pump = new Pump(new Date(), realm);
+                            pump.setNewTempBasal(null, tempBasal);
+                            detailListItem.put("value", tools.formatDisplayBasal(tempBasal.getRate(), true));
+                            detailListItem.put("summary", "(" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins");
+                            snackbarMsg += integration.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
                     }
-                    detailListItem.put("happObjectType", integrationWithDetails.aps_object_type);
-                    detailListItem.put("state", integrationWithDetails.state.toUpperCase());
-                    detailListItem.put("details", integrationWithDetails.details);
-                    detailListItem.put("action", "action:" + integrationWithDetails.action);
-                    detailListItem.put("date", sdfDateTime.format(integration.getDate_updated()));
-                    detailListItem.put("intID", "INT ID:" + integration.getId());
+                    detailListItem.put("happObjectType",    integration.getHapp_object());
+                    detailListItem.put("state",             integration.getState().toUpperCase());
+                    detailListItem.put("details",           integration.getDetails());
+                    detailListItem.put("action",            "action:" + integration.getAction());
+                    detailListItem.put("date",              sdfDateTime.format(integration.getDate_updated()));
+                    detailListItem.put("intID",             "INT ID:" + integration.getId());
                     detailList.add(detailListItem);
                 }
             }
@@ -97,34 +105,38 @@ public class InsulinIntegrationNotify {
 
         if (withErrors.size() > 0) foundError = true;
         for (Integration integrationWithError : withErrors) {
-            ObjectToSync integrationWithDetails = new ObjectToSync(integrationWithError);
+            //ObjectToSync integrationWithDetails = new ObjectToSync(integrationWithError);
             HashMap<String, String> detailListItem = new HashMap<String, String>();
 
-            if (integrationWithDetails.state.equals("delete_me")) {
+            if (integrationWithError.getState().equals("delete_me")) {
                 realm.beginTransaction();
                 integrationWithError.deleteFromRealm();
                 realm.commitTransaction();
             } else {
 
-                switch (integrationWithDetails.aps_object_type) {
+                switch (integrationWithError.getHapp_object()) {
                     case "bolus_delivery":
-                        detailListItem.put("value", tools.formatDisplayInsulin(integrationWithDetails.value1, 2));
-                        detailListItem.put("summary", integrationWithDetails.value3);
-                        errorMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayInsulin(integrationWithDetails.value1, 2) + " " + integrationWithDetails.value3 + "\n";
+                        Bolus bolus = Bolus.getBolus(integrationWithError.getHapp_object_id(), realm);
+                        detailListItem.put("value", tools.formatDisplayInsulin(bolus.getValue(), 2));
+                        detailListItem.put("summary", bolus.getType());
+                        errorMsg += integrationWithError.getState().toUpperCase() + ": " + tools.formatDisplayInsulin(bolus.getValue(), 2) + " " + bolus.getType() + "\n";
                         break;
 
                     case "temp_basal":
-                        detailListItem.put("value", tools.formatDisplayBasal(integrationWithDetails.value1, true));
-                        detailListItem.put("summary", "(" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins");
-                        errorMsg += integrationWithDetails.state.toUpperCase() + ": " + tools.formatDisplayBasal(integrationWithDetails.value1, false) + " (" + integrationWithDetails.value2 + "%) " + integrationWithDetails.value3 + "mins\n";
+                        TempBasal tempBasal = TempBasal.getTempBasalByID(integrationWithError.getHapp_object_id(), realm);
+                        Pump pump = new Pump(new Date(), realm);
+                        pump.setNewTempBasal(null, tempBasal);
+                        detailListItem.put("value", tools.formatDisplayBasal(tempBasal.getRate(), true));
+                        detailListItem.put("summary", "(" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins");
+                        errorMsg += integrationWithError.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins\n";
                         break;
                 }
-                detailListItem.put("happObjectType", integrationWithDetails.aps_object_type);
-                detailListItem.put("state", integrationWithDetails.state.toUpperCase());
-                detailListItem.put("details", integrationWithDetails.details);
-                detailListItem.put("action", "action:" + integrationWithDetails.action);
-                detailListItem.put("date", sdfDateTime.format(integrationWithError.getDate_updated()));
-                detailListItem.put("intID", "INT ID:" + integrationWithError.getId());
+                detailListItem.put("happObjectType",    integrationWithError.getHapp_object());
+                detailListItem.put("state",             integrationWithError.getState().toUpperCase());
+                detailListItem.put("details",           integrationWithError.getDetails());
+                detailListItem.put("action",            "action:" + integrationWithError.getAction());
+                detailListItem.put("date",              sdfDateTime.format(integrationWithError.getDate_updated()));
+                detailListItem.put("intID",             "INT ID:" + integrationWithError.getId());
                 detailListErrorsOnly.add(detailListItem);
             }
         }
