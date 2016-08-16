@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -59,8 +58,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import io.realm.Realm;
 
 
 public class EnterTreatment extends android.support.v4.app.FragmentActivity {
@@ -590,32 +587,26 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 }
 
                 //Shows Integration details, if any
-                ImageView treatmentInsulinIntegrationImage = (ImageView) view.findViewById(R.id.treatmentIntegrationIconLayout);
-                TextView treatmentInsulinIntegrationText = (TextView) view.findViewById(R.id.treatmentIntegrationLayout);
-                switch (treatmentInsulinIntegrationText.getText().toString()) {
-                    case "to sync":
-                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.autorenew);
-                        break;
-                    case "sent":
-                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.arrow_right_bold_circle);
-                        break;
-                    case "received":
-                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.information);
-                        break;
-                    case "delayed":
-                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.clock);
-                        break;
-                    case "delivered":
-                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.checkbox_marked_circle);
-                        break;
-                    case "error":
-                    case "error_ack":
-                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.alert_circle);
-                        break;
-                    default:
-                        treatmentInsulinIntegrationImage.setBackgroundResource(0);
-                        break;
-                }
+                ImageView treatmentInsulinIntegrationImage  = (ImageView) view.findViewById(R.id.treatmentIntegrationIconLayout);
+                TextView treatmentInsulinIntegrationText    = (TextView) view.findViewById(R.id.treatmentIntegrationLayout);
+                treatmentInsulinIntegrationImage.setBackgroundResource(tools.getIntergartionStatusImg(treatmentInsulinIntegrationText.getText().toString()));
+
+                return view;
+            }
+        }
+        public class mySimpleAdapterIntegration extends SimpleAdapter {
+
+            public mySimpleAdapterIntegration(Context context, List<HashMap<String, String>> items, int resource, String[] from, int[] to) {
+                super(context, items, resource, from, to);
+            }
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+                //Shows Integration details image
+                ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
+                TextView integrationText    = (TextView) view.findViewById(R.id.integrationDetails);
+                integrationImage.setBackgroundResource(tools.getIntergartionStatusImg(integrationText.getText().toString()));
 
                 return view;
             }
@@ -836,14 +827,14 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
                             break;
                         case 3: //Integration Details
-                            String intergrationType;
+                            String integrationType;
                             List<Integration> integrations;
                             if (selectedListType.equals("bolus")) {
-                                intergrationType="bolus_delivery";
-                                integrations = Integration.getIntegrationsFor(intergrationType,bolus.getId(), realmManager.getRealm());
+                                integrationType="bolus_delivery";
+                                integrations = Integration.getIntegrationsFor(integrationType,bolus.getId(), realmManager.getRealm());
                             } else {
-                                intergrationType="carbs";
-                                integrations = Integration.getIntegrationsFor(intergrationType,carb.getId(), realmManager.getRealm());
+                                integrationType="carbs";
+                                integrations = Integration.getIntegrationsFor(integrationType,carb.getId(), realmManager.getRealm());
                             }
 
                             final Dialog dialog = new Dialog(parentsView.getContext());
@@ -867,7 +858,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 integrationList.add(integrationItem);
                             }
 
-                            SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
+                            mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
                                     new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails"},
                                     new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails});
                             integrationListView.setAdapter(adapter);

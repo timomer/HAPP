@@ -254,32 +254,8 @@ public class InsulinIntegrationNotify {
             View view = super.getView(position, convertView, parent);
 
             ImageView imageView = (ImageView) view.findViewById(R.id.insulinSummaryStateImage);
-            TextView textView = (TextView) view.findViewById(R.id.insulinSummaryState);
-            switch (textView.getText().toString().toLowerCase()) {
-                case "to sync":
-                    imageView.setBackgroundResource(R.drawable.autorenew);
-                    break;
-                case "sent":
-                    imageView.setBackgroundResource(R.drawable.arrow_right_bold_circle);
-                    break;
-                case "received":
-                    imageView.setBackgroundResource(R.drawable.information);
-                    break;
-                case "delayed":
-                    imageView.setBackgroundResource(R.drawable.clock);
-                    break;
-                case "delivered":
-                case "set":
-                case "canceled":
-                    imageView.setBackgroundResource(R.drawable.checkbox_marked_circle);
-                    break;
-                case "error":
-                    imageView.setBackgroundResource(R.drawable.alert_circle);
-                    break;
-                default:
-                    imageView.setBackgroundResource(R.drawable.alert_circle);
-                    break;
-            }
+            TextView textView   = (TextView) view.findViewById(R.id.insulinSummaryState);
+            imageView.setBackgroundResource(tools.getIntergartionStatusImg(textView.getText().toString()));
 
             TextView happObject = (TextView) view.findViewById(R.id.insulinSummaryHappObjectType);
             TextView value = (TextView) view.findViewById(R.id.insulinSummaryAmount);
