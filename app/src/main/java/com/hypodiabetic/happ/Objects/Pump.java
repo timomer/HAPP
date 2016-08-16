@@ -257,15 +257,15 @@ public class Pump {
 
     @Override
     public String toString(){
-        return  "name: " + name + "\n" +
-                " basal_mode:" + displayBasalMode() + "\n" +
-                " min_low_basal_duration:" + min_low_basal_duration + "\n" +
-                " min_high_basal_duration:" + min_high_basal_duration + "\n" +
-                " default_basal_rate:" + default_basal_rate + "\n" +
-                " temp_basal_active:" + temp_basal_active + "\n" +
-                " temp_basal_rate:" + temp_basal_rate + "\n" +
-                " temp_basal_percent:" + temp_basal_percent + "\n" +
-                " temp_basal_duration:" + temp_basal_duration + "\n" +
-                " temp_basal_duration_left:" + temp_basal_duration_left;
+        return  " name:                     " + name + "\n" +
+                " basal_mode:               " + displayBasalMode() + "\n" +
+                " min_low_basal_duration:   " + min_low_basal_duration + "\n" +
+                " min_high_basal_duration:  " + min_high_basal_duration + "\n" +
+                " default_basal_rate:       " + default_basal_rate + "\n" +
+                " TBR_active:               " + temp_basal_active + "\n" +
+                " TBR_rate:                 " + temp_basal_rate + "\n" +
+                " TBR_percent:              " + temp_basal_percent + "\n" +
+                " TBR_duration:             " + temp_basal_duration + "\n" +
+                " TBR_duration_left:        " + temp_basal_duration_left;
     }
 }

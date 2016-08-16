@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.view.ViewGroup;
@@ -255,7 +254,7 @@ public class InsulinIntegrationNotify {
 
             ImageView imageView = (ImageView) view.findViewById(R.id.insulinSummaryStateImage);
             TextView textView   = (TextView) view.findViewById(R.id.insulinSummaryState);
-            imageView.setBackgroundResource(tools.getIntergartionStatusImg(textView.getText().toString()));
+            imageView.setBackgroundResource(tools.getIntegrationStatusImg(textView.getText().toString()));
 
             TextView happObject = (TextView) view.findViewById(R.id.insulinSummaryHappObjectType);
             TextView value = (TextView) view.findViewById(R.id.insulinSummaryAmount);

@@ -589,7 +589,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 //Shows Integration details, if any
                 ImageView treatmentInsulinIntegrationImage  = (ImageView) view.findViewById(R.id.treatmentIntegrationIconLayout);
                 TextView treatmentInsulinIntegrationText    = (TextView) view.findViewById(R.id.treatmentIntegrationLayout);
-                treatmentInsulinIntegrationImage.setBackgroundResource(tools.getIntergartionStatusImg(treatmentInsulinIntegrationText.getText().toString()));
+                treatmentInsulinIntegrationImage.setBackgroundResource(tools.getIntegrationStatusImg(treatmentInsulinIntegrationText.getText().toString()));
 
                 return view;
             }
@@ -606,7 +606,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 //Shows Integration details image
                 ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
                 TextView integrationText    = (TextView) view.findViewById(R.id.integrationDetails);
-                integrationImage.setBackgroundResource(tools.getIntergartionStatusImg(integrationText.getText().toString()));
+                integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationText.getText().toString()));
 
                 return view;
             }

@@ -193,12 +193,12 @@ public class Stat extends RealmObject{
     @Override
     public String toString(){
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
-        return  " timestamp:" + sdfDateTime.format(timestamp) + "\n" +
-                " bolus_iob:" + bolus_iob + "\n" +
-                " iob:" + iob + "\n" +
-                " cob:" + cob + "\n" +
-                " basal:" + basal + "\n" +
-                " temp_basal:" + temp_basal;
+        return  " timestamp:    " + sdfDateTime.format(timestamp) + "\n" +
+                " bolus_iob:    " + bolus_iob + "\n" +
+                " iob:          " + iob + "\n" +
+                " cob:          " + cob + "\n" +
+                " basal:        " + basal + "\n" +
+                " temp_basal:   " + temp_basal;
     }
 
 }

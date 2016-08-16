@@ -75,11 +75,12 @@ public class Safety {
 
     @Override
     public String toString(){
-        return  "user_max_bolus: " + user_max_bolus + "\n" +
-                " hardcoded_Max_Bolus:" + hardcoded_Max_Bolus + "\n" +
-                " max_basal:" + max_basal + "\n" +
-                " max_daily_basal:" + max_daily_basal + "\n" +
-                " max_iob:" + max_iob;
+        return  " user_max_bolus:       " + user_max_bolus + "\n" +
+                " hardcoded_Max_Bolus:  " + hardcoded_Max_Bolus + "\n" +
+                " user_max_basal:       " + max_basal + "\n" +
+                " max_daily_basal:      " + max_daily_basal + "\n" +
+                " current_max_basal:    " + getMaxBasal(new Profile(new Date())) + "\n" +
+                " user_max_iob:         " + max_iob;
     }
 
 }

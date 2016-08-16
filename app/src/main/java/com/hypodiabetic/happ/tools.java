@@ -409,7 +409,8 @@ public class tools {
         PackageManager manager = MainActivity.activity.getPackageManager();
         try {
             PackageInfo info = manager.getPackageInfo(MainActivity.activity.getPackageName(), 0);
-                msg =   "HAPP Version: Code:" + info.versionCode + " Name:" + info.versionName + "\n\n";
+                msg =   "HAPP Version: " + "\n" +
+                            "Code:  " + info.versionCode + " Name:" + info.versionName + "\n\n";
         } catch (PackageManager.NameNotFoundException n){
 
         }
@@ -424,7 +425,7 @@ public class tools {
         } else {
                 msg +=  "\n\n" +
                         "APS Result:" + "\n" +
-                            "APS code has never been ran";
+                            " APS code has never been ran";
         }
         if (stat != null) {
                 msg +=  "\n\n" +
@@ -433,7 +434,7 @@ public class tools {
         } else {
                 msg +=  "\n\n" +
                         "Stats Result:" + "\n" +
-                            "Stats code has never been ran";
+                            " Stats code has never been ran";
         }
                 msg +=  "\n\n" +
                         "Safety Result:" + "\n" +
@@ -486,7 +487,7 @@ public class tools {
         }
     }
 
-    public static int getIntergartionStatusImg(String state){
+    public static int getIntegrationStatusImg(String state){
         switch (state.toLowerCase()) {
             case "to sync":
                 return R.drawable.autorenew;

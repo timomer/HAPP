@@ -20,12 +20,8 @@ import com.hypodiabetic.happ.Objects.RealmManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import io.realm.Realm;
 
 public class Integration_Report extends AppCompatActivity {
 
@@ -110,7 +106,7 @@ public class Integration_Report extends AppCompatActivity {
             //Shows Integration details image
             ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
             TextView integrationText    = (TextView) view.findViewById(R.id.integrationDetails);
-            integrationImage.setBackgroundResource(tools.getIntergartionStatusImg(integrationText.getText().toString()));
+            integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationText.getText().toString()));
 
             return view;
         }
