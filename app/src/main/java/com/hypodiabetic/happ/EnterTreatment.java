@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -592,6 +593,9 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 ImageView treatmentInsulinIntegrationImage = (ImageView) view.findViewById(R.id.treatmentIntegrationIconLayout);
                 TextView treatmentInsulinIntegrationText = (TextView) view.findViewById(R.id.treatmentIntegrationLayout);
                 switch (treatmentInsulinIntegrationText.getText().toString()) {
+                    case "to sync":
+                        treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.autorenew);
+                        break;
                     case "sent":
                         treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.arrow_right_bold_circle);
                         break;
@@ -605,6 +609,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                         treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.checkbox_marked_circle);
                         break;
                     case "error":
+                    case "error_ack":
                         treatmentInsulinIntegrationImage.setBackgroundResource(R.drawable.alert_circle);
                         break;
                     default:
@@ -802,7 +807,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 carb.deleteFromRealm();
                             }
                             realmManager.getRealm().commitTransaction();
-                            SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
+                            final SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy", getResources().getConfiguration().locale);
                             SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
                             editText_treatment_date.setText(sdfDate.format(treatmentDate));
                             editText_treatment_time.setText(sdfTime.format(treatmentDate));
@@ -849,34 +854,66 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
                             ListView integrationListView        = (ListView) dialog.findViewById(R.id.integrationList);
                             ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
-                            Calendar integrationDate  = Calendar.getInstance();
                             SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
 
                             for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
                                 HashMap<String, String> integrationItem = new HashMap<>();
 
-                                //ObjectToSync objectSyncDetails = new ObjectToSync(integration);
-
-                                if (integration.getTimestamp() != null){
-                                    integrationDate.setTime(integration.getTimestamp());
-                                } else {
-                                    integrationDate.setTime(new Date(0));                                                 //Bad integration
-                                }
+                                integrationItem.put("integrationID",        integration.getId());
                                 integrationItem.put("integrationType",      integration.getType());
-                                integrationItem.put("integrationWhat",      "Request sent: " + integration.getObjectSummary(realmManager.getRealm()));
-                                integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
-                                integrationItem.put("integrationState",     "State: " + integration.getState());
-                                integrationItem.put("integrationAction",    "Action: " + integration.getAction());
-                                integrationItem.put("integrationRemoteID",  "RemoteID: " + integration.getRemote_id());
+                                integrationItem.put("integrationDateTime",  sdfDateTime.format(integration.getTimestamp()));
                                 integrationItem.put("integrationDetails",   integration.getDetails());
 
                                 integrationList.add(integrationItem);
                             }
 
                             SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
-                                    new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails"},
-                                    new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails});
+                                    new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails"},
+                                    new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails});
                             integrationListView.setAdapter(adapter);
+
+                            integrationListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
+                                    Dialog dialog = new Dialog(parentsView.getContext());
+                                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                    dialog.setContentView(R.layout.integration_list_layout_details);
+                                    dialog.setCancelable(true);
+                                    dialog.setCanceledOnTouchOutside(true);
+
+                                    SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
+                                    TextView integrationID  = (TextView) view.findViewById(R.id.integrationID);
+                                    Integration integration = Integration.getIntegrationByID(integrationID.getText().toString(), realmManager.getRealm());
+
+                                    TextView integrationTypeDetails         = (TextView) dialog.findViewById(R.id.integrationTypeDetails);
+                                    TextView integrationCreatedDetails      = (TextView) dialog.findViewById(R.id.integrationCreatedDetails);
+                                    TextView integrationUpdatedDetails      = (TextView) dialog.findViewById(R.id.integrationUpdatedDetails);
+                                    TextView integrationStateDetails        = (TextView) dialog.findViewById(R.id.integrationStateDetails);
+                                    TextView integrationActionDetails       = (TextView) dialog.findViewById(R.id.integrationActionDetails);
+                                    TextView integrationWhatDetails         = (TextView) dialog.findViewById(R.id.integrationWhatDetails);
+                                    TextView integrationIDDetails           = (TextView) dialog.findViewById(R.id.integrationIDDetails);
+                                    TextView integrationRemoteIDDetails     = (TextView) dialog.findViewById(R.id.integrationRemoteIDDetails);
+                                    TextView integrationDetailsDetails      = (TextView) dialog.findViewById(R.id.integrationDetailsDetails);
+                                    TextView integrationToSyncDetails       = (TextView) dialog.findViewById(R.id.integrationToSyncDetails);
+                                    TextView integrationAuthIDDetails       = (TextView) dialog.findViewById(R.id.integrationAuthIDDetails);
+                                    TextView integrationRemoteVar1Details   = (TextView) dialog.findViewById(R.id.integrationRemoteVar1Details);
+                                    integrationTypeDetails.setText      (integration.getType());
+                                    integrationCreatedDetails.setText   ("Created: " + sdfDateTime.format(integration.getTimestamp()));
+                                    integrationUpdatedDetails.setText   ("Updated: " + sdfDateTime.format(integration.getDate_updated()));
+                                    integrationStateDetails.setText     ("State: " + integration.getState());
+                                    integrationActionDetails.setText    (integration.getAction());
+                                    integrationWhatDetails.setText      (integration.getObjectSummary(realmManager.getRealm()));
+                                    integrationIDDetails.setText        ("Local ID: " + integration.getId());
+                                    integrationRemoteIDDetails.setText  ("Remote ID: " + integration.getRemote_id());
+                                    integrationDetailsDetails.setText   (integration.getDetails());
+                                    integrationToSyncDetails.setText    ("To Sync: " + integration.getToSync());
+                                    integrationAuthIDDetails.setText    ("Auth ID: " + integration.getAuth_code());
+                                    integrationRemoteVar1Details.setText("Remote Var1: " + integration.getRemote_var1());
+
+                                    dialog.show();
+                                }
+
+                            });
 
                             dialog.show();
                             break;

@@ -75,16 +75,16 @@ public class InsulinIntegrationNotify {
                     realm.commitTransaction();
                 } else {
 
-                    switch (integration.getHapp_object()) {
+                    switch (integration.getLocal_object()) {
                         case "bolus_delivery":
-                            Bolus bolus = Bolus.getBolus(integration.getHapp_object_id(), realm);
+                            Bolus bolus = Bolus.getBolus(integration.getLocal_object_id(), realm);
                             detailListItem.put("value", tools.formatDisplayInsulin(bolus.getValue(), 2));
                             detailListItem.put("summary", bolus.getType());
                             snackbarMsg += integration.getState().toUpperCase() + ": " + tools.formatDisplayInsulin(bolus.getValue(), 2) + " " + integration.getType() + " " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
 
                         case "temp_basal":
-                            TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getHapp_object_id(), realm);
+                            TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getLocal_object_id(), realm);
                             Pump pump = new Pump(new Date(), realm);
                             pump.setNewTempBasal(null, tempBasal);
                             detailListItem.put("value", tools.formatDisplayBasal(tempBasal.getRate(), true));
@@ -92,7 +92,7 @@ public class InsulinIntegrationNotify {
                             snackbarMsg += integration.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
                     }
-                    detailListItem.put("happObjectType",    integration.getHapp_object());
+                    detailListItem.put("happObjectType",    integration.getLocal_object());
                     detailListItem.put("state",             integration.getState().toUpperCase());
                     detailListItem.put("details",           integration.getDetails());
                     detailListItem.put("action",            "action:" + integration.getAction());
@@ -114,16 +114,16 @@ public class InsulinIntegrationNotify {
                 realm.commitTransaction();
             } else {
 
-                switch (integrationWithError.getHapp_object()) {
+                switch (integrationWithError.getLocal_object()) {
                     case "bolus_delivery":
-                        Bolus bolus = Bolus.getBolus(integrationWithError.getHapp_object_id(), realm);
+                        Bolus bolus = Bolus.getBolus(integrationWithError.getLocal_object_id(), realm);
                         detailListItem.put("value", tools.formatDisplayInsulin(bolus.getValue(), 2));
                         detailListItem.put("summary", bolus.getType());
                         errorMsg += integrationWithError.getState().toUpperCase() + ": " + tools.formatDisplayInsulin(bolus.getValue(), 2) + " " + bolus.getType() + "\n";
                         break;
 
                     case "temp_basal":
-                        TempBasal tempBasal = TempBasal.getTempBasalByID(integrationWithError.getHapp_object_id(), realm);
+                        TempBasal tempBasal = TempBasal.getTempBasalByID(integrationWithError.getLocal_object_id(), realm);
                         Pump pump = new Pump(new Date(), realm);
                         pump.setNewTempBasal(null, tempBasal);
                         detailListItem.put("value", tools.formatDisplayBasal(tempBasal.getRate(), true));
@@ -131,7 +131,7 @@ public class InsulinIntegrationNotify {
                         errorMsg += integrationWithError.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins\n";
                         break;
                 }
-                detailListItem.put("happObjectType",    integrationWithError.getHapp_object());
+                detailListItem.put("happObjectType",    integrationWithError.getLocal_object());
                 detailListItem.put("state",             integrationWithError.getState().toUpperCase());
                 detailListItem.put("details",           integrationWithError.getDetails());
                 detailListItem.put("action",            "action:" + integrationWithError.getAction());
@@ -179,7 +179,7 @@ public class InsulinIntegrationNotify {
 
     public Dialog showErrorDetailsDialog(View view){
         final Dialog dialog = new Dialog(view.getContext());
-        //dialog.setTitle("Error: Insulin Actions");
+        dialog.setTitle("Error: Insulin Actions");
         dialog.setContentView(R.layout.integration_dialog);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
@@ -256,6 +256,9 @@ public class InsulinIntegrationNotify {
             ImageView imageView = (ImageView) view.findViewById(R.id.insulinSummaryStateImage);
             TextView textView = (TextView) view.findViewById(R.id.insulinSummaryState);
             switch (textView.getText().toString().toLowerCase()) {
+                case "to sync":
+                    imageView.setBackgroundResource(R.drawable.autorenew);
+                    break;
                 case "sent":
                     imageView.setBackgroundResource(R.drawable.arrow_right_bold_circle);
                     break;

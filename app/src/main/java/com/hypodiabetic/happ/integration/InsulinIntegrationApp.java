@@ -18,10 +18,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.Notifications;
-import com.hypodiabetic.happ.Objects.BolusSerializer;
+import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.RealmManager;
+import com.hypodiabetic.happ.Objects.Serializers.BolusSerializer;
 import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Serializers.IntegrationSerializer;
+import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.TempBasalSerializer;
+import com.hypodiabetic.happ.Objects.Serializers.TempBasalSerializer;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +40,6 @@ public class InsulinIntegrationApp {
     public Context context;
     public String insulin_Integration_App;
     public String toSync;
-    public Realm realm;
     private static final String TAG = "InsulinIntegrationApp";
 
     //Service Connection to the insulin_Integration_App
@@ -54,44 +57,38 @@ public class InsulinIntegrationApp {
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     break;
                 case "BOLUS":
-                    sendBolus();
-                    break;
                 case "BASAL":
-                    sendTempBasal();
+                    sendTreatments();
                     break;
             }
         }
         public void onServiceDisconnected(ComponentName className) {
             insulin_Integration_App_Service = null;
             insulin_Integration_App_isBound = false;
-            realm.close();
         }
     };
 
 
-    public InsulinIntegrationApp(Context context, String insulin_Integration_App, String toSync, Realm realm) {
+    public InsulinIntegrationApp(Context context, String insulin_Integration_App, String toSync) {
         this.context                    = context;
         this.insulin_Integration_App    = insulin_Integration_App;
         this.toSync                     = toSync;
-        this.realm                      = realm;
     }
 
 
     public void connectInsulinTreatmentApp(){
         //Connects to Service of the insulin_Integration_App
-        Intent intent = new Intent(insulin_Integration_App + ".IncomingService");
+        Intent intent = new Intent(insulin_Integration_App + ".CommunicationService.CommunicationService");
         intent.setPackage(insulin_Integration_App);
         context.bindService(intent, insulin_Integration_App_Connection, Context.BIND_AUTO_CREATE);
-
     }
 
     public void sendTest(){
         Message msg = Message.obtain();
-
         Bundle bundle = new Bundle();
-        bundle.putString    ("ACTION", "TEST_MSG");
-        bundle.putLong      ("DATE_REQUESTED", new Date().getTime());
-        bundle.putString    ("DATA", "");
+        bundle.putString    (Constants.treatmentService.ACTION, Constants.treatmentService.OUTGOING_TEST_MSG);
+        bundle.putLong      (Constants.treatmentService.DATE_REQUESTED, new Date().getTime());
+        bundle.putString    (Constants.treatmentService.PUMP, "");
         msg.setData(bundle);
 
         try {
@@ -106,120 +103,88 @@ public class InsulinIntegrationApp {
         }
     }
 
-    public void sendTempBasal() {
-        //Send suggested Temp Basal to connected app
-        Integration basalIntegration = Integration.getIntegration("insulin_integration_app", "temp_basal", TempBasal.last(realm).getId(), realm);
-
-        if (basalIntegration.getRemote_var1().equals(insulin_Integration_App) && basalIntegration.getState().equals("to_sync")) {  //We have a temp basal waiting to be synced with our current insulin_integration app
-
-            String errorSending = "";
-            Gson gson = new Gson();
-            try {
-                gson = new GsonBuilder()
-                        .registerTypeAdapter(Class.forName("io.realm.TempBasalRealmProxy"), new TempBasalSerializer())
-                        .create();
-            } catch (ClassNotFoundException e){
-                Log.e(TAG, "Error creating gson object: " + e.getLocalizedMessage());
-            }
-
-            Message msg = Message.obtain();
-            Bundle bundle = new Bundle();
-            switch (basalIntegration.getAction()) {
-                case "new":
-                    bundle.putString    ("ACTION", "temp_basal");
-                    break;
-                case "cancel":
-                    bundle.putString    ("ACTION", "cancel_temp_basal");
-                    break;
-            }
-            bundle.putLong              ("DATE_REQUESTED", new Date().getTime());
-            bundle.putString            ("DATA", gson.toJson(basalIntegration));
-            msg.setData(bundle);
-
-            //Update details for this Integration, do this now as even if it fails to send HAPP should not resend it - leave user to resolve
-            realm.beginTransaction();
-            basalIntegration.setState   ("sent");
-            realm.commitTransaction();
-
-            try {
-                insulin_Integration_App_Service.send(msg);
-
-            } catch (DeadObjectException d) {
-                Crashlytics.logException(d);
-                d.printStackTrace();
-                //userMsg = "Failed: " + userMsg;
-                errorSending = d.getLocalizedMessage() + " " + d.getCause();
-            } catch (RemoteException e) {
-                Crashlytics.logException(e);
-                e.printStackTrace();
-                //userMsg = "Failed: " + userMsg;
-                errorSending = e.getLocalizedMessage() + " " + e.getCause();
-            }
-
-            if (!errorSending.equals("")) {
-                realm.beginTransaction();
-                basalIntegration.setState   ("error");
-                basalIntegration.setDetails ("HAPP has failed to send Temp Basal request, it will not be resent\n" + errorSending);
-                realm.commitTransaction();
-            }
-
-            Notifications.newInsulinUpdate(realm);
-       }
-
-    }
-
-    public void sendBolus() {
-        //Send Bolus Treatment to connected app
-        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", "bolus_delivery", realm);
-        List<Integration> integration_payload = new ArrayList<Integration>();
-        Gson gson = new Gson();
+    public void sendTreatments(){
+        //Send any Bolus and TempBasal treatments waiting to be synced
+        RealmManager realmManager = new RealmManager();
+        List<Integration> integrationsToSync    = new ArrayList<>();
+        List<String> treatmentsToSync           = new ArrayList<>();
+        Gson gsonIntergration=new Gson(), gsonBolus=new Gson(), gsonTempBasal=new Gson();
         try {
-            gson = new GsonBuilder()
+            gsonIntergration = new GsonBuilder()
+                    .registerTypeAdapter(Class.forName("io.realm.IntegrationRealmProxy"), new IntegrationSerializer())
+                    .create();
+            gsonBolus = new GsonBuilder()
                     .registerTypeAdapter(Class.forName("io.realm.BolusRealmProxy"), new BolusSerializer())
+                    .create();
+            gsonTempBasal = new GsonBuilder()
+                    .registerTypeAdapter(Class.forName("io.realm.TempBasalRealmProxy"), new TempBasalSerializer())
                     .create();
         } catch (ClassNotFoundException e){
             Log.e(TAG, "Error creating gson object: " + e.getLocalizedMessage());
         }
 
-        for (Integration integration : integrationsToSync) {
+        //get all Boluses
+        List<Integration> integrationBolues = Integration.getIntegrationsToSync("insulin_integration_app", "bolus_delivery", realmManager.getRealm());
+        //get most recent TempBasal and see if its waiting to be synced, old TempBasals are ignored
+        Integration integrationBasal        = Integration.getIntegration("insulin_integration_app", "temp_basal", TempBasal.last(realmManager.getRealm()).getId(), realmManager.getRealm());
 
-            realm.beginTransaction();
-
-            if (integration.getRemote_var1().equals(insulin_Integration_App)) {
-                //This integration is waiting to be synced to the insulin_Integration_App we have
-
-                if (integration.getState().equals("delete_me")) {                                   //Treatment has been deleted, do not process it
-                    integration.deleteFromRealm();
-
-                } else {
-
-                    Long ageInMins = (new Date().getTime() - integration.getTimestamp().getTime()) / 1000 / 60;
-                    if (ageInMins > Constants.INTEGRATION_2_SYNC_MAX_AGE_IN_MINS || ageInMins < 0) {//If Treatment is older than 4mins
-                        integration.setState    ("error");
-                        integration.setDetails  ("Not sent as older than 4mins or in the future (" + ageInMins + "mins old) ");
-
-                    } else {
-                        //Update details for this Integration, do this now as even if it fails to send HAPP should not resend it - leave user to resolve
-                        integration.setState    ("sent");
-
-                        integration_payload.add(integration);
-                    }
-                }
+        if (integrationBasal != null) {
+            if (integrationBasal.getState().equals("to_sync")) {
+                TempBasal tempBasalToSync = TempBasal.getTempBasalByID(integrationBasal.getLocal_object_id(),realmManager.getRealm());
+                integrationsToSync.add(integrationBasal);
+                treatmentsToSync.add(gsonTempBasal.toJson(tempBasalToSync));
+                //Update details for this Integration, do this now as even if it fails to send HAPP should not resend it - leave user to resolve
+                realmManager.getRealm().beginTransaction();
+                integrationBasal.setState("sent");
+                integrationBasal.setToSync(false);
+                realmManager.getRealm().commitTransaction();
             }
-
-            realm.commitTransaction();
         }
 
-        if (integration_payload.size() > 0){
+        for (Integration integrationBolus : integrationBolues) {
+            realmManager.getRealm().beginTransaction();
+            if (integrationBolus.getState().equals("delete_me")) {                                  //Treatment has been deleted, do not process it
+                integrationBolus.deleteFromRealm();
+
+            } else {
+                Long ageInMins = (new Date().getTime() - integrationBolus.getTimestamp().getTime()) / 1000 / 60;
+                if (ageInMins > Constants.INTEGRATION_2_SYNC_MAX_AGE_IN_MINS || ageInMins < 0) {    //If Treatment is older than 4mins
+                    integrationBolus.setState   ("error");
+                    integrationBolus.setToSync  (false);
+                    integrationBolus.setDetails ("Not sent as older than " + Constants.INTEGRATION_2_SYNC_MAX_AGE_IN_MINS + "mins or in the future (" + ageInMins + "mins old) ");
+
+                } else {
+                    Bolus bolusToSync = Bolus.getBolus(integrationBolus.getLocal_object_id(), realmManager.getRealm());
+                    integrationsToSync.add(integrationBolus);
+                    treatmentsToSync.add(gsonBolus.toJson(bolusToSync));
+                    //Update details for this Integration, do this now as even if it fails to send HAPP should not resend it - leave user to resolve
+                    integrationBolus.setState   ("sent");
+                    integrationBolus.setToSync  (false);
+                }
+
+            }
+            realmManager.getRealm().commitTransaction();
+        }
+
+        /*
+            Bundle data...
+            "ACTION"                -   What is this incoming request? Example: "NEW_TREATMENTS"
+            "DATE_REQUESTED"        -   When was this requested? So we can ignore old requests
+            "PUMP"                  -   Name of the pump the APS expects this app to support
+            "INTEGRATION_OBJECTS"   -   Array of Integration Objects, details of the objects being synced.  *OPTIONAL for NEW_TREATMENTS only*
+            "TREATMENT_OBJECTS"     -   Array of Objects themselves being synced, TempBasal or Bolus        *OPTIONAL for NEW_TREATMENTS only*
+        */
+        if (!integrationsToSync.isEmpty()){
             String errorSending = "";
+            Pump pump = new Pump(new Date(), realmManager.getRealm());
 
-            //We have some treatments to send
             Message msg = Message.obtain();
-
             Bundle bundle = new Bundle();
-            bundle.putString    ("ACTION", "bolus_delivery");
-            bundle.putLong      ("DATE_REQUESTED", new Date().getTime());
-            bundle.putString    ("DATA", gson.toJson(integration_payload));
+            bundle.putString    (Constants.treatmentService.ACTION, Constants.treatmentService.OUTGOING_NEW_TREATMENTS);
+            bundle.putLong      (Constants.treatmentService.DATE_REQUESTED, new Date().getTime());
+            bundle.putString    (Constants.treatmentService.PUMP, pump.name);
+            bundle.putString    (Constants.treatmentService.INTEGRATION_OBJECTS, gsonIntergration.toJson(integrationsToSync));
+            bundle.putString    (Constants.treatmentService.TREATMENT_OBJECTS, new Gson().toJson(treatmentsToSync));
             msg.setData(bundle);
 
             try {
@@ -237,19 +202,17 @@ public class InsulinIntegrationApp {
 
             if (!errorSending.equals("")){
                 //We had an error sending these treatments, update them with details
-                for(int i = 0; i < integration_payload.size(); i++){
-                    Integration integration = integration_payload.get(i);
-                    realm.beginTransaction();
+                for (Integration integration : integrationsToSync){
+                    realmManager.getRealm().beginTransaction();
                     integration.setState    ("error");
                     integration.setDetails  ("HAPP has failed to send Treatment, it will not be resent\n" + errorSending);
-                    realm.commitTransaction();
+                    realmManager.getRealm().commitTransaction();
                 }
             }
 
-            Notifications.newInsulinUpdate(realm);
+            Notifications.newInsulinUpdate(realmManager.getRealm());
         }
 
+        realmManager.closeRealm();
     }
-
-
 }

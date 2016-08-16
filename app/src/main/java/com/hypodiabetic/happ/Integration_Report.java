@@ -1,8 +1,10 @@
 package com.hypodiabetic.happ;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -111,30 +113,64 @@ public class Integration_Report extends AppCompatActivity {
                 realmManager.getRealm().commitTransaction();
             } else {
 
-                if (integration.getTimestamp() != null) {
-                    integrationDate.setTime(integration.getTimestamp());
-                } else {
-                    integrationDate.setTime(new Date(0));                                                 //Bad integration
-                }
+                integrationItem.put("integrationID",        integration.getId());
                 integrationItem.put("integrationType",      integration.getType());
-                integrationItem.put("integrationWhat",      "Request sent: " + integration.getObjectSummary(realmManager.getRealm()));
-                integrationItem.put("integrationDateTime",  sdfDateTime.format(integrationDate.getTime()));
-                integrationItem.put("integrationState",     "state:" + integration.getState());
-                integrationItem.put("integrationAction",    "action:" + integration.getAction());
-                integrationItem.put("integrationRemoteID",  "remote_id:" + integration.getRemote_id());
+                integrationItem.put("integrationDateTime",  sdfDateTime.format(integration.getTimestamp()));
                 integrationItem.put("integrationDetails",   integration.getDetails());
-                integrationItem.put("integrationID",        "id:" + integration.getId());
 
                 integrationList.add(integrationItem);
             }
         }
 
         SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
-                new String[]{"integrationType", "integrationWhat", "integrationDateTime", "integrationState", "integrationAction", "integrationRemoteID", "integrationDetails", "integrationID"},
-                new int[]{R.id.integrationType, R.id.integrationWhat, R.id.integrationDateTime, R.id.integrationState, R.id.integrationAction, R.id.integrationRemoteID, R.id.integrationDetails, R.id.integrationID});
+                new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails"},
+                new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails});
         integrationReportList.setAdapter(adapter);
 
         integrationItemCount.setText("Count: " + integrationList.size());
+
+        integrationReportList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
+                Dialog dialog = new Dialog(parent.getContext());
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.integration_list_layout_details);
+                dialog.setCancelable(true);
+                dialog.setCanceledOnTouchOutside(true);
+
+                SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
+                TextView integrationID  = (TextView) view.findViewById(R.id.integrationID);
+                Integration integration = Integration.getIntegrationByID(integrationID.getText().toString(), realmManager.getRealm());
+
+                TextView integrationTypeDetails         = (TextView) dialog.findViewById(R.id.integrationTypeDetails);
+                TextView integrationCreatedDetails      = (TextView) dialog.findViewById(R.id.integrationCreatedDetails);
+                TextView integrationUpdatedDetails      = (TextView) dialog.findViewById(R.id.integrationUpdatedDetails);
+                TextView integrationStateDetails        = (TextView) dialog.findViewById(R.id.integrationStateDetails);
+                TextView integrationActionDetails       = (TextView) dialog.findViewById(R.id.integrationActionDetails);
+                TextView integrationWhatDetails         = (TextView) dialog.findViewById(R.id.integrationWhatDetails);
+                TextView integrationIDDetails           = (TextView) dialog.findViewById(R.id.integrationIDDetails);
+                TextView integrationRemoteIDDetails     = (TextView) dialog.findViewById(R.id.integrationRemoteIDDetails);
+                TextView integrationDetailsDetails      = (TextView) dialog.findViewById(R.id.integrationDetailsDetails);
+                TextView integrationToSyncDetails       = (TextView) dialog.findViewById(R.id.integrationToSyncDetails);
+                TextView integrationAuthIDDetails       = (TextView) dialog.findViewById(R.id.integrationAuthIDDetails);
+                TextView integrationRemoteVar1Details   = (TextView) dialog.findViewById(R.id.integrationRemoteVar1Details);
+                integrationTypeDetails.setText      (integration.getType());
+                integrationCreatedDetails.setText   ("Created: " + sdfDateTime.format(integration.getTimestamp()));
+                integrationUpdatedDetails.setText   ("Updated: " + sdfDateTime.format(integration.getDate_updated()));
+                integrationStateDetails.setText     ("State: " + integration.getState());
+                integrationActionDetails.setText    (integration.getAction());
+                integrationWhatDetails.setText      (integration.getObjectSummary(realmManager.getRealm()));
+                integrationIDDetails.setText        ("Local ID: " + integration.getId());
+                integrationRemoteIDDetails.setText  ("Remote ID: " + integration.getRemote_id());
+                integrationDetailsDetails.setText   (integration.getDetails());
+                integrationToSyncDetails.setText    ("To Sync: " + integration.getToSync());
+                integrationAuthIDDetails.setText    ("Auth ID: " + integration.getAuth_code());
+                integrationRemoteVar1Details.setText("Remote Var1: " + integration.getRemote_var1());
+
+                dialog.show();
+            }
+
+        });
     }
 
 }

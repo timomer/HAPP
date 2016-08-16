@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:id="@+id/integrationTypeDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:text="Integration Type: "/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:id="@+id/integrationCreatedDetails"
+            android:text="Created: DD:MMM 00:00"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:id="@+id/integrationUpdatedDetails"
+            android:text="Updated: DD:MMM 00:00"/>
+        <TextView
+            android:id="@+id/integrationStateDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="State: New"/>
+        <TextView
+            android:id="@+id/integrationActionDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="Action: Set"/>
+        <TextView
+            android:id="@+id/integrationWhatDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="1.0u (100%) 30mins"/>
+        <TextView
+            android:id="@+id/integrationIDDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="Local ID: 1"/>
+        <TextView
+            android:id="@+id/integrationRemoteIDDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="RemoteID: 0001"/>
+        <TextView
+            android:id="@+id/integrationDetailsDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="details"/>
+        <TextView
+            android:id="@+id/integrationToSyncDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="To Sync: True"/>
+        <TextView
+            android:id="@+id/integrationAuthIDDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="Auth ID: 00"/>
+        <TextView
+            android:id="@+id/integrationRemoteVar1Details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="Remote Var1: XX"/>
+
+    </LinearLayout>
+
+</LinearLayout>

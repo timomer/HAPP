@@ -1,9 +1,10 @@
-package com.hypodiabetic.happ.Objects;
+package com.hypodiabetic.happ.Objects.Serializers;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.hypodiabetic.happ.Objects.TempBasal;
 
 import java.lang.reflect.Type;
 

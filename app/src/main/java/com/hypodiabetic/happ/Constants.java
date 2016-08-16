@@ -33,4 +33,26 @@ public class Constants {
     public static final String ARROW_DOUBLE_UP = "\u21c8";
     public static final String ARROW_SINGLE_UP = "\u2191";
     public static final String ARROW_FORTY_FIVE_UP = "\u2197";
+
+    //Treatment Service
+    public class treatmentService {
+        //Data
+        public static final String ACTION                       =   "ACTION";
+        public static final String DATE_REQUESTED               =   "DATE_REQUESTED";
+        public static final String INTEGRATION_OBJECTS          =   "INTEGRATION_OBJECTS";
+        public static final String TREATMENT_OBJECTS            =   "TREATMENT_OBJECTS";
+        public static final String PUMP                         =   "PUMP";
+        public static final String REMOTE_APP_NAME              =   "REMOTE_APP_NAME";
+
+        //Incoming actions
+        public static final String INCOMING_TREATMENT_UPDATES   =   "TREATMENT_UPDATES";
+        public static final String INCOMING_TEST_MSG            =   "TEST_MSG";
+
+
+        //Outgoing actions
+        public static final String OUTGOING_NEW_TREATMENTS      =   "NEW_TREATMENTS";
+        public static final String OUTGOING_TEST_MSG            =   "TEST_MSG";
+
+
+    }
 }

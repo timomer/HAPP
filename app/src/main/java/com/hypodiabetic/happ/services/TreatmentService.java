@@ -12,16 +12,21 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.Intents;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.RealmManager;
+import com.hypodiabetic.happ.Objects.Serializers.DateDeserializer;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.tools;
 
 import java.util.Date;
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -32,67 +37,70 @@ import io.realm.Realm;
 public class TreatmentService extends Service{
 
     public TreatmentService(){}
+    public static String TAG = "TreatmentService";
 
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            String action = "", update="";
+            String action = "";
 
+            /*
+                Expected Bundle data...
+                "ACTION"                -   What is this incoming request? Example: "TREATMENT_UPDATES"
+                "REMOTE_APP_NAME"       -   Name of the remote app. *OPTIONAL for INCOMING_TEST_MSG only*
+                "INTEGRATION_OBJECTS"   -   Array of Integration Objects, details of the objects being synced.  *OPTIONAL for TREATMENT_UPDATES only*
+            */
             Bundle data = msg.getData();
-            action = data.getString("ACTION");
-            Log.d("ACTION", action);
-            update = data.getString("UPDATE");
-            Log.d("UPDATE", update.toString());
+            action = data.getString(Constants.treatmentService.ACTION);
+            Log.d(TAG, "ACTION: " + action);
 
             switch (action){
-                case "TEST_MSG":
-                    Toast.makeText(MainApp.instance(), "HAPP: Your app has connected successfully. " + update, Toast.LENGTH_LONG).show();
+                case Constants.treatmentService.INCOMING_TEST_MSG:
+                    Toast.makeText(MainApp.instance(), "HAPP: Your app has connected successfully. " + data.getString(Constants.treatmentService.REMOTE_APP_NAME), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "handleMessage: " + "HAPP: Your app has connected successfully. " + data.getString(Constants.treatmentService.REMOTE_APP_NAME));
                     break;
-                case "bolus_delivery":
-                case "temp_basal":
-                    insulinDeliveryUpdate(update, action);
+                case Constants.treatmentService.INCOMING_TREATMENT_UPDATES:
+                    GsonBuilder gsonBuilder = new GsonBuilder();
+                    gsonBuilder.registerTypeAdapter(Date.class, new DateDeserializer());
+                    List<Integration> remoteIntegrations = gsonBuilder.create().fromJson(data.getString(Constants.treatmentService.INTEGRATION_OBJECTS), new TypeToken<List<Integration>>() {}.getType());
+                    Log.d(TAG, "Received " + remoteIntegrations.size() + " Integration objects");
+                    Log.d(TAG, "INTEGRATION_OBJECTS: " + remoteIntegrations.toString());
+                    insulinDeliveryUpdate(remoteIntegrations);
                     break;
             }
 
         }
     }
 
-    public void insulinDeliveryUpdate(String update, String action){
+    public void insulinDeliveryUpdate(List<Integration> remoteIntegrations){
 
         RealmManager realmManager = new RealmManager();
 
-        if (update != null){
+        for (Integration remoteintegration : remoteIntegrations){
+            Integration localIntegration = Integration.getIntegration("insulin_integration_app", remoteintegration.getLocal_object(), remoteintegration.getRemote_id(), realmManager.getRealm());
 
-            Integration integration = new Gson().fromJson(update, Integration.class);
-            String objectDetails="";
-            switch (action){
-                case "bolus_delivery":
-                    Bolus bolus = Bolus.getBolus(integration.getHapp_object_id(), realmManager.getRealm());
-                    objectDetails = integration.getState().toUpperCase() + ": " + tools.formatDisplayInsulin(bolus.getValue(),1) + " " + bolus.getType();
-                    break;
-                case "temp_basal":
-                    TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getHapp_object_id(), realmManager.getRealm());
-                    Pump pump = new Pump(new Date(), realmManager.getRealm());
-                    pump.setNewTempBasal(null, tempBasal);
-                    objectDetails = integration.getState().toUpperCase() + ": Temp Basal " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%)";
-                    break;
+            realmManager.getRealm().beginTransaction();
+
+            if (remoteintegration.getAuth_code().equals(localIntegration.getAuth_code())){
+                localIntegration.setState           (remoteintegration.getState());
+                localIntegration.setDetails         (remoteintegration.getDetails());
+            } else {
+                //Auth codes do not match, something odd going along
+                localIntegration.setState           ("error");
+                localIntegration.setDetails         ("Auth codes do not match, was this the app we sent the request to!?");
+                Log.e(TAG, "Integration " + localIntegration.getId() + " Auth codes do not match, was this the app we sent the request to!?");
             }
+            localIntegration.setRemote_id       (remoteintegration.getId());
+            localIntegration.setDate_updated    (new Date());
+            Log.d(TAG, "Updated Integration " + localIntegration.getId() + " " + localIntegration.getLocal_object());
 
-            int snackbar_length = Snackbar.LENGTH_LONG;
-            if (integration.getState().equals("error")){
-                //Something went wrong, inform user with INDEFINITE snackbar
-                snackbar_length = Snackbar.LENGTH_INDEFINITE;
-            }
-
-            //Send broadcast to Main App as we are running on a different thread
-            Intent intent = new Intent(Intents.NOTIFICATION_UPDATE);
-            intent.putExtra("NOTIFICATION_TYPE", "NEW_INSULIN_UPDATE");
-            intent.putExtra("snackbar_length", snackbar_length);
-            intent.putExtra("alertDialogText", integration.getDetails());
-            intent.putExtra("snackBarMsg", objectDetails);
-            MainApp.instance().sendBroadcast(intent);
-
+            realmManager.getRealm().commitTransaction();
         }
+
+        //Send broadcast to Main App as we are running on a different thread
+        Intent intent = new Intent(Intents.NOTIFICATION_UPDATE);
+        intent.putExtra("NOTIFICATION_TYPE", "NEW_INSULIN_UPDATE");
+        MainApp.instance().sendBroadcast(intent);
 
         realmManager.closeRealm();
     }

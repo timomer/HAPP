@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 
@@ -18,16 +17,13 @@ import android.view.View;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hypodiabetic.happ.Graphs.BgGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
-import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
-import com.hypodiabetic.happ.Objects.TempBasalSerializer;
+import com.hypodiabetic.happ.Objects.Serializers.TempBasalSerializer;
 import com.hypodiabetic.happ.integration.Objects.InsulinIntegrationNotify;
 
 
-import java.lang.reflect.Modifier;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

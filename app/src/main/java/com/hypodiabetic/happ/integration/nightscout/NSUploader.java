@@ -51,16 +51,16 @@ public class NSUploader {
                     Context context = MainApp.instance().getApplicationContext();
                     JSONObject data = new JSONObject();
 
-                    switch (integration.getHapp_object()){
+                    switch (integration.getLocal_object()){
                         case "bolus_delivery":
-                            Bolus bolus = Bolus.getBolus(integration.getHapp_object_id(), realm);
+                            Bolus bolus = Bolus.getBolus(integration.getLocal_object_id(), realm);
                             data.put("insulin", bolus.getValue());
                             data.put("note", bolus.getType());
                             data.put("eventType", "Bolus");
 
                             break;
                         case "treatment_carbs":
-                            Carb carb = Carb.getCarb(integration.getHapp_object_id(), realm);
+                            Carb carb = Carb.getCarb(integration.getLocal_object_id(), realm);
                             data.put("carbs", carb.getValue());
                             data.put("eventType", "Carbs");
 
@@ -69,7 +69,7 @@ public class NSUploader {
                             data.put("eventType", "Temp Basal");
                             switch (integration.getAction()){
                                 case "new":
-                                    TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getHapp_object_id(), realm);
+                                    TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getLocal_object_id(), realm);
                                     //if (tempBasal.basal_type.equals("percent")) {                             //Percent is not supported in NS as expected
                                     //    tempBasalJSON.put("percent", tempBasal.ratePercent);                  //Basal 1U / Hour
                                     //} else {                                                                  //NS = 50% means * 1.5 ~~ HAPP 50% means * 0.5
@@ -106,6 +106,7 @@ public class NSUploader {
                 } catch (JSONException e) {
                     realm.beginTransaction();
                     integration.setState    ("error");
+                    integration.setToSync   (false);
                     integration.setDetails  ("Failed sending to NSClient: " + e.getLocalizedMessage());
                     realm.commitTransaction();
                     Log.d(TAG,"ERROR sending Treatment to NSClient");
@@ -115,6 +116,7 @@ public class NSUploader {
                     if (!integration.getState().equals("error")) {
                         realm.beginTransaction();
                         integration.setState    ("sent");
+                        integration.setToSync   (false);
                         realm.commitTransaction();
                     }
                 }

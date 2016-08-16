@@ -11,31 +11,23 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.APSResult;
-import com.hypodiabetic.happ.Objects.APSResultSerializer;
+import com.hypodiabetic.happ.Objects.Serializers.APSResultSerializer;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Safety;
-import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Receivers.APSReceiver;
 import com.hypodiabetic.happ.tools;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.util.Date;
-import java.util.Locale;
-
-import io.realm.Realm;
-import io.realm.RealmObject;
 
 /**
  * Created by Tim on 14/02/2016.

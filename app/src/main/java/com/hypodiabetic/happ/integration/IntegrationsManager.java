@@ -49,12 +49,12 @@ public class IntegrationsManager {
 
         //Insulin Integration App: Temp Basal if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BASAL", realm);
+            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BASAL");
             insulinIntegrationApp_Basal.connectInsulinTreatmentApp();
         }
         //Insulin Integration App: Bolus if allowed
         if (p.send_bolus_allowed){
-            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BOLUS", realm);
+            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BOLUS");
             insulinIntegrationApp_Bolus.connectInsulinTreatmentApp();
         }
 
@@ -74,7 +74,7 @@ public class IntegrationsManager {
         if (p.send_bolus_allowed ) {
             if (bolus != null) {
                 Integration bolusIntegration = new Integration("insulin_integration_app", happ_object, bolus.getId());
-                bolusIntegration.setState           ("to_sync");
+                bolusIntegration.setState           ("to sync");
                 bolusIntegration.setAction          ("new");
                 bolusIntegration.setAuth_code       (new Random().toString());
                 bolusIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
@@ -84,7 +84,7 @@ public class IntegrationsManager {
             }
             if (correction != null) {
                 Integration correctionIntegration = new Integration("insulin_integration_app", happ_object, correction.getId());
-                correctionIntegration.setState           ("to_sync");
+                correctionIntegration.setState           ("to sync");
                 correctionIntegration.setAction          ("new");
                 correctionIntegration.setAuth_code       (new Random().toString());
                 correctionIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
@@ -98,7 +98,7 @@ public class IntegrationsManager {
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (bolus != null) {
                 Integration bolusIntegration = new Integration("ns_client", happ_object, bolus.getId());
-                bolusIntegration.setState           ("to_sync");
+                bolusIntegration.setState           ("to sync");
                 bolusIntegration.setAction          ("new");
                 realm.beginTransaction();
                 realm.copyToRealm(bolusIntegration);
@@ -106,7 +106,7 @@ public class IntegrationsManager {
             }
             if (correction != null) {
                 Integration correctionIntegration = new Integration("ns_client", happ_object, correction.getId());
-                correctionIntegration.setState           ("to_sync");
+                correctionIntegration.setState           ("to sync");
                 correctionIntegration.setAction          ("new");
                 realm.beginTransaction();
                 realm.copyToRealm(correctionIntegration);
@@ -126,7 +126,7 @@ public class IntegrationsManager {
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             if (carb != null) {
                 Integration carbIntegration = new Integration("ns_client", happ_object, carb.getId());
-                carbIntegration.setState        ("to_sync");
+                carbIntegration.setState        ("to sync");
                 carbIntegration.setAction       ("new");
                 carbIntegration.setRemote_var1  ("carbs");
                 realm.beginTransaction();
@@ -147,7 +147,7 @@ public class IntegrationsManager {
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
             Integration basalIntegration    =   new Integration("insulin_integration_app", happ_object, tempBasal.getId());
-            basalIntegration.setState           ("to_sync");
+            basalIntegration.setState           ("to sync");
             basalIntegration.setAction          ("new");
             basalIntegration.setAuth_code       (new Random().toString());
             basalIntegration.setRemote_var1     (prefs.getString("insulin_integration", ""));
@@ -159,8 +159,7 @@ public class IntegrationsManager {
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             Integration basalIntegration    =   new Integration("ns_client", happ_object, tempBasal.getId());
-            realm.beginTransaction();
-            basalIntegration.setState           ("to_sync");
+            basalIntegration.setState           ("to sync");
             basalIntegration.setAction          ("new");
             realm.beginTransaction();
             realm.copyToRealm(basalIntegration);
@@ -179,7 +178,7 @@ public class IntegrationsManager {
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
             Integration basalIntegration    =   new Integration("insulin_integration_app", happ_object, tempBasal.getId());
-            basalIntegration.setState       ("to_sync");
+            basalIntegration.setState       ("to sync");
             basalIntegration.setAction      ("cancel");
             realm.beginTransaction();
             realm.copyToRealm(basalIntegration);
@@ -189,7 +188,7 @@ public class IntegrationsManager {
         // NS Interaction
         if (NSUploader.isNSIntegrationActive("nightscout_treatments", prefs)) {
             Integration basalIntegration    =   new Integration("ns_client", happ_object, tempBasal.getId());
-            basalIntegration.setState       ("to_sync");
+            basalIntegration.setState       ("to sync");
             basalIntegration.setAction      ("cancel");
             realm.beginTransaction();
             realm.copyToRealm(basalIntegration);

@@ -17,7 +17,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Stat;
-import com.hypodiabetic.happ.Objects.StatSerializer;
+import com.hypodiabetic.happ.Objects.Serializers.StatSerializer;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.Intents;
@@ -26,8 +26,6 @@ import com.hypodiabetic.happ.integration.openaps.IOB;
 import org.json.JSONObject;
 
 import java.util.Date;
-
-import io.realm.Realm;
 
 /**
  * Created by Tim on 15/02/2016.

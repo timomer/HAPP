@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Insulin Integration App, try and connect
         if (!insulin_Integration_App.equals("")){
-            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST", realmManager.getRealm());
+            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST");
             insulinIntegrationApp.connectInsulinTreatmentApp();
             insulinIntegrationApp_status.setText("Connecting...");
             insulinIntegrationApp_icon.setBackground(clockWhite);

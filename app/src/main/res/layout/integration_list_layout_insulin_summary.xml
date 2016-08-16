@@ -49,6 +49,12 @@
                 android:text="Correction"
                 android:gravity="bottom"/>
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/insulinSummaryStateImage"
+                android:layout_marginRight="1dp"
+                android:layout_gravity="bottom"/>
             <TextView
                 android:id="@+id/insulinSummaryState"
                 android:layout_width="wrap_content"
@@ -56,12 +62,29 @@
                 android:textSize="16sp"
                 android:text="SENT"
                 android:gravity="center_vertical"/>
-            <ImageView
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="0dp"
+            android:layout_gravity="center">
+            <TextView
+                android:id="@+id/insulinSummaryAction"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:layout_weight="1"
+                android:text="Action: new"
+                android:gravity="center_vertical"/>
+            <TextView
+                android:id="@+id/insulinSummaryDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/insulinSummaryStateImage"
-                android:layout_marginRight="1dp"
-                android:layout_gravity="bottom"/>
+                android:textSize="13sp"
+                android:text="Last Update: 01-01-01"
+                android:gravity="center_vertical"/>
 
         </LinearLayout>
         <LinearLayout
@@ -77,21 +100,6 @@
                 android:textSize="13sp"
                 android:layout_weight="1"
                 android:text="INT ID: 1"
-                android:gravity="center_vertical"/>
-            <TextView
-                android:id="@+id/insulinSummaryAction"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:layout_weight="1"
-                android:text="Action: new"
-                android:gravity="center_vertical"/>
-            <TextView
-                android:id="@+id/insulinSummaryDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:text="Last Update: 01-01-01"
                 android:gravity="center_vertical"/>
 
         </LinearLayout>

@@ -228,7 +228,6 @@ public class pumpAction {
                 if (finalBolusTreatment != null) realm.copyToRealm(finalBolusTreatment);
                 if (finalCorrectionTrearment != null) realm.copyToRealm(finalCorrectionTrearment);
                 realm.commitTransaction();
-                realm.close();
 
                 //inform Integration Manager
                 IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment, realm);

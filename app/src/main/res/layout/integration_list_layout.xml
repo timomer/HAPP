@@ -4,6 +4,27 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
+    <TextView
+        android:id="@+id/integrationID"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:textSize="13sp"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="55dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/integrationIcon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:background="@drawable/alert_circle"/>
+
+    </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -25,7 +46,7 @@
                     android:layout_weight="1"
                     android:paddingRight="10dp"
                     android:textSize="16sp"
-                    android:text="temp_basal"
+                    android:text="APS App"
                     android:gravity="bottom"/>
 
                 <TextView
@@ -36,66 +57,6 @@
                     android:text="DD:MMM 00:00"
                     android:gravity="top"
                     android:layout_gravity="end"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:layout_marginTop="0dp"
-                >
-                <TextView
-                    android:id="@+id/integrationWhat"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="13sp"
-                    android:layout_weight="1"
-                    android:text="1.0u (100%) 30mins"
-                    android:gravity="center_vertical"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:layout_marginTop="0dp" >
-                <TextView
-                    android:id="@+id/integrationID"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingRight="10dp"
-                    android:textSize="13sp"
-                    android:text="ID: 1"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"/>
-                <TextView
-                    android:id="@+id/integrationState"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingRight="10dp"
-                    android:textSize="13sp"
-                    android:text="State: New"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"/>
-                <TextView
-                    android:id="@+id/integrationAction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingRight="10dp"
-                    android:textSize="13sp"
-                    android:text="Action: Set"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"/>
-                <TextView
-                    android:id="@+id/integrationRemoteID"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingRight="10dp"
-                    android:textSize="13sp"
-                    android:text="RemoteID: 0001"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"/>
-
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
