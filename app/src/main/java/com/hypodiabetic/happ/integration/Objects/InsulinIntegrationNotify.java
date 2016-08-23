@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainActivity;
 import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
@@ -56,8 +57,8 @@ public class InsulinIntegrationNotify {
         this.realm              =   realm;
         detailList              =   new ArrayList<>();
         detailListErrorsOnly    =   new ArrayList<>();
-        recentlyUpdated         =   Integration.getUpdatedInLastMins(1,"insulin_integration_app", realm);
-        withErrors              =   Integration.getIntegrationsWithErrors("insulin_integration_app", realm);
+        recentlyUpdated         =   Integration.getUpdatedInLastMins(1, Constants.treatmentService.INSULIN_INTEGRATION_APP, realm);
+        withErrors              =   Integration.getIntegrationsWithErrors(Constants.treatmentService.INSULIN_INTEGRATION_APP, realm);
         snackbarMsg             =   "";
         errorMsg                =   "";
         foundError              =   false;
@@ -69,11 +70,7 @@ public class InsulinIntegrationNotify {
                 //ObjectToSync integrationWithDetails = new ObjectToSync(integration);
                 HashMap<String, String> detailListItem = new HashMap<String, String>();
 
-                if (integration.getState().equals("delete_me")) {
-                    realm.beginTransaction();
-                    integration.deleteFromRealm();
-                    realm.commitTransaction();
-                } else {
+                if (!integration.getState().equals("delete_me")) {
 
                     switch (integration.getLocal_object()) {
                         case "bolus_delivery":
@@ -108,11 +105,7 @@ public class InsulinIntegrationNotify {
             //ObjectToSync integrationWithDetails = new ObjectToSync(integrationWithError);
             HashMap<String, String> detailListItem = new HashMap<String, String>();
 
-            if (integrationWithError.getState().equals("delete_me")) {
-                realm.beginTransaction();
-                integrationWithError.deleteFromRealm();
-                realm.commitTransaction();
-            } else {
+            if (!integrationWithError.getState().equals("deleted")) {
 
                 switch (integrationWithError.getLocal_object()) {
                     case "bolus_delivery":

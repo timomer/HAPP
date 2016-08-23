@@ -60,7 +60,7 @@ public class Integration_Report extends AppCompatActivity {
             }
         });
 
-        String[] integrationTypes = {"insulin_integration_app", "ns_client"};
+        String[] integrationTypes = {Constants.treatmentService.INSULIN_INTEGRATION_APP, "ns_client"};
         ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, integrationTypes);
         integrationType.setAdapter(stringArrayAdapter);
         integrationType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -105,14 +105,7 @@ public class Integration_Report extends AppCompatActivity {
         for (Integration integration : integrations){                                                    //Convert from a List<Object> Array to ArrayList
             HashMap<String, String> integrationItem = new HashMap<String, String>();
 
-            //ObjectToSync objectSyncDetails = new ObjectToSync(integration);
-
-            if (integration.getState().equals("delete_me")) {
-                realmManager.getRealm().beginTransaction();
-                integration.deleteFromRealm();
-                realmManager.getRealm().commitTransaction();
-            } else {
-
+            if (!integration.getState().equals("deleted")) {
                 integrationItem.put("integrationID",        integration.getId());
                 integrationItem.put("integrationType",      integration.getType());
                 integrationItem.put("integrationDateTime",  sdfDateTime.format(integration.getTimestamp()));

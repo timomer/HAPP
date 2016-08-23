@@ -53,6 +53,7 @@ public class Constants {
         public static final String OUTGOING_NEW_TREATMENTS      =   "NEW_TREATMENTS";
         public static final String OUTGOING_TEST_MSG            =   "TEST_MSG";
 
+        public static final String INSULIN_INTEGRATION_APP      =   "PUMP_DRIVER";
 
     }
 }

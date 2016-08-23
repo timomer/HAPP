@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         realmManager = new RealmManager();
+        realmManager.getRealm().setAutoRefresh(true); //so we pickup updates from other threads
 
         setupMenuAndToolbar();
 

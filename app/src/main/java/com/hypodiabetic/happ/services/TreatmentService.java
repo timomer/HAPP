@@ -76,21 +76,21 @@ public class TreatmentService extends Service{
 
         RealmManager realmManager = new RealmManager();
 
-        for (Integration remoteintegration : remoteIntegrations){
-            Integration localIntegration = Integration.getIntegration("insulin_integration_app", remoteintegration.getLocal_object(), remoteintegration.getRemote_id(), realmManager.getRealm());
+        for (Integration remoteIntegration : remoteIntegrations){
+            Integration localIntegration = Integration.getIntegration(Constants.treatmentService.INSULIN_INTEGRATION_APP, remoteIntegration.getLocal_object(), remoteIntegration.getRemote_id(), realmManager.getRealm());
 
             realmManager.getRealm().beginTransaction();
 
-            if (remoteintegration.getAuth_code().equals(localIntegration.getAuth_code())){
-                localIntegration.setState           (remoteintegration.getState());
-                localIntegration.setDetails         (remoteintegration.getDetails());
+            if (remoteIntegration.getAuth_code().equals(localIntegration.getAuth_code())){
+                localIntegration.setState           (remoteIntegration.getState());
+                localIntegration.setDetails         (remoteIntegration.getDetails());
             } else {
                 //Auth codes do not match, something odd going along
                 localIntegration.setState           ("error");
                 localIntegration.setDetails         ("Auth codes do not match, was this the app we sent the request to!?");
                 Log.e(TAG, "Integration " + localIntegration.getId() + " Auth codes do not match, was this the app we sent the request to!?");
             }
-            localIntegration.setRemote_id       (remoteintegration.getId());
+            localIntegration.setRemote_id       (remoteIntegration.getId());
             localIntegration.setDate_updated    (new Date());
             Log.d(TAG, "Updated Integration " + localIntegration.getId() + " " + localIntegration.getLocal_object());
 

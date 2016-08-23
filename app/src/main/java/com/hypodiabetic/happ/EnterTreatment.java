@@ -681,7 +681,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                     }
                 }
 
-                Integration integration = Integration.getIntegration("insulin_integration_app","bolus_delivery",bolus.getId(), realmManager.getRealm());
+                Integration integration = Integration.getIntegration(Constants.treatmentService.INSULIN_INTEGRATION_APP,"bolus_delivery",bolus.getId(), realmManager.getRealm());
                 if (integration != null) {
                     treatmentItem.put("integration", integration.getState());                           //log STATUS of insulin_Integration_App
                 } else {
@@ -777,9 +777,10 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         @Override
         public boolean onContextItemSelected(MenuItem item) {
             if (getUserVisibleHint()) {                                                             //be sure we only action for the current Fragment http://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
-                int itemId = item.getItemId();
+                int itemId  = item.getItemId();
                 Bolus bolus = new Bolus();
-                Carb carb = new Carb();
+                Carb carb   = new Carb();
+                List<Integration> integrations;
 
                 if (selectedListType.equals("bolus")) {
                     bolus = Bolus.getBolus(selectedListItemDB_ID, realmManager.getRealm());
@@ -823,9 +824,16 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                         case 2: //Delete
                             realmManager.getRealm().beginTransaction();
                             if (selectedListType.equals("bolus")) {
+                                integrations = Integration.getIntegrationsFor("bolus",bolus.getId(),realmManager.getRealm());
                                 bolus.deleteFromRealm();
                             } else {
+                                integrations = Integration.getIntegrationsFor("carb",carb.getId(),realmManager.getRealm());
                                 carb.deleteFromRealm();
+                            }
+                            //Update any integrations for this object
+                            for (Integration integration : integrations){
+                                integration.setState("deleted");
+                                integration.setDetails(integration.getDetails() + " TREATMENT DELETED");
                             }
                             realmManager.getRealm().commitTransaction();
                             treatmentsList.remove(selectedListItemID);
@@ -837,7 +845,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             break;
                         case 3: //Integration Details
                             String intergrationType;
-                            List<Integration> integrations;
                             if (selectedListType.equals("bolus")) {
                                 intergrationType="bolus_delivery";
                                 integrations = Integration.getIntegrationsFor(intergrationType,bolus.getId(), realmManager.getRealm());
@@ -898,16 +905,16 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                     TextView integrationAuthIDDetails       = (TextView) dialog.findViewById(R.id.integrationAuthIDDetails);
                                     TextView integrationRemoteVar1Details   = (TextView) dialog.findViewById(R.id.integrationRemoteVar1Details);
                                     integrationTypeDetails.setText      (integration.getType());
-                                    integrationCreatedDetails.setText   ("Created: " + sdfDateTime.format(integration.getTimestamp()));
-                                    integrationUpdatedDetails.setText   ("Updated: " + sdfDateTime.format(integration.getDate_updated()));
-                                    integrationStateDetails.setText     ("State: " + integration.getState());
-                                    integrationActionDetails.setText    (integration.getAction());
+                                    integrationCreatedDetails.setText   ("Created:  " + sdfDateTime.format(integration.getTimestamp()));
+                                    integrationUpdatedDetails.setText   ("Updated:  " + sdfDateTime.format(integration.getDate_updated()));
+                                    integrationStateDetails.setText     ("State:    " + integration.getState());
+                                    integrationActionDetails.setText    ("Action:   " + integration.getAction());
                                     integrationWhatDetails.setText      (integration.getObjectSummary(realmManager.getRealm()));
                                     integrationIDDetails.setText        ("Local ID: " + integration.getId());
-                                    integrationRemoteIDDetails.setText  ("Remote ID: " + integration.getRemote_id());
+                                    integrationRemoteIDDetails.setText  ("Remote ID:" + integration.getRemote_id());
                                     integrationDetailsDetails.setText   (integration.getDetails());
-                                    integrationToSyncDetails.setText    ("To Sync: " + integration.getToSync());
-                                    integrationAuthIDDetails.setText    ("Auth ID: " + integration.getAuth_code());
+                                    integrationToSyncDetails.setText    ("To Sync:  " + integration.getToSync());
+                                    integrationAuthIDDetails.setText    ("Auth ID:  " + integration.getAuth_code());
                                     integrationRemoteVar1Details.setText("Remote Var1: " + integration.getRemote_var1());
 
                                     dialog.show();

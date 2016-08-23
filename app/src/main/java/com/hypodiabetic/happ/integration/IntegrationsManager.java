@@ -45,16 +45,16 @@ public class IntegrationsManager {
         Profile p = new Profile(new Date());
 
         //Local device based Integrations
-        String insulin_Integration_App = prefs.getString("insulin_integration", "");
+        String pump_driver = prefs.getString("insulin_integration", "");
 
         //Insulin Integration App: Temp Basal if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BASAL");
+            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), pump_driver, "BASAL");
             insulinIntegrationApp_Basal.connectInsulinTreatmentApp();
         }
         //Insulin Integration App: Bolus if allowed
         if (p.send_bolus_allowed){
-            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), insulin_Integration_App, "BOLUS");
+            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), pump_driver, "BOLUS");
             insulinIntegrationApp_Bolus.connectInsulinTreatmentApp();
         }
 
@@ -73,7 +73,7 @@ public class IntegrationsManager {
         //Are we allowed and able to send bolus?
         if (p.send_bolus_allowed ) {
             if (bolus != null) {
-                Integration bolusIntegration = new Integration("insulin_integration_app", happ_object, bolus.getId());
+                Integration bolusIntegration = new Integration(Constants.treatmentService.INSULIN_INTEGRATION_APP, happ_object, bolus.getId());
                 bolusIntegration.setState           ("to sync");
                 bolusIntegration.setAction          ("new");
                 bolusIntegration.setAuth_code       (new Random().toString());
@@ -83,7 +83,7 @@ public class IntegrationsManager {
                 realm.commitTransaction();
             }
             if (correction != null) {
-                Integration correctionIntegration = new Integration("insulin_integration_app", happ_object, correction.getId());
+                Integration correctionIntegration = new Integration(Constants.treatmentService.INSULIN_INTEGRATION_APP, happ_object, correction.getId());
                 correctionIntegration.setState           ("to sync");
                 correctionIntegration.setAction          ("new");
                 correctionIntegration.setAuth_code       (new Random().toString());
@@ -146,7 +146,7 @@ public class IntegrationsManager {
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            Integration basalIntegration    =   new Integration("insulin_integration_app", happ_object, tempBasal.getId());
+            Integration basalIntegration    =   new Integration(Constants.treatmentService.INSULIN_INTEGRATION_APP, happ_object, tempBasal.getId());
             basalIntegration.setState           ("to sync");
             basalIntegration.setAction          ("new");
             basalIntegration.setAuth_code       (new Random().toString());
@@ -177,7 +177,7 @@ public class IntegrationsManager {
 
         //Insulin Integration App if we are in closed loop
         if (p.aps_mode.equals("closed") ){
-            Integration basalIntegration    =   new Integration("insulin_integration_app", happ_object, tempBasal.getId());
+            Integration basalIntegration    =   new Integration(Constants.treatmentService.INSULIN_INTEGRATION_APP, happ_object, tempBasal.getId());
             basalIntegration.setState       ("to sync");
             basalIntegration.setAction      ("cancel");
             realm.beginTransaction();
@@ -200,17 +200,14 @@ public class IntegrationsManager {
     }
 
     public static void checkOldInsulinIntegration(Realm realm){
-        List<Integration> integrationsToSync = Integration.getIntegrationsToSync("insulin_integration_app", null, realm);
+        List<Integration> integrationsToSync = Integration.getIntegrationsToSync(Constants.treatmentService.INSULIN_INTEGRATION_APP, null, realm);
 
         for (Integration integration : integrationsToSync) {
             //ObjectToSync insulinSync = new ObjectToSync(integration);
 
             realm.beginTransaction();
 
-            if (integration.getState().equals("delete_me")) {                                       //Treatment has been deleted, do not process it
-                integration.deleteFromRealm();
-
-            } else {
+            if (!integration.getState().equals("deleted")) {                                       //Treatment has been deleted, do not process it
 
                 Long ageInMins = (new Date().getTime() - integration.getTimestamp().getTime()) / 1000 / 60;
                 if (ageInMins > Constants.INTEGRATION_2_SYNC_MAX_AGE_IN_MINS || ageInMins < 0) {    //If Treatment is older than 4mins

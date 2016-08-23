@@ -40,12 +40,7 @@ public class NSUploader {
         for (Integration integration : integrationsToSync) {
             //ObjectToSync treatmentToSync = new ObjectToSync(integration);
 
-            if (integration.getState().equals("delete_me")) {                                       //Treatment has been deleted, do not process it
-                realm.beginTransaction();
-                integration.deleteFromRealm();
-                realm.commitTransaction();
-
-            } else {
+            if (!integration.getState().equals("deleted")) {                                       //Treatment has been deleted, do not process it
 
                 try {
                     Context context = MainApp.instance().getApplicationContext();

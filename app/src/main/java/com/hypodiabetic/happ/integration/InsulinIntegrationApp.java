@@ -38,18 +38,18 @@ import io.realm.Realm;
  */
 public class InsulinIntegrationApp {
     public Context context;
-    public String insulin_Integration_App;
+    public String pump_driver;
     public String toSync;
     private static final String TAG = "InsulinIntegrationApp";
 
-    //Service Connection to the insulin_Integration_App
-    private  Messenger insulin_Integration_App_Service = null;
-    public   boolean insulin_Integration_App_isBound;
+    //Service Connection to the pump_driver
+    private  Messenger pump_driver_Service = null;
+    public   boolean pump_driver_isBound;
 
-    private  ServiceConnection insulin_Integration_App_Connection = new ServiceConnection() {
+    private  ServiceConnection pump_driver_Connection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            insulin_Integration_App_Service = new Messenger(service);
-            insulin_Integration_App_isBound = true;
+            pump_driver_Service = new Messenger(service);
+            pump_driver_isBound = true;
             switch (toSync){
                 case "TEST":
                     Intent intent = new Intent("INSULIN_INTEGRATION_TEST");
@@ -63,24 +63,24 @@ public class InsulinIntegrationApp {
             }
         }
         public void onServiceDisconnected(ComponentName className) {
-            insulin_Integration_App_Service = null;
-            insulin_Integration_App_isBound = false;
+            pump_driver_Service = null;
+            pump_driver_isBound = false;
         }
     };
 
 
-    public InsulinIntegrationApp(Context context, String insulin_Integration_App, String toSync) {
+    public InsulinIntegrationApp(Context context, String pump_driver, String toSync) {
         this.context                    = context;
-        this.insulin_Integration_App    = insulin_Integration_App;
+        this.pump_driver                = pump_driver;
         this.toSync                     = toSync;
     }
 
 
     public void connectInsulinTreatmentApp(){
-        //Connects to Service of the insulin_Integration_App
-        Intent intent = new Intent(insulin_Integration_App + ".CommunicationService.CommunicationService");
-        intent.setPackage(insulin_Integration_App);
-        context.bindService(intent, insulin_Integration_App_Connection, Context.BIND_AUTO_CREATE);
+        //Connects to Service of the pump_driver
+        Intent intent = new Intent(pump_driver + ".CommunicationService.CommunicationService");
+        intent.setPackage(pump_driver);
+        context.bindService(intent, pump_driver_Connection, Context.BIND_AUTO_CREATE);
     }
 
     public void sendTest(){
@@ -92,7 +92,7 @@ public class InsulinIntegrationApp {
         msg.setData(bundle);
 
         try {
-            insulin_Integration_App_Service.send(msg);
+            pump_driver_Service.send(msg);
 
         } catch (DeadObjectException d){
             Crashlytics.logException(d);
@@ -124,12 +124,12 @@ public class InsulinIntegrationApp {
         }
 
         //get all Boluses
-        List<Integration> integrationBolues = Integration.getIntegrationsToSync("insulin_integration_app", "bolus_delivery", realmManager.getRealm());
+        List<Integration> integrationBolues = Integration.getIntegrationsToSync(Constants.treatmentService.INSULIN_INTEGRATION_APP, "bolus_delivery", realmManager.getRealm());
         //get most recent TempBasal and see if its waiting to be synced, old TempBasals are ignored
-        Integration integrationBasal        = Integration.getIntegration("insulin_integration_app", "temp_basal", TempBasal.last(realmManager.getRealm()).getId(), realmManager.getRealm());
+        Integration integrationBasal        = Integration.getIntegration(Constants.treatmentService.INSULIN_INTEGRATION_APP, "temp_basal", TempBasal.last(realmManager.getRealm()).getId(), realmManager.getRealm());
 
         if (integrationBasal != null) {
-            if (integrationBasal.getState().equals("to_sync")) {
+            if (integrationBasal.getToSync()) {
                 TempBasal tempBasalToSync = TempBasal.getTempBasalByID(integrationBasal.getLocal_object_id(),realmManager.getRealm());
                 integrationsToSync.add(integrationBasal);
                 treatmentsToSync.add(gsonTempBasal.toJson(tempBasalToSync));
@@ -143,7 +143,7 @@ public class InsulinIntegrationApp {
 
         for (Integration integrationBolus : integrationBolues) {
             realmManager.getRealm().beginTransaction();
-            if (integrationBolus.getState().equals("delete_me")) {                                  //Treatment has been deleted, do not process it
+            if (integrationBolus.getState().equals("deleted")) {                                    //Treatment has been deleted, do not process it
                 integrationBolus.deleteFromRealm();
 
             } else {
@@ -188,7 +188,7 @@ public class InsulinIntegrationApp {
             msg.setData(bundle);
 
             try {
-                insulin_Integration_App_Service.send(msg);
+                pump_driver_Service.send(msg);
 
             } catch (DeadObjectException d){
                 Crashlytics.logException(d);

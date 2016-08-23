@@ -201,23 +201,32 @@ public class pumpAction {
             bolusMsg.setText("manually set on pump");
             buttonOK.setText("Done");
         }
+        if (bolus == null && bolusCorrection == null) buttonOK.setText("Save");
 
         bolusAmount.setText(tools.formatDisplayInsulin(totalBolus,1));
         if (finalBolusTreatment != null){
             bolusTreatValue.setText(tools.formatDisplayInsulin(finalBolusTreatment.getValue(), 1));
             bolusTreatText.setText("Insulin Bolus");
-        } else {bolusTreatLayout.setVisibility(View.GONE);}
+        } else {
+            bolusTreatLayout.setVisibility(View.GONE);
+        }
         if (finalCorrectionTrearment != null){
             corrTreatValue.setText(tools.formatDisplayInsulin(finalCorrectionTrearment.getValue(), 1));
             corrTreatText.setText("Insulin Correction");
-        } else {corrTreatLayout.setVisibility(View.GONE);}
+        } else {
+            corrTreatLayout.setVisibility(View.GONE);
+        }
         if (carb != null){
             carbTreatValue.setText(tools.formatDisplayCarbs(carb.getValue()));
             carbTreatText.setText("Carbohydrates");
-        } else {carbTreatLayout.setVisibility(View.GONE);}
+        } else {
+            carbTreatLayout.setVisibility(View.GONE);
+        }
         if (!warningMSG.equals("")) {
             warningMSGText.setText(warningMSG);
-        } else {warningMSGText.setVisibility(View.GONE);}
+        } else {
+            warningMSGText.setVisibility(View.GONE);
+        }
 
         buttonOK.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -237,6 +246,7 @@ public class pumpAction {
                 MainApp.instance().startService(new Intent(MainApp.instance(), FiveMinService.class));
 
                 //Return to the home screen (if not already on it)
+                dialog.dismiss();
                 Intent intentHome = new Intent(c, MainActivity.class);
                 intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 c.startActivity(intentHome);

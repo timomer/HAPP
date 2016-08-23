@@ -19,6 +19,18 @@
             android:textSize="16sp"
             android:text="Integration Type: "/>
         <TextView
+            android:id="@+id/integrationWhatDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="1.0u (100%) 30mins"/>
+        <TextView
+            android:id="@+id/integrationDetailsDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="details"/>
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
@@ -43,30 +55,6 @@
             android:textSize="14sp"
             android:text="Action: Set"/>
         <TextView
-            android:id="@+id/integrationWhatDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="1.0u (100%) 30mins"/>
-        <TextView
-            android:id="@+id/integrationIDDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="Local ID: 1"/>
-        <TextView
-            android:id="@+id/integrationRemoteIDDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="RemoteID: 0001"/>
-        <TextView
-            android:id="@+id/integrationDetailsDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:text="details"/>
-        <TextView
             android:id="@+id/integrationToSyncDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,6 +72,18 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:text="Remote Var1: XX"/>
+        <TextView
+            android:id="@+id/integrationIDDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="Local ID: 1"/>
+        <TextView
+            android:id="@+id/integrationRemoteIDDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:text="RemoteID: 0001"/>
 
     </LinearLayout>
 
