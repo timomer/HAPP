@@ -395,8 +395,10 @@ public class MainActivity extends AppCompatActivity {
         //NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
         //if (popup.foundError) notificationManager.notify(58, notification.build());
 
-        APSResult read = APSResult.last(realmManager.getRealm());
-        Snackbar.make(view,read.toString(),Snackbar.LENGTH_LONG).show();
+        //APSResult read = APSResult.last(realmManager.getRealm());
+        //Snackbar.make(view,read.toString(),Snackbar.LENGTH_LONG).show();
+        TempBasal tempBasal = TempBasal.last(realmManager.getRealm());
+        Log.e("TESTING","timestamp:" + tempBasal.getTimestamp() + " duration:" + tempBasal.getDuration() + " starttime:" + tempBasal.getStart_time() + " enddateP:" + tempBasal.endDate());
     }
 
     public void checkInsulinAppIntegration(final boolean sendText){

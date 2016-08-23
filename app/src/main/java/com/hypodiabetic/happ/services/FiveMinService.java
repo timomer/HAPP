@@ -56,7 +56,7 @@ public class FiveMinService extends IntentService {
         IntegrationsManager.checkOldInsulinIntegration(realmManager.getRealm());    //Check if there are any old Insulin Integration requests waiting to be synced
         IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());          //Updates xDrip Watch Face
 
-        // TODO: 11/08/2016 Service appears to be killed after some hours by the system, we then lose CGM Recivers, etc.
+        // TODO: 11/08/2016 Service appears to be killed after some hours by the system, we then lose CGM Receivers, etc.
         //Starts the service if its not running
         startService(new Intent(this, BackgroundService.class));
 

@@ -53,15 +53,13 @@ public class TempBasal extends RealmObject {
         return timestamp;
     }
 
-    private String   id                 = UUID.randomUUID().toString();
-    private Double   rate               = 0D;    //Temp Basal Rate for (U/hr) mode
-    private Integer  duration           = 0;     //Duration of Temp
-    private Date     start_time;                 //When the Temp Basal started
-    private String   basal_adjustemnt   = "";    //High or Low temp
-    private String   aps_mode;
-
-    @Ignore
-    public Date     timestamp        = new Date();
+    private String      id                  = UUID.randomUUID().toString();
+    private Double      rate                = 0D;    //Temp Basal Rate for (U/hr) mode
+    private Integer     duration            = 0;     //Duration of Temp
+    private Date        start_time;                 //When the Temp Basal started
+    private String      basal_adjustemnt    = "";    //High or Low temp
+    private String      aps_mode;
+    private Date        timestamp           = new Date();
 
     public static TempBasal getTempBasalByID(String uuid, Realm realm) {
         RealmResults<TempBasal> results = realm.where(TempBasal.class)

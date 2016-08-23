@@ -43,7 +43,7 @@ public class IOB {
                 for (int j = 0; j < tempBolusCount.intValue(); j++) {
                     Bolus tempBolus = new Bolus();
                     tempBolus.setValue      (tempBolusSize);
-                    tempBolus.setTimestamp  (new Date(temp.timestamp.getTime() + j * tempBolusSpacing.longValue() * 60 * 1000));
+                    tempBolus.setTimestamp  (new Date(temp.getStart_time().getTime() + j * tempBolusSpacing.longValue() * 60 * 1000));
                     tempBolus.setType       ("bolus");
                     tempBoluses.add(tempBolus);
                 }
