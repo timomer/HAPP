@@ -1,12 +1,15 @@
 package com.hypodiabetic.happ;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -17,8 +20,6 @@ import com.hypodiabetic.happ.Objects.RealmManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -96,9 +97,25 @@ public class Integration_Report extends AppCompatActivity {
         realmManager.closeRealm();
     }
 
+    public class mySimpleAdapterIntegration extends SimpleAdapter {
+        public mySimpleAdapterIntegration(Context context, List<HashMap<String, String>> items, int resource, String[] from, int[] to) {
+            super(context, items, resource, from, to);
+        }
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+
+            //Shows Integration details image
+            ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
+            TextView integrationText    = (TextView) view.findViewById(R.id.integrationDetails);
+            integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationText.getText().toString()));
+
+            return view;
+        }
+    }
+
     public void reloadList(String intergartion, String happObject, int hoursOld){
         ArrayList<HashMap<String, String>> integrationList = new ArrayList<>();
-        Calendar integrationDate  = Calendar.getInstance();
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", getResources().getConfiguration().locale);
         List<Integration> integrations = Integration.getIntegrationsHoursOld(intergartion, happObject, hoursOld, realmManager.getRealm());
 
@@ -115,7 +132,7 @@ public class Integration_Report extends AppCompatActivity {
             }
         }
 
-        SimpleAdapter adapter = new SimpleAdapter(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
+        mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
                 new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails"},
                 new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails});
         integrationReportList.setAdapter(adapter);

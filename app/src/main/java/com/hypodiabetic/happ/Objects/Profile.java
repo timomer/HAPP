@@ -143,23 +143,23 @@ public class Profile {
 
     @Override
     public String toString(){
-        return "carbAbsorptionRate: "           + carbAbsorptionRate + "\n" +
-                " dia: "                        + dia + "\n" +
-                " current_basal: "              + current_basal + "\n" +
-                " cgm_source: "                 + cgm_source + "\n" +
-                " max_bg: "                     + max_bg + " mgdl" + "\n" +
-                " min_bg: "                     + min_bg + " mgdl" + "\n" +
-                " target_bg: "                  + target_bg + " mgdl" + "\n" +
-                " bg_units: "                   + tools.bgUnitsFormat() + "\n" +
-                " isf: "                        + isf + " mgdl" + "\n" +
-                " carbRatio: "                  + carbRatio + "\n" +
-                " pump_name: "                  + pump_name + "\n" +
-                " aps_mode: "                   + aps_mode + "\n" +
-                " temp_basal_notification: "    + temp_basal_notification + "\n" +
-                " send_bolus_allowed: "         + send_bolus_allowed + "\n" +
-                " SYSTEM BOLUS_ALLOWED: "       + UserPrefs.BOLUS_ALLOWED + "\n" +
-                " aps_loop: "                   + aps_loop + "\n" +
-                " aps_algorithm: "              + aps_algorithm;
+        return  " carbAbsorptionRate:   " + carbAbsorptionRate + "\n" +
+                " dia:                  " + dia + "\n" +
+                " current_basal:        " + current_basal + "\n" +
+                " cgm_source:           " + cgm_source + "\n" +
+                " max_bg:               " + max_bg + " mgdl" + "\n" +
+                " min_bg:               " + min_bg + " mgdl" + "\n" +
+                " target_bg:            " + target_bg + " mgdl" + "\n" +
+                " bg_units:             " + tools.bgUnitsFormat() + "\n" +
+                " isf:                  " + isf + " mgdl" + "\n" +
+                " carbRatio:            " + carbRatio + "\n" +
+                " pump_name:            " + pump_name + "\n" +
+                " aps_mode:             " + aps_mode + "\n" +
+                " temp_basal_notify:    " + temp_basal_notification + "\n" +
+                " send_bolus_allowed:   " + send_bolus_allowed + "\n" +
+                " SYSTEM_BOLUS_ALLOWED: " + UserPrefs.BOLUS_ALLOWED + "\n" +
+                " aps_loop:             " + aps_loop + "\n" +
+                " aps_algorithm:        " + aps_algorithm;
     }
 
 }

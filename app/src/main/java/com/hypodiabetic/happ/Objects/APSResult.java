@@ -238,19 +238,18 @@ public class APSResult extends RealmObject {
     @Override
     public String toString(){
         SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
-        return  "action:" + action + "\n" +
-                " reason:" + reason + "\n" +
-                " tempSuggested:" + tempSuggested + "\n" +
-                " eventualBG:" + eventualBG + "\n" +
-                " snoozeBG:" + snoozeBG + "\n" +
-                " timestamp:" + sdfDateTime.format(timestamp) + "\n" +
-                " rate:" + rate + "\n" +
-                " duration:" + duration + "\n" +
-                " basal_adjustemnt:" + basal_adjustemnt + "\n" +
-                " aps_algorithm:" + aps_algorithm + "\n" +
-                " aps_mode:" + aps_mode + "\n" +
-                " current_pump_basal:" + current_pump_basal + "\n" +
-                " aps_loop:" + aps_loop;
+        return  " timestamp:        " + sdfDateTime.format(timestamp) + "\n" +
+                " action:           " + action + "\n" +
+                " reason:           " + reason + "\n" +
+                " eventualBG:       " + eventualBG + "\n" +
+                " snoozeBG:         " + snoozeBG + "\n" +
+                " aps_algorithm:    " + aps_algorithm + "\n" +
+                " aps_mode:         " + aps_mode + "\n" +
+                " aps_loop:         " + aps_loop + "\n" +
+                " TBR_Suggested:    " + tempSuggested + "\n" +
+                " TBR_adjustment:   " + basal_adjustemnt + "\n" +
+                " TBR_rate:         " + rate + "\n" +
+                " TBR_duration:     " + duration;
     }
 }
 
