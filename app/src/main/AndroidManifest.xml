@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_LOGS" />
 
@@ -27,12 +27,7 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="AA_MODELS"
-            android:value="com.hypodiabetic.happ.Objects.Stats,
-                            com.hypodiabetic.happ.Objects.APSResult,
-                            com.hypodiabetic.happ.Objects.Treatments,
-                            com.hypodiabetic.happ.Objects.TempBasal,
-                            com.hypodiabetic.happ.Objects.Bg,
-                            com.hypodiabetic.happ.Objects.Integration" />
+            android:value="com.hypodiabetic.happ.Objects.Stats,                             com.hypodiabetic.happ.Objects.APSResult,                             com.hypodiabetic.happ.Objects.Treatments,                             com.hypodiabetic.happ.Objects.TempBasal,                             com.hypodiabetic.happ.Objects.Bg,                             com.hypodiabetic.happ.Objects.Integration" />
         <meta-data
             android:name="AA_DB_NAME"
             android:value="HAPP.db" />
@@ -46,27 +41,28 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".EnterTreatment"
-            android:label="@string/title_activity_enter_treatment"></activity>
+            android:label="@string/title_activity_enter_treatment" />
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".license_agreement"
-            android:label="@string/title_activity_license_agreement"></activity>
+            android:label="@string/title_activity_license_agreement" />
         <activity
             android:name=".Integration_Report"
             android:label="@string/title_activity_integration__report"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
 
         <service
             android:name=".services.BackgroundService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".services.APSService"
             android:exported="false" />
@@ -79,7 +75,7 @@
             android:exported="true"
             android:process=":treatment_service_process">
             <intent-filter>
-                <action android:name="com.hypodiabetic.happ.services.TreatmentService"></action>
+                <action android:name="com.hypodiabetic.happ.services.TreatmentService" />
             </intent-filter>
         </service>
 
@@ -100,6 +96,10 @@
             android:name="io.fabric.ApiKey"
             android:value="be254c8585dff3174ce74dd5e856b96909f9f8c1" />
 
+        <activity
+            android:name=".Profile_Editor"
+            android:label="@string/title_activity_profile__editor"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>
