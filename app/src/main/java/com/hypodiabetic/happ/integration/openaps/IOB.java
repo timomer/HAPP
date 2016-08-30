@@ -68,7 +68,7 @@ public class IOB {
         if (treatment.type.equals("Insulin") ) {                               //Im only ever passing Insulin, but anyway whatever
 
             Date bolusTime = new Date(treatment.datetime);                                          //Time the Insulin was taken
-            Double minAgo = (double)(time.getTime() - bolusTime.getTime()) /1000/60;                //Age in Mins of the treatment
+            Double minAgo = diaratio * (time.getTime() - bolusTime.getTime()) /1000/60;             //Age in Mins of the treatment
             Double iobContrib = 0D;
             Double activityContrib = 0D;
 
@@ -89,19 +89,13 @@ public class IOB {
                 returnValue.put("iobContrib", iobContrib);
                 if (activityContrib.isInfinite()) activityContrib = 0D;                             //*HAPP added*
                 returnValue.put("activityContrib", activityContrib);
-                returnValue.put("minsLeft", end-minAgo);                                            //mins left *HAPP added*
-                return returnValue;
-
             } catch (JSONException e) {
                 Crashlytics.logException(e);
                 e.printStackTrace();
-                return returnValue;
             }
+        }
 
-        }
-        else {
-            return returnValue;
-        }
+        return returnValue;
     }
 
     //gets the total IOB from multiple Treatments
