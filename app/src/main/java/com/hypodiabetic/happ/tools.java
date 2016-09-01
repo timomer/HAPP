@@ -502,6 +502,8 @@ public class tools {
             case "error":
             case "error_ack":
                 return R.drawable.alert_circle;
+            case "deleted":
+                return R.drawable.delete;
             default:
                 if (state.equals("")) {
                     return 0;

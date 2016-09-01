@@ -49,6 +49,7 @@ import com.hypodiabetic.happ.integration.IntegrationsManager;
 import com.hypodiabetic.happ.services.FiveMinService;
 
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -123,9 +124,9 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         todayTreatmentsFragmentObject   = new treatmentsListFragment();
         yestTreatmentsFragmentObject    = new treatmentsListFragment();
         activeTreatmentsFragmentObject  = new treatmentsListFragment();
-        Bundle bundleToday = new Bundle();
+        Bundle bundleToday  = new Bundle();
         bundleToday.putString("LOAD", "TODAY");
-        Bundle bundleYest = new Bundle();
+        Bundle bundleYest   = new Bundle();
         bundleYest.putString("LOAD", "YESTERDAY");
         Bundle bundleActive = new Bundle();
         bundleActive.putString("LOAD", "ACTIVE");
@@ -184,7 +185,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     public void manualSave(View view){
         Date treatmentDateTime = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyyHH:mm", getResources().getConfiguration().locale);
-        String treatmentDateTimeString;
 
         //gets the values the user has entered
         try {
@@ -608,8 +608,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
                 //Shows Integration details image
                 ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
-                TextView integrationText    = (TextView) view.findViewById(R.id.integrationDetails);
-                integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationText.getText().toString()));
+                TextView integrationState   = (TextView) view.findViewById(R.id.integrationState);
+                integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationState.getText().toString()));
 
                 return view;
             }
@@ -619,16 +619,12 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             treatmentsList          = new ArrayList<>();
             List<Bolus> boluses;
             List<Carb> carbs;
-            SimpleDateFormat sdfDate = new SimpleDateFormat("dd MMM", getResources().getConfiguration().locale);
             SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Calendar calDate        = Calendar.getInstance();
-            Calendar treatmentDate  = Calendar.getInstance();
             Calendar calYesterday   = Calendar.getInstance();
             calYesterday.add(Calendar.DAY_OF_YEAR, -1); // yesterday
             Profile profile = new Profile(new Date());
             Boolean lastCarb=false,lastInsulin=false;
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
             String toLoad="";
             Bundle bundle = this.getArguments();
@@ -838,7 +834,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                             Toast.makeText(parentsView.getContext(), "Treatment Deleted", Toast.LENGTH_SHORT).show();
                             break;
                         case 3: //Integration Details
-                            String intergrationType;
+                            String integrationType;
                             if (selectedListType.equals("bolus")) {
                                 integrationType="bolus_delivery";
                                 integrations = Integration.getIntegrationsFor(integrationType,bolus.getId(), realmManager.getRealm());
@@ -864,13 +860,14 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 integrationItem.put("integrationType",      integration.getType());
                                 integrationItem.put("integrationDateTime",  sdfDateTime.format(integration.getTimestamp()));
                                 integrationItem.put("integrationDetails",   integration.getDetails());
+                                integrationItem.put("integrationState",     integration.getState());
 
                                 integrationList.add(integrationItem);
                             }
 
                             mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
-                                    new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails"},
-                                    new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails});
+                                    new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails", "integrationState"},
+                                    new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails, R.id.integrationState});
                             integrationListView.setAdapter(adapter);
 
                             integrationListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){

@@ -126,6 +126,17 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
 
+            final Preference isf_profile = findPreference("isf_profile");
+            isf_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent start_isf_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    start_isf_profile.putExtra("PROFILE", "isf_profile");
+                    startActivity(start_isf_profile);
+                    return true;
+                }
+            });
+
 
             PackageManager manager = MainActivity.activity.getPackageManager();
             try {

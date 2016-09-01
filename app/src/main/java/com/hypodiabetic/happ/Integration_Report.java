@@ -107,8 +107,8 @@ public class Integration_Report extends AppCompatActivity {
 
             //Shows Integration details image
             ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
-            TextView integrationText    = (TextView) view.findViewById(R.id.integrationDetails);
-            integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationText.getText().toString()));
+            TextView integrationState   = (TextView) view.findViewById(R.id.integrationState);
+            integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationState.getText().toString()));
 
             return view;
         }
@@ -127,14 +127,15 @@ public class Integration_Report extends AppCompatActivity {
                 integrationItem.put("integrationType",      integration.getType());
                 integrationItem.put("integrationDateTime",  sdfDateTime.format(integration.getTimestamp()));
                 integrationItem.put("integrationDetails",   integration.getDetails());
+                integrationItem.put("integrationState",     integration.getState());
 
                 integrationList.add(integrationItem);
             }
         }
 
         mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
-                new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails"},
-                new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails});
+                new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails", "integrationState"},
+                new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails, R.id.integrationState});
         integrationReportList.setAdapter(adapter);
 
         integrationItemCount.setText("Count: " + integrationList.size());
@@ -168,7 +169,7 @@ public class Integration_Report extends AppCompatActivity {
                 integrationCreatedDetails.setText   ("Created: " + sdfDateTime.format(integration.getTimestamp()));
                 integrationUpdatedDetails.setText   ("Updated: " + sdfDateTime.format(integration.getDate_updated()));
                 integrationStateDetails.setText     ("State: " + integration.getState());
-                integrationActionDetails.setText    (integration.getAction());
+                integrationActionDetails.setText    ("Action: " + integration.getAction());
                 integrationWhatDetails.setText      (integration.getObjectSummary(realmManager.getRealm()));
                 integrationIDDetails.setText        ("Local ID: " + integration.getId());
                 integrationRemoteIDDetails.setText  ("Remote ID: " + integration.getRemote_id());

@@ -68,6 +68,11 @@
                 android:key="aps_profiles"
                 android:title="Profiles">
 
+                <EditTextPreference
+                    android:title="Insulin Sensitivity Factor"
+                    android:key="isf_profile"
+                    android:summary=""/>
+
                 <PreferenceScreen
                     android:title="Insulin Sensitivity Factor"
                     android:key="button_aps_isf_profile"

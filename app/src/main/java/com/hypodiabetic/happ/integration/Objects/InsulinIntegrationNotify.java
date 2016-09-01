@@ -66,7 +66,6 @@ public class InsulinIntegrationNotify {
 
         for (Integration integration : recentlyUpdated) {
             if (!integration.getState().equals("error") && !integration.getState().equals("error_ack")) {     //Deal with errors later
-                //ObjectToSync integrationWithDetails = new ObjectToSync(integration);
                 HashMap<String, String> detailListItem = new HashMap<String, String>();
 
                 if (!integration.getState().equals("delete_me")) {
@@ -101,7 +100,6 @@ public class InsulinIntegrationNotify {
 
         if (withErrors.size() > 0) foundError = true;
         for (Integration integrationWithError : withErrors) {
-            //ObjectToSync integrationWithDetails = new ObjectToSync(integrationWithError);
             HashMap<String, String> detailListItem = new HashMap<String, String>();
 
             if (!integrationWithError.getState().equals("deleted")) {

@@ -90,14 +90,15 @@ public class Bolus extends RealmObject {
 
         if (iobDetails.optDouble("iobContrib", 0) > 0) {                                    //Still active Insulin
             String isLeft = tools.formatDisplayInsulin(iobDetails.optDouble("iobContrib", 0), 2);
-            Date now = new Date();
-            Long calc = now.getTime() + (iobDetails.optLong("minsLeft", 0) * 60000);
-            Date finish = new Date(calc);
-            String timeLeft = tools.formatDisplayTimeLeft(new Date(), finish);
+            String timeLeft = calculateRemainingBolusTime(profile.dia);
             return isLeft + " " + timeLeft + " remaining";
         } else {                                                                            //Not active
             return "Not Active";
         }
+    }
+    private String calculateRemainingBolusTime(Double dia) {
+        Long endTime = this.timestamp.getTime() + (long) (dia * 60 * 60000);
+        return tools.formatDisplayTimeLeft(new Date(), new Date(endTime));
     }
 
     public static class sortByDateTimeOld2YoungOLD implements Comparator<Bolus> {
