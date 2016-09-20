@@ -66,11 +66,8 @@ public class Profile_Editor extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Date lastTime = timeSpans.get(timeSpans.size() -1).time;
-                if (!sdfTimeDisplay.format(lastTime).equals("12:30")) {
-                    TimeSpan timeSpan = new TimeSpan();
-                    timeSpan.time = getNextTimeSlot(lastTime);
-                    timeSpan.value = 0D;
-                    timeSpans.add(timeSpan);
+                if (!sdfTimeDisplay.format(lastTime).equals("23:30")) {
+                    timeSpans.add(getNextTimeSpan(lastTime));
 
                     adapter.notifyDataSetChanged();
                     adapter.notifyDataSetInvalidated();
@@ -119,7 +116,8 @@ public class Profile_Editor extends AppCompatActivity {
 
             TimeSpan timeSpan1 = new TimeSpan();
             try {
-                timeSpan1.time = sdfTimeDisplay.parse("00:00");
+                timeSpan1.time      = sdfTimeDisplay.parse("00:00");
+                timeSpan1.endTime   = sdfTimeDisplay.parse("00:00");
             }catch (ParseException e) {}
             timeSpan1.value =   0D;
             timeSpans.add(timeSpan1);
@@ -130,14 +128,19 @@ public class Profile_Editor extends AppCompatActivity {
     }
 
 
-    public Date getNextTimeSlot(Date time) {
+    public TimeSpan getNextTimeSpan(Date time) {
         //Add 30mins to this time to get next time slot
         //30 minutes * 60 seconds * 1000 milliseconds
-        return new Date(time.getTime() + 30 * 60 * 1000);
+        TimeSpan timeSpan   = new TimeSpan();
+        timeSpan.time       = new Date(time.getTime() + 30 * 60 * 1000);
+        timeSpan.endTime    = new Date(time.getTime() + 30 * 60 * 1000);
+        timeSpan.value      = 0D;
+        return timeSpan;
     }
 
     static class TimeSpan {
         Date time;
+        Date endTime;
         Double value;
     }
 
@@ -154,9 +157,11 @@ public class Profile_Editor extends AppCompatActivity {
 
         public class ViewHolder {
             protected EditText etTime;
+            protected TextView tvTimeUntil;
             protected EditText etValue;
             protected ImageView ivDelete;
             protected TextView tvUnits;
+            protected ImageView ivAdd;
 
         }
 
@@ -168,10 +173,12 @@ public class Profile_Editor extends AppCompatActivity {
                 LayoutInflater inflator = Context.getLayoutInflater();
                 v = inflator.inflate(R.layout.profile_editor_list_layout, null);
                 final ViewHolder viewHolder = new ViewHolder();
-                viewHolder.etTime   = (EditText) v.findViewById(R.id.profile_time);
-                viewHolder.etValue  = (EditText) v.findViewById(R.id.profile_value);
-                viewHolder.ivDelete = (ImageView) v.findViewById(R.id.profile_del);
-                viewHolder.tvUnits  = (TextView) v.findViewById(R.id.profile_value_unit);
+                viewHolder.etTime       = (EditText) v.findViewById(R.id.profile_time);
+                viewHolder.etValue      = (EditText) v.findViewById(R.id.profile_value);
+                viewHolder.ivDelete     = (ImageView) v.findViewById(R.id.profile_del);
+                viewHolder.tvUnits      = (TextView) v.findViewById(R.id.profile_value_unit);
+                viewHolder.ivAdd        = (ImageView) v.findViewById(R.id.profile_add);
+                viewHolder.tvTimeUntil  = (TextView) v.findViewById(R.id.profile_time_until);
 
                 viewHolder.etTime.addTextChangedListener(new CustomTextWatcher(viewHolder.etTime, rowItem));
                 viewHolder.etValue.addTextChangedListener(new CustomTextWatcher(viewHolder.etValue, rowItem));
@@ -181,6 +188,17 @@ public class Profile_Editor extends AppCompatActivity {
                     public void onClick(View v) {
                         //delete this row
                         timeSpans.remove((int) v.getTag());
+                        adapter.notifyDataSetChanged();
+                        adapter.notifyDataSetInvalidated();
+                    }
+                });
+                viewHolder.ivAdd.setTag(position);
+                viewHolder.ivAdd.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //Add 30min time slot
+                        Integer position    = (int) v.getTag();
+                        timeSpans.add(position + 1, getNextTimeSpan(timeSpans.get((int) v.getTag()).time));
                         adapter.notifyDataSetChanged();
                         adapter.notifyDataSetInvalidated();
                     }
@@ -198,11 +216,28 @@ public class Profile_Editor extends AppCompatActivity {
             }
 
             ViewHolder holder = (ViewHolder) v.getTag();
+            //Hide add button for last allowed time slot
+            if (sdfTimeDisplay.format(rowItem.time).equals("23:30")) {
+                holder.ivAdd.setVisibility(View.INVISIBLE);
+                holder.tvTimeUntil.setText("00:00");
+            }
+            //Hide remove button for first time slot
+            if (sdfTimeDisplay.format(rowItem.time).equals("00:00")) {
+                holder.ivDelete.setVisibility(View.INVISIBLE);
+            } else {
+                holder.ivDelete.setVisibility(View.VISIBLE);
+            }
 
             // set values
             holder.etTime.setText(sdfTimeDisplay.format(rowItem.time));
+            holder.tvTimeUntil.setText(sdfTimeDisplay.format(rowItem.endTime));
             holder.etValue.setText(rowItem.value.toString());
             holder.tvUnits.setText(profileUnit);
+
+            // Updates last time slot end time with this times value
+            if (timeSpans.size() > 1) {
+                timeSpans.get(timeSpans.size() - 1).endTime = rowItem.time;
+            }
 
             return v;
         }
