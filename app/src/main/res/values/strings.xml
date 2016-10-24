@@ -32,4 +32,10 @@
     <!-- profile editor -->
 
 
+    <!-- prefs -->
+    <string name="isf_profile">ISF Profile</string>
+    <string name="isf_profile_title">Insulin Sensitivity Factor</string>
+    <string name="isf_profile_summary">1U of Insulin will lower your Blood Glucose</string>
+
+
 </resources>

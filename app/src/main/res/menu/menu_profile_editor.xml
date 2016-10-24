@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".Profile_Editor">
+
+    <item
+        android:id="@+id/miSaveProfile"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Save"
+        app:showAsAction="always">
+    </item>
+
+    <item
+        android:id="@+id/miProfileSaveAs"
+        android:icon="@android:drawable/ic_menu_set_as"
+        app:showAsAction="ifRoom"
+        android:title="SaveAs"
+        android:visible="false">
+    </item>
+    <item
+        android:id="@+id/miOpenProfiles"
+        android:icon="@android:drawable/list_selector_background"
+        app:showAsAction="ifRoom"
+        android:title="Open Profiles"
+        android:visible="false">
+    </item>
+</menu>

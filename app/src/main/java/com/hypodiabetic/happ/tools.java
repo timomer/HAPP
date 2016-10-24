@@ -14,10 +14,12 @@ import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
 import android.util.Log;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.gson.Gson;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Profile;
@@ -37,6 +39,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -511,5 +515,55 @@ public class tools {
                     return R.drawable.alert_circle;
                 }
         }
+    }
+
+    //converts old 24h Profile to new Profile builder format
+    public static void convertOldProfile(String newProfile, SharedPreferences prefs){
+        String oldProfile="na", oldProfilePrefix="", newProfileArray="";
+        List<TimeSpan> profileTimeSpansList = new ArrayList<>();
+        List<String> profileArray = new ArrayList<>();
+
+        switch (newProfile){
+            case "isf_profile":
+                oldProfile          =   "button_aps_isf_profile";
+                oldProfilePrefix    =   "isf_";
+                newProfileArray     =   "isf_profiles_array";       //An array of ISF Profiles
+                break;
+        }
+
+        if (!oldProfile.equals("na") && !prefs.getString(oldProfile,"na").equals("na")){    //We have an old Profile to possibly migrate
+            if (prefs.getString(newProfile, "na").equals("na")) {                           //No new Profile, lets migrate the old one
+
+                SimpleDateFormat sdfTimeDisplay = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+                SharedPreferences.Editor editor = prefs.edit();
+                TimeSpan timeSpan;
+
+                for (Integer h = 0; h <= 23; h++) {
+                    timeSpan = new TimeSpan();
+                    try {
+                        timeSpan.time = sdfTimeDisplay.parse(h + ":00");
+                        timeSpan.endTime = sdfTimeDisplay.parse((h + 1) + ":00");
+                    } catch (ParseException e) {
+                    }
+                    timeSpan.value = stringToDouble(prefs.getString(oldProfilePrefix + h.toString(), "0"));
+                    profileTimeSpansList.add(timeSpan);
+                }
+
+                String profileJSON = new Gson().toJson(profileTimeSpansList);
+                profileArray.add(profileJSON);
+                String profileArrayJSON = new Gson().toJson(profileArray);
+                //editor.putString(newProfileArray, profileArrayJSON);    //Save the Array of Profiles, of witch we current have only the one migrated
+                Log.d(TAG, "convertOldProfile: profileArrayJSON for " + newProfileArray +" : " + profileArrayJSON);
+                //editor.putString(newProfile, "0");                      //Set to Profile 0
+                //editor.remove(oldProfile);                              //Deletes the old Profile
+                editor.commit();
+            }
+        }
+
+    }
+    private static class TimeSpan {
+        Date time;
+        Date endTime;
+        Double value;
     }
 }

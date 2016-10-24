@@ -1,7 +1,7 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,51 +13,46 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.base.Strings;
+import com.google.common.io.Resources;
+import com.google.common.primitives.Booleans;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 public class Profile_Editor extends AppCompatActivity {
 
     private static String TAG = "Profile_Editor";
     public String profileUnit;
-    public ListView profileList;
-    public List<TimeSpan> timeSpans;
+    public ListView profileListView;
+    public List<TimeSpan> timeSpansList;
     public CustomAdapter adapter;
     public SimpleDateFormat sdfTimeDisplay;
     public SimpleDateFormat sdfTimeFormat;
+    public String profile;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile__editor);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarProfileEditor);
         sdfTimeDisplay = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         sdfTimeFormat = new SimpleDateFormat("HHmm", getResources().getConfiguration().locale);
 
@@ -65,9 +60,9 @@ public class Profile_Editor extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Date lastTime = timeSpans.get(timeSpans.size() -1).time;
+                Date lastTime = timeSpansList.get(timeSpansList.size() -1).time;
                 if (!sdfTimeDisplay.format(lastTime).equals("23:30")) {
-                    timeSpans.add(getNextTimeSpan(lastTime));
+                    timeSpansList.add(getNextTimeSpan(lastTime));
 
                     adapter.notifyDataSetChanged();
                     adapter.notifyDataSetInvalidated();
@@ -75,19 +70,18 @@ public class Profile_Editor extends AppCompatActivity {
             }
         });
 
-        profileList = (ListView) findViewById(R.id.profile_list);
+        profileListView = (ListView) findViewById(R.id.profile_list);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            String profile = extras.getString("PROFILE");
+            profile = extras.getString("PROFILE");
 
             if (profile != null) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-                timeSpans = new Gson().fromJson(prefs.getString(profile, ""), new TypeToken<List<TimeSpan>>() {}.getType());
-                if (timeSpans == null) timeSpans = new ArrayList<>();
+
                 switch (profile) {
                     case "isf_profile":
-                        toolbar.setTitle("ISF Profile");
+                        toolbar.setTitle(R.string.isf_profile);
+                        toolbar.setSubtitle(R.string.isf_profile_summary);
                         profileUnit = tools.bgUnitsFormat();
 
                         break;
@@ -96,6 +90,11 @@ public class Profile_Editor extends AppCompatActivity {
                         this.finish();
                 }
 
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+                tools.convertOldProfile(profile, prefs);
+                String prefsProfile = prefs.getString(profile, "");
+                timeSpansList = new Gson().fromJson(prefsProfile, new TypeToken<List<TimeSpan>>() {}.getType());
+                if (timeSpansList == null) timeSpansList = new ArrayList<>();
                 setProfile();
 
             } else {
@@ -106,12 +105,47 @@ public class Profile_Editor extends AppCompatActivity {
             Log.e(TAG, "No profile Extra passed, not sure what profile to load");
             this.finish();
         }
+
+        setSupportActionBar(toolbar);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_profile_editor, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.miSaveProfile:
+                String profileJSON = new Gson().toJson(timeSpansList);
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(profile, profileJSON);
+                editor.commit();
+
+                Log.d(TAG, "onOptionsItemSelected: Profile: " + profile + " Changes Saved");
+
+                Intent intentHome = new Intent(MainApp.instance(), MainActivity.class);
+                intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                this.getApplicationContext().startActivity(intentHome);
+                return true;
+            case R.id.miProfileSaveAs:
+
+                return true;
+            case R.id.miOpenProfiles:
+
+                return true;
+            default:
+                return true;
+        }
     }
 
     public void setProfile() {
 
         //populate the profile list with data
-        if (timeSpans.isEmpty()) {
+        if (timeSpansList.isEmpty()) {
             //no profile data saved, add empty time span
 
             TimeSpan timeSpan1 = new TimeSpan();
@@ -120,11 +154,11 @@ public class Profile_Editor extends AppCompatActivity {
                 timeSpan1.endTime   = sdfTimeDisplay.parse("00:00");
             }catch (ParseException e) {}
             timeSpan1.value =   0D;
-            timeSpans.add(timeSpan1);
+            timeSpansList.add(timeSpan1);
         }
 
-        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpans);
-        profileList.setAdapter(adapter);
+        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
+        profileListView.setAdapter(adapter);
     }
 
 
@@ -187,20 +221,62 @@ public class Profile_Editor extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         //delete this row
-                        timeSpans.remove((int) v.getTag());
+                        Log.d(TAG, "Deleting row: " + v.getTag());
+                        timeSpansList.remove((int) v.getTag());
                         adapter.notifyDataSetChanged();
                         adapter.notifyDataSetInvalidated();
+
+                        //Destroy and recreate the adapter as this refreshes the listview and updates view Tags with correct locations
+                        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
+                        profileListView.setAdapter(adapter);
                     }
                 });
                 viewHolder.ivAdd.setTag(position);
                 viewHolder.ivAdd.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //Add 30min time slot
-                        Integer position    = (int) v.getTag();
-                        timeSpans.add(position + 1, getNextTimeSpan(timeSpans.get((int) v.getTag()).time));
-                        adapter.notifyDataSetChanged();
-                        adapter.notifyDataSetInvalidated();
+                        //Add a 30min time slot if allowed
+                        TimeSpan nextTimeSpanToInsert = getNextTimeSpan(timeSpansList.get((int) v.getTag()).time);
+                        Integer nextPosition    = (int) v.getTag() + 1;
+                        Date nextTime = new Date();
+
+                        //Get the next TimeSpan start date in the list, if any
+                        if ((int) v.getTag() == (timeSpansList.size() -1)){
+                            //Last item in the list, there is no next time
+                            try {
+                                nextTime = sdfTimeDisplay.parse("00:00");
+                            }catch (ParseException e) {}
+                        } else {
+                            //Grab the next time in the list
+                            nextTime = timeSpansList.get(nextPosition).time;
+                        }
+
+                        //Are we allowed an additional TimeSpan between this and the next one?
+                        Boolean spaceForNewTimeSpan = true;
+                        if (nextTimeSpanToInsert.time.equals(nextTime)){
+                            //Nope, no more TimeSpans allowed
+                            spaceForNewTimeSpan = false;
+                            Log.d(TAG, "cannot fit additional TimeSpan");
+                            Snackbar.make(v,"Cannot add additonal 30mins between this and next time slot",Snackbar.LENGTH_LONG).show();
+                        } else {
+                            //We have a next TimeSpan that is allowed, sets its date to this TimeSpans end date
+                            nextTimeSpanToInsert.endTime = nextTime;
+                        }
+
+                        if (spaceForNewTimeSpan){
+                            //Additional TimeSpan allowed
+                            Log.d(TAG, "Adding row: " + nextPosition);
+                            timeSpansList.add(nextPosition, nextTimeSpanToInsert);
+                            adapter.notifyDataSetChanged();
+                            adapter.notifyDataSetInvalidated();
+
+                            //Tell last TimeSlot its new end date
+                            timeSpansList.get(nextPosition - 1).endTime = nextTimeSpanToInsert.time;
+
+                            //Destroy and recreate the adapter as this refreshes the listview and updates view Tags with correct locations
+                            adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
+                            profileListView.setAdapter(adapter);
+                        }
                     }
                 });
 
@@ -235,8 +311,8 @@ public class Profile_Editor extends AppCompatActivity {
             holder.tvUnits.setText(profileUnit);
 
             // Updates last time slot end time with this times value
-            if (timeSpans.size() > 1) {
-                timeSpans.get(timeSpans.size() - 1).endTime = rowItem.time;
+            if (timeSpansList.size() > 1) {
+                timeSpansList.get(timeSpansList.size() - 1).endTime = rowItem.time;
             }
 
             return v;
@@ -268,6 +344,7 @@ public class Profile_Editor extends AppCompatActivity {
                     item.value = Double.parseDouble(text);
                 }
             }
+            //Log.d(TAG, "afterTextChanged: " + profileListView.);
         }
 
         @Override
