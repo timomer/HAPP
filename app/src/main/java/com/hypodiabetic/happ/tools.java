@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Profile;
@@ -517,11 +518,47 @@ public class tools {
         }
     }
 
+    public static List<TimeSpan> getActiveProfile(String profile, SharedPreferences prefs){
+        tools.convertOldProfile(profile, prefs);    //Converts any old profiles
+
+        ArrayList<ArrayList>  profileDetailsArray = new Gson().fromJson(prefs.getString(profile, ""),new TypeToken<List<ArrayList>>() {}.getType() );
+        int activeProfileIndex=0;
+        for(int index = 0; index < profileDetailsArray.size(); index++){
+            if (profileDetailsArray.get(index).get(1).equals("active")) activeProfileIndex = index;
+        }
+        return getProfile(profile, activeProfileIndex, prefs);
+    }
+    public static List<TimeSpan> getProfile(String profile, int index, SharedPreferences prefs){
+        String profileArrayName="";
+        List<String> profileArray;
+        List<TimeSpan> timeSpansList;
+
+        tools.convertOldProfile(profile, prefs);    //Converts any old profiles
+
+        switch (profile) {
+            case Constants.profile.ISF_PROFILE:
+                profileArrayName    =   "isf_profiles_array";
+
+                break;
+            default:
+                Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
+        }
+
+        String profileArrayJSON = prefs.getString(profileArrayName,"");                                             //RAW array of Profiles JSON
+        profileArray            = new Gson().fromJson(profileArrayJSON,new TypeToken<List<String>>() {}.getType() );//The array of Profiles
+        String profileJSON      = profileArray.get(index);                                                          //Raw Profile JSON
+        timeSpansList           = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType());   //The Profile itself
+        if (timeSpansList == null) timeSpansList = new ArrayList<>();
+
+        return timeSpansList;
+    }
+
     //converts old 24h Profile to new Profile builder format
-    public static void convertOldProfile(String newProfile, SharedPreferences prefs){
-        String oldProfile="na", oldProfilePrefix="", newProfileArray="";
+    private static void convertOldProfile(String newProfile, SharedPreferences prefs){
+        String oldProfile="na", oldProfilePrefix="", newProfileArray="", newProfileDetails="";
         List<TimeSpan> profileTimeSpansList = new ArrayList<>();
         List<String> profileArray = new ArrayList<>();
+        ArrayList<ArrayList>  newProfileDetailsArray = new ArrayList<>();
 
         switch (newProfile){
             case "isf_profile":
@@ -531,39 +568,71 @@ public class tools {
                 break;
         }
 
-        if (!oldProfile.equals("na") && !prefs.getString(oldProfile,"na").equals("na")){    //We have an old Profile to possibly migrate
-            if (prefs.getString(newProfile, "na").equals("na")) {                           //No new Profile, lets migrate the old one
+        if (!oldProfile.equals("na")){                              //We have an old Profile to possibly migrate
+            if (prefs.getString(newProfile, "na").equals("na")) {   //No new Profile, lets migrate the old one
 
                 SimpleDateFormat sdfTimeDisplay = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
                 SharedPreferences.Editor editor = prefs.edit();
                 TimeSpan timeSpan;
 
                 for (Integer h = 0; h <= 23; h++) {
-                    timeSpan = new TimeSpan();
+
+                    String value = prefs.getString(oldProfilePrefix + h.toString(), "");
+                    Date startTime = new Date(), endTime = new Date();
                     try {
-                        timeSpan.time = sdfTimeDisplay.parse(h + ":00");
-                        timeSpan.endTime = sdfTimeDisplay.parse((h + 1) + ":00");
+                        startTime   = sdfTimeDisplay.parse(h + ":00");
+                        endTime     = sdfTimeDisplay.parse((h + 1) + ":00");
                     } catch (ParseException e) {
                     }
-                    timeSpan.value = stringToDouble(prefs.getString(oldProfilePrefix + h.toString(), "0"));
-                    profileTimeSpansList.add(timeSpan);
+
+                    if (value.equals("") && !h.equals(0)){
+                        //We have no value for this hour, extend previous hour added to cover this
+                        profileTimeSpansList.get(profileTimeSpansList.size()-1).endTime = endTime;
+                    } else {
+                        if (value.equals("") && h.equals(0)){
+                            //We have no value for the first hour, set 0
+                            value = "0";
+                        }
+                        timeSpan            = new TimeSpan();
+                        timeSpan.time       = startTime;
+                        timeSpan.endTime    = endTime;
+                        timeSpan.value      = stringToDouble(value);
+                        profileTimeSpansList.add(timeSpan);
+                    }
+
                 }
 
                 String profileJSON = new Gson().toJson(profileTimeSpansList);
                 profileArray.add(profileJSON);
                 String profileArrayJSON = new Gson().toJson(profileArray);
-                //editor.putString(newProfileArray, profileArrayJSON);    //Save the Array of Profiles, of witch we current have only the one migrated
+                ArrayList<String>  newProfileDetailsRow = new ArrayList<>();
+                newProfileDetailsRow.add("Migrated");   //Name of this Profile
+                newProfileDetailsRow.add("active");     //Mark this Profile as Active
+                newProfileDetailsArray.add(newProfileDetailsRow);
+                String profileDetailsJSON = new Gson().toJson(newProfileDetailsArray);
+                editor.putString(newProfileArray, profileArrayJSON);    //Save the Array of Profiles, of witch we current have only the one migrated
                 Log.d(TAG, "convertOldProfile: profileArrayJSON for " + newProfileArray +" : " + profileArrayJSON);
-                //editor.putString(newProfile, "0");                      //Set to Profile 0
-                //editor.remove(oldProfile);                              //Deletes the old Profile
+                editor.putString(newProfile, profileDetailsJSON);       //Save details of the Profiles
+                editor.remove(oldProfile);                              //Deletes the old Profile
                 editor.commit();
             }
+
         }
 
     }
-    private static class TimeSpan {
+    public static class TimeSpan {
         Date time;
         Date endTime;
         Double value;
+
+        public Double getValue(){
+            return value;
+        }
+        public Date getTime(){
+            return time;
+        }
+        public Date getEndTime(){
+            return endTime;
+        }
     }
 }

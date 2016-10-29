@@ -9,9 +9,12 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.UserPrefs;
 import com.hypodiabetic.happ.tools;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
+import com.hypodiabetic.happ.tools.TimeSpan;
 
 /**
  * Created by tim on 03/08/2015.
@@ -100,24 +103,26 @@ public class Profile {
         }
         return basalNow;
     }
+
+
     private Double getCurrent_isf(){
         Calendar calendarNow = GregorianCalendar.getInstance();
         calendarNow.setTime(date);
         Integer hourNow = calendarNow.get(Calendar.HOUR_OF_DAY);
-        Double isfNow;
+        Double isfNow=0D;
 
-        while (true) {
-            if (prefs.getString("isf_" + hourNow, "empty").equals("empty") || prefs.getString("isf_" + hourNow, "").equals("")) {
-                hourNow--;
-                if (hourNow < 0){                                                                   //Cannot find a Basal Rate for this time or previous time
-                    isfNow = 0D;
-                    break;
-                }
-            } else {
-                isfNow = Double.parseDouble(prefs.getString("isf_" + hourNow, "0"));                //Found a Basal rate for this time or a time before
-                break;
-            }
+        List<TimeSpan> isfProfile;
+        isfProfile = tools.getActiveProfile(Constants.profile.ISF_PROFILE,prefs);
+
+        for (TimeSpan isfTimeSpan : isfProfile) {
+            calendarNow.setTime(isfTimeSpan.getTime());
+            Integer hourStart = calendarNow.get(Calendar.HOUR_OF_DAY);
+            calendarNow.setTime(isfTimeSpan.getEndTime());
+            Integer hourEnd = calendarNow.get(Calendar.HOUR_OF_DAY);
+
+            if (hourStart >= hourNow && hourEnd <= hourNow) isfNow = isfTimeSpan.getValue();
         }
+
         return isfNow;
     }
     private Integer getCurrent_carbratio(){

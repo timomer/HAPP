@@ -34,6 +34,11 @@ public class Constants {
     public static final String ARROW_SINGLE_UP = "\u2191";
     public static final String ARROW_FORTY_FIVE_UP = "\u2197";
 
+    //profiles names
+    public class profile{
+        public static final String ISF_PROFILE = "isf_profile";
+    }
+
     //Treatment Service
     public class treatmentService {
         //Data
