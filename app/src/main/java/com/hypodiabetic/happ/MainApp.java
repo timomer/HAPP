@@ -1,6 +1,9 @@
 package com.hypodiabetic.happ;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -25,6 +28,9 @@ public class MainApp extends Application {
                 .deleteRealmIfMigrationNeeded() // TODO: 03/08/2016 remove
                 .build();
         Realm.setDefaultConfiguration(realmConfiguration);
+
+
+        Migration.runMigrationCheck();
     }
 
     public static MainApp instance() {

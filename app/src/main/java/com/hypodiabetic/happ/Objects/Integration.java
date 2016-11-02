@@ -218,9 +218,9 @@ public class Integration extends RealmObject {
                 return tools.formatDisplayInsulin(bolus.getValue(),2) + " " + bolus.getType();
             case "temp_basal":
                 TempBasal tempBasal = TempBasal.getTempBasalByID(local_object_id, realm);
-                Pump pump = new Pump(new Date(), realm);
+                Pump pump = new Pump(new Profile(new Date()), realm);
                 pump.setNewTempBasal(null, tempBasal);
-                return tools.formatDisplayInsulin(tempBasal.getRate(),2) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "m duration";
+                return tools.formatDisplayInsulin(tempBasal.getRate(),2) + " (" + pump.getTempBasalPercent() + "%) " + tempBasal.getDuration() + "m duration";
             case "treatment_carbs":
                 Carb carb = Carb.getCarb(local_object_id, realm);
                 return tools.formatDisplayCarbs(carb.getValue());

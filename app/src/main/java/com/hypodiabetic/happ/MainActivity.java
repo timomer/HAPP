@@ -11,9 +11,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -38,6 +38,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +50,7 @@ import com.hypodiabetic.happ.Graphs.BgGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBBarGraph;
 import com.hypodiabetic.happ.Graphs.IOBCOBLineGraph;
 import com.hypodiabetic.happ.Objects.APSResult;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Stat;
@@ -68,6 +70,8 @@ import java.util.Date;
 
 import io.realm.Realm;
 import lecho.lib.hellocharts.gesture.ZoomType;
+import lecho.lib.hellocharts.model.ColumnChartData;
+import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.Viewport;
 import lecho.lib.hellocharts.view.ColumnChartView;
 import lecho.lib.hellocharts.view.LineChartView;
@@ -101,8 +105,9 @@ public class MainActivity extends AppCompatActivity {
     private Drawable tickWhite;
     private Drawable clockWhite;
 
-    private LineChartView chart;
-    private PreviewLineChartView previewChart;
+    private LineChartView bgChart;
+    private ProgressBar bgChartLoading;
+    private PreviewLineChartView bgPreviewChart;
     Viewport tempViewport = new Viewport();
     Viewport holdViewport = new Viewport();
     public float left;
@@ -154,7 +159,10 @@ public class MainActivity extends AppCompatActivity {
         // Create the adapter that will return a fragment for each of the 4 primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) this.findViewById(R.id.pager);
+        mViewPager      =   (ViewPager) this.findViewById(R.id.pager);
+        bgChart =   (LineChartView) findViewById(R.id.chart);
+        bgChartLoading = (ProgressBar) findViewById(R.id.bgChartLoading);
+        bgPreviewChart =   (PreviewLineChartView) findViewById(R.id.chart_preview);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         //Build Fragments
         openAPSFragmentObject       = new openAPSFragment();
@@ -229,11 +237,12 @@ public class MainActivity extends AppCompatActivity {
         };
         registerReceiver(refresh60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
 
+        Profile profile = new Profile(new Date());
         updateBGCharts();
         updateBGDetails();
         updateStats(null);
         updateAPSDetails(null);
-        IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());
+        IntegrationsManager.updatexDripWatchFace(realmManager.getRealm(), profile);
 
         //Checks if we have any Insulin Integration App errors we must warn the user about
         Notifications.newInsulinUpdate(realmManager.getRealm());
@@ -364,28 +373,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateBGCharts() {
-
-        bgGraph         =   new BgGraph(this, realmManager.getRealm());
-        chart           =   (LineChartView) findViewById(R.id.chart);
-        previewChart    =   (PreviewLineChartView) findViewById(R.id.chart_preview);
-        updateStuff     =   false;
-
-        chart.setZoomType(ZoomType.HORIZONTAL);
-        previewChart.setZoomType(ZoomType.HORIZONTAL);
-
-        chart.setLineChartData(bgGraph.lineData());
-        previewChart.setLineChartData(bgGraph.previewLineData());
-        updateStuff = true;
-
-        previewChart.setViewportCalculationEnabled(true);
-        chart.setViewportCalculationEnabled(true);
-        previewChart.setViewportChangeListener(new ViewportListener());
-        chart.setViewportChangeListener(new ChartViewPortListener());
-
-        setViewport();
-
-        Log.d(TAG, "bgGraph Updated");
+        new updateBGChartsInBackground().execute();
     }
+    private class updateBGChartsInBackground extends AsyncTask<ArrayList<LineChartData>, Void, ArrayList<LineChartData>> {
+
+        @Override
+        protected ArrayList<LineChartData> doInBackground(ArrayList<LineChartData>... arg0) {
+            Realm realm = new RealmManager().getRealm();
+            ArrayList<LineChartData> lineChartDataList = new ArrayList<>();
+            try {
+                bgGraph         =   new BgGraph(realm);
+                lineChartDataList.add(bgGraph.lineData());
+                lineChartDataList.add(bgGraph.previewLineData());
+            } finally {
+                realm.close();
+            }
+            return lineChartDataList;
+        }
+        @Override
+        protected void onPostExecute(ArrayList<LineChartData> result) {
+            //Write some code you want to execute on UI after doInBackground() completes
+            bgChartLoading.setVisibility(View.GONE);
+            bgChart.setVisibility(View.VISIBLE);
+
+            bgChart.setLineChartData(result.get(0));
+            bgPreviewChart.setLineChartData(result.get(1));
+            updateStuff = true;
+
+            //refreshes data and sets viewpoint
+            bgChart.setZoomType(ZoomType.HORIZONTAL);
+            bgPreviewChart.setZoomType(ZoomType.HORIZONTAL);
+            bgPreviewChart.setViewportCalculationEnabled(true);
+            bgChart.setViewportCalculationEnabled(true);
+            bgPreviewChart.setViewportChangeListener(new ViewportListener());
+            bgChart.setViewportChangeListener(new ChartViewPortListener());
+
+            setViewport();
+
+            Log.d(TAG, "bgGraph Updated");
+            return ;
+        }
+        @Override
+        protected void onPreExecute() {
+            //Write some code you want to execute on UI before doInBackground() starts
+
+            updateStuff     =   false;
+
+            bgChart.setVisibility(View.GONE);
+            bgChartLoading.setVisibility(View.VISIBLE);
+            return ;
+        }
+    }
+
 
     public void test(View view){
         //InsulinIntegrationNotify popup = new InsulinIntegrationNotify();
@@ -409,7 +448,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Insulin Integration App, try and connect
         if (!insulin_Integration_App.equals("")){
-            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST");
+            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST", new Profile(new Date()));
             insulinIntegrationApp.connectInsulinTreatmentApp();
             insulinIntegrationApp_status.setText("Connecting...");
             insulinIntegrationApp_icon.setBackground(clockWhite);
@@ -446,13 +485,13 @@ public class MainActivity extends AppCompatActivity {
         public void onViewportChanged(Viewport newViewport) {
             if (!updatingPreviewViewport) {
                 updatingChartViewport = true;
-                previewChart.setZoomType(ZoomType.HORIZONTAL);
-                previewChart.setCurrentViewport(newViewport);
+                bgPreviewChart.setZoomType(ZoomType.HORIZONTAL);
+                bgPreviewChart.setCurrentViewport(newViewport);
                 updatingChartViewport = false;
 
                 if (iobcobFragmentObject.getView() != null) {                                       //Fragment is loaded
                     LineChartView iobcobPastChart = (LineChartView) findViewById(R.id.iobcobPast);
-                    Viewport iobv = new Viewport(chart.getMaximumViewport());                       //Update the IOB COB Line Chart Viewport to stay inline with the preview
+                    Viewport iobv = new Viewport(bgChart.getMaximumViewport());                       //Update the IOB COB Line Chart Viewport to stay inline with the preview
                     iobv.left   = newViewport.left;
                     iobv.right  = newViewport.right;
                     iobv.top    = iobcobPastChart.getMaximumViewport().top;
@@ -462,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (basalvsTempBasalObject.getView() != null){
                     LineChartView bvbChart = (LineChartView) findViewById(R.id.basalvsTempBasal_LineChart);
-                    Viewport bvbv = new Viewport(chart.getMaximumViewport());
+                    Viewport bvbv = new Viewport(bgChart.getMaximumViewport());
                     bvbv.left   = newViewport.left;
                     bvbv.right  = newViewport.right;
                     bvbv.top    = bvbChart.getMaximumViewport().top;
@@ -478,8 +517,8 @@ public class MainActivity extends AppCompatActivity {
         public void onViewportChanged(Viewport newViewport) {
             if (!updatingChartViewport) {
                 updatingPreviewViewport = true;
-                chart.setZoomType(ZoomType.HORIZONTAL);
-                chart.setCurrentViewport(newViewport);
+                bgChart.setZoomType(ZoomType.HORIZONTAL);
+                bgChart.setCurrentViewport(newViewport);
                 tempViewport = newViewport;
                 updatingPreviewViewport = false;
 
@@ -496,7 +535,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (basalvsTempBasalObject.getView() != null){
                     LineChartView bvbChart = (LineChartView) findViewById(R.id.basalvsTempBasal_LineChart);
-                    Viewport bvbv = new Viewport(chart.getMaximumViewport());
+                    Viewport bvbv = new Viewport(bgChart.getMaximumViewport());
                     bvbv.left = newViewport.left;
                     bvbv.right = newViewport.right;
                     bvbv.top    = bvbChart.getMaximumViewport().top;
@@ -513,9 +552,9 @@ public class MainActivity extends AppCompatActivity {
     }
     public void setViewport() {
         if (tempViewport.left == 0.0 || holdViewport.left == 0.0 || holdViewport.right  >= (new Date().getTime())) {
-            previewChart.setCurrentViewport(bgGraph.advanceViewport(chart, previewChart));
+            bgPreviewChart.setCurrentViewport(bgGraph.advanceViewport(bgChart, bgPreviewChart));
         } else {
-            previewChart.setCurrentViewport(holdViewport);
+            bgPreviewChart.setCurrentViewport(holdViewport);
         }
     }
     public void updateBGDetails() {
@@ -587,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
             openAPSFragment.updateErr(errMsg);
             openAPSFragment.setRunAPSButton(true);
         }
-        Log.d(TAG, "Ran APS Update, had an error: " + errMsg);
+        Log.e(TAG, "Ran APS Update, had an error: " + errMsg);
     }
 
     public void updateAges(){
@@ -634,7 +673,7 @@ public class MainActivity extends AppCompatActivity {
 
             //Update IOB COB Active fragment Bar Chart
             Fragment iobcobActive = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":2");
-            if (iobcobActive != null) iobcobActiveFragment.updateChart(MainActivity.activity);
+            if (iobcobActive != null) iobcobActiveFragment.updateChart();
 
             //Update Basal Vs Temp Basal fragment Chart
             Fragment basalvstemp = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":3");
@@ -645,9 +684,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateRunningTemp(){
-        Pump pump = new Pump(new Date(), realmManager.getRealm());
+        Log.d(TAG, "updateRunningTemp: START");
+        Pump pump = new Pump(new Profile(new Date()), realmManager.getRealm());
         toolbar.setTitle(pump.displayBasalDesc(false));
         toolbar.setSubtitle(pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft());
+        Log.d(TAG, "updateRunningTemp: FINISH");
     }
 
     public void runAPS(View view){
@@ -849,50 +890,61 @@ public class MainActivity extends AppCompatActivity {
         static LineChartView iobcobPastChart;
         static PreviewLineChartView previewChart;
         static Viewport iobv;
-        static IOBCOBLineGraph iobcobLineGraph;
         static View rootView;
+        static ProgressBar iobcobPastLoading;
+        static IOBCOBLineGraph iobcobLineGraph;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
             iobcobPastChart         = (LineChartView) rootView.findViewById(R.id.iobcobPast);
             previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
+            iobcobPastLoading       = (ProgressBar) rootView.findViewById(R.id.iobcobPastLoading);
 
-            setupChart();
+            //setupChart();
+            updateChart();
             return rootView;
         }
 
-        public void setupChart(){
-            //Setup the chart and Viewpoint
-            iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realmManager.getRealm());
-
-            iobcobPastChart.setZoomType(ZoomType.HORIZONTAL);
-            iobcobPastChart.setViewportCalculationEnabled(false);
-
-            iobcobPastChart.setLineChartData(iobcobLineGraph.iobcobPastLineData());
-
-            iobv            = new Viewport(iobcobPastChart.getMaximumViewport());                   //Sets the min and max for Top and Bottom of the viewpoint
-            iobv.top        = Float.parseFloat(iobcobLineGraph.yCOBMax.toString());
-            iobv.bottom     = Float.parseFloat(iobcobLineGraph.yCOBMin.toString());
-            iobv.left       = previewChart.getCurrentViewport().left;
-            iobv.right      = previewChart.getCurrentViewport().right;
-            iobcobPastChart.setMaximumViewport(iobv);
-            iobcobPastChart.setCurrentViewport(iobv);
-
-        }
-
         public static void updateChart(){
-            if (iobcobPastChart != null) {
+            if (iobcobPastChart != null) new updateChartInBackground().execute();
+        }
+        private static class updateChartInBackground extends AsyncTask<LineChartData, Void, LineChartData> {
+            @Override
+            protected LineChartData doInBackground(LineChartData... arg0) {
+                Realm realm = new RealmManager().getRealm();
+                LineChartData lineChartData;
+                try {
+                    iobcobLineGraph = new IOBCOBLineGraph(realm);
+                    lineChartData   = iobcobLineGraph.iobcobPastLineData();
+                } finally {
+                    realm.close();
+                }
+                return lineChartData;
+            }
+            @Override
+            protected void onPostExecute(LineChartData result) {
+                //Write some code you want to execute on UI after doInBackground() completes
+                iobcobPastLoading.setVisibility(View.GONE);
+                iobcobPastChart.setVisibility(View.VISIBLE);
 
                 //refreshes data and sets viewpoint
-                iobcobLineGraph = new IOBCOBLineGraph(rootView.getContext(), realmManager.getRealm());
-                iobcobPastChart.setLineChartData(iobcobLineGraph.iobcobPastLineData());
-
+                iobcobPastChart.setLineChartData(result);
+                iobv            = new Viewport(iobcobPastChart.getMaximumViewport());                   //Sets the min and max for Top and Bottom of the viewpoint
+                iobv.top        = Float.parseFloat(iobcobLineGraph.yCOBMax.toString());
+                iobv.bottom     = Float.parseFloat(iobcobLineGraph.yCOBMin.toString());
                 iobv.left       = previewChart.getCurrentViewport().left;
                 iobv.right      = previewChart.getCurrentViewport().right;
                 iobcobPastChart.setMaximumViewport(iobv);
                 iobcobPastChart.setCurrentViewport(iobv);
-
+                return ;
+            }
+            @Override
+            protected void onPreExecute() {
+                //Write some code you want to execute on UI before doInBackground() starts
+                iobcobPastChart.setVisibility(View.GONE);
+                iobcobPastLoading.setVisibility(View.VISIBLE);
+                return ;
             }
         }
     }
@@ -901,30 +953,58 @@ public class MainActivity extends AppCompatActivity {
 
         static ColumnChartView iobcobChart;
         static View rootView;
+        static ProgressBar iobcobchartLoading;
+        static IOBCOBBarGraph iobcobBarGraph;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            rootView = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
-            iobcobChart = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
+            rootView                = inflater.inflate(R.layout.fragment_active_iobcob_barchart, container, false);
+            iobcobChart             = (ColumnChartView) rootView.findViewById(R.id.iobcobchart);
             iobcobChart.setViewportCalculationEnabled(false);
-            Viewport view = iobcobChart.getMaximumViewport();
+            iobcobchartLoading      = (ProgressBar) rootView.findViewById(R.id.iobcobchartLoading);
+            Viewport view           = iobcobChart.getMaximumViewport();
             view.top = 80;
             view.left = -1;
             view.right = 6;
             iobcobChart.setCurrentViewport(view);
 
-            updateChart(getActivity());
+            updateChart();
 
             return rootView;
         }
 
         //Updates Stats
-        public static void updateChart(Activity a){
-
-            if (iobcobChart != null) {
-                //reloads charts with Treatment data
-                IOBCOBBarGraph iobcobBarGraph = new IOBCOBBarGraph(rootView.getContext(), realmManager.getRealm());
-                iobcobChart.setColumnChartData(iobcobBarGraph.iobcobFutureChart());
+        public static void updateChart(){
+            //reloads charts with Treatment data
+            if (iobcobChart != null) new updateChartInBackground().execute();
+        }
+        private static class updateChartInBackground extends AsyncTask<ColumnChartData, Void, ColumnChartData> {
+            @Override
+            protected ColumnChartData doInBackground(ColumnChartData... arg0) {
+                Realm realm = new RealmManager().getRealm();
+                ColumnChartData columnChartData;
+                try {
+                    iobcobBarGraph  = new IOBCOBBarGraph(realm);
+                    columnChartData = iobcobBarGraph.iobcobFutureChart();
+                } finally {
+                    realm.close();
+                }
+                return columnChartData;
+            }
+            @Override
+            protected void onPostExecute(ColumnChartData result) {
+                //Write some code you want to execute on UI after doInBackground() completes
+                iobcobchartLoading.setVisibility(View.GONE);
+                iobcobChart.setVisibility(View.VISIBLE);
+                iobcobChart.setColumnChartData(result);
+                return ;
+            }
+            @Override
+            protected void onPreExecute() {
+                //Write some code you want to execute on UI before doInBackground() starts
+                iobcobChart.setVisibility(View.GONE);
+                iobcobchartLoading.setVisibility(View.VISIBLE);
+                return ;
             }
         }
     }
@@ -934,48 +1014,63 @@ public class MainActivity extends AppCompatActivity {
         static LineChartView basalvsTempBasalChart;
         static PreviewLineChartView previewChart;
         static Viewport iobv;
-        static BasalVSTempBasalGraph basalVSTempBasalGraph;
         static View rootView;
+        static ProgressBar basalvsTempBasalLoading;
+        static BasalVSTempBasalGraph basalVSTempBasalGraph;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             rootView = inflater.inflate(R.layout.fragment_basalvstempbasal_linechart, container, false);
             basalvsTempBasalChart   = (LineChartView) rootView.findViewById(R.id.basalvsTempBasal_LineChart);
             previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
+            basalvsTempBasalLoading = (ProgressBar) rootView.findViewById(R.id.basalvsTempBasalLoading);
 
-            setupChart();
+            //setupChart();
+            updateChart();
 
             return rootView;
         }
 
-        public void setupChart(){
-            basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realmManager.getRealm());
-
-            basalvsTempBasalChart.setZoomType(ZoomType.HORIZONTAL);
-            basalvsTempBasalChart.setViewportCalculationEnabled(false);
-
-            basalvsTempBasalChart.setLineChartData(basalVSTempBasalGraph.basalvsTempBasalData());
-
-            iobv            = new Viewport(basalvsTempBasalChart.getMaximumViewport());             //Sets the min and max for Top and Bottom of the viewpoint
-            iobv.top        = basalVSTempBasalGraph.maxBasal.floatValue();
-            iobv.bottom     = -(basalVSTempBasalGraph.maxBasal.floatValue() - 1);
-            iobv.left       = previewChart.getCurrentViewport().left;
-            iobv.right      = previewChart.getCurrentViewport().right;
-            basalvsTempBasalChart.setMaximumViewport(iobv);
-            basalvsTempBasalChart.setCurrentViewport(iobv);
-
-        }
-
         //Updates Stats
         public static void updateChart(){
-            if (basalvsTempBasalChart != null) {
-                basalVSTempBasalGraph = new BasalVSTempBasalGraph(rootView.getContext(), realmManager.getRealm());
-                basalvsTempBasalChart.setLineChartData(basalVSTempBasalGraph.basalvsTempBasalData());
+            if (basalvsTempBasalChart != null) new updateChartInBackground().execute();
+        }
+        private static class updateChartInBackground extends AsyncTask<LineChartData, Void, LineChartData> {
+            @Override
+            protected LineChartData doInBackground(LineChartData... arg0) {
+                Realm realm = new RealmManager().getRealm();
+                LineChartData lineChartData;
+                try {
+                    basalVSTempBasalGraph   = new BasalVSTempBasalGraph(realm);
+                    lineChartData           = basalVSTempBasalGraph.basalvsTempBasalData();
+                } finally {
+                    realm.close();
+                }
+                return lineChartData;
+            }
+            @Override
+            protected void onPostExecute(LineChartData result) {
+                //Write some code you want to execute on UI after doInBackground() completes
+                basalvsTempBasalLoading.setVisibility(View.GONE);
+                basalvsTempBasalChart.setVisibility(View.VISIBLE);
+                basalvsTempBasalChart.setLineChartData(result);
 
+                //Sets the min and max for Top and Bottom of the viewpoint
+                iobv            = new Viewport(basalvsTempBasalChart.getMaximumViewport());
+                iobv.top        = basalVSTempBasalGraph.maxBasal.floatValue();
+                iobv.bottom     = -(basalVSTempBasalGraph.maxBasal.floatValue() - 1);
                 iobv.left       = previewChart.getCurrentViewport().left;
                 iobv.right      = previewChart.getCurrentViewport().right;
                 basalvsTempBasalChart.setMaximumViewport(iobv);
                 basalvsTempBasalChart.setCurrentViewport(iobv);
+                return ;
+            }
+            @Override
+            protected void onPreExecute() {
+                //Write some code you want to execute on UI before doInBackground() starts
+                basalvsTempBasalChart.setVisibility(View.GONE);
+                basalvsTempBasalLoading.setVisibility(View.VISIBLE);
+                return ;
             }
         }
     }

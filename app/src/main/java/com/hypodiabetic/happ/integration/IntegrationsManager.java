@@ -38,23 +38,23 @@ public class IntegrationsManager {
     public static void syncIntegrations(Context c, Realm realm){
         Log.d(TAG, "Running Sync");
 
-        updatexDripWatchFace(realm);
+        Profile profile = new Profile(new Date());
+        updatexDripWatchFace(realm, profile);
 
         //Sends data from HAPP to Interactions
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-        Profile p = new Profile(new Date());
 
         //Local device based Integrations
         String pump_driver = prefs.getString("insulin_integration", "");
 
         //Insulin Integration App: Temp Basal if we are in closed loop
-        if (p.aps_mode.equals("closed") ){
-            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), pump_driver, "BASAL");
+        if (profile.aps_mode.equals("closed") ){
+            InsulinIntegrationApp insulinIntegrationApp_Basal = new InsulinIntegrationApp(MainApp.instance(), pump_driver, "BASAL", profile);
             insulinIntegrationApp_Basal.connectInsulinTreatmentApp();
         }
         //Insulin Integration App: Bolus if allowed
-        if (p.send_bolus_allowed){
-            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), pump_driver, "BOLUS");
+        if (profile.send_bolus_allowed){
+            InsulinIntegrationApp insulinIntegrationApp_Bolus = new InsulinIntegrationApp(MainApp.instance(), pump_driver, "BOLUS", profile);
             insulinIntegrationApp_Bolus.connectInsulinTreatmentApp();
         }
 
@@ -223,11 +223,11 @@ public class IntegrationsManager {
         Notifications.newInsulinUpdate(realm);
     }
 
-    public static void updatexDripWatchFace(Realm realm){
+    public static void updatexDripWatchFace(Realm realm, Profile profile){
         SharedPreferences prefs =   PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("xdrip_wf_integration", false)) {
-            Pump pump = new Pump(new Date(), realm);
+            Pump pump = new Pump(profile, realm);
             Stat stat = Stat.last(realm);
             String statSummary = pump.displayBasalDesc(true) + pump.displayCurrentBasal(true);
             if (stat != null){

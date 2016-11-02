@@ -186,7 +186,7 @@ public class Bg extends RealmObject {
     //   DataMap dataMap = new DataMap();
     //    dataMap.putString("sgvString", unitized_string());
     //    dataMap.putString("slopeArrow", slopeArrow());
-    //    dataMap.putDouble("timestamp", datetime.getTime());
+    //    dataMap.putDouble("timestamp", datetime.getStartTime());
     //    dataMap.putString("delta", unitizedDeltaString());
     //    dataMap.putString("battery", battery);
     //    dataMap.putLong("sgvLevel", sgvLevel(prefs));

@@ -23,6 +23,7 @@ import io.realm.Realm;
  */
 public class cob {
 
+    private static final String TAG = "cob";
 
     //var cob = {
     //        name: 'cob'
@@ -34,6 +35,8 @@ public class cob {
 
     //main function
     public static JSONObject cobTotal(List<Carb> carbs, Profile profileNow, Date timeNow, Realm realm) {
+        Log.d(TAG, "cobTotal: START");
+        
         //Var treatments        - Array of Insulin and Carb treatments over X time period
 
         //Collections.reverse(Arrays.asList(treatments));                                             //Sort the Treatments from oldest to newest **we do this before calling this function, dont do it again**
@@ -41,7 +44,7 @@ public class cob {
         Double totalCOB = 0D;
 
         //Calendar newCalendar = Calendar.getInstance();
-        //Date timeNow = newCalendar.getTime();
+        //Date timeNow = newCalendar.getStartTime();
 
         Integer isDecaying = 0;
         Date lastDecayedBy = new Date();
@@ -76,7 +79,7 @@ public class cob {
                                 }
                                 Double avgActivity = (actStart + actEnd) / 2;
 
-                                Double delayedCarbs = avgActivity * liverSensRatio * profileNow.isf / profileNow.carbRatio; //Works out amount of crabs delayed!? // TODO: 27/08/2015
+                                Double delayedCarbs = avgActivity * liverSensRatio * profileNow.getISF() / profileNow.getCarbRatio(); //Works out amount of crabs delayed!? // TODO: 27/08/2015
                                 Double delayMinutes = (double)(Math.round(delayedCarbs / profileNow.carbAbsorptionRate * 60));
 
                                 if (delayMinutes > 0) {
@@ -86,8 +89,8 @@ public class cob {
                                     } catch (JSONException e){
                                         Toast.makeText(MainApp.instance(), "Error getting COB decayedBy " + e.getMessage(), Toast.LENGTH_LONG).show();
                                     }
-                                    //Date decaysin_hr_date = new Date((cCalc.getLong("decayedBy") - timeNow.getTime()) / 1000 / 60 / 60);
-                                    //decaysin_hr = (decaysin_hr_date.getTime());
+                                    //Date decaysin_hr_date = new Date((cCalc.getLong("decayedBy") - timeNow.getStartTime()) / 1000 / 60 / 60);
+                                    //decaysin_hr = (decaysin_hr_date.getStartTime());
                                     decaysin_hr = (double)(delayed.getTime() - timeNow.getTime())  / 1000 / 60 / 60;
                                 }
                             }
@@ -114,7 +117,7 @@ public class cob {
             }
 
 
-        Double rawCarbImpact = isDecaying * profileNow.isf / profileNow.carbRatio * profileNow.carbAbsorptionRate / 60;
+        Double rawCarbImpact = isDecaying * profileNow.getISF() / profileNow.getCarbRatio() * profileNow.carbAbsorptionRate / 60;
         if (Double.isNaN(rawCarbImpact) || Double.isInfinite(rawCarbImpact)) rawCarbImpact = 0D;
         Double display = (double)Math.round(totalCOB * 10) / 10;
 
@@ -136,6 +139,7 @@ public class cob {
         }
 
         Log.d("DEBUG", "cobTotal: " + returnObject.toString());
+        Log.d(TAG, "cobTotal: FINISH");
         return returnObject;
     }
 

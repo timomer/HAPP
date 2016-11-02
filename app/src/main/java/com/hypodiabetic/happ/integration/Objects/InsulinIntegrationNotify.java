@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -24,6 +25,7 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Integration;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.R;
@@ -51,8 +53,11 @@ public class InsulinIntegrationNotify {
     String errorMsg;                                                                                //Summary String of error items
     public Boolean foundError;                                                                      //Where errors found?
     private Realm realm;
+    private Pump pump;
+    private static String TAG = "InsulinIntegrationNotify";
 
     public InsulinIntegrationNotify(Realm realm){
+        Log.d(TAG, "InsulinIntegrationNotify: START");
         this.realm              =   realm;
         detailList              =   new ArrayList<>();
         detailListErrorsOnly    =   new ArrayList<>();
@@ -61,6 +66,7 @@ public class InsulinIntegrationNotify {
         snackbarMsg             =   "";
         errorMsg                =   "";
         foundError              =   false;
+        pump                    =   new Pump(new Profile(new Date()), realm);
         SimpleDateFormat sdfDateTime    = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
         SimpleDateFormat sdfTime        = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
 
@@ -80,11 +86,10 @@ public class InsulinIntegrationNotify {
 
                         case "temp_basal":
                             TempBasal tempBasal = TempBasal.getTempBasalByID(integration.getLocal_object_id(), realm);
-                            Pump pump = new Pump(new Date(), realm);
                             pump.setNewTempBasal(null, tempBasal);
                             detailListItem.put("value", tools.formatDisplayBasal(tempBasal.getRate(), true));
-                            detailListItem.put("summary", "(" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins");
-                            snackbarMsg += integration.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins " + sdfTime.format(integration.getDate_updated()) + "\n";
+                            detailListItem.put("summary", "(" + pump.getTempBasalPercent() + "%) " + tempBasal.getDuration() + "mins");
+                            snackbarMsg += integration.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.getTempBasalPercent() + "%) " + tempBasal.getDuration() + "mins " + sdfTime.format(integration.getDate_updated()) + "\n";
                             break;
                     }
                     detailListItem.put("happObjectType",    integration.getLocal_object());
@@ -114,11 +119,10 @@ public class InsulinIntegrationNotify {
 
                     case "temp_basal":
                         TempBasal tempBasal = TempBasal.getTempBasalByID(integrationWithError.getLocal_object_id(), realm);
-                        Pump pump = new Pump(new Date(), realm);
                         pump.setNewTempBasal(null, tempBasal);
                         detailListItem.put("value", tools.formatDisplayBasal(tempBasal.getRate(), true));
-                        detailListItem.put("summary", "(" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins");
-                        errorMsg += integrationWithError.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.temp_basal_percent + "%) " + tempBasal.getDuration() + "mins\n";
+                        detailListItem.put("summary", "(" + pump.getTempBasalPercent() + "%) " + tempBasal.getDuration() + "mins");
+                        errorMsg += integrationWithError.getState().toUpperCase() + ": " + tools.formatDisplayBasal(tempBasal.getRate(), false) + " (" + pump.getTempBasalPercent() + "%) " + tempBasal.getDuration() + "mins\n";
                         break;
                 }
                 detailListItem.put("happObjectType",    integrationWithError.getLocal_object());
@@ -130,6 +134,7 @@ public class InsulinIntegrationNotify {
                 detailListErrorsOnly.add(detailListItem);
             }
         }
+        Log.d(TAG, "InsulinIntegrationNotify: FINISH");
     }
 
     public Snackbar getSnackbar(View v){

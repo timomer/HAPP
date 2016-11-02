@@ -1,6 +1,11 @@
 package com.hypodiabetic.happ.integration.openaps;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.TempBasal;
@@ -22,16 +27,20 @@ import io.realm.Realm;
  * source https://github.com/timomer/oref0/tree/master/lib/iob
  */
 public class IOB {
+    private static final String TAG = "IOB";
 
     //Gets a list of Insulin treatments, converts Temp Basal treatments to Bolus events, called from iobTotal below
-    public static List<Bolus> calcTempTreatments (Date time, Realm realm) {
-        List<Bolus> tempBoluses     = new ArrayList<>(Bolus.getBolusesBetween(new Date(time.getTime() - 8 * 60 * 60 * 1000), time, realm));              //last 8 hours of Insulin Bolus Treatments
-        List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(new Date(time.getTime() - 8 * 60 * 60 * 1000), time, realm);     //last 8 hours of Temp Basals
+    public static List<Bolus> calcTempTreatments (Date timeUntil, Realm realm, Double dia) {
+        Log.d(TAG, "calcTempTreatments: START");
+        //List<Bolus> tempBoluses     = new ArrayList<>(Bolus.getBolusesBetween(new Date(time.getStartTime() - 8 * 60 * 60 * 1000), time, realm));              //last 8 hours of Insulin Bolus Treatments
+        //List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(new Date(time.getStartTime() - 8 * 60 * 60 * 1000), time, realm);                          //last 8 hours of Temp Basals
+        List<Bolus> tempBoluses     = new ArrayList<>(Bolus.getBolusesBetween(new Date(timeUntil.getTime() - (int) Math.ceil(dia) * 60 * 60 * 1000), timeUntil, realm));              //last DIA hours of Insulin Bolus Treatments
+        List<TempBasal> tempHistory = TempBasal.getTempBasalsDated(new Date(timeUntil.getTime() - (int) Math.ceil(dia) * 60 * 60 * 1000), timeUntil, realm);                          //last DIA hours of Temp Basals
 
         Double tempBolusSize;
         for (TempBasal temp : tempHistory) {
             if (temp.getDuration() > 0) {
-                Double netBasalRate = temp.getRate() - new Profile(temp.getStart_time()).current_basal;       //*HAPP added* use the basal rate when this basal was active
+                Double netBasalRate = temp.getRate() - new Profile(temp.getStart_time()).getCurrentBasal();       //*HAPP added* use the basal rate when this basal was active
                 if (netBasalRate < 0) {
                     tempBolusSize = -0.05;
                 } else {
@@ -51,6 +60,7 @@ public class IOB {
         }
         if (!tempHistory.isEmpty()) Collections.sort(tempBoluses, new Bolus.sortByDateTimeOld2YoungOLD());
 
+        Log.d(TAG, "calcTempTreatments: FINISH, crunched " + tempHistory.size() + " TempBasal objects for time " + timeUntil);
         return tempBoluses;
     }
 
@@ -98,9 +108,9 @@ public class IOB {
     }
 
     //gets the total IOB from multiple Treatments
-    public static JSONObject iobTotal(Profile profile_data, Date time, Realm realm) {
+    public static JSONObject iobTotal(Profile profile_data, Date timeUntil, Realm realm) {
 
-        List<Bolus> boluses = calcTempTreatments(time, realm);
+        List<Bolus> boluses = calcTempTreatments(timeUntil, realm, profile_data.dia);
         JSONObject returnValue = new JSONObject();
 
         Double iob = 0D;
@@ -113,10 +123,10 @@ public class IOB {
 
                 //if (treatment.type == null) continue;                                             //bad treatment, missing data
 
-                if (bolus.getTimestamp().getTime() <= time.getTime()) {                             //Treatment is not in the future
+                if (bolus.getTimestamp().getTime() <= timeUntil.getTime()) {                             //Treatment is not in the future
 
                     Double dia = profile_data.dia;                                                  //How long Insulin stays active in your system
-                    JSONObject tIOB = iobCalc(bolus, time, dia);
+                    JSONObject tIOB = iobCalc(bolus, timeUntil, dia);
                     if (tIOB.has("iobContrib"))
                         iob += tIOB.getDouble("iobContrib");
                     if (tIOB.has("activityContrib"))
@@ -125,7 +135,7 @@ public class IOB {
                     if (bolus.getValue() >= 0.2) {
                         //use half the dia for double speed bolus snooze
                         if (!(bolus.getType().equals("correction"))) {                               //Do not use correction for Bolus Snooze
-                            JSONObject bIOB = iobCalc(bolus, time, dia / 2);
+                            JSONObject bIOB = iobCalc(bolus, timeUntil, dia / 2);
                             //console.log(treatment);
                             //console.log(bIOB);
                             if (bIOB.has("iobContrib"))
@@ -139,7 +149,7 @@ public class IOB {
             returnValue.put("iob", iob);                                                            //Total IOB
             returnValue.put("activity", activity);                                                  //Total Amount of insulin active at this time
             returnValue.put("bolusiob", bolusiob);                                                  //Total Bolus IOB DIA is twice as fast
-            returnValue.put("as_of", time.getTime());                                               //Date this request was made
+            returnValue.put("as_of", timeUntil.getTime());                                          //Date this request was made
             return returnValue;
 
         } catch (JSONException e) {

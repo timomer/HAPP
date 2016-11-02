@@ -26,8 +26,8 @@ import lecho.lib.hellocharts.view.Chart;
  */
 public class BgGraph extends CommonChartSupport {
 
-    public BgGraph(Context context, Realm realm) {
-        super(context, realm);
+    public BgGraph(Realm realm) {
+        super(realm);
     }
 
     private List<Bg> bgReadings = Bg.latestSince(start_time, realm);
@@ -97,7 +97,7 @@ public class BgGraph extends CommonChartSupport {
         if (eventualBG >= 400)  eventualBG = 400D;
         if (eventualBG < 0D)    eventualBG = 0D;
 
-        //openAPSPredictValue.add(new PointValue((float) (timeeNow.getTime() / fuzz), (float) Bg.last().sgv_double()));
+        //openAPSPredictValue.add(new PointValue((float) (timeeNow.getStartTime() / fuzz), (float) Bg.last().sgv_double()));
         openAPSPredictValue.add(new PointValue((float) (in15mins.getTime()), (float) unitized(snoozeBG.floatValue())));
         openAPSPredictValue.add(new PointValue((float) (in15mins.getTime()), (float) unitized(eventualBG.floatValue())));
     }
@@ -202,11 +202,11 @@ public class BgGraph extends CommonChartSupport {
 
     public Axis previewXAxis() {
         List<AxisValue> previewXaxisValues = new ArrayList<AxisValue>();
-        final java.text.DateFormat timeFormat = hourFormat();
-        timeFormat.setTimeZone(TimeZone.getDefault());
+        //final java.text.DateFormat timeFormat = hourFormat();
+        //timeFormat.setTimeZone(TimeZone.getDefault());
         for (int l = 0; l <= 26; l += hoursPreviewStep) {                                                  //Added 2 hours for future readings
             double timestamp = (endHour - (60000 * 60 * l));
-            previewXaxisValues.add(new AxisValue((long) (timestamp), (timeFormat.format(timestamp)).toCharArray()));
+            previewXaxisValues.add(new AxisValue((long) (timestamp), (sdfHour.format(timestamp)).toCharArray()));
         }
         Axis previewXaxis = new Axis();
         previewXaxis.setValues(previewXaxisValues);

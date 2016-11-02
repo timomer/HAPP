@@ -8,6 +8,8 @@ import com.hypodiabetic.happ.MainApp;
 import com.hypodiabetic.happ.tools;
 
 import java.util.Date;
+import java.util.List;
+import com.hypodiabetic.happ.tools.TimeSpan;
 
 /**
  * Created by Tim on 19/02/2016.
@@ -36,18 +38,17 @@ public class Safety {
 
     public Double getMaxBasal(Profile profile){
         Double maxSafeBasal = Math.min(max_basal, 3 * max_daily_basal);
-        maxSafeBasal = Math.min(maxSafeBasal, 4 * profile.current_basal);
+        maxSafeBasal = Math.min(maxSafeBasal, 4 * profile.getCurrentBasal());
         return maxSafeBasal;
     }
     private Double getMaxDailyBasal(){
         Double basalMax     = 0D;
-        Double basalFound;
-        for(int h=0; h<=12; h++) {
-            if (!prefs.getString("basal_" + h, "empty").equals("empty") && !prefs.getString("basal_" + h, "").equals("")) {
-                basalFound = tools.stringToDouble(prefs.getString("basal_" + h, "0"));
-                if (basalFound > basalMax) basalMax = basalFound;
-            }
+        List<TimeSpan> profileTimeSpanList = tools.getActiveProfile(Constants.profile.BASAL_PROFILE, prefs);
+
+        for (TimeSpan profileTimeSpan : profileTimeSpanList) {
+            if (profileTimeSpan.getValue() > basalMax) basalMax = profileTimeSpan.getValue();
         }
+
         return basalMax;
     }
 

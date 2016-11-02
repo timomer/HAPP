@@ -66,6 +66,8 @@ import io.realm.Realm;
 
 public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
+    private static final String TAG = "EnterTreatment";
+
     //Enter treatment fragments
     eSectionsPagerAdapter eSectionsPagerAdapter;                                                    //will provide fragments for each of the sections
     static ViewPager eViewPager;                                                                    //The {@link ViewPager} that will host the section contents.
@@ -616,6 +618,8 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         }
 
         public void loadTreatments(final View rootView){
+            Log.d(TAG, "loadTreatments: START");
+
             treatmentsList          = new ArrayList<>();
             List<Bolus> boluses;
             List<Carb> carbs;
@@ -739,6 +743,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             registerForContextMenu(list);   //Register popup menu when clicking a ListView item
 
             Log.d("DEBUG", "loadTreatments: " + treatmentsList.size());
+            Log.d(TAG, "loadTreatments: FINISH");
         }
 
         @Override

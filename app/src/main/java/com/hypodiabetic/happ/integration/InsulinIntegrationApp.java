@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.Notifications;
 import com.hypodiabetic.happ.Objects.Bolus;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Serializers.BolusSerializer;
 import com.hypodiabetic.happ.Objects.Integration;
@@ -40,6 +41,7 @@ public class InsulinIntegrationApp {
     public Context context;
     public String pump_driver;
     public String toSync;
+    public Profile profile;
     private static final String TAG = "InsulinIntegrationApp";
 
     //Service Connection to the pump_driver
@@ -69,10 +71,11 @@ public class InsulinIntegrationApp {
     };
 
 
-    public InsulinIntegrationApp(Context context, String pump_driver, String toSync) {
+    public InsulinIntegrationApp(Context context, String pump_driver, String toSync, Profile profile) {
         this.context                    = context;
         this.pump_driver                = pump_driver;
         this.toSync                     = toSync;
+        this.profile                    = profile;
     }
 
 
@@ -103,8 +106,10 @@ public class InsulinIntegrationApp {
         }
     }
 
-    public void sendTreatments(){
+    private void sendTreatments(){
         //Send any Bolus and TempBasal treatments waiting to be synced
+        Log.d(TAG, "sendTreatments: START");
+        
         RealmManager realmManager = new RealmManager();
         List<Integration> integrationsToSync    = new ArrayList<>();
         List<String> treatmentsToSync           = new ArrayList<>();
@@ -176,7 +181,7 @@ public class InsulinIntegrationApp {
         */
         if (!integrationsToSync.isEmpty()){
             String errorSending = "";
-            Pump pump = new Pump(new Date(), realmManager.getRealm());
+            Pump pump = new Pump(profile, realmManager.getRealm());
 
             Message msg = Message.obtain();
             Bundle bundle = new Bundle();
@@ -214,5 +219,7 @@ public class InsulinIntegrationApp {
         }
 
         realmManager.closeRealm();
+        Log.d(TAG, "sendTreatments: FINISH");
     }
+    
 }

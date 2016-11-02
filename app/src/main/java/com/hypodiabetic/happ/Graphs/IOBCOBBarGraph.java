@@ -1,6 +1,7 @@
 package com.hypodiabetic.happ.Graphs;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Objects.Stat;
@@ -21,12 +22,14 @@ import lecho.lib.hellocharts.util.ChartUtils;
  */
 public class IOBCOBBarGraph extends CommonChartSupport{
 
-    public IOBCOBBarGraph(Context context, Realm realm){super(context, realm); }
+    public IOBCOBBarGraph(Realm realm){super(realm); }
 
     private ColumnChartData columnData;
-    private List<Stat> statList = Stat.updateActiveBarChart(context, realm);
+    private List<Stat> statList = Stat.updateActiveBarChart(realm);
+    private static final String TAG = "IOBCOBLineGraph";
 
     public ColumnChartData iobcobFutureChart() {
+        Log.d(TAG, "iobcobFutureChart: START");
 
         if (!statList.isEmpty()) {
 
@@ -75,9 +78,11 @@ public class IOBCOBBarGraph extends CommonChartSupport{
             columnData.setAxisYRight(cobPastyAxis());
             columnData.setAxisXBottom(axisX);
 
+            Log.d(TAG, "iobcobFutureChart: FINISH");
             return columnData;
 
         } else{
+            Log.d(TAG, "iobcobFutureChart: FINISH EMPTY REPLY");
             return new ColumnChartData(); //empty
         }
     }

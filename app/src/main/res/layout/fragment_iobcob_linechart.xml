@@ -5,6 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity$iobcobFragment">
 
+    <ProgressBar
+        android:id="@+id/iobcobPastLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
     <lecho.lib.hellocharts.view.LineChartView
         android:id="@+id/iobcobPast"
         android:layout_width="match_parent"

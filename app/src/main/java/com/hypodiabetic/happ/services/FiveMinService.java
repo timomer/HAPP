@@ -34,7 +34,6 @@ public class FiveMinService extends IntentService {
 
     private static final String TAG = "FiveMinService";
     private Profile profile;
-    private Bundle bundle;
     private Date date;
     private RealmManager realmManager;
 
@@ -46,7 +45,6 @@ public class FiveMinService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "Service Started");
 
-        bundle              =   new Bundle();
         date                =   new Date();
         profile             =   new Profile(date);
         realmManager        =   new RealmManager();
@@ -54,7 +52,7 @@ public class FiveMinService extends IntentService {
         newStat();                                                                  //Save a new Stat Object
         checkTBRNotify();                                                           //checks if a Cancel TBR Notification is active and TBR is not running anymore
         IntegrationsManager.checkOldInsulinIntegration(realmManager.getRealm());    //Check if there are any old Insulin Integration requests waiting to be synced
-        IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());          //Updates xDrip Watch Face
+        IntegrationsManager.updatexDripWatchFace(realmManager.getRealm(), profile); //Updates xDrip Watch Face
 
         // TODO: 11/08/2016 Service appears to be killed after some hours by the system, we then lose CGM Receivers, etc.
         //Starts the service if its not running
@@ -66,7 +64,7 @@ public class FiveMinService extends IntentService {
 
     public void checkTBRNotify(){
         if (profile.temp_basal_notification){
-            Pump pump = new Pump(new Date(), realmManager.getRealm());
+            Pump pump = new Pump(profile, realmManager.getRealm());
             APSResult apsResult = APSResult.last(realmManager.getRealm());
             if (apsResult != null) {
                 if (!pump.temp_basal_active && !apsResult.getAccepted() && apsResult.checkIsCancelRequest()) {
@@ -91,7 +89,7 @@ public class FiveMinService extends IntentService {
             stat.setIob             (iobJSONValue.getDouble("iob"));
             stat.setBolus_iob       (iobJSONValue.getDouble("bolusiob"));
             stat.setCob             (cobJSONValue.getDouble("display"));
-            stat.setBasal           (profile.current_basal);
+            stat.setBasal           (profile.getCurrentBasal());
             stat.setTemp_basal      (currentTempBasal.getRate());
             stat.setTemp_basal_type (currentTempBasal.getBasal_adjustemnt());
 
@@ -122,7 +120,7 @@ public class FiveMinService extends IntentService {
                 }
 
                 //send results to xDrip WF
-                IntegrationsManager.updatexDripWatchFace(realmManager.getRealm());
+                IntegrationsManager.updatexDripWatchFace(realmManager.getRealm(), profile);
 
                 Log.d(TAG, "New Stat Saved");
             }

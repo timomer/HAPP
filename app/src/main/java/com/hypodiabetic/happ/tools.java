@@ -8,13 +8,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
+import android.content.res.Resources;
 import android.os.Environment;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
 import android.util.Log;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +47,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import io.realm.Realm;
+
 
 /**
  * Created by Tim on 15/09/2015.
@@ -405,7 +404,7 @@ public class tools {
     }
     public static void showDebug(Realm realm){
         Profile profile = new Profile(new Date());
-        Pump pump = new Pump(new Date(), realm);
+        Pump pump = new Pump(profile, realm);
         APSResult apsResult = APSResult.last(realm);
         Stat stat = Stat.last(realm);
         Safety safety = new Safety();
@@ -518,108 +517,211 @@ public class tools {
         }
     }
 
-    public static List<TimeSpan> getActiveProfile(String profile, SharedPreferences prefs){
-        tools.convertOldProfile(profile, prefs);    //Converts any old profiles
+    public static String getActiveProfileName(String profile, SharedPreferences prefs, Context c){
+        Integer activeProfileIndex = -1;
+        String profileName;
+        String profileRawString = prefs.getString(profile, "");
 
-        ArrayList<ArrayList>  profileDetailsArray = new Gson().fromJson(prefs.getString(profile, ""),new TypeToken<List<ArrayList>>() {}.getType() );
-        int activeProfileIndex=0;
-        for(int index = 0; index < profileDetailsArray.size(); index++){
-            if (profileDetailsArray.get(index).get(1).equals("active")) activeProfileIndex = index;
+        if (profileRawString.equals("")){
+            //We have no profiles, return default name
+            profileName = c.getString(R.string.default_string);
+        } else {
+            ArrayList<ArrayList>  profileDetailsArray = new Gson().fromJson(profileRawString,new TypeToken<List<ArrayList>>() {}.getType() );
+            for (int index = 0; index < profileDetailsArray.size(); index++) {
+                if (profileDetailsArray.get(index).get(1).equals("active")) activeProfileIndex = index;
+            }
+
+            if (activeProfileIndex.equals(-1)){
+                //cannot find profile, return default
+                profileName = c.getString(R.string.default_string);
+            } else {
+                profileName = profileDetailsArray.get(activeProfileIndex).get(0).toString();
+            }
         }
-        return getProfile(profile, activeProfileIndex, prefs);
+        return profileName;
+    }
+    public static List<TimeSpan> getActiveProfile(String profile, SharedPreferences prefs){
+        Integer activeProfileIndex=-1;
+        List<TimeSpan> activeProfile;
+        String profileRawString = prefs.getString(profile, "");
+
+        if (profileRawString.equals("")){
+            //We do not have any profiles, return an empty one
+            activeProfile = newEmptyProfile();
+        } else {
+            ArrayList<ArrayList>  profileDetailsArray = new Gson().fromJson(profileRawString,new TypeToken<List<ArrayList>>() {}.getType() );
+            for(int index = 0; index < profileDetailsArray.size(); index++){
+                if (profileDetailsArray.get(index).get(1).equals("active")) activeProfileIndex = index;
+            }
+
+            if (activeProfileIndex.equals(-1)){
+                //Could not find the profile, return an empty one
+                activeProfile = newEmptyProfile();
+            } else {
+                activeProfile = getProfile(profile, activeProfileIndex, prefs);
+            }
+        }
+        return activeProfile;
+    }
+    public static int getTimeSlotsDefaultRange(String profile, SharedPreferences prefs){
+        //returns the default time slots range in mins
+        String profileDefaultTimeRangeName = "";
+
+        switch (profile) {
+            case Constants.profile.ISF_PROFILE:
+                profileDefaultTimeRangeName    =   Constants.profile.ISF_PROFILE_DEFAULT_TIME_RANGE;
+                break;
+            case Constants.profile.BASAL_PROFILE:
+                profileDefaultTimeRangeName    =   Constants.profile.BASAL_PROFILE_DEFAULT_TIME_RANGE;
+                break;
+            case Constants.profile.CARB_PROFILE:
+                profileDefaultTimeRangeName    =   Constants.profile.CARB_PROFILE_DEFAULT_TIME_RANGE;
+                break;
+        }
+
+        if (profileDefaultTimeRangeName.equals("")){
+            Log.e(TAG, "Unknown profile: " + profile + ", not sure what default time slot range to return. Returning 60mins");
+            return 60;
+        } else {
+            Integer profileDefaultTimeRange = prefs.getInt(profileDefaultTimeRangeName, 60);
+            return profileDefaultTimeRange;
+        }
+    }
+    public static void setTimeSlotsDefaultRange(String profile, Integer timeSlotRange, SharedPreferences prefs){
+        String profileDefaultTimeRangeName = "";
+
+        switch (profile) {
+            case Constants.profile.ISF_PROFILE:
+                profileDefaultTimeRangeName    =   Constants.profile.ISF_PROFILE_DEFAULT_TIME_RANGE;
+                break;
+            case Constants.profile.BASAL_PROFILE:
+                profileDefaultTimeRangeName    =   Constants.profile.BASAL_PROFILE_DEFAULT_TIME_RANGE;
+                break;
+            case Constants.profile.CARB_PROFILE:
+                profileDefaultTimeRangeName    =   Constants.profile.CARB_PROFILE_DEFAULT_TIME_RANGE;
+                break;
+        }
+
+        if (profileDefaultTimeRangeName.equals("")){
+            Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to set default time slot range for.");
+        } else {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt(profileDefaultTimeRangeName, timeSlotRange);
+            Log.d(TAG, "Saved default time slot for: " + profile + " " + timeSlotRange + "mins");
+            editor.apply();
+        }
     }
     public static List<TimeSpan> getProfile(String profile, int index, SharedPreferences prefs){
         String profileArrayName="";
         List<String> profileArray;
         List<TimeSpan> timeSpansList;
 
-        tools.convertOldProfile(profile, prefs);    //Converts any old profiles
-
         switch (profile) {
             case Constants.profile.ISF_PROFILE:
-                profileArrayName    =   "isf_profiles_array";
-
+                profileArrayName    =   Constants.profile.ISF_PROFILE_ARRAY;
                 break;
-            default:
-                Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
-        }
-
-        String profileArrayJSON = prefs.getString(profileArrayName,"");                                             //RAW array of Profiles JSON
-        profileArray            = new Gson().fromJson(profileArrayJSON,new TypeToken<List<String>>() {}.getType() );//The array of Profiles
-        String profileJSON      = profileArray.get(index);                                                          //Raw Profile JSON
-        timeSpansList           = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType());   //The Profile itself
-        if (timeSpansList == null) timeSpansList = new ArrayList<>();
-
-        return timeSpansList;
-    }
-
-    //converts old 24h Profile to new Profile builder format
-    private static void convertOldProfile(String newProfile, SharedPreferences prefs){
-        String oldProfile="na", oldProfilePrefix="", newProfileArray="", newProfileDetails="";
-        List<TimeSpan> profileTimeSpansList = new ArrayList<>();
-        List<String> profileArray = new ArrayList<>();
-        ArrayList<ArrayList>  newProfileDetailsArray = new ArrayList<>();
-
-        switch (newProfile){
-            case "isf_profile":
-                oldProfile          =   "button_aps_isf_profile";
-                oldProfilePrefix    =   "isf_";
-                newProfileArray     =   "isf_profiles_array";       //An array of ISF Profiles
+            case Constants.profile.BASAL_PROFILE:
+                profileArrayName    =   Constants.profile.BASAL_PROFILE_ARRAY;
+                break;
+            case Constants.profile.CARB_PROFILE:
+                profileArrayName    =   Constants.profile.CARB_PROFILE_ARRAY;
                 break;
         }
 
-        if (!oldProfile.equals("na")){                              //We have an old Profile to possibly migrate
-            if (prefs.getString(newProfile, "na").equals("na")) {   //No new Profile, lets migrate the old one
+        if (profileArrayName.equals("")){
+            Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
+            return newEmptyProfile();
 
-                SimpleDateFormat sdfTimeDisplay = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
-                SharedPreferences.Editor editor = prefs.edit();
-                TimeSpan timeSpan;
+        } else {
+            String profileArrayJSON = prefs.getString(profileArrayName, "");                                    //RAW array of Profiles JSON
 
-                for (Integer h = 0; h <= 23; h++) {
-
-                    String value = prefs.getString(oldProfilePrefix + h.toString(), "");
-                    Date startTime = new Date(), endTime = new Date();
-                    try {
-                        startTime   = sdfTimeDisplay.parse(h + ":00");
-                        endTime     = sdfTimeDisplay.parse((h + 1) + ":00");
-                    } catch (ParseException e) {
-                    }
-
-                    if (value.equals("") && !h.equals(0)){
-                        //We have no value for this hour, extend previous hour added to cover this
-                        profileTimeSpansList.get(profileTimeSpansList.size()-1).endTime = endTime;
-                    } else {
-                        if (value.equals("") && h.equals(0)){
-                            //We have no value for the first hour, set 0
-                            value = "0";
-                        }
-                        timeSpan            = new TimeSpan();
-                        timeSpan.time       = startTime;
-                        timeSpan.endTime    = endTime;
-                        timeSpan.value      = stringToDouble(value);
-                        profileTimeSpansList.add(timeSpan);
-                    }
-
-                }
-
-                String profileJSON = new Gson().toJson(profileTimeSpansList);
-                profileArray.add(profileJSON);
-                String profileArrayJSON = new Gson().toJson(profileArray);
-                ArrayList<String>  newProfileDetailsRow = new ArrayList<>();
-                newProfileDetailsRow.add("Migrated");   //Name of this Profile
-                newProfileDetailsRow.add("active");     //Mark this Profile as Active
-                newProfileDetailsArray.add(newProfileDetailsRow);
-                String profileDetailsJSON = new Gson().toJson(newProfileDetailsArray);
-                editor.putString(newProfileArray, profileArrayJSON);    //Save the Array of Profiles, of witch we current have only the one migrated
-                Log.d(TAG, "convertOldProfile: profileArrayJSON for " + newProfileArray +" : " + profileArrayJSON);
-                editor.putString(newProfile, profileDetailsJSON);       //Save details of the Profiles
-                editor.remove(oldProfile);                              //Deletes the old Profile
-                editor.commit();
+            if (profileArrayJSON.equals("")) {
+                //cannot find any profiles, return an empty one
+                timeSpansList = newEmptyProfile();
+            } else {
+                profileArray = new Gson().fromJson(profileArrayJSON, new TypeToken<List<String>>() {}.getType());   //The array of Profiles
+                String profileJSON = profileArray.get(index);                                                   //Raw Profile JSON
+                timeSpansList = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType()); //The Profile itself
             }
 
+            return timeSpansList;
+        }
+    }
+    public static void saveProfile(String profile, String profileName, List<TimeSpan> profileData, SharedPreferences prefs, Boolean makeActive){
+        ArrayList<ArrayList>  profileDetailsArray = new ArrayList<>();  //List of Profile details, row example(Name,State): Migrated, Active
+        List<String> profileArray = new ArrayList<>();                  //List of Profiles JSON, row example(Profile JSON):
+        String active="", profileArrayName="";
+        if (makeActive) active = "active";
+
+        switch (profile){
+            case Constants.profile.ISF_PROFILE:
+                profileArrayName    =   Constants.profile.ISF_PROFILE_ARRAY;
+                break;
+            case Constants.profile.BASAL_PROFILE:
+                profileArrayName    =   Constants.profile.BASAL_PROFILE_ARRAY;
+                break;
+            case Constants.profile.CARB_PROFILE:
+                profileArrayName    =   Constants.profile.CARB_PROFILE_ARRAY;
+                break;
         }
 
+        if (profileArrayName.equals("")){
+            Log.e(TAG, "Unknown profile: " + profile + ", cannot save");
+        } else {
+
+            String profileDetailsArrayJSON = prefs.getString(profile, "");
+            if (!profileDetailsArrayJSON.equals("")) {
+                profileDetailsArray = new Gson().fromJson(profileDetailsArrayJSON,new TypeToken<List<ArrayList>>() {}.getType() );
+            }
+            String profileArrayJSON = prefs.getString(profileArrayName, "");
+            if (!profileArrayJSON.equals("")) {
+                profileArray = new Gson().fromJson(profileArrayJSON, new TypeToken<List<String>>() {}.getType());
+            }
+
+            //Checks if this Profile already exists
+            Integer profileIndex = -1;
+            if (profileDetailsArray.size() != 0) {
+                for (Integer d = 0; d < profileDetailsArray.size(); d++) {
+                    if (profileDetailsArray.get(d).get(0).equals(profileName)) profileIndex = d;
+                }
+            }
+
+            if (profileIndex.equals(-1)) {
+                //No profile found, add as new profile
+                ArrayList<String> profileDetailsRow = new ArrayList<>();
+                profileDetailsRow.add(profileName);                             //Name of this Profile
+                profileDetailsRow.add(active);                                  //Mark this Profile as Active or not
+                profileDetailsArray.add(profileDetailsRow);                     //Details of this Profile added
+
+                profileArray.add(new Gson().toJson(profileData));               //JSON of this profile added
+            } else {
+                //We found a matching profile, update it
+                profileArray.set(profileIndex, new Gson().toJson(profileData));  //JSON for this profile updated
+            }
+
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(profile, new Gson().toJson(profileDetailsArray));      //Save details of the Profiles
+            Log.d(TAG, "saveProfile Details for: " + profile + " " + new Gson().toJson(profileDetailsArray));
+            editor.putString(profileArrayName, new Gson().toJson(profileArray));    //Save the Array of Profiles
+            Log.d(TAG, "saveProfile Array for: " + new Gson().toJson(profileArray));
+            editor.commit();
+        }
     }
+    private static List<TimeSpan> newEmptyProfile(){
+        SimpleDateFormat sdfTimeDisplay = new SimpleDateFormat("HH:mm", Resources.getSystem().getConfiguration().locale);
+        List<TimeSpan> profile = new ArrayList<>();
+        TimeSpan timeSpan = new TimeSpan();
+
+        try {
+            timeSpan.time      = sdfTimeDisplay.parse("00:00");
+            timeSpan.endTime   = sdfTimeDisplay.parse("23:59");
+        }catch (ParseException e) {}
+        timeSpan.value =   0D;
+        profile.add(timeSpan);
+
+        return profile;
+    }
+
     public static class TimeSpan {
         Date time;
         Date endTime;
@@ -628,7 +730,7 @@ public class tools {
         public Double getValue(){
             return value;
         }
-        public Date getTime(){
+        public Date getStartTime(){
             return time;
         }
         public Date getEndTime(){

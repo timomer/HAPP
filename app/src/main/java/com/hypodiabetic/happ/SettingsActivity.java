@@ -93,12 +93,6 @@ public class SettingsActivity extends PreferenceActivity {
             setPreferenceListener(findPreference("cgm_source"));
             findPreference("export").setSummary("Export path: " + Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOCUMENTS + "/HAPP_Settings");
 
-            for (int x=0; x<24; x++ ){
-                setPreferenceListener(findPreference("basal_" + x));
-                setPreferenceListener(findPreference("isf_" + x));
-                setPreferenceListener(findPreference("carbratio_" + x));
-            }
-
             Preference preference_export = findPreference("export");
             preference_export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -126,13 +120,33 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
 
-            final Preference isf_profile = findPreference("isf_profile");
+            final Preference isf_profile = findPreference(Constants.profile.ISF_PROFILE);
             isf_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent start_isf_profile = new Intent(MainApp.instance(), Profile_Editor.class);
-                    start_isf_profile.putExtra("PROFILE", "isf_profile");
-                    startActivity(start_isf_profile);
+                    Intent start_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    start_profile.putExtra("PROFILE", Constants.profile.ISF_PROFILE);
+                    startActivity(start_profile);
+                    return true;
+                }
+            });
+            final Preference carb_profile = findPreference(Constants.profile.CARB_PROFILE);
+            carb_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent start_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    start_profile.putExtra("PROFILE", Constants.profile.CARB_PROFILE);
+                    startActivity(start_profile);
+                    return true;
+                }
+            });
+            final Preference basal_profile = findPreference(Constants.profile.BASAL_PROFILE);
+            basal_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent start_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    start_profile.putExtra("PROFILE", Constants.profile.BASAL_PROFILE);
+                    startActivity(start_profile);
                     return true;
                 }
             });
@@ -160,23 +174,6 @@ public class SettingsActivity extends PreferenceActivity {
                 case "lowValue":
                 case "target_bg":
                     preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue),true,MainApp.instance()));
-                    break;
-                case "basal_":
-                case "carbratio_":
-                case "isf_":
-                    //24H Profile info, if preference has no value, get set summary to value of parent (this is what Profile code does)
-                    if (stringValue.equals("")) {
-                        preference.setSummary("<Inherits from parent, or defaults to 0>");
-                    } else {
-                        switch (preference.getKey()){
-                            case "basal_":
-                                preference.setSummary(tools.formatDisplayBasal(Double.parseDouble(stringValue), false));
-                            case "carbratio_":
-                                preference.setSummary(tools.formatDisplayCarbs(Double.parseDouble(stringValue)));
-                            case "isf_":
-                                preference.setSummary(tools.formatDisplayBG(Double.parseDouble(stringValue), true, MainApp.instance()));
-                        }
-                    }
                     break;
                 case "aps_loop":
                     int aps_loop_int = Integer.parseInt(stringValue);

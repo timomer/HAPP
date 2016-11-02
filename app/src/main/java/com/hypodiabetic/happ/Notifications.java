@@ -18,6 +18,7 @@ import android.view.View;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypodiabetic.happ.Objects.APSResult;
+import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Serializers.TempBasalSerializer;
@@ -85,9 +86,10 @@ public class Notifications {
 
     //New Temp has been suggested
     public static void newTemp(TempBasal basal, Context c, Realm realm){
-
+        Log.d(TAG, "newTemp: START");
+        
         String title, msg;
-        Pump pump = new Pump(new Date(), realm);
+        Pump pump = new Pump(new Profile(new Date()), realm);
         pump.setNewTempBasal(null, basal);
 
         if (basal.checkIsCancelRequest()){
@@ -132,18 +134,21 @@ public class Notifications {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
         notificationManager.notify(NEW_TEMP, notificationBuilder.build());
+
+        Log.d(TAG, "newTemp: FINISH");
     }
 
 
     //Summary Card
     public static void updateCard(Realm realm){
-
+        Log.d(TAG, "updateCard: START");
+        
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
         if (prefs.getBoolean("summary_notification", true)) {
 
             //TempBasal lastTempBasal = TempBasal.last();
-            Pump pump       = new Pump(new Date(), realm);
+            Pump pump       = new Pump(new Profile(new Date()), realm);
             String title    = pump.displayBasalDesc(false);
             String msg      = pump.displayCurrentBasal(false) + " " + pump.displayTempBasalMinsLeft();
 
@@ -179,6 +184,7 @@ public class Notifications {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
             notificationManager.notify(UPDATE_CARD, notificationBuilder.build());
         }
+        Log.d(TAG, "updateCard: FINISH");
     }
 
     //Update summary heads up card

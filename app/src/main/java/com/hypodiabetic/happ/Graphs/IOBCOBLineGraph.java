@@ -31,8 +31,8 @@ import lecho.lib.hellocharts.util.ChartUtils;
  */
 public class IOBCOBLineGraph extends CommonChartSupport{
 
-    public IOBCOBLineGraph(Context context, Realm realm){
-        super(context, realm);
+    public IOBCOBLineGraph(Realm realm){
+        super(realm);
     }
 
     JSONArray iobFutureValues = new JSONArray();
@@ -123,6 +123,7 @@ public class IOBCOBLineGraph extends CommonChartSupport{
 
 
     public void addfutureValues(){
+        Log.d(TAG, "addfutureValues: START");
         iobFutureValues = new JSONArray();
         cobFutureValues = new JSONArray();
         Date dateVar = new Date();
@@ -133,6 +134,7 @@ public class IOBCOBLineGraph extends CommonChartSupport{
         Profile profileAsOfNow = new Profile(dateVar);
 
         for (int v=0; v<=10; v++) {
+            Log.d(TAG, "addfutureValues: Getting stats for: " + dateVar);
 
             iobFutureValues.put(IOB.iobTotal(profileAsOfNow, dateVar, realm));                //get total IOB as of dateVar
             cobFutureValues.put(cob.cobTotal(carbs, profileAsOfNow, dateVar, realm));
@@ -140,6 +142,7 @@ public class IOBCOBLineGraph extends CommonChartSupport{
             dateVar = new Date(dateVar.getTime() + 10*60000);                   //Adds 10mins to dateVar
             profileAsOfNow = new Profile(dateVar);        //Gets Profile info for the new dateVar
         }
+        Log.d(TAG, "addfutureValues: FINISH");
     }
 
     public Line cobFutureLine(){

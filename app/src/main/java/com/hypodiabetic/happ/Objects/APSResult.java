@@ -137,7 +137,7 @@ public class APSResult extends RealmObject {
         setAps_algorithm        (p.aps_algorithm);
         setAps_mode             (p.aps_mode);
         setAps_loop             (p.aps_loop);
-        setCurrent_pump_basal   (p.current_basal);
+        setCurrent_pump_basal   (p.getCurrentBasal());
 
         if (apsJSON.has("rate")) {
             setTempSuggested    (true);

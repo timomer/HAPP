@@ -150,45 +150,47 @@ public class Stat extends RealmObject{
         //        .execute();
     }
 
-    public static List<Stat> updateActiveBarChart(Context c, Realm realm){
+    public static List<Stat> updateActiveBarChart(Realm realm){
+        Log.d(TAG, "updateActiveBarChart: START");
         List<Stat> statList = new ArrayList<Stat>();
-        Date dateVar = new Date();
-        Profile profileAsOfNow = new Profile(dateVar);
+        Date timeUntil = new Date();
+        Profile profileAsOfNow = new Profile(timeUntil);
 
-        for (int v=0; v<=5; v++) {
+        for (Integer v=0; v<=5; v++) {
+            Log.d(TAG, "updateActiveBarChart: Getting stats for: " + timeUntil);
             Stat stat = new Stat();
 
-            JSONObject iobJSONValue = IOB.iobTotal(profileAsOfNow, dateVar, realm);
-            JSONObject cobJSONValue = Carb.getCOB(profileAsOfNow, dateVar, realm);
+            JSONObject iobJSONValue = IOB.iobTotal(profileAsOfNow, timeUntil, realm);
+            JSONObject cobJSONValue = Carb.getCOB(profileAsOfNow, timeUntil, realm);
 
             try {
-                stat.timestamp  = dateVar;
+                stat.timestamp  = timeUntil;
+                if (v.equals(0)) {
+                    stat.when       = "now";
+                } else {
+                    stat.when       = (v*2) + "0mins";
+                }
                 stat.iob        = iobJSONValue.getDouble("iob");
                 stat.bolus_iob  = iobJSONValue.getDouble("bolusiob");
                 stat.cob        = cobJSONValue.getDouble("display");
-                stat.basal      = profileAsOfNow.current_basal;
-                stat.temp_basal = TempBasal.getCurrentActive(dateVar, realm).getRate();
-
-                if (v==0){
-                    stat.when   = "now";
-                } else {
-                    stat.when   = (v*2) + "0mins";
-                }
-
+                stat.basal      = profileAsOfNow.getCurrentBasal();
+                stat.temp_basal = TempBasal.getCurrentActive(timeUntil, realm).getRate();
                 statList.add(stat);
 
-                dateVar = new Date(dateVar.getTime() + 20*60000);                   //Adds 20mins to dateVar
-                profileAsOfNow = new Profile(dateVar);        //Gets Profile info for the new dateVar
+                timeUntil       = new Date(timeUntil.getTime() + 20*60000);             //Adds 20mins to until
+                profileAsOfNow  = new Profile(timeUntil);                               //Gets Profile info for the new time until
 
             } catch (Exception e)  {
                 Crashlytics.logException(e);
-                Toast.makeText(c, "Error getting Stats", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "updateActiveBarChart: Error getting Stats");
             }
         }
 
         Log.d(TAG, "updateActiveBarChart: " + statList.size() + " updated");
+        Log.d(TAG, "updateActiveBarChart: FINISH");
         return statList;
     }
+
 
     @Override
     public String toString(){

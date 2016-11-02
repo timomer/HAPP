@@ -34,9 +34,20 @@ public class Constants {
     public static final String ARROW_SINGLE_UP = "\u2191";
     public static final String ARROW_FORTY_FIVE_UP = "\u2197";
 
-    //profiles names
+    //profiles strings
     public class profile{
-        public static final String ISF_PROFILE = "isf_profile";
+        public static final String ISF_PROFILE      = "isf_profile";
+        public static final String CARB_PROFILE     = "carb_profile";
+        public static final String BASAL_PROFILE    = "basal_profile";
+
+        public static final String ISF_PROFILE_DEFAULT_TIME_RANGE      = "isf_profiles_default_time_range";
+        public static final String CARB_PROFILE_DEFAULT_TIME_RANGE     = "carb_profiles_default_time_range";
+        public static final String BASAL_PROFILE_DEFAULT_TIME_RANGE    = "basal_profiles_default_time_range";
+
+        public static final String ISF_PROFILE_ARRAY      = "isf_profiles_array";
+        public static final String CARB_PROFILE_ARRAY      = "carb_profiles_array";
+        public static final String BASAL_PROFILE_ARRAY     = "basal_profiles_array";
+
     }
 
     //Treatment Service

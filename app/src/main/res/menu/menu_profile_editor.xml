@@ -6,8 +6,26 @@
         android:id="@+id/miSaveProfile"
         android:icon="@android:drawable/ic_menu_save"
         android:title="Save"
-        app:showAsAction="always">
+        app:showAsAction="ifRoom">
     </item>
+    <item
+        android:title="Default Time Slots"
+        app:showAsAction="withText">
+    </item>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/miTimeSlot30"
+            android:title="30 mins"
+            app:showAsAction="withText"/>
+        <item
+            android:id="@+id/miTimeSlot60"
+            android:title="60 mins"
+            app:showAsAction="withText"/>
+    </group>
+
+
+
 
     <item
         android:id="@+id/miProfileSaveAs"

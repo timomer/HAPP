@@ -57,7 +57,7 @@ public class APSService extends IntentService {
         profile                 = new Profile(new Date());
         safety                  = new Safety();
         realmManager            = new RealmManager();
-        pumpActive              = new Pump(new Date(), realmManager.getRealm());
+        pumpActive              = new Pump(profile, realmManager.getRealm());
 
         if (aps_paused) {
             bundle.putString("error", "APS is currently Paused");
@@ -67,7 +67,7 @@ public class APSService extends IntentService {
         } else if (!prefsOK()) {
             bundle.putString("error", "User preferences missing, please check all APS & Pump settings are set");
             receiver.send(Constants.STATUS_ERROR, bundle);
-            Log.d(TAG, "User preferences missing, not running");
+            Log.e(TAG, "User preferences missing, not running");
 
         } else {
             context = MainApp.instance();
@@ -129,7 +129,7 @@ public class APSService extends IntentService {
         else if (apsResult.getRate() > safety.getMaxBasal(profile)) { apsResult.setRate(safety.getMaxBasal(profile)); }
         apsResult.setRate(tools.round(apsResult.getRate(), 2));
 
-        Pump pumpWithProposedBasal = new Pump(new Date(), realmManager.getRealm());
+        Pump pumpWithProposedBasal = new Pump(profile, realmManager.getRealm());
         pumpWithProposedBasal.setNewTempBasal(apsResult, null);
 
         //apsResult.ratePercent =  pumpWithProposedBasal.temp_basal_percent;
@@ -156,12 +156,12 @@ public class APSService extends IntentService {
                 apsResult.setBasal_adjustemnt   ("None");
                 apsResult.setTempSuggested      (false);
 
-            } else if (apsResult.getRate() > profile.current_basal && apsResult.getDuration() != 0) {
+            } else if (apsResult.getRate() > profile.getCurrentBasal() && apsResult.getDuration() != 0) {
                 apsResult.setAction             ("High Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_high_basal_duration + "mins");
                 apsResult.setBasal_adjustemnt   ("High");
                 apsResult.setDuration           (pumpActive.min_high_basal_duration);
 
-            } else if (apsResult.getRate() < profile.current_basal && apsResult.getDuration() != 0) {
+            } else if (apsResult.getRate() < profile.getCurrentBasal() && apsResult.getDuration() != 0) {
                 apsResult.setAction             ("Low Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_low_basal_duration + "mins");
                 apsResult.setBasal_adjustemnt   ("Low");
                 apsResult.setDuration           (pumpActive.min_low_basal_duration);
@@ -176,18 +176,18 @@ public class APSService extends IntentService {
 
         switch (profile.aps_algorithm) {
             case "openaps_oref0_dev":
-                com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS oref0_dev = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(context));
+                com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS oref0_dev = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(context), profile);
                 return oref0_dev.invoke();
 
             case "openaps_oref0_master":
             default:
-                com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS oref0_master = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(context));
+                com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS oref0_master = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(context), profile);
                 return oref0_master.invoke();
         }
     }
 
     private Boolean prefsOK(){
-        if (profile.carbAbsorptionRate.equals(0D) || profile.dia.equals(0D) || profile.isf.equals(0D) || profile.current_basal.equals(0D) || profile.carbRatio.equals(0) || profile.pump_name.equals("none") || profile.aps_algorithm.equals("none")) return false;
+        if (profile.carbAbsorptionRate.equals(0D) || profile.dia.equals(0D) || profile.getISF().equals(0D) || profile.getCurrentBasal().equals(0D) || profile.getCarbRatio().equals(0) || profile.pump_name.equals("none") || profile.aps_algorithm.equals("none")) return false;
         if (safety.user_max_bolus.equals(0D) || safety.max_basal.equals(0D) || safety.max_iob.equals(0D)) return false;
         if (profile.cgm_source.equals("")) return false;
         return true;

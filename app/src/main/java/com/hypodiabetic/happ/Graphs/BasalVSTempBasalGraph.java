@@ -21,7 +21,7 @@ import lecho.lib.hellocharts.util.ChartUtils;
  */
 public class BasalVSTempBasalGraph extends CommonChartSupport{
 
-    public BasalVSTempBasalGraph(Context context, Realm realm){super(context, realm); }
+    public BasalVSTempBasalGraph(Realm realm){super(realm); }
 
     private List<Stat> statsReadings = Stat.statsList(start_time, realm);
     private List<PointValue> tempBasalValues = new ArrayList<>();

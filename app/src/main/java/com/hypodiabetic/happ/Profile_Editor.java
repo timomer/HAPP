@@ -1,12 +1,13 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -25,8 +26,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+
 import com.hypodiabetic.happ.tools.TimeSpan;
 
 public class Profile_Editor extends AppCompatActivity {
@@ -44,8 +44,11 @@ public class Profile_Editor extends AppCompatActivity {
     public List<TimeSpan> timeSpansList;
     public CustomAdapter adapter;
     public SimpleDateFormat sdfTimeDisplay;
-    public SimpleDateFormat sdfTimeFormat;
     public String profile;
+    public String profileName;
+    public Integer timeSlotsDefaultRange;
+    public Boolean errorInProfile=false;
+    public Boolean profileChanged=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +56,6 @@ public class Profile_Editor extends AppCompatActivity {
         setContentView(R.layout.activity_profile__editor);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarProfileEditor);
         sdfTimeDisplay = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
-        sdfTimeFormat = new SimpleDateFormat("HHmm", getResources().getConfiguration().locale);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -61,10 +63,10 @@ public class Profile_Editor extends AppCompatActivity {
             public void onClick(View view) {
                 Date lastTime = timeSpansList.get(timeSpansList.size() -1).time;
                 if (!sdfTimeDisplay.format(lastTime).equals("23:30")) {
-                    timeSpansList.add(getNextTimeSpan(lastTime));
+                    //timeSpansList.add(getNextTimeSpan(lastTime));
 
-                    adapter.notifyDataSetChanged();
-                    adapter.notifyDataSetInvalidated();
+                    //adapter.notifyDataSetChanged();
+                    //adapter.notifyDataSetInvalidated();
                 }
             }
         });
@@ -74,22 +76,33 @@ public class Profile_Editor extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             profile = extras.getString("PROFILE");
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
 
             if (profile != null) {
+                profileName             = tools.getActiveProfileName(profile, prefs, this);
+                timeSlotsDefaultRange   = tools.getTimeSlotsDefaultRange(profile, prefs);
 
                 switch (profile) {
                     case Constants.profile.ISF_PROFILE:
-                        toolbar.setTitle(R.string.isf_profile);
+                        profileUnit             = tools.bgUnitsFormat();
+                        toolbar.setTitle(getString(R.string.isf_profile) + ": " + profileName);
                         toolbar.setSubtitle(R.string.isf_profile_summary);
-                        profileUnit         =   tools.bgUnitsFormat();
-
+                        break;
+                    case Constants.profile.BASAL_PROFILE:
+                        profileUnit             = "units";
+                        toolbar.setTitle(getString(R.string.basal_profile) + ": " + profileName);
+                        toolbar.setSubtitle(R.string.basal_profile_summary);
+                        break;
+                    case Constants.profile.CARB_PROFILE:
+                        profileUnit             = "grams";
+                        toolbar.setTitle(getString(R.string.carb_profile) + ": " + profileName);
+                        toolbar.setSubtitle(R.string.carb_profile_summary);
                         break;
                     default:
                         Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
                         this.finish();
                 }
 
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
                 timeSpansList           = tools.getActiveProfile(profile, prefs);
                 setProfile();
 
@@ -108,24 +121,22 @@ public class Profile_Editor extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile_editor, menu);
+        MenuItem item30 = menu.findItem(R.id.miTimeSlot30);
+        MenuItem item60 = menu.findItem(R.id.miTimeSlot60);
+        if (timeSlotsDefaultRange.equals(30)){
+            item30.setChecked(true);
+        } else {
+            item60.setChecked(true);
+        }
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.miSaveProfile:
-                String profileJSON = new Gson().toJson(timeSpansList);
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(profile, profileJSON);
-                editor.commit();
-
-                Log.d(TAG, "onOptionsItemSelected: Profile: " + profile + " Changes Saved");
-
-                Intent intentHome = new Intent(MainApp.instance(), MainActivity.class);
-                intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                this.getApplicationContext().startActivity(intentHome);
+                saveAndExit();
                 return true;
             case R.id.miProfileSaveAs:
 
@@ -133,8 +144,30 @@ public class Profile_Editor extends AppCompatActivity {
             case R.id.miOpenProfiles:
 
                 return true;
+            case R.id.miTimeSlot30:
+                tools.setTimeSlotsDefaultRange(profile, 30, PreferenceManager.getDefaultSharedPreferences(MainApp.instance()));
+                timeSlotsDefaultRange = 30;
+                item.setChecked(true);
+                return true;
+            case R.id.miTimeSlot60:
+                tools.setTimeSlotsDefaultRange(profile, 60, PreferenceManager.getDefaultSharedPreferences(MainApp.instance()));
+                timeSlotsDefaultRange = 60;
+                item.setChecked(true);
+                return true;
             default:
                 return true;
+        }
+    }
+
+    public void saveAndExit() {
+        if (errorInProfile){
+            Snackbar.make(findViewById(android.R.id.content), R.string.profile_save_error ,Snackbar.LENGTH_LONG).show();
+        } else {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+            tools.saveProfile(profile, profileName, timeSpansList, prefs, true);
+
+            Log.d(TAG, "onOptionsItemSelected: Profile: " + profile + " Changes Saved");
+            this.finish();
         }
     }
 
@@ -146,7 +179,7 @@ public class Profile_Editor extends AppCompatActivity {
 
             TimeSpan timeSpan1 = new TimeSpan();
             try {
-                timeSpan1.time      = sdfTimeDisplay.parse("00:00");
+                timeSpan1.time = sdfTimeDisplay.parse("00:00");
                 timeSpan1.endTime   = sdfTimeDisplay.parse("23:59");
             }catch (ParseException e) {}
             timeSpan1.value =   0D;
@@ -158,14 +191,40 @@ public class Profile_Editor extends AppCompatActivity {
     }
 
 
-    public TimeSpan getNextTimeSpan(Date time) {
-        //Add 30mins to this time to get next time slot
-        //30 minutes * 60 seconds * 1000 milliseconds
-        TimeSpan timeSpan   = new TimeSpan();
-        timeSpan.time       = new Date(time.getTime() + 30 * 60 * 1000);
-        timeSpan.endTime    = new Date(time.getTime() + 60 * 60 * 1000);
-        timeSpan.value      = 0D;
-        return timeSpan;
+    public TimeSpan getNextTimeSpan(TimeSpan currentTimeSpan, int position) {
+        //Add timeSlotsDefaultRange mins to this time to get next time slot
+        //timeSlotsDefaultRange minutes * 60 seconds * 1000 milliseconds
+        TimeSpan nextTimeSpan   = new TimeSpan();
+        nextTimeSpan.time = new Date(currentTimeSpan.time.getTime() + timeSlotsDefaultRange * 60 * 1000);
+        nextTimeSpan.endTime    = new Date(currentTimeSpan.time.getTime() + (timeSlotsDefaultRange + (timeSlotsDefaultRange-1)) * 60 * 1000);
+        nextTimeSpan.value      = 0D;
+
+        if (position == (timeSpansList.size()-1)) {
+            //this is the last time slot
+            if (sdfTimeDisplay.format(currentTimeSpan.time).equals("23:30")) {
+                //We have the last Time Slot, no additional 30mins slots possible
+                return null;
+            } else {
+                //sets the correct end time for the last slot
+                try {
+                    nextTimeSpan.endTime = sdfTimeDisplay.parse("23:59");
+                } catch (ParseException e){}
+            }
+        } else {
+
+            //Check there is room between this timeslot and next
+            TimeSpan nextTimeSpanInList = timeSpansList.get(position+1);
+            if (nextTimeSpan.time.equals(nextTimeSpanInList.time)){
+                //We do not have room for an additional 30mins slot
+                return null;
+            } else {
+                //Sets the end date of this new time slot to the start of the next
+                nextTimeSpan.endTime = new Date(nextTimeSpanInList.time.getTime() - 1 * 60 * 1000); //next time - 1min
+            }
+            Log.e(TAG, "POS: " + position + " New Start: " + sdfTimeDisplay.format(nextTimeSpan.time) + " Next Start:" +  sdfTimeDisplay.format(nextTimeSpanInList.time));
+        }
+
+        return nextTimeSpan;
     }
 
 
@@ -188,6 +247,7 @@ public class Profile_Editor extends AppCompatActivity {
             protected ImageView ivDelete;
             protected TextView tvUnits;
             protected ImageView ivAdd;
+            protected ImageView ivError;
 
         }
 
@@ -204,30 +264,8 @@ public class Profile_Editor extends AppCompatActivity {
                 viewHolder.ivDelete     = (ImageView) v.findViewById(R.id.profile_del);
                 viewHolder.tvUnits      = (TextView) v.findViewById(R.id.profile_value_unit);
                 viewHolder.ivAdd        = (ImageView) v.findViewById(R.id.profile_add);
+                viewHolder.ivError      = (ImageView) v.findViewById(R.id.profile_error);
                 viewHolder.spTimeUntil  = (Spinner) v.findViewById(R.id.profile_time_until);
-
-                viewHolder.spStartTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                        try {
-                            rowItem.time = sdfTimeDisplay.parse(viewHolder.spStartTime.getSelectedItem().toString());
-                        } catch (ParseException e){}
-                    }
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parentView) {
-                    }
-                });
-                viewHolder.spTimeUntil.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                        try {
-                            rowItem.endTime = sdfTimeDisplay.parse(viewHolder.spTimeUntil.getSelectedItem().toString());
-                        } catch (ParseException e){}
-                    }
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parentView) {
-                    }
-                });
 
                 viewHolder.etValue.addTextChangedListener(new CustomTextWatcher(viewHolder.etValue, rowItem));
                 viewHolder.ivDelete.setTag(position);
@@ -240,9 +278,7 @@ public class Profile_Editor extends AppCompatActivity {
                         adapter.notifyDataSetChanged();
                         adapter.notifyDataSetInvalidated();
 
-                        //Destroy and recreate the adapter as this refreshes the listview and updates view Tags with correct locations
-                        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
-                        profileListView.setAdapter(adapter);
+                        destroyAndReloadList();
                     }
                 });
                 viewHolder.ivAdd.setTag(position);
@@ -250,46 +286,25 @@ public class Profile_Editor extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         //Add a 30min time slot if allowed
-                        TimeSpan nextTimeSpanToInsert = getNextTimeSpan(timeSpansList.get((int) v.getTag()).time);
-                        Integer nextPosition    = (int) v.getTag() + 1;
-                        Date nextTime = new Date();
-
-                        //Get the next TimeSpan start date in the list, if any
-                        if ((int) v.getTag() == (timeSpansList.size() -1)){
-                            //Last item in the list, there is no next time
-                            try {
-                                nextTime = sdfTimeDisplay.parse("23:59");
-                            }catch (ParseException e) {}
-                        } else {
-                            //Grab the next time in the list
-                            nextTime = timeSpansList.get(nextPosition).time;
-                        }
+                        Integer position        = (int) v.getTag();
+                        TimeSpan nextTimeSpanToInsert = getNextTimeSpan(timeSpansList.get(position) , position);
 
                         //Are we allowed an additional TimeSpan between this and the next one?
-                        Boolean spaceForNewTimeSpan = true;
-                        if (nextTimeSpanToInsert.time.equals(nextTime)){
+                        if (nextTimeSpanToInsert == null){
                             //Nope, no more TimeSpans allowed
-                            spaceForNewTimeSpan = false;
                             Log.d(TAG, "cannot fit additional TimeSpan");
-                            Snackbar.make(v,"Cannot add additional 30mins between this and next time slot",Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(v,R.string.timeslot_no_room, Snackbar.LENGTH_LONG).show();
                         } else {
-                            //We have a next TimeSpan that is allowed, sets its date to this TimeSpans end date
-                            nextTimeSpanToInsert.endTime = new Date(nextTime.getTime() - 1 * 60 * 1000); //next time - 1min
-                        }
-
-                        if (spaceForNewTimeSpan){
                             //Additional TimeSpan allowed
-                            Log.d(TAG, "Adding row: " + nextPosition);
-                            timeSpansList.add(nextPosition, nextTimeSpanToInsert);
+                            Log.d(TAG, "Adding row: " + position+1 + " start: " + sdfTimeDisplay.format(nextTimeSpanToInsert.time) + " end: " + sdfTimeDisplay.format(nextTimeSpanToInsert.endTime));
+                            timeSpansList.add(position+1, nextTimeSpanToInsert);
                             adapter.notifyDataSetChanged();
                             adapter.notifyDataSetInvalidated();
 
                             //Tell last TimeSlot its new end date
-                            timeSpansList.get(nextPosition - 1).endTime = nextTimeSpanToInsert.time;
+                            timeSpansList.get(position).endTime = new Date(nextTimeSpanToInsert.time.getTime() - 1 * 60 * 1000);
 
-                            //Destroy and recreate the adapter as this refreshes the listview and updates view Tags with correct locations
-                            adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
-                            profileListView.setAdapter(adapter);
+                            destroyAndReloadList();
                         }
                     }
                 });
@@ -318,11 +333,25 @@ public class Profile_Editor extends AppCompatActivity {
                     rowItem.time = sdfTimeDisplay.parse("00:00");
                 } catch (ParseException e){}
             } else {
-                allowedTimeSlotsStartTime = getAllowedTimeSlots(rowItem.getTime(), rowItem.getEndTime(), true);
+                allowedTimeSlotsStartTime = getAllowedTimeSlots(timeSpansList.get(position-1).endTime, rowItem.endTime, true);
             }
-            ArrayAdapter<String> stringArrayAdapterStartTime= new ArrayAdapter<>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, allowedTimeSlotsStartTime);
-            holder.spStartTime.setAdapter(stringArrayAdapterStartTime);
-            holder.spStartTime.setSelection(getTimeSlotIndex(rowItem.getTime(),allowedTimeSlotsStartTime));
+            setAllowedTimes(holder.spStartTime, allowedTimeSlotsStartTime, rowItem.time, v);
+            holder.spStartTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    try {
+                        if (!rowItem.time.equals(sdfTimeDisplay.parse(parentView.getSelectedItem().toString()))) { //TODO: 31/10/2016  this should not be needed, but onItemSelected keeps getting fired - second spinner does not appear to have this issue
+                            rowItem.time = sdfTimeDisplay.parse(parentView.getSelectedItem().toString());
+
+                            destroyAndReloadList();
+                        }
+                    }catch(ParseException e){
+                    }
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                }
+            });
 
             //Sets the correct end time for last time slot
             if (position == timeSpansList.size()-1) {
@@ -331,11 +360,24 @@ public class Profile_Editor extends AppCompatActivity {
                     rowItem.endTime = sdfTimeDisplay.parse("23:59");
                 } catch (ParseException e){}
             } else {
-                allowedTimeSlotsEndTime = getAllowedTimeSlots(rowItem.getTime(), rowItem.getEndTime(), false);
+                allowedTimeSlotsEndTime = getAllowedTimeSlots(rowItem.time, timeSpansList.get(position+1).time, false);
             }
-            ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, allowedTimeSlotsEndTime);
-            holder.spTimeUntil.setAdapter(stringArrayAdapter);
-            holder.spTimeUntil.setSelection(getTimeSlotIndex(rowItem.endTime,allowedTimeSlotsEndTime));
+            setAllowedTimes(holder.spTimeUntil, allowedTimeSlotsEndTime, rowItem.endTime, v);
+            holder.spTimeUntil.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    try {
+                        if (!rowItem.endTime.equals(sdfTimeDisplay.parse(parentView.getSelectedItem().toString()))) {
+                            rowItem.endTime = sdfTimeDisplay.parse(parentView.getSelectedItem().toString());
+
+                            destroyAndReloadList();
+                        }
+                    } catch (ParseException e){}
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                }
+            });
 
             holder.etValue.setText(rowItem.value.toString());
             holder.tvUnits.setText(profileUnit);
@@ -344,15 +386,42 @@ public class Profile_Editor extends AppCompatActivity {
             if (sdfTimeDisplay.format(rowItem.time).equals("00:00")) {
                 holder.ivDelete.setVisibility(View.INVISIBLE);
                 holder.spStartTime.setEnabled(false);
+            } else {
+                holder.ivDelete.setVisibility(View.VISIBLE);
+                holder.spStartTime.setEnabled(true);
             }
             //Disables End Time for last time slot
             if (sdfTimeDisplay.format(rowItem.endTime).equals("23:59")) {
                 holder.spTimeUntil.setEnabled(false);
+            } else {
+                holder.spTimeUntil.setEnabled(true);
             }
-
+            //Is there a gap between this and next timespan?
+            if (timeSpansList.size() > 1 && position < (timeSpansList.size()-1) ) {
+                if (errorBetweenTimeSpans(rowItem, timeSpansList.get(position + 1))) {
+                    holder.ivError.setVisibility(View.VISIBLE);
+                    errorInProfile = true;
+                } else {
+                    holder.ivError.setVisibility(View.GONE);
+                }
+            }
 
             return v;
         }
+    }
+
+    private void destroyAndReloadList(){
+        //Destroy and recreate the adapter as this refreshes the spinners allowed time slots and error checking
+        errorInProfile = false;
+        profileChanged = true;
+        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
+        profileListView.setAdapter(adapter);
+    }
+
+    private void setAllowedTimes(Spinner spinner, ArrayList allowedTimes, Date selectedTime, View v){
+        ArrayAdapter<String> stringArrayAdapter= new ArrayAdapter<>(v.getContext(), android.R.layout.simple_spinner_dropdown_item, allowedTimes);
+        spinner.setAdapter(stringArrayAdapter);
+        spinner.setSelection(getTimeSlotIndex(selectedTime,allowedTimes));
     }
 
     private ArrayList<String> getAllowedTimeSlots(Date startDate, Date endDate, Boolean startTime){
@@ -371,17 +440,23 @@ public class Profile_Editor extends AppCompatActivity {
             try {
 
                 if (hourStart.equals(hourEnd)) {
-                    if (minsEnd == 30) {
+                    if (minsEnd.equals(29)) {
                         allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":00")));
+                    }else if (minsEnd.equals(59)) {
+                            allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":30")));
                     } else {
                         allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":00")));
                         allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":30")));
                     }
 
                 } else {
-                    for (Integer h = hourStart; h < hourEnd; h++) {
-                        if (h.equals(hourStart) && minsStart.equals(30)) {
+                    for (Integer h = hourStart; h <= (hourEnd); h++) {
+                        if (h.equals(hourStart) && minsStart.equals(29)) {
                             allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":30")));
+                        } else if (h.equals(hourStart) && minsStart.equals(59)) {
+
+                        } else if (h.equals(hourEnd) && minsEnd.equals(29)) {
+                            allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":00")));
                         } else {
                             allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":00")));
                             allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":30")));
@@ -394,27 +469,28 @@ public class Profile_Editor extends AppCompatActivity {
         } else {
 
             try {
-                for (Integer h = hourStart; h < hourEnd; h++) {
-                    if (h.equals(hourStart) && minsStart.equals(30)) {
-                        allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":59")));
-                    } else {
-                        allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":29")));
-                        allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":59")));
-                    }
-
-                }
 
                 if (hourStart.equals(hourEnd)) {
-                    if (minsStart == 30) {
+                    if (minsStart.equals(30)) {
                         allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":59")));
                     } else {
                         allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":29")));
                     }
+
+                } else {
+                    for (Integer h = hourStart; h <= (hourEnd); h++) {
+                        if (h.equals(hourStart) && minsStart.equals(30)) {
+                            allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":59")));
+                        } else  if (h.equals(hourEnd) && minsEnd.equals(30)){
+                            allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":29")));
+                        } else  if (h.equals(hourEnd) && minsEnd.equals(00)){
+
+                        } else {
+                            allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":29")));
+                            allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(h + ":59")));
+                        }
+                    }
                 }
-
-
-                if (allowedTimeSlots.isEmpty())
-                    allowedTimeSlots.add(sdfTimeDisplay.format(sdfTimeDisplay.parse(hourStart + ":55")));
 
             } catch (ParseException e) {
             }
@@ -427,6 +503,14 @@ public class Profile_Editor extends AppCompatActivity {
             if (sdfTimeDisplay.format(timeSlot).equals(allowedTimes.get(x))) return x;
         }
         return 0;
+    }
+
+    public boolean errorBetweenTimeSpans(TimeSpan timeSpan, TimeSpan nextTimeSpan){
+        if (new Date(timeSpan.endTime.getTime() + 1 * 60 * 1000).equals(nextTimeSpan.time) || timeSpan.endTime.equals(nextTimeSpan.time)){
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private class CustomTextWatcher implements TextWatcher {
@@ -456,6 +540,27 @@ public class Profile_Editor extends AppCompatActivity {
         }
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+    }
+    @Override
+    public void onBackPressed() {
+        if (profileChanged){
+            //Changes have been made and not saved, warn the user
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.unsaved_profile)
+                    .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveAndExit();
+                        }
+                    })
+                    .setNegativeButton(R.string.reject, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .show();
+        } else {
+            finish();
         }
     }
 }

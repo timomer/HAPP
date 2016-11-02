@@ -20,8 +20,14 @@
     <string name="title">Hello Notification!</string>
     <string name="notification_posted">Notification posted</string>
 
+    <!-- Misc -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="default_string">Default</string>
+    <string name="save">Save</string>
+    <string name="reject">Reject</string>
+
+
     <string name="title_activity_integration__report">Integration_Report</string>
 
     <!-- InsulinIntegrationNotify -->
@@ -30,12 +36,24 @@
     <string name="title_activity_profile__editor">Profile_Editor</string>
 
     <!-- profile editor -->
-
+    <string name="profile_save_error">Gaps between time slots, fix before saving</string>
+    <string name="unsaved_profile">Profile changes have not been saved</string>
+    <string name="timeslot_no_room">Cannot add additional 30mins between this and next time slot</string>
 
     <!-- prefs -->
     <string name="isf_profile">ISF Profile</string>
     <string name="isf_profile_title">Insulin Sensitivity Factor</string>
     <string name="isf_profile_summary">1U Insulin lower your Blood Glucose</string>
+
+    <string name="carb_profile">Carb Ratio Profile</string>
+    <string name="carb_profile_title">Carbohydrate Ratio</string>
+    <string name="carb_profile_summary">1U Insulin covers how many Carbs</string>
+
+    <string name="basal_profile">Basal Profile</string>
+    <string name="basal_profile_title">Pump Basal</string>
+    <string name="basal_profile_summary">Background Insulin from pump</string>
+
+
 
 
 </resources>

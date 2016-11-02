@@ -52,14 +52,15 @@ public class DetermineBasalAdapterJS {
 
     JSONObject bgCheck;
     private RealmManager realmManager;
+    private static String TAG = "DetermineBasalAdapterJS-Master";
 
-    public DetermineBasalAdapterJS(ScriptReader scriptReader) throws IOException {
+    public DetermineBasalAdapterJS(ScriptReader scriptReader, Profile profile) throws IOException {
+        Log.d(TAG, "DetermineBasalAdapterJS: START");
         mV8rt = V8.createV8Runtime();
         mScriptReader  = scriptReader;
         realmManager = new RealmManager();
 
         Date dateVar = new Date();
-        Profile profile = new Profile(dateVar);
 
         initProfile(profile);
         initGlucoseStatus();
@@ -74,6 +75,7 @@ public class DetermineBasalAdapterJS {
 
         loadScript();
         realmManager.closeRealm();
+        Log.d(TAG, "DetermineBasalAdapterJS: FINISH");
     }
 
     public JSONObject invoke() {
@@ -312,13 +314,13 @@ public class DetermineBasalAdapterJS {
         mProfile.add("max_iob", safty.max_iob);
         mProfile.add("carbs_hr", p.carbAbsorptionRate);
         mProfile.add("dia", p.dia);
-        mProfile.add("current_basal", p.current_basal);
+        mProfile.add("current_basal", p.getCurrentBasal());
         mProfile.add("max_daily_basal", safty.max_daily_basal);
         mProfile.add("max_basal", safty.max_basal);
         mProfile.add("max_bg", p.max_bg);
         mProfile.add("min_bg", p.min_bg);
-        mProfile.add("carbratio", p.carbRatio);
-        mProfile.add("sens", p.isf);
+        mProfile.add("carbratio", p.getCarbRatio());
+        mProfile.add("sens", p.getISF());
         mProfile.add("target_bg", p.target_bg);
         mProfile.add("type", "current"); // TODO: 21/11/2015 what is this used for?
         mV8rt.add(PARAM_profile, mProfile);

@@ -2,8 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/profile_error"
+        android:background="@drawable/alert_circle"
+        android:visibility="gone"/>
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,14 +24,13 @@
         android:layout_height="wrap_content"
         android:text="~"
         android:layout_gravity="center"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"/>
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"/>
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=" ~ 00:00"
         android:layout_gravity="center"
-        android:paddingRight="32dp"
         android:id="@+id/profile_time_until"/>
 
     <EditText
@@ -36,7 +43,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=" Insulin Units"
+        android:text="u"
         android:inputType="time"
         android:layout_gravity="center"
         android:id="@+id/profile_value_unit"/>
