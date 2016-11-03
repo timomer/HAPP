@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -15,21 +22,16 @@
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00:00"
-        android:inputType="time"
         android:layout_gravity="center"
         android:id="@+id/profile_time"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="~"
-        android:layout_gravity="center"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"/>
+        android:layout_gravity="center"/>
     <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=" ~ 00:00"
         android:layout_gravity="center"
         android:id="@+id/profile_time_until"/>
 
@@ -44,24 +46,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="u"
-        android:inputType="time"
         android:layout_gravity="center"
         android:id="@+id/profile_value_unit"/>
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
-    <ImageView
+    </LinearLayout>
+
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:id="@+id/profile_add"
-        android:background="@drawable/fab_add"
-        android:layout_marginRight="10dp"/>
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:id="@+id/profile_del"
-        android:background="@drawable/close_circle"/>
-</LinearLayout>
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/profile_add"
+                android:background="@drawable/fab_add"
+                android:layout_marginRight="4dp"
+                />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/profile_del"
+                android:background="@drawable/close_circle"/>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

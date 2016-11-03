@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<LineChartData> result) {
             //Write some code you want to execute on UI after doInBackground() completes
             bgChartLoading.setVisibility(View.GONE);
-            bgChart.setVisibility(View.VISIBLE);
+            //bgChart.setVisibility(View.VISIBLE);
 
             bgChart.setLineChartData(result.get(0));
             bgPreviewChart.setLineChartData(result.get(1));
@@ -416,10 +416,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             //Write some code you want to execute on UI before doInBackground() starts
-
             updateStuff     =   false;
-
-            bgChart.setVisibility(View.GONE);
+            //bgChart.setVisibility(View.GONE);
             bgChartLoading.setVisibility(View.VISIBLE);
             return ;
         }

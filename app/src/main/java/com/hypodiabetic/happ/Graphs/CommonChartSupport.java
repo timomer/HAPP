@@ -74,7 +74,7 @@ public class CommonChartSupport {
         //pointSize           = isXLargeTablet() ? 5 : 3;
         //axisTextSize        = isXLargeTablet() ? 20 : Axis.DEFAULT_TEXT_SIZE_SP;
         previewAxisTextSize = 5;//isXLargeTablet() ? 12 : 5;
-        hoursPreviewStep    = 1;//isXLargeTablet() ? 2 : 1;
+        hoursPreviewStep    = 2;//isXLargeTablet() ? 2 : 1;
     }
 
     public Line minShowLine() {
