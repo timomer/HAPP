@@ -71,11 +71,6 @@ public class TempBasal extends RealmObject {
         } else {
             return results.first();
         }
-        //TempBasal tempBasal = new Select()
-        //        .from(TempBasal.class)
-        //        .where("_id = " + dbid)
-        //        .executeSingle();
-        //return tempBasal;
     }
 
     public static TempBasal last(Realm realm) {
@@ -87,25 +82,11 @@ public class TempBasal extends RealmObject {
         } else {
             return results.first();
         }
-        //TempBasal last = new Select()
-        //        .from(TempBasal.class)
-        //        .orderBy("start_time desc")
-        //        .executeSingle();
-
-        //if (last != null){
-        //    return last;
-        //} else {
-        //    return new TempBasal();     //returns an empty TempBasal, other than null
-        //}
     }
 
     public static TempBasal getCurrentActive(Date atThisDate, Realm realm) {
         RealmResults<TempBasal> results = realm.where(TempBasal.class)
                 .findAllSorted("start_time", Sort.DESCENDING);
-        //TempBasal last = new Select()
-        //        .from(TempBasal.class)
-        //        .orderBy("start_time desc")
-        //        .executeSingle();
         TempBasal last = null;
         if (!results.isEmpty()) last = results.first();
         if (last != null && last.isactive(atThisDate)){
@@ -157,14 +138,6 @@ public class TempBasal extends RealmObject {
         }
     }
 
-    //public static List<TempBasal> latestTempBasals(int limit) {
-
-    //    return new Select()
-    //            .from(TempBasal.class)
-    //            .orderBy("start_time desc")
-    //            .limit(limit)
-    //            .execute();
-    //}
 
     public static List<TempBasal> getTempBasalsDated(Date dateFrom, Date dateTo, Realm realm) {
         RealmResults<TempBasal> results = realm.where(TempBasal.class)
@@ -172,12 +145,6 @@ public class TempBasal extends RealmObject {
                 .lessThanOrEqualTo("start_time", dateTo)
                 .findAllSorted("start_time", Sort.DESCENDING);
         return results;
-
-        //return new Select()
-        //        .from(TempBasal.class)
-        //        .where("start_time >= ? and start_time <= ?", dateFrom, dateTo)
-        //        .orderBy("start_time desc")
-        //        .execute();
     }
 
     public boolean checkIsCancelRequest() {

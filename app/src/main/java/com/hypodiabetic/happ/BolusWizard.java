@@ -21,25 +21,23 @@ public class BolusWizard {
 
 
     //main HAPP function
-    public static JSONObject bw (Double carbs, Realm realm){
+    public static JSONObject bw (Double carbs, Realm realm, Profile profile, Double cobNow, Double iobNow){
 
         Log.d(TAG, "bw: START");
 
-        Date dateNow = new Date();
-        Profile profile = new Profile(dateNow);
-        JSONObject iobNow       = IOB.iobTotal(profile, dateNow, realm);
-        JSONObject cobNow       = Carb.getCOB(profile, dateNow, realm);
+        //Date dateNow = new Date();
+        //JSONObject iobNow       = IOB.iobTotal(profile, dateNow, realm);
+        //JSONObject cobNow       = Carb.getCOB(profile, dateNow, realm);
         String bgCorrection;
 
         Bg bg = Bg.last(realm);
         Double lastBG = 0D;
         if (bg != null) lastBG = bg.sgv_double();
 
-        Double cob, iob;
         //eventualBG  = openAPSNow.optDouble("eventualBG",0D);
         //snoozeBG    = openAPSNow.optDouble("snoozeBG",0D);
-        cob         = cobNow.optDouble("cob",0D);
-        iob         = iobNow.optDouble("iob",0D);
+        //cobNow         = cobNow.optDouble("cob",0D);
+        //iobNow         = iobNow.optDouble("iob",0D);
 
 
         Double insulin_correction_bg;
@@ -52,12 +50,12 @@ public class BolusWizard {
         String net_biob_correction_maths;
 
         //Net IOB after current carbs taken into consideration
-        if (iob < 0){
-            net_correction_biob         =   (cob / profile.getCarbRatio()) + iob;
+        if (iobNow < 0){
+            net_correction_biob         =   (cobNow / profile.getCarbRatio()) + iobNow;
             if (net_correction_biob.isNaN() || net_correction_biob.isInfinite()) net_correction_biob = 0D;
-            net_biob_correction_maths   = "(COB(" + cob + ") / Carb Ratio(" + profile.getCarbRatio() + "g)) + IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
+            net_biob_correction_maths   = "(COB(" + cobNow + ") / Carb Ratio(" + profile.getCarbRatio() + "g)) + IOB(" + tools.formatDisplayInsulin(iobNow,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
         } else {
-            net_correction_biob         =   (cob / profile.getCarbRatio()) - iob;
+            net_correction_biob         =   (cobNow / profile.getCarbRatio()) - iobNow;
             if (net_correction_biob.isNaN() || net_correction_biob.isInfinite()) net_correction_biob = 0D;
 
             //Ignore positive correction if BG is low
@@ -65,7 +63,7 @@ public class BolusWizard {
                 net_biob_correction_maths   = "Low BG: Suggested Corr " + tools.formatDisplayInsulin(net_correction_biob,2) + " Setting to 0";
                 net_correction_biob = 0D;
             } else {
-                net_biob_correction_maths   = "(COB(" + cob + ") / Carb Ratio(" + profile.getCarbRatio() + "g)) - IOB(" + tools.formatDisplayInsulin(iob,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
+                net_biob_correction_maths   = "(COB(" + cobNow + ") / Carb Ratio(" + profile.getCarbRatio() + "g)) - IOB(" + tools.formatDisplayInsulin(iobNow,2) + ") = " + tools.formatDisplayInsulin(net_correction_biob,2);
             }
         }
 
@@ -117,8 +115,8 @@ public class BolusWizard {
         JSONObject reply = new JSONObject();
         try {
             reply.put("isf",profile.getISF());
-            reply.put("iob",iob);
-            reply.put("cob",cob);
+            reply.put("iob",iobNow);
+            reply.put("cob",cobNow);
             reply.put("carbRatio",profile.getCarbRatio());
             //reply.put("bolusiob",biob);
             //reply.put("eventualBG",eventualBG);

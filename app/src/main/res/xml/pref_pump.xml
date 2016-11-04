@@ -31,9 +31,9 @@
                 android:title="Pump Profiles">
 
                 <Preference
-                    android:title="@string/basal_profile_title"
+                    android:title="@string/prefs_basal_profile_title"
                     android:key="basal_profile"
-                    android:summary="@string/basal_profile_summary"/>
+                    android:summary="@string/prefs_basal_profile_summary"/>
 
             </PreferenceCategory>
         </PreferenceScreen>

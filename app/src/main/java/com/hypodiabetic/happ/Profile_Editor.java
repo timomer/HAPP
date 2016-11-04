@@ -85,18 +85,18 @@ public class Profile_Editor extends AppCompatActivity {
                 switch (profile) {
                     case Constants.profile.ISF_PROFILE:
                         profileUnit             = tools.bgUnitsFormat();
-                        toolbar.setTitle(getString(R.string.isf_profile) + ": " + profileName);
-                        toolbar.setSubtitle(R.string.isf_profile_summary);
+                        toolbar.setTitle(getString(R.string.prefs_isf_profile) + ": " + profileName);
+                        toolbar.setSubtitle(R.string.prefs_isf_profile_summary);
                         break;
                     case Constants.profile.BASAL_PROFILE:
                         profileUnit             = "units";
-                        toolbar.setTitle(getString(R.string.basal_profile) + ": " + profileName);
-                        toolbar.setSubtitle(R.string.basal_profile_summary);
+                        toolbar.setTitle(getString(R.string.prefs_basal_profile) + ": " + profileName);
+                        toolbar.setSubtitle(R.string.prefs_basal_profile_summary);
                         break;
                     case Constants.profile.CARB_PROFILE:
                         profileUnit             = "grams";
-                        toolbar.setTitle(getString(R.string.carb_profile) + ": " + profileName);
-                        toolbar.setSubtitle(R.string.carb_profile_summary);
+                        toolbar.setTitle(getString(R.string.prefs_carb_profile) + ": " + profileName);
+                        toolbar.setSubtitle(R.string.prefs_carb_profile_summary);
                         break;
                     default:
                         Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
@@ -161,7 +161,7 @@ public class Profile_Editor extends AppCompatActivity {
 
     public void saveAndExit() {
         if (errorInProfile){
-            Snackbar.make(findViewById(android.R.id.content), R.string.profile_save_error ,Snackbar.LENGTH_LONG).show();
+            Snackbar.make(findViewById(android.R.id.content), R.string.profile_editor_profile_save_error,Snackbar.LENGTH_LONG).show();
         } else {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
             tools.saveProfile(profile, profileName, timeSpansList, prefs, true);
@@ -293,7 +293,7 @@ public class Profile_Editor extends AppCompatActivity {
                         if (nextTimeSpanToInsert == null){
                             //Nope, no more TimeSpans allowed
                             Log.d(TAG, "cannot fit additional TimeSpan");
-                            Snackbar.make(v,R.string.timeslot_no_room, Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(v,R.string.profile_editor_timeslot_no_room, Snackbar.LENGTH_LONG).show();
                         } else {
                             //Additional TimeSpan allowed
                             Log.d(TAG, "Adding row: " + position+1 + " start: " + sdfTimeDisplay.format(nextTimeSpanToInsert.time) + " end: " + sdfTimeDisplay.format(nextTimeSpanToInsert.endTime));
@@ -310,14 +310,8 @@ public class Profile_Editor extends AppCompatActivity {
                 });
 
                 v.setTag(viewHolder);
-                viewHolder.spStartTime.setTag(rowItem);
-                viewHolder.etValue.setTag(rowItem);
-
-            } else {
-                ViewHolder holder = (ViewHolder) v.getTag();
-                holder.spStartTime.setTag(rowItem);
-                holder.etValue.setTag(rowItem);
-                holder.ivDelete.setTag(position);
+                //viewHolder.spStartTime.setTag(rowItem);
+                //viewHolder.etValue.setTag(rowItem);
             }
 
             ViewHolder holder = (ViewHolder) v.getTag();
@@ -529,7 +523,10 @@ public class Profile_Editor extends AppCompatActivity {
 
             if (text != null && text.length() > 0) {
                 if (EditText.getId() == R.id.profile_value) {
-                    item.value = Double.parseDouble(text);
+                    if (!item.value.equals(Double.parseDouble(text))) {
+                        item.value = Double.parseDouble(text);
+                        profileChanged = true;
+                    }
                 }
             }
             //Log.d(TAG, "afterTextChanged: " + profileListView.);
@@ -547,7 +544,7 @@ public class Profile_Editor extends AppCompatActivity {
         if (profileChanged){
             //Changes have been made and not saved, warn the user
             new AlertDialog.Builder(this)
-                    .setMessage(R.string.unsaved_profile)
+                    .setMessage(R.string.profile_editor_unsaved_profile)
                     .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             saveAndExit();

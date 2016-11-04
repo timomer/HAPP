@@ -1,59 +1,73 @@
 <resources>
     <string name="app_name">HAPP</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_enter_carb">EnterCarb</string>
-    <string name="title_activity_enter_treatment">EnterTreatment</string>
-    <string name="title_activity_pref_basal_layout">pref_basal_layout</string>
-    <string name="title_activity_isf_list">isfList</string>
-    <string name="title_activity_bolus_wizard">BolusWizardActivity</string>
-
-    <string name="pref_I_understand_title"> I UNDERSTAND AND AGREE</string>
-    <string name="pref_I_understand_summery">HAPP MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_activity_license_agreement">activity_license_agreement</string>
-    <string name="title_activity_license_agreement">license_agreement</string>
-
-    <string name="hello">Hello World!</string>
-    <string name="title">Hello Notification!</string>
-    <string name="notification_posted">Notification posted</string>
-
     <!-- Misc -->
+    <string name="action_settings">Settings</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="default_string">Default</string>
     <string name="save">Save</string>
     <string name="reject">Reject</string>
+    <string name="mins_left">mins left</string>
+    <string name="min_left">min left</string>
+    <string name="mins">mins</string>
+    <string name="min">min</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+    <string name="set">set</string>
+    <string name="string_for">for</string>
+    <string name="none">None</string>
 
-
+    <!-- Titles -->
+    <string name="title_activity_enter_carb">EnterCarb</string>
+    <string name="title_activity_enter_treatment">EnterTreatment</string>
+    <string name="title_activity_pref_basal_layout">pref_basal_layout</string>
+    <string name="title_activity_isf_list">isfList</string>
+    <string name="title_activity_bolus_wizard">BolusWizardActivity</string>
     <string name="title_activity_integration__report">Integration_Report</string>
+    <string name="title_activity_activity_license_agreement">activity_license_agreement</string>
+    <string name="title_activity_license_agreement">license_agreement</string>
+
+    <!-- APS -->
+    <string name="aps_cancel_active">Cancel Active</string>
+    <string name="aps_keep_current">Keep Current</string>
+    <string name="aps_paused">APS is currently Paused</string>
+    <string name="aps_prefs_missing">User preferences missing, please check all APS &amp; Pump settings are set</string>
+    <string name="aps_wait">Wait and monitor</string>
+
+    <!-- Pump Object -->
+    <string name="pump_no_basal_mode">Could not detect basal mode</string>
+    <string name="pump_tbr">TBR</string>
+    <string name="pump_extended_bolus">Extended Bolus</string>
+    <string name="pump_default_basal">Default Basal</string>
+    <string name="pump_no_extended_bolus">No Extended Bolus</string>
+    <string name="pump_basal_absolute">Absolute (U/hr)</string>
+    <string name="pump_basal_percent">Percent of Basal</string>
+    <string name="pump_basal_plus_tbr_percent">hourly basal rate plus TBR percentage</string>
+    <string name="pump_basal_absolute_30min_neg_basal">Extended Bolus</string>
 
     <!-- InsulinIntegrationNotify -->
-    <string name="actions_failed">The following pump requests have failed and WILL NOT be resent. Review pump and manually action if needed.</string>
-    <string name="acknowledge">Acknowledge</string>
-    <string name="title_activity_profile__editor">Profile_Editor</string>
+    <string name="InsulinIntegrationNotify_actions_failed">The following pump requests have failed and WILL NOT be resent. Review pump and manually action if needed.</string>
+    <string name="InsulinIntegrationNotify_acknowledge">Acknowledge</string>
+    <string name="InsulinIntegrationNotify_title_activity_profile__editor">Profile_Editor</string>
 
     <!-- profile editor -->
-    <string name="profile_save_error">Gaps between time slots, fix before saving</string>
-    <string name="unsaved_profile">Profile changes have not been saved</string>
-    <string name="timeslot_no_room">Cannot add additional 30mins between this and next time slot</string>
+    <string name="profile_editor_profile_save_error">Gaps between time slots, fix before saving</string>
+    <string name="profile_editor_unsaved_profile">Profile changes have not been saved</string>
+    <string name="profile_editor_timeslot_no_room">Cannot add additional 30mins between this and next time slot</string>
 
     <!-- prefs -->
-    <string name="isf_profile">ISF Profile</string>
-    <string name="isf_profile_title">Insulin Sensitivity Factor</string>
-    <string name="isf_profile_summary">1U Insulin lower your Blood Glucose</string>
-
-    <string name="carb_profile">Carb Ratio Profile</string>
-    <string name="carb_profile_title">Carbohydrate Ratio</string>
-    <string name="carb_profile_summary">1U Insulin covers how many Carbs</string>
-
-    <string name="basal_profile">Basal Profile</string>
-    <string name="basal_profile_title">Pump Basal</string>
-    <string name="basal_profile_summary">Background Insulin from pump</string>
-
-
+    <string name="pref_I_understand_title"> I UNDERSTAND AND AGREE</string>
+    <string name="pref_I_understand_summery">HAPP MUST NOT BE USED TO MAKE MEDICAL DECISIONS. THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION. </string>
+    <string name="prefs_isf_profile">ISF Profile</string>
+    <string name="prefs_isf_profile_title">Insulin Sensitivity Factor</string>
+    <string name="prefs_isf_profile_summary">1U Insulin lower your Blood Glucose</string>
+    <string name="prefs_carb_profile">Carb Ratio Profile</string>
+    <string name="prefs_carb_profile_title">Carbohydrate Ratio</string>
+    <string name="prefs_carb_profile_summary">1U Insulin covers how many Carbs</string>
+    <string name="prefs_basal_profile">Basal Profile</string>
+    <string name="prefs_basal_profile_title">Pump Basal</string>
+    <string name="prefs_basal_profile_summary">Background Insulin from pump</string>
 
 
 </resources>

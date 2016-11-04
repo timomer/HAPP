@@ -69,14 +69,14 @@
                 android:title="Profiles">
 
                 <Preference
-                    android:title="@string/isf_profile_title"
+                    android:title="@string/prefs_isf_profile_title"
                     android:key="isf_profile"
-                    android:summary="@string/isf_profile_summary"/>
+                    android:summary="@string/prefs_isf_profile_summary"/>
 
                 <Preference
-                    android:title="@string/carb_profile_title"
+                    android:title="@string/prefs_carb_profile_title"
                     android:key="carb_profile"
-                    android:summary="@string/carb_profile_summary"/>
+                    android:summary="@string/prefs_carb_profile_summary"/>
 
             </PreferenceCategory>
 

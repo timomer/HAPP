@@ -180,11 +180,11 @@ public class InsulinIntegrationNotify {
         dialog.setCanceledOnTouchOutside(true);
 
         TextView msg = (TextView) dialog.findViewById(R.id.integrationMsg);
-        msg.setText(R.string.actions_failed);
+        msg.setText(R.string.InsulinIntegrationNotify_actions_failed);
         msg.setVisibility(View.VISIBLE);
 
         Button buttonOK = (Button) dialog.findViewById(R.id.integrationOK);
-        buttonOK.setText(R.string.acknowledge);
+        buttonOK.setText(R.string.InsulinIntegrationNotify_acknowledge);
         buttonOK.setVisibility(View.VISIBLE);
         buttonOK.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -21,6 +21,7 @@ import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.Pump;
 import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.Objects.Safety;
+import com.hypodiabetic.happ.R;
 import com.hypodiabetic.happ.Receivers.APSReceiver;
 import com.hypodiabetic.happ.tools;
 
@@ -60,12 +61,12 @@ public class APSService extends IntentService {
         pumpActive              = new Pump(profile, realmManager.getRealm());
 
         if (aps_paused) {
-            bundle.putString("error", "APS is currently Paused");
+            bundle.putString(Constants.ERROR, getString(R.string.aps_paused));
             receiver.send(Constants.STATUS_ERROR, bundle);
             Log.d(TAG, "Paused, not running");
 
         } else if (!prefsOK()) {
-            bundle.putString("error", "User preferences missing, please check all APS & Pump settings are set");
+            bundle.putString(Constants.ERROR, getString(R.string.aps_prefs_missing));
             receiver.send(Constants.STATUS_ERROR, bundle);
             Log.e(TAG, "User preferences missing, not running");
 
@@ -79,23 +80,23 @@ public class APSService extends IntentService {
                 apsResult.fromJSON(apsJSON, profile, pumpActive);
 
             } catch (IOException i) {
-                bundle.putString("error", i.getLocalizedMessage());
+                bundle.putString(Constants.ERROR, i.getLocalizedMessage());
                 Crashlytics.logException(i);
                 Log.d(TAG, "Service error " + i.getLocalizedMessage());
 
             } finally {
 
                 if (apsJSON != null) {
-                    if (apsJSON.has("error") || !bundle.getString("error", "").equals("") ) {
-                        if (apsJSON.has("error")) bundle.putString("error", apsResult.getReason());
+                    if (apsJSON.has(Constants.ERROR) || !bundle.getString(Constants.ERROR, "").equals("") ) {
+                        if (apsJSON.has(Constants.ERROR)) bundle.putString(Constants.ERROR, apsResult.getReason());
                         receiver.send(Constants.STATUS_ERROR, bundle);
-                        Log.d(TAG, "Service APS error " + bundle.getString("error", ""));
+                        Log.d(TAG, "Service APS error " + bundle.getString(Constants.ERROR, ""));
 
                     } else {
                         if (apsResult.getTempSuggested()) {
                             apsResult = setTempBasalInfo(apsResult);
                         } else {
-                            apsResult.setAction("Wait and monitor");
+                            apsResult.setAction(getString(R.string.aps_wait));
                         }
                     }
 
@@ -145,25 +146,25 @@ public class APSService extends IntentService {
         //requestedTemp.put("duration", duration);
         //openAPSSuggest.put("rate", rate);// Math.round((Math.round(rate / 0.05) * 0.05) * 100) / 100); todo not sure why this needs to be rounded to 0 decimal places
         if (apsResult.checkIsCancelRequest() && pumpActive.temp_basal_active) {
-            apsResult.setAction                 ("Cancel Active Temp Basal");
-            apsResult.setBasal_adjustemnt       ("Basal Default");
+            apsResult.setAction                 (getString(R.string.aps_cancel_active) + " " + pumpWithProposedBasal.getTBRSupport());
+            apsResult.setBasal_adjustemnt       (pumpWithProposedBasal.getDefaultModeString());
             //apsResult.rate              =   profile.current_basal;
             //apsResult.ratePercent       =   100;
 
         } else {
             if (apsResult.getRate().equals(pumpActive.activeRate())){
-                apsResult.setAction             ("Keep Current Temp Basal");
-                apsResult.setBasal_adjustemnt   ("None");
+                apsResult.setAction             (getString(R.string.aps_keep_current) + " " + pumpWithProposedBasal.getTBRSupport());
+                apsResult.setBasal_adjustemnt   (getString(R.string.none));
                 apsResult.setTempSuggested      (false);
 
             } else if (apsResult.getRate() > profile.getCurrentBasal() && apsResult.getDuration() != 0) {
-                apsResult.setAction             ("High Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_high_basal_duration + "mins");
-                apsResult.setBasal_adjustemnt   ("High");
+                apsResult.setAction             (getString(R.string.high) + " " + pumpWithProposedBasal.getTBRSupport() + " " + getString(R.string.set) + " " + pumpWithProposedBasal.displayCurrentBasal(true) + " " + getString(R.string.string_for) + " " + pumpActive.min_high_basal_duration + getString(R.string.mins));
+                apsResult.setBasal_adjustemnt   (getString(R.string.high));
                 apsResult.setDuration           (pumpActive.min_high_basal_duration);
 
             } else if (apsResult.getRate() < profile.getCurrentBasal() && apsResult.getDuration() != 0) {
-                apsResult.setAction             ("Low Temp Basal set " + pumpWithProposedBasal.displayCurrentBasal(true) + " for " + pumpActive.min_low_basal_duration + "mins");
-                apsResult.setBasal_adjustemnt   ("Low");
+                apsResult.setAction             (getString(R.string.low) + " " + pumpWithProposedBasal.getTBRSupport() + " " + getString(R.string.set) + " " + pumpWithProposedBasal.displayCurrentBasal(true) + " " + getString(R.string.string_for) + " " + pumpActive.min_low_basal_duration + getString(R.string.mins));
+                apsResult.setBasal_adjustemnt   (getString(R.string.low));
                 apsResult.setDuration           (pumpActive.min_low_basal_duration);
             }
         }
@@ -175,11 +176,11 @@ public class APSService extends IntentService {
     private JSONObject getAPSJSON() throws IOException{
 
         switch (profile.aps_algorithm) {
-            case "openaps_oref0_dev":
+            case Constants.aps.OPEN_APS_DEV:
                 com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS oref0_dev = new com.hypodiabetic.happ.integration.openaps.dev.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.dev.ScriptReader(context), profile);
                 return oref0_dev.invoke();
 
-            case "openaps_oref0_master":
+            case Constants.aps.OPEN_APS_MASTER:
             default:
                 com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS oref0_master = new com.hypodiabetic.happ.integration.openaps.master.DetermineBasalAdapterJS(new com.hypodiabetic.happ.integration.openaps.master.ScriptReader(context), profile);
                 return oref0_master.invoke();
@@ -187,7 +188,7 @@ public class APSService extends IntentService {
     }
 
     private Boolean prefsOK(){
-        if (profile.carbAbsorptionRate.equals(0D) || profile.dia.equals(0D) || profile.getISF().equals(0D) || profile.getCurrentBasal().equals(0D) || profile.getCarbRatio().equals(0) || profile.pump_name.equals("none") || profile.aps_algorithm.equals("none")) return false;
+        if (profile.carbAbsorptionRate.equals(0D) || profile.dia.equals(0D) || profile.getISF().equals(0D) || profile.getCurrentBasal().equals(0D) || profile.getCarbRatio().equals(0) || profile.pump_name.equals(Constants.NONE) || profile.aps_algorithm.equals(Constants.NONE)) return false;
         if (safety.user_max_bolus.equals(0D) || safety.max_basal.equals(0D) || safety.max_iob.equals(0D)) return false;
         if (profile.cgm_source.equals("")) return false;
         return true;

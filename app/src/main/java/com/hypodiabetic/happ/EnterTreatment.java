@@ -40,12 +40,14 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Integration;
 import com.hypodiabetic.happ.Objects.Profile;
 import com.hypodiabetic.happ.Objects.RealmManager;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
+import com.hypodiabetic.happ.integration.openaps.IOB;
 import com.hypodiabetic.happ.services.FiveMinService;
 
 import org.json.JSONObject;
@@ -101,11 +103,23 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
     public static Boolean listDirty=false;                                                          //Tracks if treatment lists are dirty and need to be reloaded
 
     public static RealmManager realmManager;
+    public static Profile profile;
+    public static JSONObject iobNow, cobNow;
 
     @Override
     public void onDestroy(){
         super.onDestroy();
         realmManager.closeRealm();
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        Date dateNow = new Date();
+        profile      = new Profile(dateNow);
+        iobNow       = IOB.iobTotal(profile, dateNow, realmManager.getRealm());
+        cobNow       = Carb.getCOB(profile, dateNow, realmManager.getRealm());
+        Log.d(TAG, "onResume: Finished");
     }
 
     @Override
@@ -114,7 +128,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_treatment);
 
-        realmManager = new RealmManager();
+        realmManager            = new RealmManager();
 
         //Treatment Lists
         // Create the adapter that will return a fragment .
@@ -358,7 +372,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                 carbValue = tools.stringToDouble(wizardCarbs.getText().toString());
             }
 
-            JSONObject bw = BolusWizard.bw(carbValue, realmManager.getRealm());
+            JSONObject bw = BolusWizard.bw(carbValue, realmManager.getRealm(),profile,cobNow.optDouble("cob",0D),iobNow.optDouble("iob",0D));
 
             //Bolus Wizard Display
             bwDisplayIOBCorr.setText(           bw.optString("net_biob", "error"));
@@ -627,7 +641,6 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
             Calendar calDate        = Calendar.getInstance();
             Calendar calYesterday   = Calendar.getInstance();
             calYesterday.add(Calendar.DAY_OF_YEAR, -1); // yesterday
-            Profile profile = new Profile(new Date());
             Boolean lastCarb=false,lastInsulin=false;
 
             String toLoad="";

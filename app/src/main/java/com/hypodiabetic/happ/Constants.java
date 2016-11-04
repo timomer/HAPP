@@ -10,6 +10,10 @@ package com.hypodiabetic.happ;
 
 public class Constants {
 
+    //Misc
+    public static final String ERROR = "error";
+    public static final String NONE = "none";
+
     //hardcoded safty checks
     public static final int HARDCODED_MAX_BOLUS = 15;
     public static final int BOLUS_MAX_AGE_IN_MINS = 5;
@@ -48,6 +52,24 @@ public class Constants {
         public static final String CARB_PROFILE_ARRAY      = "carb_profiles_array";
         public static final String BASAL_PROFILE_ARRAY     = "basal_profiles_array";
 
+    }
+
+    //APS
+    public class aps{
+        public static final String OPEN_APS_DEV          = "openaps_oref0_dev";
+        public static final String OPEN_APS_MASTER       = "openaps_oref0_master";
+    }
+
+    //pumps
+    public class pump{
+        public static final String ROCHE_COMBO          = "roche_combo";
+        public static final String MEDTRONIC_PERCENT    = "medtronic_percent";
+        public static final String MEDTRONIC_ABSOLUTE   = "medtronic_absolute";
+        public static final String ANIMAS               = "animas";
+        public static final String OMNIPOD              = "omnipod";
+        public static final String DANA_R               = "dana_r";
+        public static final String TSLIM                = "tslim";
+        public static final String TSLIM_EXTENDED_BOLUS = "tslim_extended_bolus";
     }
 
     //Treatment Service

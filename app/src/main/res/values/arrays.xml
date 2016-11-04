@@ -25,6 +25,8 @@
             <item>SOOIL Dana R</item>
             <item>Animas</item>
             <item>OmniPod - (U/hr Mode Only)</item>
+            <item>Tslim - (% Mode)</item>
+            <item>Tslim - (Extended Bolus Mode)</item>
         </string-array>
         <string-array name="pump_nameValues">
             <item>medtronic_absolute</item>
@@ -33,7 +35,8 @@
             <item>dana_r</item>
             <item>animas</item>
             <item>omnipod</item>
-
+            <item>tslim</item>
+            <item>tslim_extended_bolus</item>
         </string-array>
 
     <string-array name="aps_modeArray">

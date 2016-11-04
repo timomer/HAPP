@@ -98,8 +98,9 @@
 
         <activity
             android:name=".Profile_Editor"
-            android:label="@string/title_activity_profile__editor"
-            android:theme="@style/AppTheme"></activity>
+            android:windowSoftInputMode="adjustPan"
+            android:label="@string/InsulinIntegrationNotify_title_activity_profile__editor"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
