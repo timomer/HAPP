@@ -17,6 +17,7 @@
     <string name="set">set</string>
     <string name="string_for">for</string>
     <string name="none">None</string>
+    <string name="connecting">Connecting</string>
 
     <!-- Titles -->
     <string name="title_activity_enter_carb">EnterCarb</string>
@@ -34,6 +35,8 @@
     <string name="aps_paused">APS is currently Paused</string>
     <string name="aps_prefs_missing">User preferences missing, please check all APS &amp; Pump settings are set</string>
     <string name="aps_wait">Wait and monitor</string>
+    <string name="aps_pause_un_pause">"Long press to Pause / Un-Pause APS"</string>
+    <string name="aps_err_running">There was an error running APS</string>
 
     <!-- Pump Object -->
     <string name="pump_no_basal_mode">Could not detect basal mode</string>
@@ -44,7 +47,6 @@
     <string name="pump_basal_absolute">Absolute (U/hr)</string>
     <string name="pump_basal_percent">Percent of Basal</string>
     <string name="pump_basal_plus_tbr_percent">hourly basal rate plus TBR percentage</string>
-    <string name="pump_basal_absolute_30min_neg_basal">Extended Bolus</string>
 
     <!-- InsulinIntegrationNotify -->
     <string name="InsulinIntegrationNotify_actions_failed">The following pump requests have failed and WILL NOT be resent. Review pump and manually action if needed.</string>
@@ -68,6 +70,17 @@
     <string name="prefs_basal_profile">Basal Profile</string>
     <string name="prefs_basal_profile_title">Pump Basal</string>
     <string name="prefs_basal_profile_summary">Background Insulin from pump</string>
+
+    <!-- Insulin Integration -->
+    <string name="InsulinIntegration_no_app">No app selected or not in Closed Loop</string>
+
+    <!-- Main Screen -->
+    <string name="home_dash_aps_result">APS Result</string>
+    <string name="home_chart_iob_cob">IOB &amp; COB</string>
+    <string name="home_dash_chart_active_iob_cob">Active IOB &amp; COB</string>
+    <string name="home_dash_tbasal_vs_basal">Temp Basal vs Basal</string>
+
+
 
 
 </resources>

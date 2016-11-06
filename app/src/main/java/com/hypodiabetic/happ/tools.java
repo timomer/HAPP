@@ -353,7 +353,7 @@ public class tools {
         // list package
         List<ResolveInfo> activityList = pm.queryIntentActivities(sharingIntent, 0);
 
-        objShareIntentListAdapter = new ShareIntentListAdapter(MainActivity.activity, activityList.toArray());
+        objShareIntentListAdapter = new ShareIntentListAdapter(MainActivity.getInstance(), activityList.toArray());
 
         // Create alert dialog box
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
@@ -399,7 +399,7 @@ public class tools {
         } catch (IOException e) {
             logCat = e.getLocalizedMessage();
         } finally {
-            showAlertText(logCat, MainActivity.getInstace());
+            showAlertText(logCat, MainActivity.getInstance());
         }
     }
     public static void showDebug(Realm realm){
@@ -410,9 +410,9 @@ public class tools {
         Safety safety = new Safety();
         String msg = "";
 
-        PackageManager manager = MainActivity.activity.getPackageManager();
+        PackageManager manager = MainActivity.getInstance().getPackageManager();
         try {
-            PackageInfo info = manager.getPackageInfo(MainActivity.activity.getPackageName(), 0);
+            PackageInfo info = manager.getPackageInfo(MainActivity.getInstance().getPackageName(), 0);
                 msg =   "HAPP Version: " + "\n" +
                             "Code:  " + info.versionCode + " Name:" + info.versionName + "\n\n";
         } catch (PackageManager.NameNotFoundException n){
@@ -462,7 +462,7 @@ public class tools {
                             bgList;
         }
 
-        showAlertText(msg, MainActivity.getInstace());
+        showAlertText(msg, MainActivity.getInstance());
     }
     public static void showAlertText(final String msg, final Context context){
         try {
@@ -472,7 +472,7 @@ public class tools {
                         public void onClick(DialogInterface dialog, int which) {
                             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                             clipboard.setText(msg);
-                            Toast.makeText(MainActivity.getInstace(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.getInstance(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {

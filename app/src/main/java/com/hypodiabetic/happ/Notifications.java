@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
@@ -37,50 +38,64 @@ import io.realm.Realm;
  */
 public class Notifications {
 
-    static int NEW_TEMP        =   55;
-    static int UPDATE_CARD     =   56;
-    static int DEBUG_CARD      =   57;
-    static int INSULIN_UPDATE  =   58;
+    private static int NEW_TEMP        =   55;
+    private static int UPDATE_CARD     =   56;
+    private static int DEBUG_CARD      =   57;
+    private static int INSULIN_UPDATE  =   58;
 
-    static Dialog activeErrorDialog;
-    static String TAG = "Notifications";
+    private static String TAG = "Notifications";
 
     //Insulin Treatments Integration notification
     public static void newInsulinUpdate(Realm realm){
-
         InsulinIntegrationNotify insulinUpdate          = new InsulinIntegrationNotify(realm);
-        NotificationCompat.Builder errorNotification    = insulinUpdate.getErrorNotification();
-        NotificationManagerCompat notificationManager   = NotificationManagerCompat.from(MainApp.instance());
-        View mainActivityView                           = null;
+        Gson gson = new Gson();
 
-        try {
-            mainActivityView = MainActivity.activity.findViewById(R.id.mainActivity);
-            
-        } catch (NullPointerException e){
+        //Inform UI
+        if (insulinUpdate.haveUpdates) {
+            Intent intentUpdate = new Intent(Intents.UI_UPDATE);
+            intentUpdate.putExtra(Constants.UPDATE, Constants.broadcast.NEW_INSULIN_UPDATE);
+            intentUpdate.putExtra(Constants.broadcast.NEW_INSULIN_UPDATE_RESULT, gson.toJson(insulinUpdate)); //// TODO: 06/11/2016 poss hang here on converting to gson
+            LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intentUpdate);
+        }
+        //Errors found
+        if (insulinUpdate.foundError){
+            //Show Notification
+            NotificationCompat.Builder errorNotification    = insulinUpdate.getErrorNotification();
+            NotificationManagerCompat notificationManager   = NotificationManagerCompat.from(MainApp.instance());
+            notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
+        }
+
+
+        //View mainActivityView                           = null;
+
+        //try {
+        //    mainActivityView = MainActivity.activity.findViewById(R.id.mainActivity);
+
+        //} catch (NullPointerException e){
             //Error getting Main app View
-            if (insulinUpdate.foundError) notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
+        //    if (insulinUpdate.foundError) notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
 
-        } finally {
+        //} finally {
 
-            if (mainActivityView != null){
+        //    if (mainActivityView != null){
                 //Main Activity is loaded, show snackbar notification
-                Snackbar snackbar = insulinUpdate.getSnackbar(mainActivityView);
-                if (snackbar != null) snackbar.show();
+        //        Snackbar snackbar = insulinUpdate.getSnackbar(mainActivityView);
+        //        if (snackbar != null) snackbar.show();
 
                 //Errors found, show Dialog
-                if (insulinUpdate.foundError) {
-                    Dialog errorDialog = insulinUpdate.showErrorDetailsDialog(mainActivityView);
+        //        if (insulinUpdate.foundError) {
+        //            Dialog errorDialog = insulinUpdate.showErrorDetailsDialog(mainActivityView);
 
-                    notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
-                    if (activeErrorDialog != null) activeErrorDialog.dismiss();
-                    errorDialog.show();
-                    activeErrorDialog = errorDialog;
-                }
-            } else {
+        //            notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
+        //            if (activeErrorDialog != null) activeErrorDialog.dismiss();
+        //            errorDialog.show();
+        //            activeErrorDialog = errorDialog;
+        //        }
+        //    } else {
                 //Main app not loaded
-                if (insulinUpdate.foundError) notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
-            }
-        }
+        //        if (insulinUpdate.foundError) notificationManager.notify(INSULIN_UPDATE, errorNotification.build());
+        //    }
+        //}
     }
 
 
@@ -130,7 +145,7 @@ public class Notifications {
         notificationBuilder.setCategory(Notification.CATEGORY_ALARM);
         notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
         notificationBuilder.setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500});
-        notificationBuilder.addAction(R.drawable.ic_exit_to_app_white_24dp, "Accept Temp", pending_intent_accept_temp);
+        notificationBuilder.addAction(R.drawable.exit_to_app, "Accept Temp", pending_intent_accept_temp);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
         notificationManager.notify(NEW_TEMP, notificationBuilder.build());

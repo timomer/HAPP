@@ -186,7 +186,7 @@ public class Profile_Editor extends AppCompatActivity {
             timeSpansList.add(timeSpan1);
         }
 
-        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
+        adapter = new CustomAdapter(MainActivity.getInstance(), 0, timeSpansList);
         profileListView.setAdapter(adapter);
     }
 
@@ -408,7 +408,7 @@ public class Profile_Editor extends AppCompatActivity {
         //Destroy and recreate the adapter as this refreshes the spinners allowed time slots and error checking
         errorInProfile = false;
         profileChanged = true;
-        adapter = new CustomAdapter(MainActivity.getInstace(), 0, timeSpansList);
+        adapter = new CustomAdapter(MainActivity.getInstance(), 0, timeSpansList);
         profileListView.setAdapter(adapter);
     }
 

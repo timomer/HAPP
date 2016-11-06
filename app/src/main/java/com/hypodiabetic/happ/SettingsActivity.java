@@ -152,9 +152,9 @@ public class SettingsActivity extends PreferenceActivity {
             });
 
 
-            PackageManager manager = MainActivity.activity.getPackageManager();
+            PackageManager manager = MainActivity.getInstance().getPackageManager();
             try {
-                PackageInfo info = manager.getPackageInfo(MainActivity.activity.getPackageName(), 0);
+                PackageInfo info = manager.getPackageInfo(MainActivity.getInstance().getPackageName(), 0);
                 Preference preference_version = findPreference("version");
                 preference_version.setSummary("Code:" + info.versionCode + " Name:" + info.versionName);
             } catch (PackageManager.NameNotFoundException n){

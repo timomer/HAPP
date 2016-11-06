@@ -5,16 +5,13 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -40,7 +37,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.Objects.Bolus;
 import com.hypodiabetic.happ.Objects.Carb;
 import com.hypodiabetic.happ.Objects.Integration;
@@ -51,7 +47,6 @@ import com.hypodiabetic.happ.integration.openaps.IOB;
 import com.hypodiabetic.happ.services.FiveMinService;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,8 +57,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import io.realm.Realm;
 
 
 public class EnterTreatment extends android.support.v4.app.FragmentActivity {
@@ -883,7 +876,7 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
                                 integrationList.add(integrationItem);
                             }
 
-                            mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
+                            mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstance(), integrationList, R.layout.integration_list_layout,
                                     new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails", "integrationState"},
                                     new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails, R.id.integrationState});
                             integrationListView.setAdapter(adapter);

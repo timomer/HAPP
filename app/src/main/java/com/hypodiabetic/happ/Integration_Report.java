@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.realm.Realm;
-
 public class Integration_Report extends AppCompatActivity {
 
     Spinner integrationType;
@@ -133,7 +131,7 @@ public class Integration_Report extends AppCompatActivity {
             }
         }
 
-        mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstace(), integrationList, R.layout.integration_list_layout,
+        mySimpleAdapterIntegration adapter = new mySimpleAdapterIntegration(MainActivity.getInstance(), integrationList, R.layout.integration_list_layout,
                 new String[]{"integrationID", "integrationType", "integrationDateTime", "integrationDetails", "integrationState"},
                 new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails, R.id.integrationState});
         integrationReportList.setAdapter(adapter);

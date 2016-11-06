@@ -9,5 +9,5 @@ public class UserPrefs {
     public static final boolean BOLUS_ALLOWED   =   true;
 
     //If True, Shows the Test button on APS Dash, used for debugging
-    public static final boolean APS_TEST_BUTTON =   true;
+    public static final boolean APS_TEST_BUTTON =   false;
 }

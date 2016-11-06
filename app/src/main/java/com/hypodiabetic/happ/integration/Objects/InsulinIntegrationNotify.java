@@ -52,9 +52,10 @@ public class InsulinIntegrationNotify {
     String snackbarMsg;                                                                             //Summary String for Snackbar
     String errorMsg;                                                                                //Summary String of error items
     public Boolean foundError;                                                                      //Where errors found?
+    public Boolean haveUpdates;                                                                     //Updates found?
     private Realm realm;
     private Pump pump;
-    private static String TAG = "InsulinIntegrationNotify";
+    private static String TAG = "InsulinIntegratNotify";
 
     public InsulinIntegrationNotify(Realm realm){
         Log.d(TAG, "InsulinIntegrationNotify: START");
@@ -66,9 +67,11 @@ public class InsulinIntegrationNotify {
         snackbarMsg             =   "";
         errorMsg                =   "";
         foundError              =   false;
+        haveUpdates             =   false;
         pump                    =   new Pump(new Profile(new Date()), realm);
         SimpleDateFormat sdfDateTime    = new SimpleDateFormat("dd MMM HH:mm", MainApp.instance().getResources().getConfiguration().locale);
         SimpleDateFormat sdfTime        = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+        if (recentlyUpdated.size() > 0) haveUpdates = true;
 
         for (Integration integration : recentlyUpdated) {
             if (!integration.getState().equals("error") && !integration.getState().equals("error_ack")) {     //Deal with errors later
@@ -157,7 +160,7 @@ public class InsulinIntegrationNotify {
                     dialog.setCanceledOnTouchOutside(true);
 
                     ListView list = (ListView) dialog.findViewById(R.id.integrationList);
-                    mySimpleAdapter adapter = new mySimpleAdapter(MainActivity.getInstace(), detailList, R.layout.integration_list_layout_insulin_summary,
+                    mySimpleAdapter adapter = new mySimpleAdapter(MainActivity.getInstance(), detailList, R.layout.integration_list_layout_insulin_summary,
                             new String[]{"value", "summary", "state", "details", "happObjectType", "action", "date"},
                             new int[]{R.id.insulinSummaryAmount, R.id.insulinSummarySummary, R.id.insulinSummaryState, R.id.insulinSummaryDetails, R.id.insulinSummaryHappObjectType, R.id.insulinSummaryAction, R.id.insulinSummaryDate});
                     list.setAdapter(adapter);
@@ -200,7 +203,7 @@ public class InsulinIntegrationNotify {
         });
 
         ListView list = (ListView) dialog.findViewById(R.id.integrationList);
-        mySimpleAdapter adapter = new mySimpleAdapter(MainActivity.getInstace(), detailListErrorsOnly, R.layout.integration_list_layout_insulin_summary,
+        mySimpleAdapter adapter = new mySimpleAdapter(MainActivity.getInstance(), detailListErrorsOnly, R.layout.integration_list_layout_insulin_summary,
                 new String[]{"value", "summary", "state", "details", "happObjectType", "action", "date", "intID"},
                 new int[]{R.id.insulinSummaryAmount, R.id.insulinSummarySummary, R.id.insulinSummaryState, R.id.insulinSummaryDetails, R.id.insulinSummaryHappObjectType, R.id.insulinSummaryAction, R.id.insulinSummaryDate, R.id.insulinSummaryINTID});
         list.setAdapter(adapter);

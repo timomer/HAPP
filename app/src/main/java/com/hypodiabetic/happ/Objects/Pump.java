@@ -22,9 +22,10 @@ public class Pump {
     public Integer  min_high_basal_duration;        //low basal duration supported
     public Boolean  temp_basal_active=false;        //Is a temp basal active
     public Double   temp_basal_rate;                //Current temp basal rate
-    private Integer  temp_basal_percent=null;        //Current temp basal percent
+    private Integer temp_basal_percent=null;        //Current temp basal percent
     public Integer  temp_basal_duration;            //Temp duration in Mins
     public Long     temp_basal_duration_left;       //Mins left of this Temp Basal
+    public Boolean  high_temp_extended_bolus;       //For High TBR use Extended Bolus (where pump does not support High TBR adjustments)
 
     private Profile profile;
     private TempBasal tempBasal;
@@ -32,7 +33,6 @@ public class Pump {
     private static final int ABSOLUTE                   =  1;       //Absolute (U/hr)
     private static final int PERCENT                    =  2;       //Percent of Basal
     private static final int BASAL_PLUS_PERCENT         =  3;       //hourly basal rate plus TBR percentage
-    private static final int ABSOLUTE_30MIN_NEG_BASAL   =  4;       //Absolute (U/hr) rate / 2 for 30min rate negative current Basal (Mainly used for Extended Bolus where pump does not support TBR adjustments)
 
     public Pump(Profile profile, Realm realm){
 
@@ -47,27 +47,32 @@ public class Pump {
                 basal_mode              =   BASAL_PLUS_PERCENT;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
+                high_temp_extended_bolus=   false;
                 break;
             case Constants.pump.DANA_R:
                 basal_mode              =   BASAL_PLUS_PERCENT;
                 min_low_basal_duration  =   60;
                 min_high_basal_duration =   30;
+                high_temp_extended_bolus=   false;
                 break;
             case Constants.pump.MEDTRONIC_ABSOLUTE:
                 basal_mode              =   ABSOLUTE;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
+                high_temp_extended_bolus=   false;
                 break;
             case Constants.pump.ANIMAS:
             case Constants.pump.OMNIPOD:
                 basal_mode              =   PERCENT;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
+                high_temp_extended_bolus=   false;
                 break;
             case Constants.pump.TSLIM_EXTENDED_BOLUS:
-                basal_mode              =   ABSOLUTE_30MIN_NEG_BASAL;
+                basal_mode              =   BASAL_PLUS_PERCENT;
                 min_low_basal_duration  =   30;
                 min_high_basal_duration =   30;
+                high_temp_extended_bolus=   true;
                 break;
         }
 
@@ -132,35 +137,35 @@ public class Pump {
     public String displayCurrentBasal(boolean small){
         if (basal_mode == null) return MainApp.instance().getString(R.string.pump_no_basal_mode);
         String msg="";
-        if (small) {
-            switch (basal_mode) {
-                case ABSOLUTE:
-                    msg = tools.formatDisplayBasal(activeRate(), false);
-                    break;
-                case PERCENT:
-                    msg = calcPercentOfBasal() + "%";
-                    break;
-                case BASAL_PLUS_PERCENT:
-                    msg = calcBasalPlusPercent() + "%";
-                    break;
-                case ABSOLUTE_30MIN_NEG_BASAL:
-                    msg = Double.toString((activeRate() / 2) - (profile.getCurrentBasal() / 2)) + " U/30" + MainApp.instance().getString(R.string.min);
-                    break;
-            }
+        if (high_temp_extended_bolus && activeRate() > 0) {
+            //Return Extended Bolus, Absolute (U/hr) rate / 2 for 30min rate negative current Basal
+            msg = Double.toString((activeRate() / 2) - (profile.getCurrentBasal() / 2)) + " U/30" + MainApp.instance().getString(R.string.min);
+
         } else {
-            switch (basal_mode) {
-                case ABSOLUTE:
-                    msg = tools.formatDisplayBasal(activeRate(), false);
-                    break;
-                case PERCENT:
-                    msg = calcPercentOfBasal() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
-                    break;
-                case BASAL_PLUS_PERCENT:
-                    msg = calcBasalPlusPercent() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
-                    break;
-                case ABSOLUTE_30MIN_NEG_BASAL:
-                    msg = Double.toString((activeRate() / 2) - (profile.getCurrentBasal() / 2)) + " U/30" + MainApp.instance().getString(R.string.min);
-                    break;
+            if (small) {
+                switch (basal_mode) {
+                    case ABSOLUTE:
+                        msg = tools.formatDisplayBasal(activeRate(), false);
+                        break;
+                    case PERCENT:
+                        msg = calcPercentOfBasal() + "%";
+                        break;
+                    case BASAL_PLUS_PERCENT:
+                        msg = calcBasalPlusPercent() + "%";
+                        break;
+                }
+            } else {
+                switch (basal_mode) {
+                    case ABSOLUTE:
+                        msg = tools.formatDisplayBasal(activeRate(), false);
+                        break;
+                    case PERCENT:
+                        msg = calcPercentOfBasal() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
+                        break;
+                    case BASAL_PLUS_PERCENT:
+                        msg = calcBasalPlusPercent() + "% (" + tools.formatDisplayBasal(activeRate(), false) + ")";
+                        break;
+                }
             }
         }
 
@@ -210,28 +215,26 @@ public class Pump {
     }
 
     public String getTBRSupport(){
-        switch (name){
-            case Constants.pump.TSLIM_EXTENDED_BOLUS:
-                return MainApp.instance().getString(R.string.pump_extended_bolus);
-            default:
-                return MainApp.instance().getString(R.string.pump_tbr);
+        if (high_temp_extended_bolus && activeRate() > 0){
+            return MainApp.instance().getString(R.string.pump_extended_bolus);
+        } else {
+            return MainApp.instance().getString(R.string.pump_tbr);
         }
     }
 
     public String getDefaultModeString(){
-        switch (name){
-            case Constants.pump.TSLIM_EXTENDED_BOLUS:
-                return MainApp.instance().getString(R.string.pump_no_extended_bolus);
-            default:
-                return MainApp.instance().getString(R.string.pump_default_basal);
+        if (high_temp_extended_bolus && activeRate() > 0){
+            return MainApp.instance().getString(R.string.pump_default_basal) + ", " + MainApp.instance().getString(R.string.pump_no_extended_bolus);
+        } else {
+            return MainApp.instance().getString(R.string.pump_default_basal);
         }
     }
 
     private int getBasalPercent(){
         if (basal_mode == null) return 0;
+        if (high_temp_extended_bolus && activeRate() > 0) return 0;
         switch (basal_mode){
             case ABSOLUTE:
-            case ABSOLUTE_30MIN_NEG_BASAL:
                 return 0;
             case PERCENT:
                 return calcPercentOfBasal();
@@ -292,18 +295,23 @@ public class Pump {
 
     private String displayBasalMode(){
         if (basal_mode == null) return MainApp.instance().getString(R.string.pump_no_basal_mode);
+        String reply = "";
         switch (basal_mode){
             case ABSOLUTE:
-                return MainApp.instance().getString(R.string.pump_basal_absolute);
+                reply = MainApp.instance().getString(R.string.pump_basal_absolute);
+                break;
             case PERCENT:
-                return MainApp.instance().getString(R.string.pump_basal_percent);
+                reply = MainApp.instance().getString(R.string.pump_basal_percent);
+                break;
             case BASAL_PLUS_PERCENT:
-                return MainApp.instance().getString(R.string.pump_basal_plus_tbr_percent);
-            case ABSOLUTE_30MIN_NEG_BASAL:
-                return MainApp.instance().getString(R.string.pump_basal_absolute_30min_neg_basal);
+                reply = MainApp.instance().getString(R.string.pump_basal_plus_tbr_percent);
+                break;
             default:
-                return MainApp.instance().getString(R.string.pump_no_basal_mode);
+                reply = MainApp.instance().getString(R.string.pump_no_basal_mode);
+                break;
         }
+        if (high_temp_extended_bolus) reply = reply + ", " + MainApp.instance().getString(R.string.high) + MainApp.instance().getString(R.string.pump_tbr) + MainApp.instance().getString(R.string.pump_extended_bolus);
+        return reply;
     }
 
     @Override

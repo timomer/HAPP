@@ -11,8 +11,11 @@ package com.hypodiabetic.happ;
 public class Constants {
 
     //Misc
-    public static final String ERROR = "error";
-    public static final String NONE = "none";
+    public static final String ERROR    = "error";
+    public static final String NONE     = "none";
+    public static final String MSG      = "MSG";
+    public static final String TEST     = "TEST";
+    public static final String UPDATE   = "UPDATE";
 
     //hardcoded safty checks
     public static final int HARDCODED_MAX_BOLUS = 15;
@@ -56,8 +59,9 @@ public class Constants {
 
     //APS
     public class aps{
-        public static final String OPEN_APS_DEV          = "openaps_oref0_dev";
-        public static final String OPEN_APS_MASTER       = "openaps_oref0_master";
+        public static final String OPEN_APS_DEV         = "openaps_oref0_dev";
+        public static final String OPEN_APS_MASTER      = "openaps_oref0_master";
+        public static final String PAUSED               = "aps_paused";
     }
 
     //pumps
@@ -92,6 +96,26 @@ public class Constants {
         public static final String OUTGOING_TEST_MSG            =   "TEST_MSG";
 
         public static final String INSULIN_INTEGRATION_APP      =   "PUMP_DRIVER";
+        public static final String INSULIN_INTEGRATION_TEST     =   "INSULIN_INTEGRATION_TEST";
+    }
+
+    //BG
+    public class bg {
+        public static final String HIGH_VALUE   =   "highValue";
+        public static final String LOW_VALUE    =   "lowValue";
+    }
+
+    //Broadcasts
+    public class broadcast {
+        public static final String NEW_APS_RESULT               =   "NEW_APS_RESULT";
+        public static final String NEW_INSULIN_UPDATE           =   "NEW_INSULIN_UPDATE";
+        public static final String NEW_INSULIN_UPDATE_RESULT    =   "NEW_INSULIN_UPDATE_RESULT";
+        public static final String UPDATE_RUNNING_TEMP          =   "UPDATE_RUNNING_TEMP";
+        public static final String NEW_STAT_UPDATE              =   "NEW_STAT_UPDATE";
+        public static final String ERROR_APS_RESULT             =   "ERROR_APS_RESULT";
+        public static final String NEW_BG                       =   "NEW_BG";
+        public static final String APS_RESULT                   =   "APSResult";
+        public static final String STAT_RESULT                  =   "stat";
 
     }
 }

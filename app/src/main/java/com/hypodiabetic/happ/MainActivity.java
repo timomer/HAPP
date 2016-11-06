@@ -1,6 +1,7 @@
 package com.hypodiabetic.happ;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,15 +15,18 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -58,6 +62,7 @@ import com.hypodiabetic.happ.Objects.TempBasal;
 import com.hypodiabetic.happ.Objects.Bg;
 import com.hypodiabetic.happ.integration.InsulinIntegrationApp;
 import com.hypodiabetic.happ.integration.IntegrationsManager;
+import com.hypodiabetic.happ.integration.Objects.InsulinIntegrationNotify;
 import com.hypodiabetic.happ.services.APSService;
 import com.hypodiabetic.happ.services.BackgroundService;
 
@@ -89,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView insulinIntegrationApp_icon;
     private BgGraph bgGraph;
     //private static final ExtendedGraphBuilder extendedGraphBuilder = new ExtendedGraphBuilder(MainApp.instance());
-    public static Activity activity;
+    public Activity activity;
     private Toolbar toolbar;
 
     SectionsPagerAdapter mSectionsPagerAdapter;                                                     //will provide fragments for each of the sections
@@ -112,18 +117,17 @@ public class MainActivity extends AppCompatActivity {
     Viewport holdViewport = new Viewport();
     public float left;
     public float right;
-    public float top;
-    public float bottom;
     public boolean updateStuff;
     public boolean updatingPreviewViewport = false;
     public boolean updatingChartViewport = false;
     public static RealmManager realmManager;
+    private static Dialog activeErrorDialog;
 
     BroadcastReceiver newUIUpdate;
     BroadcastReceiver refresh60Seconds;
     BroadcastReceiver insulinIntegrationAppUpdate;
 
-    public static MainActivity getInstace(){
+    public static MainActivity getInstance(){
         return ins;
     }
 
@@ -197,27 +201,31 @@ public class MainActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 Gson gson = new GsonBuilder().create();
 
-                switch (intent.getStringExtra("UPDATE")){
-                    case "NEW_BG":
+                switch (intent.getStringExtra(Constants.UPDATE)){
+                    case Constants.broadcast.NEW_BG:
                         updateBGDetails();
                         updateBGCharts();
                         holdViewport.set(0, 0, 0, 0); // TODO: 16/02/2016 needed?
                         break;
-                    case "NEW_APS_RESULT":
-                        APSResult apsResult = gson.fromJson(intent.getStringExtra("APSResult"), APSResult.class);
+                    case Constants.broadcast.NEW_APS_RESULT:
+                        APSResult apsResult = gson.fromJson(intent.getStringExtra(Constants.broadcast.APS_RESULT), APSResult.class);
                         updateAPSDetails(apsResult);
                         updateBGCharts();
                         break;
-                    case "ERROR_APS_RESULT":
-                        String errorMsg = intent.getStringExtra("error");
+                    case Constants.broadcast.ERROR_APS_RESULT:
+                        String errorMsg = intent.getStringExtra(Constants.ERROR);
                         updateAPSError(errorMsg);
                         break;
-                    case "NEW_STAT_UPDATE":
-                        Stat stat = gson.fromJson(intent.getStringExtra("stat"), Stat.class);
+                    case Constants.broadcast.NEW_STAT_UPDATE:
+                        Stat stat = gson.fromJson(intent.getStringExtra(Constants.broadcast.STAT_RESULT), Stat.class);
                         updateStats(stat);
                         break;
-                    case "UPDATE_RUNNING_TEMP":
+                    case Constants.broadcast.UPDATE_RUNNING_TEMP:
                         updateRunningTemp();
+                        break;
+                    case Constants.broadcast.NEW_INSULIN_UPDATE:
+                        InsulinIntegrationNotify insulinUpdate = gson.fromJson(intent.getStringExtra(Constants.broadcast.NEW_INSULIN_UPDATE_RESULT), InsulinIntegrationNotify.class);
+                        notifyInsulinUpdate(insulinUpdate);
                         break;
                 }
             }
@@ -300,12 +308,16 @@ public class MainActivity extends AppCompatActivity {
 
         tickWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
         clockWhite.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-        reportWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
-        bugWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
-        stopWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
-        settingsWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
-        checkWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
-        catWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        try {
+            reportWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+            bugWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+            stopWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+            settingsWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+            checkWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+            catWhite.setColorFilter(getResources().getColor(R.color.secondary_text_light), PorterDuff.Mode.SRC_ATOP);
+        } catch (NullPointerException e){
+            Log.e(TAG, "setupMenuAndToolbar: error setting secondary_text_light");
+        }
 
         ListView mDrawerList            = (ListView)findViewById(R.id.navList);
         ArrayList<NavItem> menuItems    = new ArrayList<>();
@@ -411,7 +423,6 @@ public class MainActivity extends AppCompatActivity {
             setViewport();
 
             Log.d(TAG, "bgGraph Updated");
-            return ;
         }
         @Override
         protected void onPreExecute() {
@@ -419,10 +430,21 @@ public class MainActivity extends AppCompatActivity {
             updateStuff     =   false;
             //bgChart.setVisibility(View.GONE);
             bgChartLoading.setVisibility(View.VISIBLE);
-            return ;
         }
     }
 
+    public void notifyInsulinUpdate(InsulinIntegrationNotify insulinUpdate){
+        Snackbar snackbar = insulinUpdate.getSnackbar(this.findViewById(android.R.id.content));
+        if (snackbar != null) snackbar.show();
+
+        if (insulinUpdate.foundError) {
+            Dialog errorDialog = insulinUpdate.showErrorDetailsDialog(this.findViewById(android.R.id.content));
+
+            if (activeErrorDialog != null) activeErrorDialog.dismiss();
+            errorDialog.show();
+            activeErrorDialog = errorDialog;
+        }
+    }
 
     public void test(View view){
         //InsulinIntegrationNotify popup = new InsulinIntegrationNotify();
@@ -440,30 +462,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void checkInsulinAppIntegration(final boolean sendText){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.getInstace());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         //Local device based Integrations
         String insulin_Integration_App = prefs.getString("insulin_integration", "");
 
         //Insulin Integration App, try and connect
         if (!insulin_Integration_App.equals("")){
-            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(MainActivity.getInstace(), insulin_Integration_App, "TEST", new Profile(new Date()));
+            final InsulinIntegrationApp insulinIntegrationApp = new InsulinIntegrationApp(this, insulin_Integration_App, Constants.TEST, new Profile(new Date()));
             insulinIntegrationApp.connectInsulinTreatmentApp();
-            insulinIntegrationApp_status.setText("Connecting...");
+            insulinIntegrationApp_status.setText(R.string.connecting);
             insulinIntegrationApp_icon.setBackground(clockWhite);
             insulinIntegrationApp_icon.setColorFilter(Color.WHITE);
             //listens out for connection
             insulinIntegrationAppUpdate = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    insulinIntegrationApp_status.setText(intent.getStringExtra("MSG"));
+                    insulinIntegrationApp_status.setText(intent.getStringExtra(Constants.MSG));
                     insulinIntegrationApp_icon.setBackground(tickWhite);
                     if(sendText) insulinIntegrationApp.sendTest();
-                    LocalBroadcastManager.getInstance(MainActivity.getInstace()).unregisterReceiver(insulinIntegrationAppUpdate);
+                    LocalBroadcastManager.getInstance(activity).unregisterReceiver(insulinIntegrationAppUpdate);
                 }
             };
-            LocalBroadcastManager.getInstance(MainActivity.getInstace()).registerReceiver(insulinIntegrationAppUpdate, new IntentFilter("INSULIN_INTEGRATION_TEST"));
+            LocalBroadcastManager.getInstance(this).registerReceiver(insulinIntegrationAppUpdate, new IntentFilter(Constants.treatmentService.INSULIN_INTEGRATION_TEST));
         } else {
-            insulinIntegrationApp_status.setText("No app selected or not in Closed Loop");
+            insulinIntegrationApp_status.setText(R.string.InsulinIntegration_no_app);
             insulinIntegrationApp_icon.setBackgroundResource(R.drawable.alert_circle);
         }
     }
@@ -560,8 +582,8 @@ public class MainActivity extends AppCompatActivity {
         TextView notificationText   = (TextView)findViewById(R.id.notices);
         TextView deltaText          = (TextView)findViewById(R.id.bgDelta);
         SharedPreferences prefs     = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-        Double highMark             = Double.parseDouble(prefs.getString("highValue", "170"));
-        Double lowMark              = Double.parseDouble(prefs.getString("lowValue", "70"));
+        Double highMark             = Double.parseDouble(prefs.getString(Constants.bg.HIGH_VALUE, "170"));
+        Double lowMark              = Double.parseDouble(prefs.getString(Constants.bg.LOW_VALUE, "70"));
 
         if ((currentBgValueText.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) > 0) {
             currentBgValueText.setPaintFlags(currentBgValueText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
@@ -696,7 +718,7 @@ public class MainActivity extends AppCompatActivity {
         MainApp.instance().startService(apsIntent);
     }
     public void pauseAPSToast(View view){
-        Toast.makeText(MainActivity.getInstace(), "Long press to Pause / Un-Pause APS", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.aps_pause_un_pause, Toast.LENGTH_SHORT).show();
     }
 
     public void apsstatusAccept (final View view){
@@ -745,13 +767,13 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "APS Result";
+                    return getString(R.string.home_dash_aps_result);
                 case 1:
-                    return "IOB & COB";
+                    return getString(R.string.home_chart_iob_cob);
                 case 2:
-                    return "Active IOB & COB";
+                    return getString(R.string.home_dash_chart_active_iob_cob);
                 case 3:
-                    return "Temp Basal vs Basal";
+                    return getString(R.string.home_dash_tbasal_vs_basal);
             }
             return null;
         }
@@ -759,7 +781,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static class openAPSFragment extends Fragment {
         public openAPSFragment(){}
-        private static TextView     apsstatus_deviation;
+        public static TextView     apsstatus_deviation;
         private static TextView     apsstatus_reason;
         private static TextView     apsstatus_Action;
         private static TextView     apsstatus_algorithm;
@@ -844,7 +866,8 @@ public class MainActivity extends AppCompatActivity {
                 //apsstatus_temp.setText("None");
                 //apsstatus_deviation.setText(apsResult.getFormattedDeviation());
                 apsstatus_mode.setText(apsResult.getAps_mode());
-                apsstatus_loop.setText(apsResult.getAps_loop() + " mins");
+                String apsstatus_loop_text = apsResult.getAps_loop() + MainApp.instance().getResources().getString(R.string.mins);
+                apsstatus_loop.setText(apsstatus_loop_text);
                 apsstatus_algorithm.setText(apsResult.getFormattedAlgorithmName());
 
                 if (apsResult.getTempSuggested() && !apsResult.getAccepted()) {
@@ -861,7 +884,7 @@ public class MainActivity extends AppCompatActivity {
 
             apsstatus_date.setText(sdfTime.format(new Date()));
             apsstatus_reason.setText(msg);
-            apsstatus_Action.setText("There was an error running APS");
+            apsstatus_Action.setText(R.string.aps_err_running);
             apsstatus_deviation.setText("-");
             apsstatus_mode.setText("-");
             apsstatus_loop.setText("-");
@@ -872,13 +895,13 @@ public class MainActivity extends AppCompatActivity {
 
         public void pauseAPS(){
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-            boolean aps_paused = prefs.getBoolean("aps_paused", false);
+            boolean aps_paused = prefs.getBoolean(Constants.aps.PAUSED, false);
             if (aps_paused){
                 pasuseAPSButton.setImageResource(R.drawable.ic_media_pause);
-                prefs.edit().putBoolean("aps_paused", false).apply();
+                prefs.edit().putBoolean(Constants.aps.PAUSED, false).apply();
             } else {
                 pasuseAPSButton.setImageResource(R.drawable.ic_media_play);
-                prefs.edit().putBoolean("aps_paused", true).apply();
+                prefs.edit().putBoolean(Constants.aps.PAUSED, true).apply();
             }
 
         }
@@ -888,13 +911,12 @@ public class MainActivity extends AppCompatActivity {
         static LineChartView iobcobPastChart;
         static PreviewLineChartView previewChart;
         static Viewport iobv;
-        static View rootView;
         static ProgressBar iobcobPastLoading;
         static IOBCOBLineGraph iobcobLineGraph;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_iobcob_linechart, container, false);
             iobcobPastChart         = (LineChartView) rootView.findViewById(R.id.iobcobPast);
             previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
             iobcobPastLoading       = (ProgressBar) rootView.findViewById(R.id.iobcobPastLoading);
@@ -942,7 +964,6 @@ public class MainActivity extends AppCompatActivity {
                 //Write some code you want to execute on UI before doInBackground() starts
                 iobcobPastChart.setVisibility(View.GONE);
                 iobcobPastLoading.setVisibility(View.VISIBLE);
-                return ;
             }
         }
     }
@@ -995,14 +1016,12 @@ public class MainActivity extends AppCompatActivity {
                 iobcobchartLoading.setVisibility(View.GONE);
                 iobcobChart.setVisibility(View.VISIBLE);
                 iobcobChart.setColumnChartData(result);
-                return ;
             }
             @Override
             protected void onPreExecute() {
                 //Write some code you want to execute on UI before doInBackground() starts
                 iobcobChart.setVisibility(View.GONE);
                 iobcobchartLoading.setVisibility(View.VISIBLE);
-                return ;
             }
         }
     }
@@ -1012,13 +1031,12 @@ public class MainActivity extends AppCompatActivity {
         static LineChartView basalvsTempBasalChart;
         static PreviewLineChartView previewChart;
         static Viewport iobv;
-        static View rootView;
         static ProgressBar basalvsTempBasalLoading;
         static BasalVSTempBasalGraph basalVSTempBasalGraph;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            rootView = inflater.inflate(R.layout.fragment_basalvstempbasal_linechart, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_basalvstempbasal_linechart, container, false);
             basalvsTempBasalChart   = (LineChartView) rootView.findViewById(R.id.basalvsTempBasal_LineChart);
             previewChart            = (PreviewLineChartView) getActivity().findViewById(R.id.chart_preview);
             basalvsTempBasalLoading = (ProgressBar) rootView.findViewById(R.id.basalvsTempBasalLoading);
