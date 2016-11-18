@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -163,10 +164,13 @@ public class Profile_Editor extends AppCompatActivity {
         if (errorInProfile){
             Snackbar.make(findViewById(android.R.id.content), R.string.profile_editor_profile_save_error,Snackbar.LENGTH_LONG).show();
         } else {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
-            tools.saveProfile(profile, profileName, timeSpansList, prefs, true);
+            if (profileChanged) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
+                tools.saveProfile(profile, profileName, timeSpansList, prefs, true);
 
-            Log.d(TAG, "onOptionsItemSelected: Profile: " + profile + " Changes Saved");
+                Log.d(TAG, "onOptionsItemSelected: Profile: " + profile + " Changes Saved");
+                Toast.makeText(this, R.string.profile_editor_saved, Toast.LENGTH_LONG).show();
+            }
             this.finish();
         }
     }
@@ -523,8 +527,8 @@ public class Profile_Editor extends AppCompatActivity {
 
             if (text != null && text.length() > 0) {
                 if (EditText.getId() == R.id.profile_value) {
-                    if (!item.value.equals(Double.parseDouble(text))) {
-                        item.value = Double.parseDouble(text);
+                    if (!item.value.equals(tools.stringToDouble(text))) {
+                        item.value = tools.stringToDouble(text);
                         profileChanged = true;
                     }
                 }

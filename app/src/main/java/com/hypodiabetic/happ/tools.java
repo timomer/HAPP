@@ -564,7 +564,7 @@ public class tools {
         }
         return activeProfile;
     }
-    public static int getTimeSlotsDefaultRange(String profile, SharedPreferences prefs){
+    public static Integer getTimeSlotsDefaultRange(String profile, SharedPreferences prefs){
         //returns the default time slots range in mins
         String profileDefaultTimeRangeName = "";
 

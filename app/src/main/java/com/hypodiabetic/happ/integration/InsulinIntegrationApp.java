@@ -196,10 +196,12 @@ public class InsulinIntegrationApp {
                 pump_driver_Service.send(msg);
 
             } catch (DeadObjectException d){
+                realmManager.closeRealm();
                 Crashlytics.logException(d);
                 d.printStackTrace();
                 errorSending = d.getLocalizedMessage() + " " + d.getCause();
             } catch (RemoteException e) {
+                realmManager.closeRealm();
                 Crashlytics.logException(e);
                 e.printStackTrace();
                 errorSending = e.getLocalizedMessage() + " " + e.getCause();

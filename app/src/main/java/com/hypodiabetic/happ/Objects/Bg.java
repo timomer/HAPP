@@ -148,6 +148,8 @@ public class Bg extends RealmObject {
 
     public String slopeArrow() {
         String arrow = "--";
+        if (direction == null) return arrow;
+
         if (direction.compareTo("DoubleDown") == 0) {
             arrow = Constants.ARROW_DOUBLE_DOWN;
         } else if (direction.compareTo("SingleDown") == 0) {

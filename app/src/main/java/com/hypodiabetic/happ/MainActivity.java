@@ -184,12 +184,13 @@ public class MainActivity extends AppCompatActivity {
         if (refresh60Seconds != null) {
             unregisterReceiver(refresh60Seconds);
         }
+        realmManager.closeRealm();
     }
 
     @Override
     public void onDestroy(){
-        super.onDestroy();
         realmManager.closeRealm();
+        super.onDestroy();
     }
 
     @Override

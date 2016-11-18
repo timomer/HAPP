@@ -101,8 +101,13 @@ public class EnterTreatment extends android.support.v4.app.FragmentActivity {
 
     @Override
     public void onDestroy(){
-        super.onDestroy();
         realmManager.closeRealm();
+        super.onDestroy();
+    }
+    @Override
+    public void onPause(){
+        realmManager.closeRealm();
+        super.onPause();
     }
     @Override
     public void onResume(){

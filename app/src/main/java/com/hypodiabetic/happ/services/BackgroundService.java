@@ -57,11 +57,11 @@ public class BackgroundService extends Service{
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         if (mPrefs != null && mPrefListener != null)    mPrefs.unregisterOnSharedPreferenceChangeListener(mPrefListener);
         if (mNotifyReceiver != null)                    unregisterReceiver(mNotifyReceiver);
         if (mCGMReceiver != null)                       unregisterReceiver(mCGMReceiver);
         realmManager.closeRealm();
+        super.onDestroy();
     }
 
     @Override

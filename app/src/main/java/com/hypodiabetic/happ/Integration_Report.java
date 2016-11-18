@@ -91,8 +91,13 @@ public class Integration_Report extends AppCompatActivity {
 
     @Override
     public void onDestroy(){
-        super.onDestroy();
         realmManager.closeRealm();
+        super.onDestroy();
+    }
+    @Override
+    public void onPause(){
+        realmManager.closeRealm();
+        super.onPause();
     }
 
     public class mySimpleAdapterIntegration extends SimpleAdapter {

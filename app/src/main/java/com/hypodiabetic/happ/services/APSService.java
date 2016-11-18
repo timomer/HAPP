@@ -117,10 +117,9 @@ public class APSService extends IntentService {
                     receiver.send(Constants.STATUS_FINISHED, bundle);
                 }
             }
-
-            realmManager.closeRealm();
-            Log.d(TAG, "Service Finished");
         }
+        realmManager.closeRealm();
+        Log.d(TAG, "Service Finished");
     }
 
     //Sets the suggested Temp Basal info as result of APS suggestion

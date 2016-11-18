@@ -52,10 +52,10 @@ public class DetermineBasalAdapterJS {
 
     JSONObject bgCheck;
     private RealmManager realmManager;
-    private static String TAG = "DetermineBasalAdapterJS-Master";
+    private static String TAG = "DetermineBasal-Master";
 
     public DetermineBasalAdapterJS(ScriptReader scriptReader, Profile profile) throws IOException {
-        Log.d(TAG, "DetermineBasalAdapterJS: START");
+        Log.d(TAG, "START");
         mV8rt = V8.createV8Runtime();
         mScriptReader  = scriptReader;
         realmManager = new RealmManager();
