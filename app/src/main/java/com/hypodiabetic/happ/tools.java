@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.hypodiabetic.happ.Objects.APSResult;
 import com.hypodiabetic.happ.Objects.Bg;
@@ -641,7 +642,14 @@ public class tools {
             } else {
                 profileArray = new Gson().fromJson(profileArrayJSON, new TypeToken<List<String>>() {}.getType());   //The array of Profiles
                 String profileJSON = profileArray.get(index);                                                       //Raw Profile JSON
-                timeSpansList = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType());     //The Profile itself
+                try {
+                    timeSpansList = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType()); //The Profile itself
+                } catch (JsonSyntaxException j){
+                    Crashlytics.log("profileJSON: " + profileJSON);
+                    Crashlytics.logException(j);
+                    Log.e(TAG, "Error getting profileJSON: " + j.getLocalizedMessage() + " " + profileJSON);
+                    timeSpansList = newEmptyProfile();
+                }
             }
 
             return timeSpansList;
