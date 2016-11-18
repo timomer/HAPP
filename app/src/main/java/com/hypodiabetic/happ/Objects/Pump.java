@@ -25,7 +25,7 @@ public class Pump {
     private Integer temp_basal_percent=null;        //Current temp basal percent
     public Integer  temp_basal_duration;            //Temp duration in Mins
     public Long     temp_basal_duration_left;       //Mins left of this Temp Basal
-    public Boolean  high_temp_extended_bolus;       //For High TBR use Extended Bolus (where pump does not support High TBR adjustments)
+    public Boolean  high_temp_extended_bolus=false; //For High TBR use Extended Bolus (where pump does not support High TBR adjustments)
 
     private Profile profile;
     private TempBasal tempBasal;

@@ -62,7 +62,7 @@ public class CommonChartSupport {
 
     public CommonChartSupport(Realm realm){
         this.realm          = realm;
-        this.sdfHour        = new SimpleDateFormat("HH:mm", MainApp.instance().getResources().getConfiguration().locale);
+        this.sdfHour        = new SimpleDateFormat("HH", MainApp.instance().getResources().getConfiguration().locale);
         //this.context        = context;
         this.prefs          = PreferenceManager.getDefaultSharedPreferences(MainApp.instance());
         this.highMark       = Double.parseDouble(prefs.getString("highValue", "170"));
@@ -72,8 +72,8 @@ public class CommonChartSupport {
         defaultMinY         = unitized(40);
         defaultMaxY         = unitized(250);
         //pointSize           = isXLargeTablet() ? 5 : 3;
-        //axisTextSize        = isXLargeTablet() ? 20 : Axis.DEFAULT_TEXT_SIZE_SP;
-        previewAxisTextSize = 5;//isXLargeTablet() ? 12 : 5;
+        axisTextSize        = 8;//isXLargeTablet() ? 20 : Axis.DEFAULT_TEXT_SIZE_SP;
+        previewAxisTextSize = 7;//isXLargeTablet() ? 12 : 5;
         hoursPreviewStep    = 2;//isXLargeTablet() ? 2 : 1;
     }
 

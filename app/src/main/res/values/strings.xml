@@ -18,6 +18,9 @@
     <string name="string_for">for</string>
     <string name="none">None</string>
     <string name="connecting">Connecting</string>
+    <string name="error">error</string>
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Titles -->
     <string name="title_activity_enter_carb">EnterCarb</string>
@@ -28,6 +31,23 @@
     <string name="title_activity_integration__report">Integration_Report</string>
     <string name="title_activity_activity_license_agreement">activity_license_agreement</string>
     <string name="title_activity_license_agreement">license_agreement</string>
+
+    <!-- Treatments -->
+    <string name="treatments_carbs_entered">Carbs entered</string>
+    <string name="treatments_bolus_wizard">Bolus Wizard</string>
+    <string name="treatments_manual_entry">Manual Entry</string>
+    <string name="treatments_critical_low_no_bolus">Critical Low, no Bolus allowed</string>
+    <string name="treatments_select_time">Select Time</string>
+    <string name="treatments_active">Active</string>
+    <string name="treatments_today">Today</string>
+    <string name="treatments_yesterday">Yesterday</string>
+    <string name="treatments_press_options">Long press for options</string>
+    <string name="treatments_original_deleted">"Original Treatment Deleted, re-save to add back"</string>
+    <string name="treatments_deleted">Treatment Deleted</string>
+    <string name="treatments_enter_carb">Enter Carb Value</string>
+    <string name="treatments_bolus">Bolus</string>
+    <string name="treatments_correction">Correction</string>
+    <string name="treatments_show_calc">Show Calc</string>
 
     <!-- APS -->
     <string name="aps_cancel_active">Cancel Active</string>

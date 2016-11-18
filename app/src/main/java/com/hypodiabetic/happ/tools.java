@@ -633,15 +633,15 @@ public class tools {
             return newEmptyProfile();
 
         } else {
-            String profileArrayJSON = prefs.getString(profileArrayName, "");                                    //RAW array of Profiles JSON
+            String profileArrayJSON = prefs.getString(profileArrayName, "");                                        //RAW array of Profiles JSON
 
             if (profileArrayJSON.equals("")) {
                 //cannot find any profiles, return an empty one
                 timeSpansList = newEmptyProfile();
             } else {
                 profileArray = new Gson().fromJson(profileArrayJSON, new TypeToken<List<String>>() {}.getType());   //The array of Profiles
-                String profileJSON = profileArray.get(index);                                                   //Raw Profile JSON
-                timeSpansList = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType()); //The Profile itself
+                String profileJSON = profileArray.get(index);                                                       //Raw Profile JSON
+                timeSpansList = new Gson().fromJson(profileJSON, new TypeToken<List<TimeSpan>>() {}.getType());     //The Profile itself
             }
 
             return timeSpansList;

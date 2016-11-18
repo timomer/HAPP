@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="200dp">
+    android:layout_height="wrap_content">
 
 
         <LinearLayout
@@ -90,7 +90,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:hint="Enter Carb Value"
+                android:hint="@string/treatments_enter_carb"
                 android:id="@+id/wizardCarbValue"
                 android:inputType="number"
                 android:textSize="14sp"/>
@@ -103,7 +103,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:hint="Bolus"
+                android:hint="@string/treatments_bolus"
                 android:id="@+id/wizardSuggestedBolus"
                 android:inputType="numberDecimal"
                 android:text="0"
@@ -117,13 +117,22 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:hint="Correction"
+                android:hint="@string/treatments_correction"
                 android:text="0"
                 android:id="@+id/wizardSuggestedCorrection"
                 android:inputType="numberDecimal"
                 android:textSize="14sp"/>
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/wizardCriticalLow"
+        android:textColor="#FF5722"
+        android:gravity="center"
+        android:text="@string/treatments_critical_low_no_bolus"
+        android:visibility="gone"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -143,7 +152,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="Show Calc"
+                    android:text="@string/treatments_show_calc"
                     android:gravity="center_vertical"
                     android:paddingLeft="8dp"/>
 
@@ -161,14 +170,14 @@
                     android:layout_height="46dp"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="Accept"
+                    android:text="@string/accept"
                     android:onClick="wizardAccept"
                     android:id="@+id/wizardAccept" />
                 <Button
                     android:layout_width="wrap_content"
                     android:minWidth="88dp"
                     android:layout_height="46dp"
-                    android:text="Cancel"
+                    android:text="@string/cancel"
                     android:paddingRight="16dp"
                     android:paddingLeft="16dp"
                     android:onClick="cancel"/>

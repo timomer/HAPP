@@ -48,6 +48,7 @@ public class BolusWizard {
         Double suggested_correction;
         Double net_correction_biob;
         String net_biob_correction_maths;
+        Boolean bgCriticalLow=false;
 
         //Net IOB after current carbs taken into consideration
         if (iobNow < 0){
@@ -73,7 +74,7 @@ public class BolusWizard {
         String insulin_correction_carbs_maths   = "Carbs(" + carbs + "g) / Carb Ratio(" + profile.getCarbRatio() + "g) = " + tools.formatDisplayInsulin(insulin_correction_carbs,2);
 
         //Insulin required for BG correction
-        if (lastBG >= profile.max_bg) {                                                              //True HIGH
+        if (lastBG >= profile.max_bg) {                                                             //True HIGH
             insulin_correction_bg = (lastBG - profile.max_bg) / profile.getISF();
             bgCorrection = "High";
             insulin_correction_bg_maths = "BG(" + lastBG + ") - (Max BG(" + profile.max_bg + ") / ISF(" + profile.getISF() + ")) = " + tools.formatDisplayInsulin(insulin_correction_bg,2);
@@ -81,6 +82,9 @@ public class BolusWizard {
         } else if (lastBG <= (profile.min_bg-30)){                                                  //Critical LOW
             insulin_correction_bg       = (lastBG - profile.target_bg) / profile.getISF();
             bgCorrection                = "Critical Low";
+            bgCriticalLow               = true;
+            if (insulin_correction_carbs > 0)   insulin_correction_carbs   = 0D;
+            if (net_correction_biob > 0)        net_correction_biob        = 0D;
             if(insulin_correction_bg > 0) {
                 insulin_correction_bg_maths = "Suggestion " + insulin_correction_bg + "U, Blood Sugars below " + (profile.min_bg-30) + ". Setting to 0.";
                 insulin_correction_bg   = 0D;
@@ -97,19 +101,14 @@ public class BolusWizard {
             bgCorrection                = "Within Target";
             insulin_correction_bg_maths = "NA - BG within Target";
         }
+
         if (insulin_correction_bg.isNaN() || insulin_correction_bg.isInfinite()) insulin_correction_bg = 0D;
+
         suggested_correction        = insulin_correction_bg + net_correction_biob;
         suggested_correction_maths  = "BG Corr(" + tools.formatDisplayInsulin(insulin_correction_bg,2) + ") - Net Bolus(" + tools.formatDisplayInsulin(net_correction_biob,2) + ") = " + tools.formatDisplayInsulin(suggested_correction,2);
+        suggested_bolus             = insulin_correction_carbs;
+        suggested_bolus_maths       = "Carb Corr(" + tools.formatDisplayInsulin(insulin_correction_carbs, 2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
 
-
-        //if (suggested_correction < 0) {
-        //    suggested_bolus = insulin_correction_carbs + suggested_correction;
-        //    suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayInsulin(insulin_correction_carbs, 2) + ") + " + "Neg Corr(" + tools.formatDisplayInsulin(suggested_correction,2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
-        //    suggested_correction = 0D;
-        //} else {
-            suggested_bolus = insulin_correction_carbs;
-            suggested_bolus_maths = "Carb Corr(" + tools.formatDisplayInsulin(insulin_correction_carbs, 2) + ") = " + tools.formatDisplayInsulin(suggested_bolus,2);
-        //}
 
 
         JSONObject reply = new JSONObject();
@@ -124,6 +123,7 @@ public class BolusWizard {
             reply.put("max_bg",profile.max_bg);
             reply.put("target_bg",profile.target_bg);
             reply.put("bgCorrection",bgCorrection);
+            reply.put("bgCriticalLow",bgCriticalLow);
             if (net_correction_biob > 0){
                 reply.put("net_biob",                   "+" + tools.formatDisplayInsulin(net_correction_biob,1));
             } else {
@@ -150,7 +150,7 @@ public class BolusWizard {
         } catch (JSONException e) {
             Crashlytics.logException(e);
         }
-        Log.d("DEBUG", "bw: resut" + reply.toString());
+        Log.d(TAG, "bw: result" + reply.toString());
         Log.d(TAG, "bw: FINISH");
         return reply;
 

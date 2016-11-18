@@ -76,6 +76,19 @@ public class Constants {
         public static final String TSLIM_EXTENDED_BOLUS = "tslim_extended_bolus";
     }
 
+    //Treatments
+    public class treatments {
+        public static final String CARBS                        =   "Carbs";
+        public static final String INSULIN                      =   "Insulin";
+        public static final String CORRECTION                   =   "correction";
+        public static final String BOLUS                        =   "bolus";
+        public static final String LOAD                         =   "LOAD";
+        public static final String TODAY                        =   "TODAY";
+        public static final String YESTERDAY                    =   "YESTERDAY";
+        public static final String ACTIVE                       =   "ACTIVE";
+        public static final String TYPE                         =   "type";
+    }
+
     //Treatment Service
     public class treatmentService {
         //Data
