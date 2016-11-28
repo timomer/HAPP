@@ -3,10 +3,10 @@
 
 Native Android Artificial Pancreas App with OpenAPS.org algorithm
 
-* Most recent apk: https://drive.google.com/open?id=0BxE8lMx4AjLieEpYSWU4NkpNbnc
+* Most recent Master apk: https://drive.google.com/open?id=0BxE8lMx4AjLieEpYSWU4NkpNbnc
 * App Summary: https://sites.google.com/a/n-omer.co.uk/hackabetes/home/happ-overview
 * Project blog: http://www.hypodiabetic.co.uk
-* Gitter chat group: https://gitter.im/timomer/HAPP
+* [![Gitter](https://badges.gitter.im/timomer/HAPP.svg)](https://gitter.im/timomer/HAPP?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ![](https://github.com/timomer/HAPP/blob/master/HAPP_Front_Page.png)
 ![](https://github.com/timomer/HAPP/blob/master/HAPP_WF.png)
@@ -27,7 +27,7 @@ This allows a Diabetic with any pump to experiment with the OpenAPS algorithm.
 
 Requirements:
 * Android 5.0+
-* xDrip App for CGM Data (use this xDrip build for integration with xDrip WF https://dl.dropboxusercontent.com/u/17867795/xdripbroadcast/xdripBroadcast21.apk)
+* xDrip App for CGM Data
 * Android Wear for viewing current Basal & acknowledging Temp Basal Suggestions (optional but highly recommended)
 * NSClient for Nightscout uploads (optional)
 * Pump Driver app for your pump (optional)
@@ -37,7 +37,7 @@ I am utilising code from the following repos and porting them over to this app.
 * OpenAPS oref0 - https://github.com/timomer/oref0
 * NightWatch - https://github.com/timomer/NightWatch
 * Nightscout - https://github.com/timomer/cgm-remote-monitor
-* xDrip with HAPP WF Support - https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental/tree/status_happ
+* xDrip - https://github.com/StephenBlackWasAlreadyTaken/xDrip-Experimental
 
 ###Thanks to
 The community for all their code and advice to make this possible.

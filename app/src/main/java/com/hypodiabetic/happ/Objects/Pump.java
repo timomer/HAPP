@@ -288,6 +288,7 @@ public class Pump {
         }
     }
     private int calcBasalPlusPercent(){
+        // TODO: 18/11/2016 do we need to check if activeRate is TBR and if so get activeRate as when the TBR was set and not as of now? 
         Double ratePercent = (activeRate() / profile.getCurrentBasal()) * 100;
         ratePercent = (double) Math.round(ratePercent / 10) * 10; //round to closest 10
         return ratePercent.intValue();

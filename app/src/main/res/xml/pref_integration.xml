@@ -11,7 +11,7 @@
                 <SwitchPreference
                     android:title="Update Watch Face"
                     android:key="xdrip_wf_integration"
-                    android:summary="Show active Basal, IOB and COB. See HAPP github page for xDrip apk with this feature"
+                    android:summary="Show active Basal, IOB and COB on xDrip Watch Face"
                     android:defaultValue="false"/>
             </PreferenceCategory>
 
