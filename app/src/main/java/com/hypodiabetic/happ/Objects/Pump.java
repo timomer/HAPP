@@ -1,5 +1,7 @@
 package com.hypodiabetic.happ.Objects;
 
+import android.util.Log;
+
 import com.crashlytics.android.Crashlytics;
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
@@ -33,6 +35,8 @@ public class Pump {
     private static final int ABSOLUTE                   =  1;       //Absolute (U/hr)
     private static final int PERCENT                    =  2;       //Percent of Basal
     private static final int BASAL_PLUS_PERCENT         =  3;       //hourly basal rate plus TBR percentage
+
+    private static final String TAG                     =  "Pump Driver";
 
     public Pump(Profile profile, Realm realm){
 
@@ -89,6 +93,14 @@ public class Pump {
         return temp_basal_percent;
     }
 
+    private Boolean isExtendedBolusActive(){
+        if (temp_basal_active && temp_basal_rate > 0 && high_temp_extended_bolus) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public Double checkSuggestedRate(Double rate){
         switch (name) {
             case Constants.pump.OMNIPOD:
@@ -137,9 +149,10 @@ public class Pump {
     public String displayCurrentBasal(boolean small){
         if (basal_mode == null) return MainApp.instance().getString(R.string.pump_no_basal_mode);
         String msg="";
-        if (high_temp_extended_bolus && activeRate() > 0) {
+        if (isExtendedBolusActive()) {
             //Return Extended Bolus, Absolute (U/hr) rate / 2 for 30min rate negative current Basal
-            msg = Double.toString((activeRate() / 2) - (profile.getCurrentBasal() / 2)) + " U/30" + MainApp.instance().getString(R.string.min);
+            msg =  Double.toString( tools.round((activeRate() / 2) - (profile.getCurrentBasal() / 2), 2) );
+            Log.d(TAG, "displayCurrentBasal: high_temp_extended_bolus: " + msg );
 
         } else {
             if (small) {
@@ -215,7 +228,7 @@ public class Pump {
     }
 
     public String getTBRSupport(){
-        if (high_temp_extended_bolus && activeRate() > 0){
+        if (isExtendedBolusActive()){
             return MainApp.instance().getString(R.string.pump_extended_bolus);
         } else {
             return MainApp.instance().getString(R.string.pump_tbr);
@@ -223,7 +236,7 @@ public class Pump {
     }
 
     public String getDefaultModeString(){
-        if (high_temp_extended_bolus && activeRate() > 0){
+        if (isExtendedBolusActive()){
             return MainApp.instance().getString(R.string.pump_default_basal) + ", " + MainApp.instance().getString(R.string.pump_no_extended_bolus);
         } else {
             return MainApp.instance().getString(R.string.pump_default_basal);
@@ -231,8 +244,8 @@ public class Pump {
     }
 
     private int getBasalPercent(){
-        if (basal_mode == null) return 0;
-        if (high_temp_extended_bolus && activeRate() > 0) return 0;
+        if (basal_mode == null)         return 0;
+        if (isExtendedBolusActive())    return 0;
         switch (basal_mode){
             case ABSOLUTE:
                 return 0;
@@ -311,7 +324,7 @@ public class Pump {
                 reply = MainApp.instance().getString(R.string.pump_no_basal_mode);
                 break;
         }
-        if (high_temp_extended_bolus) reply = reply + ", " + MainApp.instance().getString(R.string.high) + MainApp.instance().getString(R.string.pump_tbr) + MainApp.instance().getString(R.string.pump_extended_bolus);
+        if (high_temp_extended_bolus) reply = reply + ", " + MainApp.instance().getString(R.string.high) + " " + MainApp.instance().getString(R.string.pump_tbr) + " " + MainApp.instance().getString(R.string.pump_extended_bolus);
         return reply;
     }
 
@@ -322,6 +335,7 @@ public class Pump {
                 " min_low_basal_duration:   " + min_low_basal_duration + "\n" +
                 " min_high_basal_duration:  " + min_high_basal_duration + "\n" +
                 " current_basal_rate:       " + profile.getCurrentBasal() + "\n" +
+                " high_temp_extended_bolus: " + high_temp_extended_bolus + "\n" +
                 " TBR_active:               " + temp_basal_active + "\n" +
                 " TBR_rate:                 " + temp_basal_rate + "\n" +
                 " TBR_percent:              " + getTempBasalPercent() + "\n" +
