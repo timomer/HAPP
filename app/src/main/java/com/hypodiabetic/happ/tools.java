@@ -189,7 +189,7 @@ public class tools {
 
         if (dirExists) {
             new AlertDialog.Builder(c)
-                    .setMessage("Export Settings to " + file + "?")
+                    .setMessage(c.getString(R.string.tools_export_to) + file + "?")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 
@@ -203,7 +203,7 @@ public class tools {
                                 }
                                 pw.close();
                                 fw.close();
-                                Toast.makeText(c, "Exported", Toast.LENGTH_LONG).show();
+                                Toast.makeText(c, c.getString(R.string.tools_exported), Toast.LENGTH_LONG).show();
                                 Log.d(TAG, "Exported settings to " + file.toString());
                             } catch (Exception e) {
                                 Crashlytics.logException(e);
@@ -218,7 +218,7 @@ public class tools {
                     })
                     .show();
         } else {
-            Toast.makeText(c, "Could not create export folder, export aborted", Toast.LENGTH_LONG).show();
+            Toast.makeText(c, c.getString(R.string.tools_export_failed), Toast.LENGTH_LONG).show();
             Log.e(TAG, "Could not create export folder, export aborted " + file.toString());
         }
     }
@@ -228,7 +228,7 @@ public class tools {
         final File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "HAPP_Settings");
 
         new AlertDialog.Builder(c)
-                .setMessage("Import Settings from " + file + "?")
+                .setMessage(c.getString(R.string.tools_import_from) + file + "?")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -257,12 +257,12 @@ public class tools {
                             }
                             reader.close();
                             editor.commit();
-                            Toast.makeText(c, "Settings Imported", Toast.LENGTH_LONG).show();
+                            Toast.makeText(c, c.getString(R.string.tools_imported), Toast.LENGTH_LONG).show();
                             Log.d(TAG, "Imported settings from " + file.toString());
 
 
                         } catch (FileNotFoundException e2) {
-                            Toast.makeText(c, "File not found " + file, Toast.LENGTH_LONG).show();
+                            Toast.makeText(c, c.getString(R.string.tools_file_not_found) + file, Toast.LENGTH_LONG).show();
                             Log.e(TAG, "Settings File not found " + file.toString());
 
                         } catch (IOException e2) {
@@ -358,7 +358,7 @@ public class tools {
 
         // Create alert dialog box
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
-        builder.setTitle("Insulin Treatment Apps installed");
+        builder.setTitle(c.getString(R.string.tools_Insulin_Apps));
         builder.setAdapter(objShareIntentListAdapter, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int item) {
@@ -469,11 +469,11 @@ public class tools {
         try {
             AlertDialog alertDialog = new AlertDialog.Builder(context)
                     .setMessage(msg)
-                    .setPositiveButton("Copy to Clipboard", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(context.getText(R.string.tools_to_clipboard), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
                             clipboard.setText(msg);
-                            Toast.makeText(MainActivity.getInstance(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.getInstance(), context.getText(R.string.tools_to_clipboard), Toast.LENGTH_SHORT).show();
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {

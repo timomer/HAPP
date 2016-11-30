@@ -177,7 +177,7 @@ public class SettingsActivity extends PreferenceActivity {
                     break;
                 case "aps_loop":
                     int aps_loop_int = Integer.parseInt(stringValue);
-                    preference.setSummary("every " + (aps_loop_int / 60000) + " mins");
+                    preference.setSummary(MainApp.instance().getString(R.string.every) + " " + (aps_loop_int / 60000) + " " + MainApp.instance().getString(R.string.mins));
                     break;
                 default:
                     preference.setSummary(stringValue);

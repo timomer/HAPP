@@ -62,13 +62,13 @@ public class Profile_Editor extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Date lastTime = timeSpansList.get(timeSpansList.size() -1).time;
-                if (!sdfTimeDisplay.format(lastTime).equals("23:30")) {
+                //Date lastTime = timeSpansList.get(timeSpansList.size() -1).time;
+                //if (!sdfTimeDisplay.format(lastTime).equals("23:30")) {
                     //timeSpansList.add(getNextTimeSpan(lastTime));
 
                     //adapter.notifyDataSetChanged();
                     //adapter.notifyDataSetInvalidated();
-                }
+                //}
             }
         });
 
@@ -234,24 +234,24 @@ public class Profile_Editor extends AppCompatActivity {
 
 
 
-    public class CustomAdapter extends ArrayAdapter<TimeSpan> {
+    private class CustomAdapter extends ArrayAdapter<TimeSpan> {
         private List<TimeSpan> items;
         private Activity Context;
 
-        public CustomAdapter(Activity context, int textViewResourceId, List<TimeSpan> items) {
+        private CustomAdapter(Activity context, int textViewResourceId, List<TimeSpan> items) {
             super(context, textViewResourceId, items);
             this.items = items;
             this.Context = context;
         }
 
-        public class ViewHolder {
-            protected Spinner spStartTime;
-            protected Spinner spTimeUntil;
-            protected EditText etValue;
-            protected ImageView ivDelete;
-            protected TextView tvUnits;
-            protected ImageView ivAdd;
-            protected ImageView ivError;
+        private class ViewHolder {
+            private Spinner spStartTime;
+            private Spinner spTimeUntil;
+            private EditText etValue;
+            private ImageView ivDelete;
+            private TextView tvUnits;
+            private ImageView ivAdd;
+            private ImageView ivError;
 
         }
 
@@ -344,6 +344,7 @@ public class Profile_Editor extends AppCompatActivity {
                             destroyAndReloadList();
                         }
                     }catch(ParseException e){
+                        Log.e(TAG, "onItemSelected: " + e.getLocalizedMessage());
                     }
                 }
                 @Override
@@ -356,7 +357,9 @@ public class Profile_Editor extends AppCompatActivity {
                 allowedTimeSlotsEndTime.add("23:59");
                 try {
                     rowItem.endTime = sdfTimeDisplay.parse("23:59");
-                } catch (ParseException e){}
+                } catch (ParseException e){
+                    Log.e(TAG, "getView: " + e.getLocalizedMessage());
+                }
             } else {
                 allowedTimeSlotsEndTime = getAllowedTimeSlots(rowItem.time, timeSpansList.get(position+1).time, false);
             }
@@ -370,7 +373,9 @@ public class Profile_Editor extends AppCompatActivity {
 
                             destroyAndReloadList();
                         }
-                    } catch (ParseException e){}
+                    } catch (ParseException e){
+                        Log.e(TAG, "onItemSelected: " + e.getLocalizedMessage());
+                    }
                 }
                 @Override
                 public void onNothingSelected(AdapterView<?> parentView) {
@@ -491,6 +496,7 @@ public class Profile_Editor extends AppCompatActivity {
                 }
 
             } catch (ParseException e) {
+                Log.d(TAG, "getAllowedTimeSlots: " + e.getLocalizedMessage());
             }
         }
 
@@ -516,7 +522,7 @@ public class Profile_Editor extends AppCompatActivity {
         private EditText EditText;
         private TimeSpan item;
 
-        public CustomTextWatcher(EditText e, TimeSpan item) {
+        private CustomTextWatcher(EditText e, TimeSpan item) {
             this.EditText = e;
             this.item = item;
         }

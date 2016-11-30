@@ -21,6 +21,10 @@
     <string name="error">error</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+    <string name="count">Count</string>
+    <string name="deliver">Deliver</string>
+    <string name="done">Done</string>
+    <string name="every">every</string>
 
     <!-- Titles -->
     <string name="title_activity_enter_carb">EnterCarb</string>
@@ -94,6 +98,32 @@
 
     <!-- Insulin Integration -->
     <string name="InsulinIntegration_no_app">No app selected or not in Closed Loop</string>
+
+    <!-- Integration Report -->
+
+    <!-- Pump Action -->
+    <string name="pump_action_deliver_to_pump">deliver to pump</string>
+    <string name="pump_action_manually_set_pump">manually set on pump</string>
+    <string name="pump_action_error_old_bolus">Bolus is in the past or future, will not be sent to Pump</string>
+    <string name="pump_action_Insulin_Bolus">Insulin Bolus</string>
+    <string name="pump_action_Insulin_Correction">"Insulin Correction</string>
+    <string name="pump_action_Carbohydrates">Carbohydrates</string>
+    <string name="pump_action_no_active_tbr">No Active Temp Basal to Cancel</string>
+    <string name="pump_action_no_bolus">No Bolus to Deliver</string>
+    <string name="pump_action_suggested_bolus">Suggested Bolus</string>
+    <string name="pump_action_over_safe_bolus"> > than Safe Bolus (User Max:</string>
+    <string name="pump_action_sys_max"> System Max:</string>
+    <string name="pump_action_setting_to">). Setting to </string> //Example use: Setting to 5U
+
+    <!-- Tools -->
+    <string name="tools_export_to">Export Settings to </string>
+    <string name="tools_exported">Exported</string>
+    <string name="tools_export_failed">Could not create export folder, export aborted</string>
+    <string name="tools_import_from">Import Settings from </string>
+    <string name="tools_imported">Settings Imported</string>
+    <string name="tools_file_not_found">File not found </string>
+    <string name="tools_Insulin_Apps">Insulin Treatment Apps installed</string>
+    <string name="tools_to_clipboard">Copy to Clipboard</string>
 
     <!-- Main Screen -->
     <string name="home_dash_aps_result">APS Result</string>

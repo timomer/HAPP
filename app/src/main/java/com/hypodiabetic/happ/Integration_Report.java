@@ -141,7 +141,7 @@ public class Integration_Report extends AppCompatActivity {
                 new int[]{R.id.integrationID, R.id.integrationType, R.id.integrationDateTime, R.id.integrationDetails, R.id.integrationState});
         integrationReportList.setAdapter(adapter);
 
-        integrationItemCount.setText("Count: " + integrationList.size());
+        integrationItemCount.setText(getString(R.string.count) + ": " + integrationList.size());
 
         integrationReportList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override

@@ -151,7 +151,7 @@ public class Pump {
         String msg="";
         if (isExtendedBolusActive()) {
             //Return Extended Bolus, Absolute (U/hr) rate / 2 for 30min rate negative current Basal
-            msg =  Double.toString( tools.round((activeRate() / 2) - (profile.getCurrentBasal() / 2), 2) );
+            msg =  tools.formatDisplayInsulin( (activeRate() / 2) - (profile.getCurrentBasal() / 2), 2);
             Log.d(TAG, "displayCurrentBasal: high_temp_extended_bolus: " + msg );
 
         } else {

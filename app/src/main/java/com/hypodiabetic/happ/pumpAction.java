@@ -104,17 +104,17 @@ public class pumpAction {
 
             //Update Main Activity of Current Temp Change
             Intent intent = new Intent(Intents.UI_UPDATE);
-            intent.putExtra("UPDATE", "UPDATE_RUNNING_TEMP");
+            intent.putExtra(Constants.UPDATE, Constants.broadcast.UPDATE_RUNNING_TEMP);
             LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intent);
 
             //Update UI
             Intent intentUpdate = new Intent(Intents.UI_UPDATE);
-            intentUpdate.putExtra("UPDATE", "NEW_APS_RESULT");
+            intentUpdate.putExtra(Constants.UPDATE, Constants.broadcast.NEW_APS_RESULT);
             LocalBroadcastManager.getInstance(MainApp.instance()).sendBroadcast(intentUpdate);
 
         } else {
             //No temp Basal active
-            Toast.makeText(MainApp.instance(), "No Active Temp Basal to Cancel", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainApp.instance(), MainApp.instance().getString(R.string.pump_action_no_active_tbr), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -141,7 +141,7 @@ public class pumpAction {
             totalBolus = 0D;
             bolus = null;
             bolusCorrection = null;
-            warningMSG = "No Bolus to Deliver";
+            warningMSG = c.getString(R.string.pump_action_no_bolus);
         }
 
         if (bolus == null && bolusCorrection == null && carb == null) return;
@@ -149,7 +149,7 @@ public class pumpAction {
 
         if (!safety.checkIsSafeMaxBolus(totalBolus)){
 
-            warningMSG = "Suggested Bolus " + tools.formatDisplayInsulin(totalBolus,2) + " > than Safe Bolus (User Max:" + safety.user_max_bolus + " System Max:" + safety.hardcoded_Max_Bolus + "). Setting to " + tools.formatDisplayInsulin(safety.getSafeBolus(),2);
+            warningMSG = c.getString(R.string.pump_action_suggested_bolus) + " " + tools.formatDisplayInsulin(totalBolus,2) + c.getString(R.string.pump_action_over_safe_bolus) + safety.user_max_bolus + c.getString(R.string.pump_action_sys_max) + safety.hardcoded_Max_Bolus + c.getString(R.string.pump_action_setting_to) + tools.formatDisplayInsulin(safety.getSafeBolus(),2);
             diffBolus = totalBolus - safety.getSafeBolus();
             totalBolus = safety.getSafeBolus();
 
@@ -169,9 +169,9 @@ public class pumpAction {
 
         }
 
-        final Bolus finalCorrectionTrearment = bolusCorrection;
-        final Bolus finalBolusTreatment = bolus;
-        final Dialog dialog = new Dialog(c);
+        final Bolus finalCorrectionTreatment    = bolusCorrection;
+        final Bolus finalBolusTreatment         = bolus;
+        final Dialog dialog                     = new Dialog(c);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.bolus_dialog);
 
@@ -192,33 +192,33 @@ public class pumpAction {
         if (p.send_bolus_allowed){
             //Bolus allowed to send commend to pump
             if (!safety.checkIsBolusSafeToSend(bolus, bolusCorrection)) {
-                warningMSG += "\nBolus is in the past or future, will not be sent to Pump.";
+                warningMSG += "\n" + c.getString(R.string.pump_action_error_old_bolus);
             }
-            bolusMsg.setText("deliver to pump");
-            buttonOK.setText("Deliver");
+            bolusMsg.setText(c.getString(R.string.pump_action_deliver_to_pump));
+            buttonOK.setText(c.getString(R.string.deliver));
         } else {
             //not sending bolus to pump, prompt user to manually action
-            bolusMsg.setText("manually set on pump");
-            buttonOK.setText("Done");
+            bolusMsg.setText(c.getString(R.string.pump_action_manually_set_pump));
+            buttonOK.setText(c.getString(R.string.done));
         }
-        if (bolus == null && bolusCorrection == null) buttonOK.setText("Save");
+        if (bolus == null && bolusCorrection == null) buttonOK.setText(c.getString(R.string.save));
 
         bolusAmount.setText(tools.formatDisplayInsulin(totalBolus,1));
         if (finalBolusTreatment != null){
             bolusTreatValue.setText(tools.formatDisplayInsulin(finalBolusTreatment.getValue(), 1));
-            bolusTreatText.setText("Insulin Bolus");
+            bolusTreatText.setText(c.getString(R.string.pump_action_Insulin_Bolus));
         } else {
             bolusTreatLayout.setVisibility(View.GONE);
         }
-        if (finalCorrectionTrearment != null){
-            corrTreatValue.setText(tools.formatDisplayInsulin(finalCorrectionTrearment.getValue(), 1));
-            corrTreatText.setText("Insulin Correction");
+        if (finalCorrectionTreatment != null){
+            corrTreatValue.setText(tools.formatDisplayInsulin(finalCorrectionTreatment.getValue(), 1));
+            corrTreatText.setText(c.getString(R.string.pump_action_Insulin_Correction));
         } else {
             corrTreatLayout.setVisibility(View.GONE);
         }
         if (carb != null){
             carbTreatValue.setText(tools.formatDisplayCarbs(carb.getValue()));
-            carbTreatText.setText("Carbohydrates");
+            carbTreatText.setText(c.getString(R.string.pump_action_Carbohydrates));
         } else {
             carbTreatLayout.setVisibility(View.GONE);
         }
@@ -235,11 +235,11 @@ public class pumpAction {
                 realm.beginTransaction();
                 if (carb != null) realm.copyToRealm(carb);
                 if (finalBolusTreatment != null) realm.copyToRealm(finalBolusTreatment);
-                if (finalCorrectionTrearment != null) realm.copyToRealm(finalCorrectionTrearment);
+                if (finalCorrectionTreatment != null) realm.copyToRealm(finalCorrectionTreatment);
                 realm.commitTransaction();
 
                 //inform Integration Manager
-                IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTrearment, realm);
+                IntegrationsManager.newBolus(finalBolusTreatment,finalCorrectionTreatment, realm);
                 IntegrationsManager.newCarbs(carb, realm);
 
                 //update Stats
