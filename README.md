@@ -3,7 +3,7 @@
 
 Native Android Artificial Pancreas App with OpenAPS.org algorithm
 
-* Most recent Master apk: https://drive.google.com/open?id=0BxE8lMx4AjLieEpYSWU4NkpNbnc
+* Most recent [Master apk](https://drive.google.com/open?id=0BxE8lMx4AjLieEpYSWU4NkpNbnc)
 * [App Summary](https://sites.google.com/a/n-omer.co.uk/hackabetes/home/happ-overview)
 * [Project blog](http://www.hypodiabetic.co.uk)
 * [Wiki Documentation](https://github.com/timomer/HAPP/wiki)
