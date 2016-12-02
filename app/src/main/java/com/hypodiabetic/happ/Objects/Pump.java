@@ -94,7 +94,7 @@ public class Pump {
     }
 
     private Boolean isExtendedBolusActive(){
-        if (temp_basal_active && temp_basal_rate > 0 && high_temp_extended_bolus) {
+        if (temp_basal_active && temp_basal_rate > profile.getCurrentBasal() && high_temp_extended_bolus) {
             return true;
         } else {
             return false;

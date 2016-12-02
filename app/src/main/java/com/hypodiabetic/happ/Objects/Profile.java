@@ -137,7 +137,7 @@ public class Profile {
             Log.e(TAG, "getCurrentProfileValue: Could not get " + profile + " current value, returning 0 for time: " + sdfTime.format(timeNow));
             return 0D;
         } else {
-            Log.d(TAG, "getCurrentProfileValue: Found value for profile: " + profile + ": " + valueNow + " for time: " + sdfTime.format(timeNow));
+            //Log.d(TAG, "getCurrentProfileValue: Found value for profile: " + profile + ": " + valueNow + " for time: " + sdfTime.format(timeNow));
             return valueNow;
         }
     }

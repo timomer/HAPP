@@ -120,7 +120,7 @@
                 android:hint="@string/treatments_correction"
                 android:text="0"
                 android:id="@+id/wizardSuggestedCorrection"
-                android:inputType="numberDecimal"
+                android:inputType="numberDecimal|numberSigned"
                 android:textSize="14sp"/>
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
