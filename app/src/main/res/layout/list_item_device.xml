@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/misc_placeholder"
+        android:id="@+id/deviceName"
+        style="@style/DefaultTitle"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/misc_placeholder"
+        android:id="@+id/deviceStatus"
+        style="@style/DefaultSubTitle"
+        android:paddingTop="@dimen/activity_horizontal_margin"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/device_status_title"
+        android:id="@+id/deviceStatusFooter"
+        style="@style/DefaultSubTitleFooter"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/activity_horizontal_margin">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:id="@+id/deviceMsgOneBox">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgOne"
+                style="@style/DefaultSubTitle"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgOneFooter"
+                style="@style/DefaultSubTitleFooter"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:id="@+id/deviceMsgTwoBox">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgTwo"
+                style="@style/DefaultSubTitle"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgTwoFooter"
+                style="@style/DefaultSubTitleFooter"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:id="@+id/deviceMsgThreeBox">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgThree"
+                style="@style/DefaultSubTitle"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgThreeFooter"
+                style="@style/DefaultSubTitleFooter"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:id="@+id/deviceMsgFourBox">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgFour"
+                style="@style/DefaultSubTitle"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/deviceMsgFourFooter"
+                style="@style/DefaultSubTitleFooter"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

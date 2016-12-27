@@ -1,0 +1,31 @@
+ <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+     android:layout_weight="1"
+    tools:context="layout.FragmentLineChart"
+     android:id="@+id/FragmentLineChart">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:id="@+id/FragmentLineChartTitle"
+            android:text="@string/misc_placeholder"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|end"
+            android:id="@+id/FragmentLineChartSummary"
+            android:text="@string/misc_placeholder"/>
+    </LinearLayout>
+
+</FrameLayout>
