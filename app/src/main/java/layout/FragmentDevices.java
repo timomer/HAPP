@@ -1,13 +1,17 @@
 package layout;
 
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -19,8 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import plugins.CGM.PluginBaseCGM;
-import plugins.PluginBase;
+import com.hypodiabetic.happplus.helperObjects.DeviceSummary;
+import com.hypodiabetic.happplus.plugins.PluginBase;
+import com.hypodiabetic.happplus.plugins.PluginInterface;
+import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
+
+import static com.hypodiabetic.happplus.R.id.deviceMsgFour;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,9 +37,9 @@ import plugins.PluginBase;
  */
 public class FragmentDevices extends Fragment {
 
-    private ListView list;
-    private mySimpleAdapter adapter;
-    private ArrayList<HashMap<String, String>> deviceList;
+    private RecyclerView rv;
+    private BroadcastReceiver mCGMNewCGMReading;
+    private AdapterDevices adapterDevices;
 
     public FragmentDevices() {
         // Required empty public constructor
@@ -47,51 +55,29 @@ public class FragmentDevices extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        deviceList = new ArrayList<>();
-        for (PluginBase device : MainApp.devicePlugins){
-            HashMap<String, String> deviceItem = new HashMap<>();
-            deviceItem.put("name",      device.displayName);
-            deviceItem.put("status",    device.getStatus().getStatusDisplay());
-            deviceList.add(deviceItem);
-        }
-
+        mCGMNewCGMReading = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                adapterDevices.notifyDataSetChanged();
+            }
+        };
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_devices, container, false);
 
-        list = (ListView) view.findViewById(R.id.deviceList);
-        adapter = new mySimpleAdapter(this.getContext(), deviceList, R.layout.list_item_device,
-                new String[]{"name", "status"},
-                new int[]{R.id.deviceName, R.id.deviceStatus});
-        list.setAdapter(adapter);
+        //Setup the Device Cards list
+        rv=(RecyclerView)view.findViewById(R.id.deviceList);
+        LinearLayoutManager llm = new LinearLayoutManager(view.getContext());
+        rv.setLayoutManager(llm);
+        rv.setHasFixedSize(true);
 
-        View injecterLayout;
-
-
-
-
+        adapterDevices = new AdapterDevices(MainApp.devicePlugins);
+        rv.setAdapter(adapterDevices);
 
         return view;
     }
 
-    public class mySimpleAdapter extends SimpleAdapter {
-
-        public mySimpleAdapter(Context context, List<HashMap<String, String>> items, int resource, String[] from, int[] to) {
-            super(context, items, resource, from, to);
-        }
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View view = super.getView(position, convertView, parent);
-
-            //ImageView integrationImage  = (ImageView) view.findViewById(R.id.integrationIcon);
-            //TextView deviceName   = (TextView) view.findViewById(R.id.deviceName);
-            //integrationImage.setBackgroundResource(tools.getIntegrationStatusImg(integrationState.getText().toString()));
-
-            return view;
-        }
-    }
 }

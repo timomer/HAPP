@@ -1,4 +1,4 @@
-package helperObjects;
+package com.hypodiabetic.happplus.helperObjects;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;

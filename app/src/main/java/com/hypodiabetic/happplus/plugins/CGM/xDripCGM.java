@@ -1,4 +1,4 @@
-package plugins.CGM;
+package com.hypodiabetic.happplus.plugins.cgm;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,24 +6,25 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.hypodiabetic.happplus.Intents;
-import com.hypodiabetic.happplus.database.CGMValue;
+import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 
-import java.util.Date;
+import org.json.JSONArray;
 
 /**
  * Created by Tim on 25/12/2016.
  */
 
-public class xDripCGM implements PluginBaseCGM {
+public class xDripCGM extends PluginCGM {
 
-    private static final String XDRIP_BGESTIMATE = "com.eveningoutpost.dexdrip.BgEstimate";
+    private final static String DISPLAY_NAME        =   "xDrip";
+    private final static String NAME                =   "xdrip";
+    private static final String XDRIP_BGESTIMATE    =   "com.eveningoutpost.dexdrip.BgEstimate";
+
     private BroadcastReceiver mCGMReceiver;
 
-    //public xDripCGM(){
-    //    super("xDripCGM", "xDrip");     //Plugin Name
-
-    //}
+    public xDripCGM(){
+        super(NAME,DISPLAY_NAME);
+    }
 
     private void setupXDrip(){
         //Register xDrip listeners
@@ -41,7 +42,7 @@ public class xDripCGM implements PluginBaseCGM {
     public boolean load(){
         setupXDrip();
         isLoaded = true;
-        return true;
+        return isLoaded;
     }
 
     @Override
@@ -51,5 +52,15 @@ public class xDripCGM implements PluginBaseCGM {
             Log.d(TAG, "Listener Unregistered");
         }
         return true;
+    }
+
+    @Override
+    public DeviceStatus getStatus(){
+        return new DeviceStatus(true,true,"");
+    }
+
+    @Override
+    public JSONArray getDebug(){
+        return new JSONArray();
     }
 }

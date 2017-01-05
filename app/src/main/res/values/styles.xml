@@ -17,18 +17,56 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="DefaultTitle">
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:textSize">30sp</item>
+    <!-- Titles -->
+    <style name="PrimaryText">
+        <item name="android:textColor">@color/colorTextLight</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
     </style>
-    <style name="DefaultSubTitle">
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:textSize">20sp</item>
+    <style name="Subtitle">
+        <item name="android:textColor">@color/colorTextLight</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
     </style>
-    <style name="DefaultSubTitleFooter">
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:textSize">10sp</item>
+    <style name="Subtext">
+        <item name="android:textColor">@color/colorTextLight</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+    <style name="SubtextTitle">
+        <item name="android:textColor">@color/colorSubText</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
     </style>
 
+    <!-- Cards -->
+    <style name="Card" parent="CardView">
+        <item name="cardCornerRadius">2dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardUseCompatPadding">true</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="cardBackgroundColor">@color/colorPrimaryDark</item>
+    </style>
+    <style name="CardActions">
+        <item name="android:padding">8dp</item>
+        <item name="android:background">@color/colorTextLight</item>
+        <item name="android:layout_marginTop">16dp</item>
+    </style>
+    <style name="CardImageAction">
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/ic_menu_gallery</item>
+        <item name="android:backgroundTint">@color/colorButton</item>
+    </style>
 
 </resources>

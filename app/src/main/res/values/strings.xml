@@ -21,4 +21,19 @@
     <string name="device_status_warn">Warning</string>
     <string name="device_status_ok">Ready</string>
     <string name="device_status_title">status</string>
+    <string name="device_action">device action</string>
+
+    //Device Strings
+    <string name="last_reading">last reading</string>
+    <string name="age">age</string>
+
+    //Time Strings
+    <string name="time_just_now">just now</string>
+    <string name="time_min_ago">min ago</string>
+    <string name="time_mins_ago">mins ago</string>
+
+    //BG Strings
+    <string name="bg_mgdl">mgdl</string>
+    <string name="bg_mmol">mmol/l</string>
+    <string name="bg_delta">delta</string>
 </resources>

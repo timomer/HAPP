@@ -1,4 +1,4 @@
-package plugins.CGM;
+package com.hypodiabetic.happplus.plugins.cgm;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.hypodiabetic.happplus.database.CGMValue;
+import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,13 +19,17 @@ import java.util.Date;
  * Created by Tim on 25/12/2016.
  */
 
-public class NSClientCGM extends PluginBaseCGM {
+public class NSClientCGM extends PluginCGM {
 
-    public static final String NSCLIENT_ACTION_NEW_SGV  = "info.nightscout.client.NEW_SGV";
+    private final static String DISPLAY_NAME            =   "nsclient";
+    private final static String NAME                    =   "NSClient (NightScout)";
+    private static final String NSCLIENT_ACTION_NEW_SGV =   "info.nightscout.client.NEW_SGV";
+    private final static String NSCLIENT_SGV_VALUES     =   "sgvs";
+
     private BroadcastReceiver mCGMReceiver;
 
     public NSClientCGM(){
-        super("NSClientCGM", "NSClient (NightScout)");     //Plugin Name
+        super(DISPLAY_NAME, NAME);     //Plugin Name
 
     }
 
@@ -52,8 +56,8 @@ public class NSClientCGM extends PluginBaseCGM {
 
     private void getCGMValues(Bundle bundle){
 
-        if (bundle.containsKey("sgvs")) {
-            String sgvString = bundle.getString("sgvs");
+        if (bundle.containsKey(NSCLIENT_SGV_VALUES)) {
+            String sgvString = bundle.getString(NSCLIENT_SGV_VALUES);
 
             try {
                 JSONArray jsonArray = new JSONArray(sgvString);
@@ -68,7 +72,12 @@ public class NSClientCGM extends PluginBaseCGM {
                     } catch (JSONException e) {
                         Log.d(TAG, "getCGMValue: failed to read CGM Value");
                     }
-                    saveNewCGMValue(sgv, timeStamp);
+
+                    if (!haveBGTimestamped(timeStamp)){
+                        saveNewCGMValue(sgv, timeStamp);
+                    } else {
+                        Log.d(TAG, "Already have a BG with this timestamp, ignoring");
+                    }
                 }
 
             } catch (JSONException e){
@@ -92,5 +101,15 @@ public class NSClientCGM extends PluginBaseCGM {
             Log.d(TAG, "Listener Unregistered");
         }
         return true;
+    }
+
+    @Override
+    public DeviceStatus getStatus(){
+        return new DeviceStatus(true,true,"");
+    }
+
+    @Override
+    public JSONArray getDebug(){
+        return new JSONArray();
     }
 }

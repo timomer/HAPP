@@ -22,7 +22,7 @@ public class dbHelperCGM {
     public static CGMValue getLastReading(String source, Realm realm) {
         RealmResults<CGMValue> results = realm.where(CGMValue.class)
                 .equalTo("source", source)
-                .findAllSorted("timeStamp", Sort.DESCENDING);
+                .findAllSorted("timestamp", Sort.DESCENDING);
 
         if (results.isEmpty()) {
             return null;
@@ -31,11 +31,32 @@ public class dbHelperCGM {
         }
     }
 
-    public static List<CGMValue> getReadingsSince(String source, Date timeStamp, Realm realm) {
+    public static List<CGMValue> getReadingsSince(String source, Date timestamp, Realm realm) {
         RealmResults<CGMValue> results = realm.where(CGMValue.class)
                 .equalTo("source", source)
-                .greaterThanOrEqualTo("timeStamp", timeStamp)
-                .findAllSorted("timeStamp", Sort.DESCENDING);
+                .greaterThanOrEqualTo("timestamp", timestamp)
+                .findAllSorted("timestamp", Sort.DESCENDING);
+
+        return results;
+    }
+
+    public static CGMValue getReadingTimestamped(String source, Date timestamp, Realm realm){
+        RealmResults<CGMValue> results = realm.where(CGMValue.class)
+                .equalTo("source", source)
+                .equalTo("timestamp", timestamp)
+                .findAllSorted("timestamp", Sort.DESCENDING);
+        if (results.isEmpty()) {
+            return null;
+        } else {
+            return results.first();
+        }
+    }
+
+    public static List<CGMValue> getReadingsBefore(String source, Date timestamp, Realm realm) {
+        RealmResults<CGMValue> results = realm.where(CGMValue.class)
+                .equalTo("source", source)
+                .lessThan("timestamp", timestamp)
+                .findAllSorted("timestamp", Sort.DESCENDING);
 
         return results;
     }
