@@ -13,4 +13,5 @@ public class Constants {
         public static final double DELTA_NULL       =   999;
         public static final double DELTA_OLD        =   998;
     }
+
 }

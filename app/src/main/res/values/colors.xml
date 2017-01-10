@@ -5,9 +5,13 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorButton">#54000000</color>
-    <color name="colorSubText">#54000000</color>
     <color name="colorTextLight">#ffffff</color>
+    <color name="colorSubTextLight">#70ffffff</color>
+    <color name="colorTextDark">#87000000</color>
+    <color name="colorSubTextDark">#54000000</color>
 
     <color name="colorCGM">#c0392b</color>
     <color name="colorImageBackground">#54000000</color>
+
+    <color name="backgroundLight">#50fafafa</color>
 </resources>

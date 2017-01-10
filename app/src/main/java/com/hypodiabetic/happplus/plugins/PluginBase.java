@@ -1,18 +1,13 @@
 package com.hypodiabetic.happplus.plugins;
 
 import android.content.Context;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 
 import com.hypodiabetic.happplus.MainApp;
-import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -21,7 +16,7 @@ import java.util.List;
  * example: PluginBase > PluginBaseCGM > xDripCGM
  */
 
-public abstract class PluginBase {
+public abstract class PluginBase extends Fragment {
 
     final public String TAG;
     final protected Context context;
@@ -30,8 +25,10 @@ public abstract class PluginBase {
     final public int pluginDataType;
     final public String pluginName;
     final public String pluginDisplayName;
+    final public String pluginDescription;
 
     public boolean isLoaded;
+    public boolean loadInBackground;
 
     public static final int PLUGIN_TYPE_SOURCE   =   1;
     public static final int PLUGIN_TYPE_DEVICE   =   2;
@@ -40,16 +37,18 @@ public abstract class PluginBase {
     public static final int DATA_TYPE_CGM        =   1;
     public static final int DATA_TYPE_APS        =   2;
 
-    public PluginBase (int pluginType, int pluginDataType, String pluginName, String pluginDisplayName){
+    public PluginBase (int pluginType, int pluginDataType, String pluginName, String pluginDisplayName, String pluginDescription, Boolean loadInBackground){
         this.pluginType         =   pluginType;
         this.pluginDataType     =   pluginDataType;
         this.pluginName         =   pluginName;
         this.pluginDisplayName  =   pluginDisplayName;
-        this.TAG                =   getTag();
+        this.pluginDescription  =   pluginDescription;
+        this.TAG                =   getTagName();
         this.context            =   MainApp.getInstance();
+        this.loadInBackground   =   loadInBackground;
     }
 
-    private String getTag(){
+    private String getTagName(){
         String type, dataType;
         switch (pluginType){
             case PLUGIN_TYPE_SOURCE:

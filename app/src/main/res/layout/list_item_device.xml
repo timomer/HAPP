@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -12,154 +11,15 @@
         android:id="@+id/cv"
         android:minHeight="150dp">
 
-        <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginEnd="-37dp"
-            android:layout_marginTop="-37dp"
-            android:layout_gravity="end"
-            android:id="@+id/deviceImage"
-            android:background="@drawable/invert_colors"
-            android:backgroundTint="@color/colorImageBackground"
-            android:alpha=".38"/>
-
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/misc_placeholder"
-                    android:id="@+id/deviceName"
-                    style="@style/PrimaryText"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/misc_placeholder"
-                    android:id="@+id/deviceStatus"
-                    style="@style/Subtitle"
-                    android:paddingTop="@dimen/activity_horizontal_margin"/>
 
+            <include layout="@layout/device_summary"></include>
+            <include layout="@layout/device_actions"></include>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingTop="@dimen/activity_horizontal_margin">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:id="@+id/deviceMsgOneBox">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgOne"
-                            style="@style/Subtext"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgOneFooter"
-                            style="@style/SubtextTitle"/>
-
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:id="@+id/deviceMsgTwoBox">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgTwo"
-                            style="@style/Subtext"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgTwoFooter"
-                            style="@style/SubtextTitle"/>
-
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:id="@+id/deviceMsgThreeBox">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgThree"
-                            style="@style/Subtext"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgThreeFooter"
-                            style="@style/SubtextTitle"/>
-
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:id="@+id/deviceMsgFourBox">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgFour"
-                            style="@style/Subtext"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/misc_placeholder"
-                            android:id="@+id/deviceMsgFourFooter"
-                            style="@style/SubtextTitle"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/CardActions">
-
-                    <ImageView
-                        style="@style/CardImageAction"
-                        android:layout_alignParentStart="true"
-                        android:id="@+id/deviceActionOne"/>
-                    <ImageView
-                        style="@style/CardImageAction"
-                        android:layout_toEndOf="@id/deviceActionOne"
-                        android:id="@+id/deviceActionTwo"/>
-                    <ImageView
-                        style="@style/CardImageAction"
-                        android:layout_toEndOf="@id/deviceActionTwo"
-                        android:id="@+id/deviceActionThree"/>
-                    <ImageView
-                        style="@style/CardImageAction"
-                        android:layout_alignParentEnd="true"
-                        android:id="@+id/deviceActionSettings"/>
-
-                </RelativeLayout>
-
-            </LinearLayout>
-
+        </LinearLayout>
     </android.support.v7.widget.CardView>
 
 </RelativeLayout>

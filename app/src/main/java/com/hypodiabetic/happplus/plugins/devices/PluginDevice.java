@@ -5,6 +5,10 @@ import android.graphics.drawable.Drawable;
 import com.hypodiabetic.happplus.helperObjects.DeviceSummary;
 import com.hypodiabetic.happplus.plugins.PluginBase;
 
+import java.util.List;
+
+import layout.AdapterPlugins;
+
 /**
  * Created by Tim on 29/12/2016.
  */
@@ -15,8 +19,8 @@ public abstract class PluginDevice extends PluginBase {
     final public boolean isActionTwoEnabled;
     final public boolean isActionThreeEnabled;
 
-    public PluginDevice(int deviceDataType, String name, String displayName, boolean isActionOneEnabled, boolean isActionTwoEnabled, boolean isActionThreeEnabled) {
-        super(PLUGIN_TYPE_DEVICE, deviceDataType, name, displayName);
+    public PluginDevice(int deviceDataType, String name, String displayName, String deviceDescription, boolean isActionOneEnabled, boolean isActionTwoEnabled, boolean isActionThreeEnabled) {
+        super(PLUGIN_TYPE_DEVICE, deviceDataType, name, displayName, deviceDescription, true);
 
         this.isActionOneEnabled = isActionOneEnabled;
         this.isActionTwoEnabled = isActionTwoEnabled;
@@ -46,4 +50,10 @@ public abstract class PluginDevice extends PluginBase {
      * @return string
      */
     public abstract String getDetailedName();
+
+    /**
+     * Returns a list of plugins that support this Device
+     * @return List of Plugins
+     */
+    public abstract List<PluginBase> getSupportedPlugins();
 }

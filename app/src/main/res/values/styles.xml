@@ -17,34 +17,62 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <!-- Titles -->
-    <style name="PrimaryText">
-        <item name="android:textColor">@color/colorTextLight</item>
+    <!-- Text -->
+    <style name="TextPrimary">
         <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/colorTextLight</item>
+    </style>
+    <style name="TextPrimaryDark" parent="TextPrimary">
+        <item name="android:textColor">@color/colorTextDark</item>
+    </style>
+    <style name="TextPrimarySecondary">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/colorTextLight</item>
+    </style>
+    <style name="TextPrimarySecondaryDark" parent="TextPrimarySecondary">
+        <item name="android:textColor">@color/colorTextDark</item>
+    </style>
+    <style name="TextSecondary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/colorTextLight</item>
+    </style>
+    <style name="TextSecondaryDark" parent="TextSecondary">
+        <item name="android:textColor">@color/colorSubTextDark</item>
+    </style>
+
+    <!-- Titles -->
+    <style name="TitlePrimary" parent="TextPrimary">
         <item name="android:paddingTop">24dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">16dp</item>
     </style>
-    <style name="Subtitle">
-        <item name="android:textColor">@color/colorTextLight</item>
-        <item name="android:textSize">14sp</item>
+    <style name="TitlePrimaryDark" parent="TitlePrimary">
+        <item name="android:textColor">@color/colorTextDark</item>
+    </style>
+    <style name="TitleSecondary" parent="TextSecondary">
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">16dp</item>
     </style>
-    <style name="Subtext">
-        <item name="android:textColor">@color/colorTextLight</item>
-        <item name="android:textSize">14sp</item>
+    <style name="TitleSecondaryDark" parent="TitleSecondary">
+        <item name="android:textColor">@color/colorTextDark</item>
+    </style>
+    <style name="Subtext" parent="TextSecondary">
         <item name="android:paddingTop">16dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">16dp</item>
     </style>
-    <style name="SubtextTitle">
-        <item name="android:textColor">@color/colorSubText</item>
-        <item name="android:textSize">14sp</item>
+    <style name="SubtextDark" parent="Subtext">
+        <item name="android:textColor">@color/colorTextDark</item>
+    </style>
+    <style name="TitleSubtext" parent="TextSecondary">
+        <item name="android:textColor">@color/colorSubTextLight</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">16dp</item>
+    </style>
+    <style name="TitleSubtextDark" parent="TitleSubtext">
+        <item name="android:textColor">@color/colorSubTextDark</item>
     </style>
 
     <!-- Cards -->
@@ -58,7 +86,7 @@
     <style name="CardActions">
         <item name="android:padding">8dp</item>
         <item name="android:background">@color/colorTextLight</item>
-        <item name="android:layout_marginTop">16dp</item>
+
     </style>
     <style name="CardImageAction">
         <item name="android:layout_marginEnd">8dp</item>
@@ -66,6 +94,14 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/ic_menu_gallery</item>
+        <item name="android:backgroundTint">@color/colorButton</item>
+    </style>
+    <style name="iconButton">
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/settings</item>
         <item name="android:backgroundTint">@color/colorButton</item>
     </style>
 

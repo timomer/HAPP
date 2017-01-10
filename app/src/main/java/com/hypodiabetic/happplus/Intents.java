@@ -11,6 +11,10 @@ public class Intents {
     }
 
     public class newLocalEvent{
-        public final static String NEW_LOCAL_EVENT_SGV    =   "newLocalEvent.sgv";
+        public final static String NEW_LOCAL_EVENT_SGV  =   "newLocalEvent.sgv";
+    }
+
+    public class extras{
+        public static final String PLUGIN_NAME          =   "plugin_name";
     }
 }

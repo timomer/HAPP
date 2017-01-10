@@ -1,6 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorCGM">
+
+        <include layout="@layout/device_summary"></include>
+
+    </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/backgroundLight"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Blood Glucose Units"
+                style="@style/TitleSecondary"
+                android:textColor="@color/colorSubTextDark"
+                android:id="@+id/settingTitleBG"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/settingTitleBG"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/settingBG">
+            </Spinner>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plugins"
+                style="@style/TitleSecondary"
+                android:id="@+id/settingBG2"
+                android:layout_below="@id/settingTitleBG"/>
+
+            </RelativeLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:id="@+id/pluginList"
+                android:layout_weight="1"/>
+
+            <include layout="@layout/device_actions"></include>
+
+
 
 </LinearLayout>

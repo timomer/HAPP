@@ -4,31 +4,19 @@ package layout;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
+import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.hypodiabetic.happplus.helperObjects.DeviceSummary;
-import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.PluginInterface;
-import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
-
-import static com.hypodiabetic.happplus.R.id.deviceMsgFour;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,8 +26,10 @@ import static com.hypodiabetic.happplus.R.id.deviceMsgFour;
 public class FragmentDevices extends Fragment {
 
     private RecyclerView rv;
-    private BroadcastReceiver mCGMNewCGMReading;
     private AdapterDevices adapterDevices;
+
+    private BroadcastReceiver mCGMNewCGMReading;
+    private BroadcastReceiver mRefresh60Seconds;
 
     public FragmentDevices() {
         // Required empty public constructor
@@ -54,13 +44,19 @@ public class FragmentDevices extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
-        mCGMNewCGMReading = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                adapterDevices.notifyDataSetChanged();
-            }
-        };
+    @Override
+    public void onResume(){
+        super.onResume();
+        registerReceivers();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if (mCGMNewCGMReading != null) LocalBroadcastManager.getInstance(MainApp.getInstance()).unregisterReceiver(mCGMNewCGMReading);
+        if (mRefresh60Seconds != null) MainApp.getInstance().unregisterReceiver(mRefresh60Seconds);
     }
 
     @Override
@@ -78,6 +74,29 @@ public class FragmentDevices extends Fragment {
         rv.setAdapter(adapterDevices);
 
         return view;
+    }
+
+
+    private void registerReceivers(){
+        mCGMNewCGMReading = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateDevices();
+            }
+        };
+        LocalBroadcastManager.getInstance(MainApp.getInstance()).registerReceiver(mCGMNewCGMReading, new IntentFilter(Intents.newLocalEvent.NEW_LOCAL_EVENT_SGV));
+
+        mRefresh60Seconds = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().compareTo(Intent.ACTION_TIME_TICK) == 0) updateDevices();
+            }
+        };
+        MainApp.getInstance().registerReceiver(mRefresh60Seconds, new IntentFilter(Intent.ACTION_TIME_TICK));
+    }
+
+    private void updateDevices(){
+        adapterDevices.notifyDataSetChanged();
     }
 
 }

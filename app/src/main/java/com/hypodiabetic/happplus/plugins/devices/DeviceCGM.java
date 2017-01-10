@@ -8,6 +8,8 @@ import android.preference.PreferenceManager;
 import android.support.design.internal.NavigationMenu;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +25,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.DeviceSummary;
+import com.hypodiabetic.happplus.plugins.PluginBase;
 import com.hypodiabetic.happplus.plugins.cgm.PluginCGM;
+
+import layout.AdapterDevices;
+import layout.AdapterPlugins;
 
 /**
  * Created by Tim on 26/12/2016.
@@ -38,17 +45,22 @@ public class DeviceCGM extends PluginDevice {
 
     private final static String NAME            =   "cgm";
     private final static String DISPLAY_NAME    =   "CGM";
+    private final static String DESCRIPTION     =   "HAPP CGM Device";
     private final int COLOUR                    =   ContextCompat.getColor(context, R.color.colorCGM);
     private final Drawable IMAGE                =   ContextCompat.getDrawable(context, R.drawable.invert_colors);
 
     private PluginCGM pluginCGM;
+    private RecyclerView rv;
+    public AdapterPlugins adapterPlugins;
 
     public String prefCGMFormat;
 
     public DeviceCGM(){
-        super(DATA_TYPE_CGM, NAME, DISPLAY_NAME, false, false, false);
+        super(DATA_TYPE_CGM, NAME, DISPLAY_NAME, DESCRIPTION, false, false, false);
 
         pluginCGM = getPluginCGM("nsclient");
+
+        pluginCGM = MainApp.plugins.get(1).getClass();
     }
 
     @Override
@@ -159,18 +171,29 @@ public class DeviceCGM extends PluginDevice {
         }
     }
 
-    public static class deviceUIFragment extends Fragment{
-        public deviceUIFragment(){}
+    public List<PluginBase> getSupportedPlugins(){
+        return null;
+    }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_device_cgm, container, false);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_device_cgm, container, false);
 
-            return rootView;
-        }
+        //Setup the Device Cards list
+        rv=(RecyclerView)rootView.findViewById(R.id.deviceList);
+        LinearLayoutManager llm = new LinearLayoutManager(rootView.getContext());
+        rv.setLayoutManager(llm);
+        rv.setHasFixedSize(true);
 
 
+        List<PluginBase> pB = new ArrayList<>();
+        pB.addAll(MainApp.cgmSourcePlugins);
+        adapterPlugins = new AdapterPlugins(pB);
 
+        rv.setAdapter(adapterPlugins);
+
+
+        return rootView;
     }
 
 

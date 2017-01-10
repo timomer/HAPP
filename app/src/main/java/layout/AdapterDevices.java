@@ -1,5 +1,6 @@
 package layout;
 
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,8 +10,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.SingleFragmentActivity;
 import com.hypodiabetic.happplus.helperObjects.DeviceSummary;
 import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
 
@@ -45,6 +48,7 @@ public class AdapterDevices extends RecyclerView.Adapter<AdapterDevices.DeviceVi
         ImageView deviceActionOne;
         ImageView deviceActionTwo;
         ImageView deviceActionThree;
+        ImageView deviceActionSettings;
 
         ImageView deviceImage;
 
@@ -70,6 +74,7 @@ public class AdapterDevices extends RecyclerView.Adapter<AdapterDevices.DeviceVi
             deviceActionOne         = (ImageView) itemView.findViewById(R.id.deviceActionOne);
             deviceActionTwo         = (ImageView) itemView.findViewById(R.id.deviceActionTwo);
             deviceActionThree       = (ImageView) itemView.findViewById(R.id.deviceActionThree);
+            deviceActionSettings    = (ImageView) itemView.findViewById(R.id.deviceActionSettings);
 
             deviceImage             = (ImageView) itemView.findViewById(R.id.deviceImage);
         }
@@ -77,7 +82,7 @@ public class AdapterDevices extends RecyclerView.Adapter<AdapterDevices.DeviceVi
 
     List<PluginDevice> devices;
 
-    AdapterDevices(List<PluginDevice> devices){
+    public AdapterDevices(List<PluginDevice> devices){
         this.devices = devices;
     }
 
@@ -94,7 +99,7 @@ public class AdapterDevices extends RecyclerView.Adapter<AdapterDevices.DeviceVi
     }
 
     @Override
-    public void onBindViewHolder(DeviceViewHolder deviceViewHolder, int i) {
+    public void onBindViewHolder(DeviceViewHolder deviceViewHolder, final int i) {
         DeviceSummary deviceSummary = devices.get(i).getDeviceSummary();
         deviceViewHolder.deviceName.setText(            devices.get(i).getDetailedName());
         deviceViewHolder.deviceStatus.setText(          devices.get(i).getStatus().getStatusDisplay());
@@ -118,6 +123,18 @@ public class AdapterDevices extends RecyclerView.Adapter<AdapterDevices.DeviceVi
         if (!devices.get(i).isActionOneEnabled){     deviceViewHolder.deviceActionOne.setVisibility(View.GONE);}
         if (!devices.get(i).isActionTwoEnabled){     deviceViewHolder.deviceActionTwo.setVisibility(View.GONE);}
         if (!devices.get(i).isActionThreeEnabled){   deviceViewHolder.deviceActionThree.setVisibility(View.GONE);}
+
+        deviceViewHolder.deviceActionSettings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent loadFragment = new Intent(MainApp.getInstance(), SingleFragmentActivity.class);
+                    loadFragment.putExtra(Intents.extras.PLUGIN_NAME, devices.get(i).pluginName);
+                    view.getContext().startActivity(loadFragment);
+                }
+            }
+        );
+
+
     }
 
     @Override

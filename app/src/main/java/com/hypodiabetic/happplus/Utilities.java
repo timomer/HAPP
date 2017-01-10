@@ -20,7 +20,7 @@ public class Utilities {
         int minutesAgo = (int) Math.floor(getDiffInMins(timestamp, new Date()));
         switch (minutesAgo){
             case 0:
-                return minutesAgo + " " + MainApp.getInstance().getString(R.string.time_just_now);
+                return MainApp.getInstance().getString(R.string.time_just_now);
             case 1:
                 return minutesAgo + " " + MainApp.getInstance().getString(R.string.time_min_ago);
             default:

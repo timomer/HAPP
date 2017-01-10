@@ -31,8 +31,8 @@ public abstract class PluginCGM extends PluginBase {
 
     private RealmHelper realmHelper;
 
-    public PluginCGM(String pluginName, String pluginDisplayName){
-        super(PLUGIN_TYPE_SOURCE, DATA_TYPE_CGM, pluginName, pluginDisplayName);
+    public PluginCGM(String pluginName, String pluginDisplayName, String pluginDescription, boolean loadInBackground){
+        super(PLUGIN_TYPE_SOURCE, DATA_TYPE_CGM, pluginName, pluginDisplayName, pluginDescription, loadInBackground);
         realmHelper     = new RealmHelper();
     }
 

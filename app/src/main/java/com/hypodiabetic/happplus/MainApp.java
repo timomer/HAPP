@@ -27,9 +27,9 @@ public class MainApp extends Application {
     final static String TAG = "MainApp";
     private static MainApp sInstance;
 
-    public static List<PluginBase> backgroundPlugins = new ArrayList<>();       //Plugins that load in the background and are always active
-    public static List<PluginCGM> cgmSourcePlugins = new ArrayList<>();     //CGM Data Source com.hypodiabetic.happplus.plugins
-    public static List<PluginDevice> devicePlugins = new ArrayList<>();           //Device com.hypodiabetic.happplus.plugins
+    public static List<PluginBase> plugins = new ArrayList<>();                 //List of all plugins
+    public static List<PluginCGM> cgmSourcePlugins = new ArrayList<>();         //CGM Data Source plugins
+    public static List<PluginDevice> devicePlugins = new ArrayList<>();         //Device plugins
 
     @Override
     public void onCreate() {
@@ -41,42 +41,44 @@ public class MainApp extends Application {
         /*
         HAPP+ plugin list, add additional plugins here
          */
+
+
         //CGM Source Plugins
         cgmSourcePlugins.add(new xDripCGM());
         cgmSourcePlugins.add(new NSClientCGM());
-        backgroundPlugins.addAll(cgmSourcePlugins);
+        plugins.addAll(cgmSourcePlugins);
 
         //APS Source Plugins
 
         //Device Plugins
         devicePlugins.add(new DeviceCGM());
-        backgroundPlugins.addAll(devicePlugins);
+        plugins.addAll(devicePlugins);
 
         //UI Plugins
-
 
 
         loadBackgroundPlugins();
     }
 
     public void loadBackgroundPlugins(){
-        for (PluginBase plugin : backgroundPlugins){
-            if (true){
+        for (PluginBase plugin : plugins){
+            if (plugin.loadInBackground){
                 if(plugin.load()) {
                     Log.d(TAG, "loadPlugins: loaded plugin " + plugin.TAG);
                 } else {
                     Log.e(TAG, "loadPlugins: error loading plugin " + plugin.TAG);
                     // TODO: 25/12/2016 warn user?
                 }
-            } else {
-                if(plugin.unLoad()) {
-                    Log.d(TAG, "loadPlugins: unloaded plugin " + plugin.TAG);
-                } else {
-                    Log.e(TAG, "loadPlugins: error unloading plugin " + plugin.TAG);
-                    // TODO: 25/12/2016 warn user?
-                }
             }
         }
+    }
+
+    public static PluginBase getPlugin(String pluginName){
+        for (PluginBase plugin : plugins){
+            if (plugin.pluginName.equals(pluginName)) return plugin;
+        }
+        Log.d(TAG, "getPlugin: Cannot find plugin: " + pluginName);
+        return null;
     }
 
 
