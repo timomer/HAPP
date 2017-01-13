@@ -96,14 +96,18 @@ public class tools {
 
         switch (decPoints){
             case 1:
-                if (precisionRounding()){
-                    df = new DecimalFormat("##0.00", otherSymbols);
-                } else {
+                if (!precisionRounding()){
                     df = new DecimalFormat("##0.0", otherSymbols);
+                } else {
+                    df = new DecimalFormat("##0.00", otherSymbols);
                 }
                 break;
             case 2:
-                df = new DecimalFormat("##0.00", otherSymbols);
+                if (!precisionRounding()) {
+                    df = new DecimalFormat("##0.00", otherSymbols);
+                } else {
+                    df = new DecimalFormat("##0.000", otherSymbols);
+                }
                 break;
             case 3:
                 df = new DecimalFormat("##0.000", otherSymbols);
@@ -289,13 +293,15 @@ public class tools {
             return 0.0;
         }
 
-        Locale theLocale = Locale.getDefault();
-        NumberFormat numberFormat = DecimalFormat.getInstance(theLocale);
-        Number theNumber;
-        try {
-            theNumber = numberFormat.parse(string);
-            return theNumber.doubleValue();
-        } catch (ParseException e) {
+
+
+        //Locale theLocale = Locale.getDefault();
+        //NumberFormat numberFormat = DecimalFormat.getInstance(theLocale);
+        //Number theNumber;
+        //try {
+        //    theNumber = numberFormat.parse(string);
+        //    return theNumber.doubleValue();
+        //} catch (ParseException e) {
             // The string value might be either 99.99 or 99,99, depending on Locale.
             // We can deal with this safely, by forcing to be a point for the decimal separator, and then using Double.valueOf ...
             // http://stackoverflow.com/a/21901846/4088013
@@ -316,7 +322,7 @@ public class tools {
                 return 0.0;
             }
         }
-    }
+    //}
 
     /**
      * @param date the date in the format "yyyy-MM-dd"
