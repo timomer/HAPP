@@ -1,0 +1,7 @@
+<CheckedTextView android:id="@android:id/text1"
+    android:maxLines="1"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:text="@string/misc_placeholder"
+    style="@style/TitleSecondaryDark"
+    xmlns:android="http://schemas.android.com/apk/res/android" />

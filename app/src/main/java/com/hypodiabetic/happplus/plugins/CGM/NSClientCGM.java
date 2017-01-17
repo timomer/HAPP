@@ -7,31 +7,36 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Tim on 25/12/2016.
+ * CGM Data from Nightscout via NSClient Android app
  */
 
 public class NSClientCGM extends PluginCGM {
 
-    private final static String DISPLAY_NAME            =   "nsclient";
-    private final static String NAME                    =   "NSClient (NightScout)";
     private static final String NSCLIENT_ACTION_NEW_SGV =   "info.nightscout.client.NEW_SGV";
     private final static String NSCLIENT_SGV_VALUES     =   "sgvs";
 
     private BroadcastReceiver mCGMReceiver;
 
     public NSClientCGM(){
-        super(DISPLAY_NAME, NAME);     //Plugin Name
-
+        super();
     }
+
+    public String getPluginName(){          return "nsclient";}
+    public String getPluginDisplayName(){   return "NSClient (NightScout)";}
+    public String getPluginDescription(){   return "CGM values from Nightscout via the NSClient Android app";}
 
     private void setupNSClient(){
         mCGMReceiver = new BroadcastReceiver() {
@@ -87,15 +92,12 @@ public class NSClientCGM extends PluginCGM {
 
     }
 
-    @Override
-    public boolean load(){
+    public boolean onLoad(){
         setupNSClient();
-        isLoaded = true;
         return true;
     }
 
-    @Override
-    public boolean unLoad(){
+    public boolean onUnLoad(){
         if (mCGMReceiver!=null) {
             context.unregisterReceiver(mCGMReceiver);
             Log.d(TAG, "Listener Unregistered");
@@ -103,12 +105,20 @@ public class NSClientCGM extends PluginCGM {
         return true;
     }
 
-    @Override
-    public DeviceStatus getStatus(){
-        return new DeviceStatus(true,true,"");
+    public List<String> getPrefNames(){
+        return new ArrayList<>();
     }
 
-    @Override
+    public DeviceStatus getPluginStatus(){
+        DeviceStatus deviceStatus = new DeviceStatus();
+
+        if (mCGMReceiver == null){
+            deviceStatus.hasError(true);
+            deviceStatus.addComment(context.getString(R.string.plugin_receiver_isnull));
+        }
+        return deviceStatus;
+    }
+
     public JSONArray getDebug(){
         return new JSONArray();
     }

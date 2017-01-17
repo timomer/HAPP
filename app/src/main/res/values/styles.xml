@@ -93,7 +93,7 @@
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/ic_menu_gallery</item>
+        <item name="android:background">@drawable/settings</item>
         <item name="android:backgroundTint">@color/colorButton</item>
     </style>
     <style name="iconButton">

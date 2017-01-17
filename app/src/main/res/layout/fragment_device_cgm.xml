@@ -8,51 +8,89 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:background="@color/colorCGM">
 
-        <include layout="@layout/device_summary"></include>
+        <include layout="@layout/device_title"></include>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/misc_placeholder"
+            style="@style/TitleSecondary"
+            android:id="@+id/statusText"
+            android:paddingBottom="8dp"/>
 
     </LinearLayout>
 
-        <RelativeLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/backgroundLight"
+        android:paddingBottom="8dp"
+        android:orientation="vertical">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/backgroundLight"
-            android:paddingBottom="8dp">
-
+            android:orientation="horizontal">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Blood Glucose Units"
-                style="@style/TitleSecondary"
-                android:textColor="@color/colorSubTextDark"
-                android:id="@+id/settingTitleBG"/>
+                android:text="@string/device_cgm_units"
+                style="@style/TitleSecondaryDark"
+                android:gravity="center_vertical"/>
             <Spinner
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/settingTitleBG"
-                android:layout_alignParentEnd="true"
-                android:id="@+id/settingBG">
+                android:layout_weight="1"
+                android:id="@+id/prefBG"
+                style="@style/TitleSecondaryDark"
+                android:spinnerMode="dialog">
             </Spinner>
+        </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Plugins"
-                style="@style/TitleSecondary"
-                android:id="@+id/settingBG2"
-                android:layout_below="@id/settingTitleBG"/>
+                android:text="@string/device_cgm_data_source"
+                style="@style/TitleSecondaryDark"
+                android:gravity="center_vertical"/>
+            <Spinner
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/prefCGMSource"
+                style="@style/TitleSecondaryDark"
+                android:spinnerMode="dialog">
+            </Spinner>
+        </LinearLayout>
 
-            </RelativeLayout>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/misc_plugins"
+                style="@style/TitlePrimaryDark"
+                android:id="@+id/settingBG2"/>
 
-            <android.support.v7.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:id="@+id/pluginList"
-                android:layout_weight="1"/>
+    </LinearLayout>
 
-            <include layout="@layout/device_actions"></include>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/pluginList"/>
+    </LinearLayout>
 
+    <include layout="@layout/device_actions"></include>
 
 
 </LinearLayout>

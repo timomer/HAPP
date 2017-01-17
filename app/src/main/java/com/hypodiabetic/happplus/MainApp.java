@@ -1,6 +1,8 @@
 package com.hypodiabetic.happplus;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.plugins.cgm.NSClientCGM;
@@ -28,8 +30,6 @@ public class MainApp extends Application {
     private static MainApp sInstance;
 
     public static List<PluginBase> plugins = new ArrayList<>();                 //List of all plugins
-    public static List<PluginCGM> cgmSourcePlugins = new ArrayList<>();         //CGM Data Source plugins
-    public static List<PluginDevice> devicePlugins = new ArrayList<>();         //Device plugins
 
     @Override
     public void onCreate() {
@@ -44,41 +44,52 @@ public class MainApp extends Application {
 
 
         //CGM Source Plugins
-        cgmSourcePlugins.add(new xDripCGM());
-        cgmSourcePlugins.add(new NSClientCGM());
-        plugins.addAll(cgmSourcePlugins);
+        plugins.add(new xDripCGM());
+        plugins.add(new NSClientCGM());
+        //plugins.addAll(cgmSourcePlugins);
 
         //APS Source Plugins
 
         //Device Plugins
-        devicePlugins.add(new DeviceCGM());
-        plugins.addAll(devicePlugins);
+        plugins.add(new DeviceCGM());
+        //plugins.addAll(devicePlugins);
 
         //UI Plugins
-
 
         loadBackgroundPlugins();
     }
 
+
     public void loadBackgroundPlugins(){
         for (PluginBase plugin : plugins){
-            if (plugin.loadInBackground){
-                if(plugin.load()) {
-                    Log.d(TAG, "loadPlugins: loaded plugin " + plugin.TAG);
-                } else {
-                    Log.e(TAG, "loadPlugins: error loading plugin " + plugin.TAG);
-                    // TODO: 25/12/2016 warn user?
-                }
-            }
+            if (plugin.getLoadInBackground())   plugin.load();
         }
     }
 
-    public static PluginBase getPlugin(String pluginName){
+    public static PluginBase getPlugin(String pluginName, Class pluginClass){
         for (PluginBase plugin : plugins){
-            if (plugin.pluginName.equals(pluginName)) return plugin;
+            if (plugin.getPluginName().equals(pluginName) && pluginClass.isAssignableFrom(plugin.getClass())) return plugin;
         }
-        Log.d(TAG, "getPlugin: Cannot find plugin: " + pluginName);
+        Log.e(TAG, "getPlugin: Cannot find plugin: " + pluginName + " " + pluginClass.getName());
         return null;
+    }
+
+    public static PluginBase getPluginByName(String pluginName){
+        for (PluginBase plugin : plugins){
+            if (plugin.getPluginName().equals(pluginName)) return plugin;
+        }
+        Log.e(TAG, "getPluginByName: Cannot find plugin: " + pluginName);
+        return null;
+    }
+
+    public static List<? extends PluginBase> getPluginList(Class pluginClass){
+        List<PluginBase> pluginBaseList = new ArrayList<>();
+        for (PluginBase plugin : plugins){
+            if (pluginClass.isAssignableFrom(plugin.getClass()))     pluginBaseList.add(plugin);
+        }
+        if (pluginBaseList.isEmpty())   Log.e(TAG, "getPluginList: Cannot find plugins: " + pluginClass.getName());
+
+        return pluginBaseList;
     }
 
 

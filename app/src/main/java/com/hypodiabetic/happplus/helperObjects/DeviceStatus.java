@@ -7,44 +7,61 @@ import java.util.Date;
 
 /**
  * Created by Tim on 25/12/2016.
+ * Object detailing the status of a Device
  */
 
 public class DeviceStatus {
 
-    public int result;
-    public boolean usable;
-    public String comment;
-    public Date captured;
+    private boolean error;
+    private boolean warning;
+    private String comment;
+    private Date captured;
 
-    public static final int RESULT_ERROR     = 1;
-    public static final int RESULT_WARNING   = 2;
-    public static final int RESULT_OK        = 3;
-
-    public DeviceStatus(boolean error, boolean warning, String comment){
-        this.comment    =   comment;
+    public DeviceStatus(){
         captured        =   new Date();
-
-        if (error){
-            result  =   RESULT_ERROR;
-            usable  =   false;
-        } else if (warning){
-            result  =   RESULT_WARNING;
-            usable  =   true;
-        } else {
-            result  =   RESULT_OK;
-            usable  =   true;
-        }
     }
 
     public String getStatusDisplay(){
-        switch (result){
-            case RESULT_WARNING:
-                return MainApp.getInstance().getString(R.string.device_status_warn);
-            case RESULT_OK:
-                return MainApp.getInstance().getString(R.string.device_status_ok);
-            case RESULT_ERROR:
-                default:
-                return MainApp.getInstance().getString(R.string.device_status_error);
+        if (error){
+            return MainApp.getInstance().getString(R.string.device_status_error);
+        } else if (warning){
+            return MainApp.getInstance().getString(R.string.device_status_warn);
+        } else {
+            return MainApp.getInstance().getString(R.string.device_status_ok);
         }
+    }
+
+    public boolean getIsUsable(){
+        if (error){
+            return  false;
+        } else if (warning){
+            return true;
+        } else {
+            return true;
+        }
+    }
+
+    public String getComment(){
+                        return comment;
+    }
+
+    public Date getDateCaptured(){
+            return captured;
+    }
+
+    public void addComment(String comment){
+        if (this.comment == null) {
+            this.comment = comment;
+        } else {
+            this.comment = this.comment + " " + comment;
+        }
+    }
+
+    public void hasError(Boolean error){
+        this.error  =   error;
+    }
+
+    public void hasWarning(Boolean warning){
+        this.warning    =   warning;
     }
 }

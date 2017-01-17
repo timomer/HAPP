@@ -1,37 +1,25 @@
 package com.hypodiabetic.happplus.plugins.devices;
 
 import android.graphics.drawable.Drawable;
+import android.view.View;
 
-import com.hypodiabetic.happplus.helperObjects.DeviceSummary;
 import com.hypodiabetic.happplus.plugins.PluginBase;
 
-import java.util.List;
-
-import layout.AdapterPlugins;
+import layout.AdapterDevices;
 
 /**
  * Created by Tim on 29/12/2016.
+ * Base functions for Plugin type Device, new Device Plugins should extend from this
  */
 
 public abstract class PluginDevice extends PluginBase {
 
-    final public boolean isActionOneEnabled;
-    final public boolean isActionTwoEnabled;
-    final public boolean isActionThreeEnabled;
-
-    public PluginDevice(int deviceDataType, String name, String displayName, String deviceDescription, boolean isActionOneEnabled, boolean isActionTwoEnabled, boolean isActionThreeEnabled) {
-        super(PLUGIN_TYPE_DEVICE, deviceDataType, name, displayName, deviceDescription, true);
-
-        this.isActionOneEnabled = isActionOneEnabled;
-        this.isActionTwoEnabled = isActionTwoEnabled;
-        this.isActionThreeEnabled = isActionThreeEnabled;
+    public PluginDevice() {
+        super();
     }
 
-    /**
-     * Up to four summary values and their titles regarding the current status of the device
-     * @return DeviceSummary object
-     */
-    public abstract DeviceSummary getDeviceSummary();
+    public int getPluginType(){             return PLUGIN_TYPE_DEVICE;}
+    public boolean getLoadInBackground(){   return true;}
 
     /**
      * Background colour of the Device
@@ -51,9 +39,17 @@ public abstract class PluginDevice extends PluginBase {
      */
     public abstract String getDetailedName();
 
+    //Device Card UI functions
     /**
-     * Returns a list of plugins that support this Device
-     * @return List of Plugins
+     * Creates a AdapterDevices.ViewHolder for this Device that is used for the Devices UI Card
+     * @param v view
+     * @return AdapterDevices.ViewHolder
      */
-    public abstract List<PluginBase> getSupportedPlugins();
+    public abstract AdapterDevices.ViewHolder getDeviceCardViewHolder(View v);
+
+    /**
+     * Populates the above Card with data about this Device
+     * @param viewHolder viewHolder
+     */
+    public abstract void setDeviceCardData(AdapterDevices.ViewHolder viewHolder);
 }

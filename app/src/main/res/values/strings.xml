@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">HAPP+</string>
 
-    <string name="misc_placeholder">Placeholder String+</string>
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
@@ -11,10 +9,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    //misc
+    <string name="misc_plugins">Plugins</string>
+    <string name="misc_placeholder">Placeholder String+</string>
+    <string name="misc_default">Default</string>
+
     //Main Activity
     <string name="activity_main_fragment_now">Now</string>
     <string name="activity_main_fragment_devices">Devices</string>
     <string name="activity_main_fragment_events">Events</string>
+
+    //Shared plugin strings
+    <string name="plugin_not_enabled">"Plugin is not enabled."</string>
+    <string name="plugin_pref">Pref</string>
+    <string name="plugin_pref_missing">is missing</string>
+    <string name="plugin_receiver_isnull">Broadcast Receiver is not registered.</string>
+    <string name="plugin_not_loaded">is not loaded.</string>
 
     //Device
     <string name="device_status_error">Error</string>
@@ -26,6 +36,11 @@
     //Device Strings
     <string name="last_reading">last reading</string>
     <string name="age">age</string>
+
+    //Device CGM
+    <string name="device_cgm_data_source">CGM Data Source</string>
+    <string name="device_cgm_units">Blood Glucose Units</string>
+    <string name="device_cgm_missing_plugin">CGM Source Plugin cannot be found.</string>
 
     //Time Strings
     <string name="time_just_now">just now</string>

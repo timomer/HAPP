@@ -27,7 +27,7 @@ public class SingleFragmentActivity extends FragmentActivity {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                PluginBase plugin = MainApp.getPlugin(pluginName);
+                PluginBase plugin = MainApp.getPluginByName(pluginName);
 
                 if (plugin != null){
                     fragmentTransaction.add(R.id.fragmentHolder, plugin);

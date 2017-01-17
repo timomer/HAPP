@@ -1,26 +1,19 @@
 package com.hypodiabetic.happplus.plugins.cgm;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.Constants;
 import com.hypodiabetic.happplus.Intents;
-import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.CGMValue;
 import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.database.dbHelperCGM;
 import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.PluginInterface;
 
 import java.util.Date;
 import java.util.List;
-
-import io.realm.Realm;
-import io.realm.RealmResults;
-import io.realm.Sort;
 
 /**
  * Created by Tim on 25/12/2016.
@@ -31,11 +24,14 @@ public abstract class PluginCGM extends PluginBase {
 
     private RealmHelper realmHelper;
 
-    public PluginCGM(String pluginName, String pluginDisplayName, String pluginDescription, boolean loadInBackground){
-        super(PLUGIN_TYPE_SOURCE, DATA_TYPE_CGM, pluginName, pluginDisplayName, pluginDescription, loadInBackground);
+    public PluginCGM(){
+        super();
         realmHelper     = new RealmHelper();
     }
 
+    public int getPluginType(){             return PLUGIN_TYPE_SOURCE;}
+    public int getPluginDataType(){         return DATA_TYPE_CGM;}
+    public boolean getLoadInBackground(){   return true;}
 
     //Database actions
     protected void saveNewCGMValue(Integer sgv, Date timestamp){
@@ -45,7 +41,7 @@ public abstract class PluginCGM extends PluginBase {
             CGMValue cgmValue = new CGMValue();
             cgmValue.setSgv(sgv);
             cgmValue.setTimestamp(timestamp);
-            cgmValue.setSource(pluginName);
+            cgmValue.setSource(getPluginName());
 
             dbHelperCGM.saveNewCGMValue(cgmValue, realmHelper.getRealm());
             realmHelper.closeRealm();
@@ -57,24 +53,20 @@ public abstract class PluginCGM extends PluginBase {
 
 
     public CGMValue getLastReading() {
-        return dbHelperCGM.getLastReading(pluginName, realmHelper.getRealm());
+        return dbHelperCGM.getLastReading(getPluginName(), realmHelper.getRealm());
     }
 
     public boolean haveBGTimestamped(Date timestamp){
-        CGMValue cgmValue = dbHelperCGM.getReadingTimestamped(pluginName, timestamp, realmHelper.getRealm());
-        if (cgmValue == null){
-            return false;
-        } else {
-            return true;
-        }
+        CGMValue cgmValue = dbHelperCGM.getReadingTimestamped(getPluginName(), timestamp, realmHelper.getRealm());
+        return (cgmValue == null);
     }
 
     public List<CGMValue> getReadingsSince(Date timeStamp){
-        return dbHelperCGM.getReadingsSince(pluginName, timeStamp, realmHelper.getRealm());
+        return dbHelperCGM.getReadingsSince(getPluginName(), timeStamp, realmHelper.getRealm());
     }
 
     public double getDelta(CGMValue cgmValue){
-        CGMValue lastCGMValue   =   dbHelperCGM.getReadingsBefore(pluginName, cgmValue.getTimestamp(), realmHelper.getRealm()).get(0);
+        CGMValue lastCGMValue   =   dbHelperCGM.getReadingsBefore(getPluginName(), cgmValue.getTimestamp(), realmHelper.getRealm()).get(0);
 
         if (lastCGMValue == null){
             return Constants.CGM.DELTA_NULL;

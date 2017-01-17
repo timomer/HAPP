@@ -17,6 +17,11 @@ import android.view.ViewGroup;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.plugins.PluginBase;
+import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,13 +55,14 @@ public class FragmentDevices extends Fragment {
     public void onResume(){
         super.onResume();
         registerReceivers();
+        updateDevices();
     }
 
     @Override
     public void onPause(){
         super.onPause();
-        if (mCGMNewCGMReading != null) LocalBroadcastManager.getInstance(MainApp.getInstance()).unregisterReceiver(mCGMNewCGMReading);
-        if (mRefresh60Seconds != null) MainApp.getInstance().unregisterReceiver(mRefresh60Seconds);
+        if (mCGMNewCGMReading != null)  LocalBroadcastManager.getInstance(MainApp.getInstance()).unregisterReceiver(mCGMNewCGMReading);
+        if (mRefresh60Seconds != null)  MainApp.getInstance().unregisterReceiver(mRefresh60Seconds);
     }
 
     @Override
@@ -70,7 +76,7 @@ public class FragmentDevices extends Fragment {
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        adapterDevices = new AdapterDevices(MainApp.devicePlugins);
+        adapterDevices = new AdapterDevices((List<PluginDevice>) MainApp.getPluginList(PluginDevice.class));
         rv.setAdapter(adapterDevices);
 
         return view;

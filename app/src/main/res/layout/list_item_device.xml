@@ -16,6 +16,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <include layout="@layout/device_title"></include>
             <include layout="@layout/device_summary"></include>
             <include layout="@layout/device_actions"></include>
 

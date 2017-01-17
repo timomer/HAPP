@@ -1,5 +1,6 @@
 package layout;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +9,10 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.hypodiabetic.happplus.Intents;
+import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.SingleFragmentActivity;
 import com.hypodiabetic.happplus.plugins.PluginBase;
 
 import java.util.List;
@@ -60,30 +64,38 @@ public class AdapterPlugins extends RecyclerView.Adapter<AdapterPlugins.PluginVi
     @Override
     public void onBindViewHolder(AdapterPlugins.PluginViewHolder pluginViewHolder, final int i) {
 
-        pluginViewHolder.pluginName.setText(plugins.get(i).pluginDisplayName);
-        pluginViewHolder.pluginDescription.setText(plugins.get(i).pluginDescription);
-        pluginViewHolder.pluginOnOff.setChecked(plugins.get(i).isLoaded);
+        pluginViewHolder.pluginName.setText(plugins.get(i).getPluginDisplayName());
+        pluginViewHolder.pluginDescription.setText(plugins.get(i).getPluginDescription());
+        pluginViewHolder.pluginOnOff.setChecked(plugins.get(i).getIsLoaded());
         pluginViewHolder.pluginOnOff.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (plugins.get(i).isLoaded){
+                        if (plugins.get(i).getIsLoaded()){
+                            plugins.get(i).setEnabled(false);
                             plugins.get(i).unLoad();
                         } else {
+                            plugins.get(i).setEnabled(true);
                             plugins.get(i).load();
                         }
                     }
                 }
         );
-        pluginViewHolder.pluginSettings.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
 
+        if (plugins.get(i).getPrefCount() > 0) {
+            pluginViewHolder.pluginSettings.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent loadFragment = new Intent(MainApp.getInstance(), SingleFragmentActivity.class);
+                            loadFragment.putExtra(Intents.extras.PLUGIN_NAME, plugins.get(i).getPluginName());
+                            view.getContext().startActivity(loadFragment);
+                        }
                     }
-                }
-        );
-
+            );
+        } else {
+            pluginViewHolder.pluginSettings.setVisibility(View.GONE);
+        }
 
     }
 

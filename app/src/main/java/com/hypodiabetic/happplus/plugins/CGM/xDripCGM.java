@@ -6,25 +6,31 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Tim on 25/12/2016.
+ * xDrip CGM Plugin, receives Broadcast CGM values from local xDrip / xDrip+ app
  */
 
 public class xDripCGM extends PluginCGM {
 
-    private final static String DISPLAY_NAME        =   "xDrip";
-    private final static String NAME                =   "xdrip";
     private static final String XDRIP_BGESTIMATE    =   "com.eveningoutpost.dexdrip.BgEstimate";
-
     private BroadcastReceiver mCGMReceiver;
 
     public xDripCGM(){
-        super(NAME,DISPLAY_NAME);
+        super();
     }
+
+    public String getPluginName(){          return "xdrip";}
+    public String getPluginDisplayName(){   return "xDrip";}
+    public String getPluginDescription(){   return "CGM values from xDrip \' xDrip+ Android app";}
 
     private void setupXDrip(){
         //Register xDrip listeners
@@ -39,14 +45,13 @@ public class xDripCGM extends PluginCGM {
     }
 
     @Override
-    public boolean load(){
+    public boolean onLoad(){
         setupXDrip();
-        isLoaded = true;
-        return isLoaded;
+        return true;
     }
 
     @Override
-    public boolean unLoad(){
+    public boolean onUnLoad(){
         if (mCGMReceiver!=null) {
             context.unregisterReceiver(mCGMReceiver);
             Log.d(TAG, "Listener Unregistered");
@@ -54,12 +59,20 @@ public class xDripCGM extends PluginCGM {
         return true;
     }
 
-    @Override
-    public DeviceStatus getStatus(){
-        return new DeviceStatus(true,true,"");
+    public List<String> getPrefNames(){
+        return new ArrayList<>();
     }
 
-    @Override
+    public DeviceStatus getPluginStatus(){
+        DeviceStatus deviceStatus = new DeviceStatus();
+
+        if (mCGMReceiver == null){
+            deviceStatus.hasError(true);
+            deviceStatus.addComment(context.getString(R.string.plugin_receiver_isnull));
+        }
+        return deviceStatus;
+    }
+
     public JSONArray getDebug(){
         return new JSONArray();
     }
