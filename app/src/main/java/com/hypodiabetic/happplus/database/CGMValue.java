@@ -3,6 +3,7 @@ package com.hypodiabetic.happplus.database;
 import java.util.Date;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
 
 /**
  * Created by Tim on 25/12/2016.
@@ -11,11 +12,11 @@ import io.realm.RealmObject;
 
 public class CGMValue extends RealmObject{
 
-    public Integer getSgv() {
+    public Float getSgv() {
         return sgv;
     }
 
-    public void setSgv(Integer sgv) {
+    public void setSgv(Float sgv) {
         this.sgv = sgv;
     }
 
@@ -35,7 +36,8 @@ public class CGMValue extends RealmObject{
         this.timestamp = timestamp;
     }
 
-    private Integer sgv;
+    private Float sgv;
     private String source;
     private Date timestamp;
+
 }

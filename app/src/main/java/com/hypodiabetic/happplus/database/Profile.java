@@ -18,8 +18,23 @@ public class Profile extends RealmObject{
 
     private final static String TAG =   "Profile Object";
 
+    private String name;
+    private String data;
+    private int type;
+    private String id;
+
+    public Profile(){}
+    public Profile(String name, int type){
+        this.name   =   name;
+        this.type   =   type;
+        this.id     =   UUID.randomUUID().toString();
+    }
+
     public String getName() {
         return name;
+    }
+    public void setName(String name){
+        this.name   =   name;
     }
 
     public JSONObject getData() {
@@ -47,20 +62,11 @@ public class Profile extends RealmObject{
         return id;
     }
 
-    private String name;
-    private String data;
-    private int type;
-    private String id;
-
     public static final int TYPE_SYS_PROFILE = 0;
 
-    public Profile(){}
-
-    public Profile(String name, int type){
-        this.name   =   name;
-        this.type   =   type;
-        this.id     =   UUID.randomUUID().toString();
+    @Override
+    public String toString(){
+        return getName();
     }
-
 
 }

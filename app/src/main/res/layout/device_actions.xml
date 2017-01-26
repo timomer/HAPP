@@ -3,22 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     style="@style/CardActions"
-    android:id="@+id/deviceCardActions">
+    android:id="@+id/deviceCardActions"
+    android:layout_alignParentBottom="true">
 
-                <ImageView
-                    style="@style/CardImageAction"
-                    android:layout_alignParentStart="true"
-                    android:id="@+id/deviceActionOne"/>
-                <ImageView
-                    style="@style/CardImageAction"
-                    android:layout_toEndOf="@id/deviceActionOne"
-                    android:id="@+id/deviceActionTwo"/>
-                <ImageView
-                    style="@style/CardImageAction"
-                    android:layout_toEndOf="@id/deviceActionTwo"
-                    android:id="@+id/deviceActionThree"/>
-                <ImageView
-                    style="@style/CardImageAction"
-                    android:layout_alignParentEnd="true"
-                    android:id="@+id/deviceActionSettings"/>
+    <ImageButton
+        style="@style/CardImageAction"
+        android:layout_alignParentStart="true"
+        android:id="@+id/deviceActionOne"/>
+    <ImageButton
+        style="@style/CardImageAction"
+        android:layout_toEndOf="@id/deviceActionOne"
+        android:id="@+id/deviceActionTwo"/>
+    <ImageButton
+        style="@style/CardImageAction"
+        android:layout_toEndOf="@id/deviceActionTwo"
+        android:id="@+id/deviceActionThree"/>
+    <ImageButton
+        style="@style/CardImageAction"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/deviceActionRight"/>
+
 </RelativeLayout>

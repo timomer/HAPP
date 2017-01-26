@@ -1,11 +1,11 @@
 package com.hypodiabetic.happplus.plugins.devices;
 
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
+import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.plugins.PluginBase;
 
-import layout.AdapterDevices;
+import layout.RecyclerViewDevices;
 
 /**
  * Created by Tim on 29/12/2016.
@@ -14,12 +14,21 @@ import layout.AdapterDevices;
 
 public abstract class PluginDevice extends PluginBase {
 
+    //Devices own RealHelper object
+    protected RealmHelper realmHelper;
+
     public PluginDevice() {
         super();
+        realmHelper =   new RealmHelper();
     }
 
     public int getPluginType(){             return PLUGIN_TYPE_DEVICE;}
     public boolean getLoadInBackground(){   return true;}
+
+    public boolean onUnLoad(){
+        //realmHelper.closeRealm(); //do not close Realm, as it is created on Plugin Creation
+        return true;
+    }
 
     /**
      * Background colour of the Device
@@ -39,17 +48,9 @@ public abstract class PluginDevice extends PluginBase {
      */
     public abstract String getDetailedName();
 
-    //Device Card UI functions
-    /**
-     * Creates a AdapterDevices.ViewHolder for this Device that is used for the Devices UI Card
-     * @param v view
-     * @return AdapterDevices.ViewHolder
-     */
-    public abstract AdapterDevices.ViewHolder getDeviceCardViewHolder(View v);
-
     /**
      * Populates the above Card with data about this Device
      * @param viewHolder viewHolder
      */
-    public abstract void setDeviceCardData(AdapterDevices.ViewHolder viewHolder);
+    public abstract void setDeviceCardData(RecyclerViewDevices.ViewHolder viewHolder);
 }

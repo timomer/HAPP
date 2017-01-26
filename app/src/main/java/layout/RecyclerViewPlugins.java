@@ -22,7 +22,9 @@ import java.util.List;
  * Simple Adapter showing a list of plugins
  */
 
-public class AdapterPlugins extends RecyclerView.Adapter<AdapterPlugins.PluginViewHolder> {
+public class RecyclerViewPlugins extends RecyclerView.Adapter<RecyclerViewPlugins.PluginViewHolder> {
+
+    private List<PluginBase> plugins;
 
     public static class PluginViewHolder extends RecyclerView.ViewHolder {
 
@@ -43,9 +45,7 @@ public class AdapterPlugins extends RecyclerView.Adapter<AdapterPlugins.PluginVi
         }
     }
 
-    List<PluginBase> plugins;
-
-    public AdapterPlugins(List<PluginBase> plugins) {
+    public RecyclerViewPlugins(List<PluginBase> plugins) {
         this.plugins = plugins;
     }
 
@@ -55,14 +55,13 @@ public class AdapterPlugins extends RecyclerView.Adapter<AdapterPlugins.PluginVi
     }
 
     @Override
-    public AdapterPlugins.PluginViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public RecyclerViewPlugins.PluginViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_plugin, viewGroup, false);
-        PluginViewHolder pvh = new PluginViewHolder(v);
-        return pvh;
+        return new PluginViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(AdapterPlugins.PluginViewHolder pluginViewHolder, final int i) {
+    public void onBindViewHolder(final RecyclerViewPlugins.PluginViewHolder pluginViewHolder, int i) {
 
         pluginViewHolder.pluginName.setText(plugins.get(i).getPluginDisplayName());
         pluginViewHolder.pluginDescription.setText(plugins.get(i).getPluginDescription());
@@ -71,12 +70,13 @@ public class AdapterPlugins extends RecyclerView.Adapter<AdapterPlugins.PluginVi
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (plugins.get(i).getIsLoaded()){
-                            plugins.get(i).setEnabled(false);
-                            plugins.get(i).unLoad();
+                        int position    =   pluginViewHolder.getAdapterPosition();
+                        if (plugins.get(position).getIsLoaded()){
+                            plugins.get(position).setEnabled(false);
+                            plugins.get(position).unLoad();
                         } else {
-                            plugins.get(i).setEnabled(true);
-                            plugins.get(i).load();
+                            plugins.get(position).setEnabled(true);
+                            plugins.get(position).load();
                         }
                     }
                 }
@@ -88,7 +88,7 @@ public class AdapterPlugins extends RecyclerView.Adapter<AdapterPlugins.PluginVi
                         @Override
                         public void onClick(View view) {
                             Intent loadFragment = new Intent(MainApp.getInstance(), SingleFragmentActivity.class);
-                            loadFragment.putExtra(Intents.extras.PLUGIN_NAME, plugins.get(i).getPluginName());
+                            loadFragment.putExtra(Intents.extras.PLUGIN_NAME, plugins.get(pluginViewHolder.getAdapterPosition()).getPluginName());
                             view.getContext().startActivity(loadFragment);
                         }
                     }

@@ -9,10 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Constants;
@@ -26,16 +24,20 @@ import com.hypodiabetic.happplus.database.CGMValue;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.helperObjects.PluginPref;
+import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.PluginBase;
 import com.hypodiabetic.happplus.plugins.cgm.PluginCGM;
 
-import layout.AdapterDevices;
-import layout.AdapterPlugins;
-import layout.DeviceViewHolder;
+import io.realm.RealmResults;
+import layout.RecyclerViewDevices;
+import layout.RecyclerViewPlugins;
+
 
 /**
  * Created by Tim on 26/12/2016.
@@ -46,32 +48,27 @@ public class DeviceCGM extends PluginDevice {
 
     private final static String PREF_BG_UNITS       =   "bg_units";
     private final static String PREF_BG_UNITS_MGDL  =   "mgdl";
-    private final static String PREF_BG_UNITS_MMOLL =   "mmol/l";
+    private final static String PREF_BG_UNITS_MMOLL =   "mmoll";
     private final static String PREF_CGM_SOURCE     =   "cgm_source";
 
     private PluginCGM pluginCGMSource;
     private RecyclerView rv;
-    private AdapterPlugins adapterPlugins;
+    private RecyclerViewPlugins adapterPlugins;
 
     public DeviceCGM(){
         super();
     }
 
     public String getPluginName(){          return "cgm";}
-    public String getPluginDisplayName(){   return "CGM";}
-    public String getPluginDescription(){   return "HAPP CGM Device";}
-    public int getPluginDataType(){         return DATA_TYPE_CGM;}
+    public String getPluginDisplayName(){   return context.getString(R.string.device_cgm_name);}
+    public String getPluginDescription(){   return context.getString(R.string.device_cgm_desc);}
     public int getColour(){                 return ContextCompat.getColor(context, R.color.colorCGM);}
     public Drawable getImage(){             return ContextCompat.getDrawable(context, R.drawable.invert_colors);}
 
 
     public boolean onLoad(){
         setCGMPluginSource();
-
         return getStatus().getIsUsable();
-    }
-    public boolean onUnLoad(){
-        return true;
     }
 
     public String getDetailedName() {
@@ -105,22 +102,36 @@ public class DeviceCGM extends PluginDevice {
     }
 
     private void setCGMPluginSource(){
-        if (!getPref(PREF_CGM_SOURCE).getStringValue().isEmpty()){
+        if (getPref(PREF_CGM_SOURCE).getStringValue() != null){
             pluginCGMSource = (PluginCGM) MainApp.getPlugin(getPref(PREF_CGM_SOURCE).getStringValue(),PluginCGM.class);
         }
     }
 
-    protected List<String> getPrefNames(){
-        List<String> prefs = new ArrayList<>();
-        prefs.add(PREF_BG_UNITS);
-        prefs.add(PREF_CGM_SOURCE);
+    protected void onPrefChange(SysPref sysPref){
+        setCGMPluginSource();
+    }
+
+    protected List<PluginPref> getPrefsList(){
+        List<PluginPref> prefs = new ArrayList<>();
+        prefs.add(new PluginPref<>(
+                PREF_BG_UNITS,
+                context.getString(R.string.device_cgm_units),
+                context.getString(R.string.device_cgm_units_desc),
+                Arrays.asList(PREF_BG_UNITS_MGDL,PREF_BG_UNITS_MMOLL),
+                Arrays.asList(context.getString(R.string.device_cgm_bg_mgdl), context.getString(R.string.device_cgm_bg_mmol))));
+        prefs.add(new PluginPref<>(
+                PREF_CGM_SOURCE,
+                context.getString(R.string.device_cgm_data_source),
+                context.getString(R.string.device_cgm_data_source_desc),
+                (List<PluginBase>) MainApp.getPluginList(PluginCGM.class),
+                (List<PluginBase>) MainApp.getPluginList(PluginCGM.class)));
 
         return prefs;
     }
 
     public CGMValue getLastCGMValue(){
         if (pluginCGMSource != null) {
-            return pluginCGMSource.getLastReading();
+            return pluginCGMSource.getLastReading(realmHelper.getRealm());
         } else {
             return null;
         }
@@ -128,43 +139,47 @@ public class DeviceCGM extends PluginDevice {
 
     public Double getDelta(CGMValue cgmValue){
         if (pluginCGMSource != null) {
-            return pluginCGMSource.getDelta(cgmValue);
+            return pluginCGMSource.getDelta(cgmValue, realmHelper.getRealm());
         } else {
             return null;
         }
     }
 
-    public List<CGMValue> getReadingsSince(Date timeStamp){
+    public RealmResults<CGMValue> getReadingsSince(Date timeStamp){
         if (pluginCGMSource != null) {
-            return pluginCGMSource.getReadingsSince(timeStamp);
+            return pluginCGMSource.getReadingsSince(timeStamp, realmHelper.getRealm());
         } else {
             return null;
         }
     }
 
-    public String displayBG(Double bgValue, Boolean showConverted, String cgmFormat){
+    public String displayBG(CGMValue cgmValue, Boolean showConverted){
+        return displayBG(cgmValue.getSgv().doubleValue(), showConverted);
+    }
+
+    public String displayBG(Double bgValue, Boolean showConverted){
         String reply;
 
-        if(cgmFormat.equals(PREF_BG_UNITS_MGDL)) {
-            reply = bgValue.intValue() + MainApp.getInstance().getString(R.string.bg_mgdl);
-            if (showConverted) reply += " (" + Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + MainApp.getInstance().getString(R.string.bg_mmol);
+        if(getPref(PREF_BG_UNITS).getStringValue().equals(PREF_BG_UNITS_MGDL)) {
+            reply = bgValue.intValue() + context.getString(R.string.device_cgm_bg_mgdl);
+            if (showConverted) reply += " (" + Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + context.getString(R.string.device_cgm_bg_mmol);
             return reply;
         } else {
-            reply = Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + MainApp.getInstance().getString(R.string.bg_mmol);
+            reply = Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + context.getString(R.string.device_cgm_bg_mmol);
             Double toMgdl = (bgValue * Constants.CGM.MMOLL_TO_MGDL);
-            if (showConverted) reply += " (" + toMgdl.intValue() + MainApp.getInstance().getString(R.string.bg_mgdl);
+            if (showConverted) reply += " (" + toMgdl.intValue() + context.getString(R.string.device_cgm_bg_mgdl);
             return reply;
         }
     }
 
     public String displayDelta(Double delta){
-        if (delta == Constants.CGM.DELTA_OLD || delta ==Constants.CGM.DELTA_NULL) return "-";
+        if (delta == Constants.CGM.DELTA_OLD || delta == Constants.CGM.DELTA_NULL) return "-";
         if (delta > 0){
-            return "+" + delta;
+            return "+" + displayBG(delta ,false);
         } else if (delta < 0){
-            return "-" + delta;
+            return "-" + displayBG(delta ,false);
         } else {
-            return delta.toString();
+            return displayBG(delta ,false);
         }
     }
 
@@ -179,10 +194,10 @@ public class DeviceCGM extends PluginDevice {
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
         TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);
         TextView deviceStatusText       = (TextView)rootView.findViewById(R.id.statusText);
-        ImageView deviceActionOne         = (ImageView) rootView.findViewById(R.id.deviceActionOne);
-        ImageView deviceActionTwo         = (ImageView) rootView.findViewById(R.id.deviceActionTwo);
-        ImageView deviceActionThree       = (ImageView) rootView.findViewById(R.id.deviceActionThree);
-        ImageView deviceActionSettings    = (ImageView) rootView.findViewById(R.id.deviceActionSettings);
+        ImageButton deviceActionOne         = (ImageButton) rootView.findViewById(R.id.deviceActionOne);
+        ImageButton deviceActionTwo         = (ImageButton) rootView.findViewById(R.id.deviceActionTwo);
+        ImageButton deviceActionThree       = (ImageButton) rootView.findViewById(R.id.deviceActionThree);
+        ImageButton deviceActionRight       = (ImageButton) rootView.findViewById(R.id.deviceActionRight);
 
         deviceName.setText(             getDetailedName());
         DeviceStatus status             = getStatus();
@@ -190,41 +205,8 @@ public class DeviceCGM extends PluginDevice {
         deviceStatusText.setText(       status.getComment());
 
         //Setup Prefs
-        Spinner spinnerBG                      = (Spinner)rootView.findViewById(R.id.prefBG);
-        String[] bgPrefs                    = {PREF_BG_UNITS_MGDL, PREF_BG_UNITS_MMOLL};
-        ArrayAdapter<String> bgPrefsAdapter = new ArrayAdapter<>(context, R.layout.spinner_dropdown_item, bgPrefs);
-        spinnerBG.setAdapter(bgPrefsAdapter);
-        spinnerBG.setSelection(Utilities.getIndex(spinnerBG, getPref(PREF_BG_UNITS).getStringValue()), false);
-        spinnerBG.setPrompt(getPref(PREF_BG_UNITS).getDisplayValue());
-        spinnerBG.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                savePref(PREF_BG_UNITS, parent.getSelectedItem().toString());
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-        Spinner spinnerCGMSource               = (Spinner)rootView.findViewById(R.id.prefCGMSource);
-        ArrayAdapter<PluginCGM> cgmPrefsAdapter = new ArrayAdapter(context, R.layout.spinner_dropdown_item, MainApp.getPluginList(PluginCGM.class));
-        spinnerCGMSource.setAdapter(cgmPrefsAdapter);
-
-        if (pluginCGMSource != null){
-            spinnerCGMSource.setSelection(Utilities.getIndex(spinnerCGMSource, pluginCGMSource.getPluginDisplayName()), false);
-        }
-        spinnerCGMSource.setPrompt(getPref(PREF_CGM_SOURCE).getDisplayValue());
-        spinnerCGMSource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                savePref(PREF_CGM_SOURCE, MainApp.getPluginList(PluginCGM.class).get(position).getPluginName());
-                setCGMPluginSource();
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
+        setPluginPref((LinearLayout) rootView.findViewById(R.id.prefBGUnits), rootView, getPref(PREF_BG_UNITS));
+        setPluginPref((LinearLayout) rootView.findViewById(R.id.prefCGMSource), rootView, getPref(PREF_CGM_SOURCE));
 
         //Setup the Plugin Cards list
         rv=(RecyclerView)rootView.findViewById(R.id.pluginList);
@@ -233,7 +215,7 @@ public class DeviceCGM extends PluginDevice {
 
         List<PluginBase> pB = new ArrayList<>();
         pB.addAll(MainApp.getPluginList(PluginCGM.class));
-        adapterPlugins = new AdapterPlugins(pB);
+        adapterPlugins = new RecyclerViewPlugins(pB);
 
         rv.setAdapter(adapterPlugins);
 
@@ -241,20 +223,19 @@ public class DeviceCGM extends PluginDevice {
         deviceActionOne.setVisibility(View.GONE);
         deviceActionTwo.setVisibility(View.GONE);
         deviceActionThree.setVisibility(View.GONE);
-        deviceActionSettings.setVisibility(View.GONE);
+        deviceActionRight.setVisibility(View.GONE);
 
         return rootView;
     }
 
 
+
+
     /**
      * Device UI Card Functions
      */
-    public AdapterDevices.ViewHolder getDeviceCardViewHolder(View v){
-        return new DeviceViewHolder(v);
-    }
-    public void setDeviceCardData(AdapterDevices.ViewHolder viewHolder){
-        DeviceViewHolder deviceViewHolder = (DeviceViewHolder) viewHolder;
+    public void setDeviceCardData(RecyclerViewDevices.ViewHolder viewHolder){
+        RecyclerViewDevices.DeviceViewHolder deviceViewHolder = (RecyclerViewDevices.DeviceViewHolder) viewHolder;
         String lastReading, lastDelta, lastAge, avgDelta;
         CGMValue cgmValue = getLastCGMValue();
 
@@ -264,7 +245,7 @@ public class DeviceCGM extends PluginDevice {
             lastAge         =   "-";
             avgDelta        =   "-";
         } else {
-            lastReading =   displayBG(cgmValue.getSgv().doubleValue() ,false, getPref(PREF_BG_UNITS).getStringValue());
+            lastReading =   displayBG(cgmValue, false);
             lastDelta   =   displayDelta(getDelta(getLastCGMValue()));
             lastAge     =   Utilities.displayAge(cgmValue.getTimestamp());
             avgDelta    =   getDelta(getLastCGMValue()).toString();
@@ -275,7 +256,7 @@ public class DeviceCGM extends PluginDevice {
         deviceViewHolder.deviceMsgOne.setText(          lastReading);
         deviceViewHolder.deviceMsgOneFooter.setText(    context.getString(R.string.last_reading));
         deviceViewHolder.deviceMsgTwo.setText(          lastDelta);
-        deviceViewHolder.deviceMsgTwoFooter.setText(    context.getString(R.string.bg_delta));
+        deviceViewHolder.deviceMsgTwoFooter.setText(    context.getString(R.string.device_cgm_bg_delta));
         deviceViewHolder.deviceMsgThree.setText(        lastAge);
         deviceViewHolder.deviceMsgThreeFooter.setText(  context.getString(R.string.age));
         deviceViewHolder.deviceMsgFour.setText(         avgDelta);
@@ -289,7 +270,7 @@ public class DeviceCGM extends PluginDevice {
         deviceViewHolder.deviceActionTwo.setVisibility(View.GONE);
         deviceViewHolder.deviceActionThree.setVisibility(View.GONE);
 
-        deviceViewHolder.deviceActionSettings.setOnClickListener(new View.OnClickListener() {
+        deviceViewHolder.deviceActionRight.setOnClickListener(new View.OnClickListener() {
                                                                      @Override
                                                                      public void onClick(View view) {
                  Intent loadFragment = new Intent(MainApp.getInstance(), SingleFragmentActivity.class);

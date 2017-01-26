@@ -11,6 +11,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.Date;
 import java.util.Locale;
 
+import io.realm.RealmResults;
+import layout.AdapterRealmList;
+
 /**
  * Created by Tim on 02/01/2017.
  * Shared Utility Functions
@@ -102,12 +105,17 @@ public class Utilities {
 
     //returns the location of an item in a spinner
     public static int getIndex(Spinner spinner, String myString){
-        int index = 0;
+        int index = -1;
         for (int i=0;i<spinner.getCount();i++){
+            //Log.e("TEST", "getIndex: " + spinner.getItemAtPosition(i).toString());
             if (spinner.getItemAtPosition(i).toString().equals(myString)){
                 index = i;
             }
         }
         return index;
+    }
+
+    public static Date getDateHoursAgo(int hours){
+        return new Date(new Date().getTime() - ((60000 * 60 * hours)));
     }
 }

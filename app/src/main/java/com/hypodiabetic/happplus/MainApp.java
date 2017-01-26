@@ -1,8 +1,6 @@
 package com.hypodiabetic.happplus;
 
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.plugins.cgm.NSClientCGM;
@@ -15,9 +13,8 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.cgm.PluginCGM;
 import com.hypodiabetic.happplus.plugins.cgm.xDripCGM;
-import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
+import com.hypodiabetic.happplus.plugins.devices.DeviceSysProfile;
 
 /**
  * Created by Tim on 25/12/2016.
@@ -41,18 +38,16 @@ public class MainApp extends Application {
         /*
         HAPP+ plugin list, add additional plugins here
          */
-
+        //Device Plugins
+        plugins.add(new DeviceSysProfile());
+        plugins.add(new DeviceCGM());
 
         //CGM Source Plugins
         plugins.add(new xDripCGM());
         plugins.add(new NSClientCGM());
-        //plugins.addAll(cgmSourcePlugins);
 
         //APS Source Plugins
 
-        //Device Plugins
-        plugins.add(new DeviceCGM());
-        //plugins.addAll(devicePlugins);
 
         //UI Plugins
 
@@ -60,10 +55,21 @@ public class MainApp extends Application {
     }
 
 
-    public void loadBackgroundPlugins(){
+    public static void loadBackgroundPlugins(){
         for (PluginBase plugin : plugins){
             if (plugin.getLoadInBackground())   plugin.load();
         }
+        Log.i(TAG, "loadBackgroundPlugins: Completed");
+    }
+
+    public static void reLoadPlugins(){
+        for (PluginBase plugin : plugins){
+            if (plugin.getIsLoaded() || plugin.getLoadInBackground()){
+                plugin.unLoad();
+                plugin.load();
+            }
+        }
+        Log.i(TAG, "reLoadPlugins: Completed");
     }
 
     public static PluginBase getPlugin(String pluginName, Class pluginClass){
@@ -71,6 +77,14 @@ public class MainApp extends Application {
             if (plugin.getPluginName().equals(pluginName) && pluginClass.isAssignableFrom(plugin.getClass())) return plugin;
         }
         Log.e(TAG, "getPlugin: Cannot find plugin: " + pluginName + " " + pluginClass.getName());
+        return null;
+    }
+
+    public static PluginBase getPluginByClass(Class pluginClass){
+        for (PluginBase plugin : plugins){
+            if (pluginClass.isAssignableFrom(plugin.getClass())) return plugin;
+        }
+        Log.e(TAG, "getPluginByClass: Cannot find plugin: " + pluginClass.getName());
         return null;
     }
 

@@ -8,6 +8,8 @@ import android.util.Log;
 
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.helperObjects.PluginPref;
+import com.hypodiabetic.happplus.helperObjects.SysPref;
 
 import org.json.JSONArray;
 
@@ -59,8 +61,11 @@ public class xDripCGM extends PluginCGM {
         return true;
     }
 
-    public List<String> getPrefNames(){
+    public List<PluginPref> getPrefsList(){
         return new ArrayList<>();
+    }
+
+    protected void onPrefChange(SysPref sysPref){
     }
 
     public DeviceStatus getPluginStatus(){

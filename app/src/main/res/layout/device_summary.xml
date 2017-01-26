@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:id="@+id/deviceCardSummary"
-    android:background="@color/colorCGM">
+    android:id="@+id/deviceCardSummary">
 
         <LinearLayout
             android:layout_width="match_parent"

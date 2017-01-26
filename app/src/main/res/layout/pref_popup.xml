@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/backgroundLight"
+    style="@style/Card">
+
+    <TextView
+        android:id="@+id/sysPrefPopupTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/misc_placeholder"
+        style="@style/TitlePrimaryDark"/>
+    <TextView
+        android:id="@+id/sysPrefPopupSubTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/misc_placeholder"
+        style="@style/SubtextDark"/>
+    <TextView
+        android:id="@+id/sysPrefPopupDesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/misc_placeholder"
+        style="@style/TitleSubtextDark"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:text="@string/misc_item_mark"
+            style="@style/TitleSecondaryDark"
+            android:paddingEnd="0dp"/>
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sysPrefSysProfiles"
+            style="@style/TitleSecondaryDark"
+            android:paddingStart="0dp"
+            android:spinnerMode="dialog">
+        </Spinner>
+    </LinearLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/divider"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sysPrefText"/>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sysPrefItems">
+    </ListView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/sysPrefCancel"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@android:string/cancel"/>
+        <Button
+            android:id="@+id/sysPrefSave"
+            style="Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@android:string/ok"
+            android:layout_toStartOf="@id/sysPrefCancel"/>
+    </RelativeLayout>
+
+</LinearLayout>

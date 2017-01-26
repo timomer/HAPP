@@ -5,18 +5,26 @@ import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.devices.DeviceSysProfile;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import layout.PrefPopupWindow;
 
 
 /**
@@ -25,7 +33,7 @@ import java.util.List;
  * example: PluginBase > PluginBaseCGM > xDripCGM
  */
 
-public abstract class PluginBase extends Fragment {
+public abstract class PluginBase<T> extends Fragment {
 
     final public String TAG;
     final protected Context context;
@@ -50,7 +58,7 @@ public abstract class PluginBase extends Fragment {
     }
 
     private String getTagName(){
-        String type, dataType;
+        String type;
         switch (getPluginType()){
             case PLUGIN_TYPE_SOURCE:
                 type    =   "SOURCE";
@@ -64,17 +72,7 @@ public abstract class PluginBase extends Fragment {
             default:
                 type    =   "unknown Plugin Type";
         }
-        switch (getPluginDataType()){
-            case DATA_TYPE_CGM:
-                dataType    =   "CGM";
-                break;
-            case DATA_TYPE_APS:
-                dataType    =   "APS";
-                break;
-            default:
-                dataType    =   "unknown Plugin Data Type";
-        }
-        return "Plugin:" + type + ":" + dataType + ":" + getPluginName();
+        return "Plugin:" + type + ":" + getPluginName();
     }
 
     /**
@@ -92,20 +90,27 @@ public abstract class PluginBase extends Fragment {
     protected abstract boolean onLoad();
     public boolean load(){
         loadPrefs();
-        if (getPref(PREF_ENABLED).getBooleanValue() || getPluginType() == PLUGIN_TYPE_DEVICE) {          //always load Device Plugins
+        if (getPluginType() == PLUGIN_TYPE_DEVICE) {        //always load Device Plugins
             if (onLoad()) {
                 isLoaded = true;
                 Log.d(TAG, "load: Successful");
-
             } else {
                 isLoaded = false;
                 Log.e(TAG, "load: Unsuccessful, " + getStatus().getComment());
-
             }
         } else {
-            isLoaded = false;
-            Log.e(TAG, "load: Unsuccessful, plugin is not enabled");
-
+            if (getPref(PREF_ENABLED).getBooleanValue()) {
+                if (onLoad()) {
+                    isLoaded = true;
+                    Log.d(TAG, "load: Successful");
+                } else {
+                    isLoaded = false;
+                    Log.e(TAG, "load: Unsuccessful, " + getStatus().getComment());
+                }
+            } else {
+                isLoaded = false;
+                Log.e(TAG, "load: Unsuccessful, plugin is not enabled");
+            }
         }
         return isLoaded;
     }
@@ -128,22 +133,41 @@ public abstract class PluginBase extends Fragment {
     }
 
     /**
+     * Reloads prefs and notifies the plugin
+     */
+    public void refreshPrefs(){
+        loadPrefs();
+        onPrefChange(null);
+    }
+    /**
+     * Reloads prefs, notifies the plugin and sends the refreshed SysPref object
+     */
+    public void refreshPrefs(SysPref sysPref){
+        loadPrefs();
+        onPrefChange(sysPref);
+    }
+
+    /**
+     * Called when a Pref for this plugin has been updated or when refreshPrefs() is called
+     * A SysPref object is passed if a pref was updated
+     */
+    protected abstract void onPrefChange(SysPref sysPref);
+
+    /**
      * Names of Prefs for this Plugin, if any
      * @return String List of Pref Names
      */
-    protected abstract List<String> getPrefNames();
-    private void loadPrefs(){
-        RealmHelper realmHelper = new RealmHelper();
-        pluginPrefs             = new ArrayList<>();
-        List<String> prefNames  = getPrefNames();
-
-        pluginPrefs.add(SysPref.getPref(PREF_PREFIX + PREF_ENABLED, realmHelper.getRealm()));
-        for (int p = 0; p < prefNames.size(); p++){
-            SysPref sysPref = SysPref.getPref(PREF_PREFIX + prefNames.get(p), realmHelper.getRealm());
+    protected abstract List<PluginPref> getPrefsList();
+    protected void loadPrefs(){
+        Log.i(TAG, "loadPrefs: for " + TAG + " Started");
+        pluginPrefs =   new ArrayList<>();
+        pluginPrefs.add(new SysPref<>(PREF_PREFIX + PREF_ENABLED, PREF_ENABLED, context.getString(R.string.pref_enabled_desc), Arrays.asList("true", "false"), Arrays.asList("true", "false"), PluginPref.PREF_TYPE_LIST));
+        for (PluginPref pref : getPrefsList()) {
+            SysPref sysPref =   new SysPref<>(PREF_PREFIX + pref.getName(), pref.getDisplayName(), pref.getDescription(), pref.getValues(), pref.getDisplayValues(), pref.getPrefType());
             pluginPrefs.add(sysPref);
+            Log.i(TAG, sysPref.getPrefName() + "=" + sysPref.getStringValue() + " | " + sysPref.getPrefDescription());
         }
-
-        realmHelper.closeRealm();
+        Log.i(TAG, "loadPrefs: for " + TAG + " Completed");
     }
 
     /**
@@ -164,28 +188,47 @@ public abstract class PluginBase extends Fragment {
      * @param prefValue value of pref
      */
     protected void savePref(String prefName, String prefValue){
-        savePluginPref(prefName, prefValue);
+        savePluginPref(PREF_PREFIX + prefName, prefValue);
     }
     protected void savePref(String prefName, Integer prefValue){
-        savePluginPref(prefName, prefValue.toString());
+        savePluginPref(PREF_PREFIX + prefName, prefValue.toString());
     }
     protected void savePref(String prefName, Double prefValue){
-        savePluginPref(prefName, prefValue.toString());
+        savePluginPref(PREF_PREFIX + prefName, prefValue.toString());
     }
     protected void savePref(String prefName, Boolean prefValue){
-        savePluginPref(prefName, prefValue.toString());
+        savePluginPref(PREF_PREFIX + prefName, prefValue.toString());
     }
-    private void savePluginPref(String prefName, String prefValue){
-        RealmHelper realmHelper = new RealmHelper();
-        SysPref.savePref(PREF_PREFIX + prefName, prefValue, realmHelper.getRealm());
+    protected void savePluginPref(String prefName, String prefValue){
+        DeviceSysProfile deviceSysProfile = (DeviceSysProfile) MainApp.getPluginByClass(DeviceSysProfile.class);
+        deviceSysProfile.savePref(prefName, prefValue);
         loadPrefs();
-        realmHelper.closeRealm();
 
         Intent prefUpdate = new Intent(Intents.newLocalEvent.NEW_LOCAL_EVENT_PREF_UPDATE);
         prefUpdate.putExtra(Intents.extras.PLUGIN_NAME, getPluginName());
         prefUpdate.putExtra(Intents.extras.PLUGIN_TYPE, getPluginType());
         prefUpdate.putExtra(Intents.extras.PLUGIN_PREF_NAME, prefName);
         LocalBroadcastManager.getInstance(context).sendBroadcast(prefUpdate);
+    }
+
+    /**
+     * Setups a Plugin Prefs UI Layout for the user to view and change Prefs value
+     * @param linearLayout layout that has pref_layout.xml included
+     * @param rootView view of parent plugin
+     * @param sysPref the sysPref we are displaying
+     */
+    protected void setPluginPref(LinearLayout linearLayout, View rootView, SysPref sysPref){
+        final TextView prefValue        =   (TextView) linearLayout.findViewById(R.id.prefValue);
+        TextView prefTitle              =   (TextView) linearLayout.findViewById(R.id.prefTitle);
+        RelativeLayout prefValueLayout  =   (RelativeLayout) linearLayout.findViewById(R.id.prefValueLayout);
+        prefTitle.setText(              sysPref.getPrefDisplayName());
+        prefValue.setText(              sysPref.getPrefDisplayValue());
+        final PrefPopupWindow popupWindow = new PrefPopupWindow(rootView.getContext(), sysPref, this, prefValue);
+        prefValueLayout.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                popupWindow.show(v.getRootView(), 0, -250);
+            }
+        });
     }
 
     /**
@@ -211,9 +254,11 @@ public abstract class PluginBase extends Fragment {
             deviceStatus.addComment(prefCheck);
         }
         //enabled
-        if (!getPref(PREF_ENABLED).getBooleanValue() && getPluginType() != PLUGIN_TYPE_DEVICE) {
-            deviceStatus.hasError(true);
-            deviceStatus.addComment(context.getString(R.string.plugin_not_enabled));
+        if (getPluginType() != PLUGIN_TYPE_DEVICE) {
+            if (!getPref(PREF_ENABLED).getBooleanValue()) {
+                deviceStatus.hasError(true);
+                deviceStatus.addComment(context.getString(R.string.plugin_not_enabled));
+            }
         }
 
         return deviceStatus;
@@ -227,7 +272,7 @@ public abstract class PluginBase extends Fragment {
         String summary = "";
         if (pluginPrefs != null) {
             for (SysPref pref : pluginPrefs){
-                if (pref.getStringValue() == null && !pref.getPrefName().equals(TAG + ":" + PREF_ENABLED)) summary += context.getString(R.string.plugin_pref) + " '" + pref.getPrefName() + "' " + context.getString(R.string.plugin_pref_missing) + ". ";
+                if (pref.getStringValue() == null && !pref.getPrefName().equals(TAG + ":" + PREF_ENABLED)) summary += context.getString(R.string.pref) + " '" + pref.getPrefName() + "' " + context.getString(R.string.pref_missing) + ". ";
             }
         }
         return summary;
@@ -284,7 +329,7 @@ public abstract class PluginBase extends Fragment {
      * Type of data this plugin handel's
      * @return int as listed in PluginBase, example DATA_TYPE_CGM
      */
-    public abstract int getPluginDataType();
+    //public abstract int getPluginDataType();
 
     /**
      * Does this plugin load on app start?

@@ -8,7 +8,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.helperObjects.PluginPref;
+import com.hypodiabetic.happplus.helperObjects.SysPref;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,33 +66,34 @@ public class NSClientCGM extends PluginCGM {
 
         if (bundle.containsKey(NSCLIENT_SGV_VALUES)) {
             String sgvString = bundle.getString(NSCLIENT_SGV_VALUES);
+            RealmHelper realmHelper = new RealmHelper();
 
             try {
                 JSONArray jsonArray = new JSONArray(sgvString);
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject sgvJson = jsonArray.getJSONObject(i);
-                    Integer sgv     =   null;
+                    Float sgv     =   null;
                     Date timeStamp  =   null;
                     try {
-                        sgv         =   sgvJson.getInt("mgdl");
+                        sgv         =   (float) sgvJson.getInt("mgdl");
                         timeStamp   =   new Date(sgvJson.getLong("mills"));
                     } catch (JSONException e) {
                         Log.d(TAG, "getCGMValue: failed to read CGM Value");
                     }
 
-                    if (!haveBGTimestamped(timeStamp)){
+                    if (!haveBGTimestamped(timeStamp, realmHelper.getRealm())){
                         saveNewCGMValue(sgv, timeStamp);
                     } else {
-                        Log.d(TAG, "Already have a BG with this timestamp, ignoring");
+                        Log.d(TAG, "Already have a BG with this timestamp " + timeStamp + ", ignoring");
                     }
                 }
 
             } catch (JSONException e){
                 Log.d(TAG, "getCGMValue: failed to read CGM Values, giving up");
             }
+            realmHelper.closeRealm();
         }
-
     }
 
     public boolean onLoad(){
@@ -105,7 +109,7 @@ public class NSClientCGM extends PluginCGM {
         return true;
     }
 
-    public List<String> getPrefNames(){
+    public List<PluginPref> getPrefsList(){
         return new ArrayList<>();
     }
 
@@ -117,6 +121,8 @@ public class NSClientCGM extends PluginCGM {
             deviceStatus.addComment(context.getString(R.string.plugin_receiver_isnull));
         }
         return deviceStatus;
+    }
+    protected void onPrefChange(SysPref sysPref){
     }
 
     public JSONArray getDebug(){

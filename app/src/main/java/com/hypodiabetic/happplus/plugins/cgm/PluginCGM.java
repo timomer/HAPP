@@ -13,7 +13,9 @@ import com.hypodiabetic.happplus.database.dbHelperCGM;
 import com.hypodiabetic.happplus.plugins.PluginBase;
 
 import java.util.Date;
-import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by Tim on 25/12/2016.
@@ -22,22 +24,19 @@ import java.util.List;
 
 public abstract class PluginCGM extends PluginBase {
 
-    private RealmHelper realmHelper;
-
     public PluginCGM(){
         super();
-        realmHelper     = new RealmHelper();
     }
 
     public int getPluginType(){             return PLUGIN_TYPE_SOURCE;}
-    public int getPluginDataType(){         return DATA_TYPE_CGM;}
     public boolean getLoadInBackground(){   return true;}
 
     //Database actions
-    protected void saveNewCGMValue(Integer sgv, Date timestamp){
+    protected void saveNewCGMValue(Float sgv, Date timestamp){
         if (sgv==null || timestamp==null){
             Log.d(TAG, "saveNewCGMValue: New Value rejected, missing data");
         } else {
+            RealmHelper realmHelper = new RealmHelper();
             CGMValue cgmValue = new CGMValue();
             cgmValue.setSgv(sgv);
             cgmValue.setTimestamp(timestamp);
@@ -52,21 +51,21 @@ public abstract class PluginCGM extends PluginBase {
     }
 
 
-    public CGMValue getLastReading() {
-        return dbHelperCGM.getLastReading(getPluginName(), realmHelper.getRealm());
+    public CGMValue getLastReading(Realm realm) {
+        return dbHelperCGM.getLastReading(getPluginName(), realm);
     }
 
-    public boolean haveBGTimestamped(Date timestamp){
-        CGMValue cgmValue = dbHelperCGM.getReadingTimestamped(getPluginName(), timestamp, realmHelper.getRealm());
-        return (cgmValue == null);
+    public boolean haveBGTimestamped(Date timestamp, Realm realm){
+        CGMValue cgmValue = dbHelperCGM.getReadingTimestamped(getPluginName(), timestamp, realm);
+        return (cgmValue != null);
     }
 
-    public List<CGMValue> getReadingsSince(Date timeStamp){
-        return dbHelperCGM.getReadingsSince(getPluginName(), timeStamp, realmHelper.getRealm());
+    public RealmResults<CGMValue> getReadingsSince(Date timeStamp, Realm realm){
+        return dbHelperCGM.getReadingsSince(getPluginName(), timeStamp, realm);
     }
 
-    public double getDelta(CGMValue cgmValue){
-        CGMValue lastCGMValue   =   dbHelperCGM.getReadingsBefore(getPluginName(), cgmValue.getTimestamp(), realmHelper.getRealm()).get(0);
+    public double getDelta(CGMValue cgmValue, Realm realm){
+        CGMValue lastCGMValue   =   dbHelperCGM.getReadingsBefore(getPluginName(), cgmValue.getTimestamp(), realm).get(0);
 
         if (lastCGMValue == null){
             return Constants.CGM.DELTA_NULL;

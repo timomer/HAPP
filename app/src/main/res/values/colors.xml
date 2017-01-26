@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#2196f3</color>
+    <color name="colorPrimaryDark">#1976d2</color>
+    <color name="colorAccent">#ff5722</color>
 
     <color name="colorButton">#54000000</color>
     <color name="colorTextLight">#ffffff</color>
@@ -11,7 +11,9 @@
     <color name="colorSubTextDark">#54000000</color>
 
     <color name="colorCGM">#c0392b</color>
+    <color name="colorProfileManager">#546E7A</color>
     <color name="colorImageBackground">#54000000</color>
 
     <color name="backgroundLight">#50fafafa</color>
+    <color name="primary_text_material_light">#212121</color>
 </resources>

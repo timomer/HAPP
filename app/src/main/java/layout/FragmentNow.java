@@ -10,10 +10,16 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.database.CGMValue;
+import com.hypodiabetic.happplus.plugins.devices.DeviceCGM;
 
 import java.util.Date;
 import java.util.UUID;
+
+import io.realm.RealmResults;
 
 
 public class FragmentNow extends Fragment {
@@ -69,8 +75,10 @@ public class FragmentNow extends Fragment {
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
 
-        FragmentLineChart mGlucoseLineChartFragment = FragmentLineChart.newInstance(8,"", "Glucose", "summary");
-        FragmentLineChart mInsulinLineChartFragment = FragmentLineChart.newInstance(8,"", "Insulin", "summary");
+        DeviceCGM deviceCGM = (DeviceCGM) MainApp.getPluginByClass(DeviceCGM.class);
+        RealmResults<CGMValue> readings = deviceCGM.getReadingsSince(Utilities.getDateHoursAgo(8));
+        FragmentLineChart mGlucoseLineChartFragment = FragmentLineChart.newInstance(8, readings, "Glucose", "summary");
+        FragmentLineChart mInsulinLineChartFragment = FragmentLineChart.newInstance(4, readings, "Insulin", "summary");
 
         ft.add(mChartContainer.getId(), mGlucoseLineChartFragment, "chartGlucose");
         ft.add(mChartContainer.getId(), mInsulinLineChartFragment, "chartInsulin");

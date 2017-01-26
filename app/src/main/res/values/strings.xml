@@ -13,18 +13,29 @@
     <string name="misc_plugins">Plugins</string>
     <string name="misc_placeholder">Placeholder String+</string>
     <string name="misc_default">Default</string>
+    <string name="misc_item_mark">*</string>
+    <string name="misc_error">error</string>
 
     //Main Activity
     <string name="activity_main_fragment_now">Now</string>
     <string name="activity_main_fragment_devices">Devices</string>
     <string name="activity_main_fragment_events">Events</string>
 
+    //Menus
+    <string name="menu_back">back</string>
+
     //Shared plugin strings
     <string name="plugin_not_enabled">"Plugin is not enabled."</string>
-    <string name="plugin_pref">Pref</string>
-    <string name="plugin_pref_missing">is missing</string>
     <string name="plugin_receiver_isnull">Broadcast Receiver is not registered.</string>
     <string name="plugin_not_loaded">is not loaded.</string>
+
+    //Prefs
+    <string name="pref_enabled_desc">Is this plugin enabled</string>
+    <string name="pref_compare_profile">Compare to this profile</string>
+    <string name="pref">Pref</string>
+    <string name="pref_missing">is missing</string>
+    <string name="pref_not_set">not set</string>
+    <string name="pref_inherited">inherited</string>
 
     //Device
     <string name="device_status_error">Error</string>
@@ -38,17 +49,32 @@
     <string name="age">age</string>
 
     //Device CGM
-    <string name="device_cgm_data_source">CGM Data Source</string>
-    <string name="device_cgm_units">Blood Glucose Units</string>
     <string name="device_cgm_missing_plugin">CGM Source Plugin cannot be found.</string>
+    <string name="device_cgm_bg_delta">delta</string>
+    <string name="device_cgm_units">Blood Glucose Units</string>
+    <string name="device_cgm_units_desc">Blood Glucose displayed in the following format</string>
+    <string name="device_cgm_bg_mgdl">mgdl</string>
+    <string name="device_cgm_bg_mmol">mmol/l</string>
+    <string name="device_cgm_data_source">CGM Data Source</string>
+    <string name="device_cgm_data_source_desc">Use Blood Glucose readings from the following CGM Source Plugin</string>
+    <string name="device_cgm_desc">HAPP CGM Device</string>
+    <string name="device_cgm_name">CGM</string>
+
+    //Device Sys Profile
+    <string name="device_profile_desc">HAPP Sys Profile Manager Device</string>
+    <string name="device_profile_name">Profile</string>
+    <string name="device_profile">Profile</string>
+    <string name="device_profile_loaded">Profile Loaded</string>
+    <string name="device_profile_loaded_name">Profile Name</string>
+    <string name="device_profile_name_not_allowed">Profile name is not allowed, please change</string>
+    <string name="device_profile_new">New Profile</string>
+    <string name="device_profile_copy">Copy</string>
+
 
     //Time Strings
     <string name="time_just_now">just now</string>
     <string name="time_min_ago">min ago</string>
     <string name="time_mins_ago">mins ago</string>
 
-    //BG Strings
-    <string name="bg_mgdl">mgdl</string>
-    <string name="bg_mmol">mmol/l</string>
-    <string name="bg_delta">delta</string>
+
 </resources>

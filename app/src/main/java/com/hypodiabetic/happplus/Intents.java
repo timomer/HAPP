@@ -13,6 +13,7 @@ public class Intents {
     public class newLocalEvent{
         public final static String NEW_LOCAL_EVENT_SGV          =   "newLocalEvent.sgv";
         public final static String NEW_LOCAL_EVENT_PREF_UPDATE  =   "newLocalEvent.prefUpdate";
+        public final static String SYS_PROFILE_CHANGE           =   "newLocalEvent.sysProfileChange";
     }
 
     public class extras{
