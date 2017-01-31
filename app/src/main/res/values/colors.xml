@@ -16,4 +16,7 @@
 
     <color name="backgroundLight">#50fafafa</color>
     <color name="primary_text_material_light">#212121</color>
+
+    <color name="colorCGMMinLine">#FF5722</color>
+    <color name="colorCGMMaxLine">#FF9800</color>
 </resources>

@@ -29,15 +29,16 @@ public class CGMValue extends RealmObject{
     }
 
     public Date getTimestamp() {
-        return timestamp;
+        return new Date(timestamp.longValue());
     }
 
     public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+        this.timestamp = (float) timestamp.getTime();
     }
+
 
     private Float sgv;
     private String source;
-    private Date timestamp;
+    private Float timestamp;
 
 }

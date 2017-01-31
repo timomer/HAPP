@@ -7,19 +7,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.Utilities;
-import com.hypodiabetic.happplus.database.CGMValue;
+import com.hypodiabetic.happplus.charts.FragmentLineChartBase;
+import com.hypodiabetic.happplus.charts.cgmLineChart;
 import com.hypodiabetic.happplus.plugins.devices.DeviceCGM;
-
-import java.util.Date;
-import java.util.UUID;
-
-import io.realm.RealmResults;
+import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
 
 
 public class FragmentNow extends Fragment {
@@ -32,6 +27,7 @@ public class FragmentNow extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    FragmentLineChartBase mCGMLineChartFragment;
 
     public FragmentNow() {
         // Required empty public constructor
@@ -70,25 +66,22 @@ public class FragmentNow extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_now, container, false);
-        LinearLayout mChartContainer = (LinearLayout) mView.findViewById(R.id.FragmentNowCharts); // TODO: 25/12/2016 change ID to ramdom Int to allow mutiple instances 
+        LinearLayout mChartContainer = (LinearLayout) mView.findViewById(R.id.FragmentNowCharts); // TODO: 25/12/2016 change ID to random Int to allow multiple instances
 
-        FragmentManager fm = getFragmentManager();
+        final FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
 
-        DeviceCGM deviceCGM = (DeviceCGM) MainApp.getPluginByClass(DeviceCGM.class);
-        RealmResults<CGMValue> readings = deviceCGM.getReadingsSince(Utilities.getDateHoursAgo(8));
-        FragmentLineChart mGlucoseLineChartFragment = FragmentLineChart.newInstance(8, readings, "Glucose", "summary");
-        FragmentLineChart mInsulinLineChartFragment = FragmentLineChart.newInstance(4, readings, "Insulin", "summary");
+        //CGM Readings Line Chart
+        PluginDevice deviceCGM      =   (PluginDevice) MainApp.getPluginByClass(DeviceCGM.class);
+        mCGMLineChartFragment       =   cgmLineChart.newInstance(8, "CGM Readings", "Summary", "mmoll", deviceCGM.getColour());
 
-        ft.add(mChartContainer.getId(), mGlucoseLineChartFragment, "chartGlucose");
-        ft.add(mChartContainer.getId(), mInsulinLineChartFragment, "chartInsulin");
 
+        ft.add(mChartContainer.getId(), mCGMLineChartFragment, "chartGlucose");
         ft.commit();
+
 
         return mView;
     }
-
-
 
 
 

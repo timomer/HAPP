@@ -34,7 +34,7 @@ public class dbHelperCGM {
     public static RealmResults<CGMValue> getReadingsSince(String source, Date timestamp, Realm realm) {
         RealmResults<CGMValue> results = realm.where(CGMValue.class)
                 .equalTo("source", source)
-                .greaterThanOrEqualTo("timestamp", timestamp)
+                .greaterThanOrEqualTo("timestamp", (float) timestamp.getTime())
                 .findAllSorted("timestamp", Sort.DESCENDING);
 
         return results;
@@ -43,7 +43,7 @@ public class dbHelperCGM {
     public static CGMValue getReadingTimestamped(String source, Date timestamp, Realm realm){
         RealmResults<CGMValue> results = realm.where(CGMValue.class)
                 .equalTo("source", source)
-                .equalTo("timestamp", timestamp)
+                .equalTo("timestamp", (float) timestamp.getTime())
                 .findAllSorted("timestamp", Sort.DESCENDING);
         if (results.isEmpty()) {
             return null;
@@ -55,7 +55,7 @@ public class dbHelperCGM {
     public static RealmResults<CGMValue> getReadingsBefore(String source, Date timestamp, Realm realm) {
         RealmResults<CGMValue> results = realm.where(CGMValue.class)
                 .equalTo("source", source)
-                .lessThan("timestamp", timestamp)
+                .lessThan("timestamp", (float) timestamp.getTime())
                 .findAllSorted("timestamp", Sort.DESCENDING);
 
         return results;

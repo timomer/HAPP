@@ -153,21 +153,25 @@ public class DeviceCGM extends PluginDevice {
         }
     }
 
-    public String displayBG(CGMValue cgmValue, Boolean showConverted){
-        return displayBG(cgmValue.getSgv().doubleValue(), showConverted);
+    public String displayBG(CGMValue cgmValue, Boolean showUnitMeasure, Boolean showConverted){
+        return displayBG(cgmValue.getSgv().doubleValue(), showUnitMeasure, showConverted);
     }
 
-    public String displayBG(Double bgValue, Boolean showConverted){
-        String reply;
-
+    public String displayBG(Double bgValue, Boolean showUnitMeasure, Boolean showConverted){
+        String reply    =   String.valueOf(bgValue.intValue());
         if(getPref(PREF_BG_UNITS).getStringValue().equals(PREF_BG_UNITS_MGDL)) {
-            reply = bgValue.intValue() + context.getString(R.string.device_cgm_bg_mgdl);
-            if (showConverted) reply += " (" + Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + context.getString(R.string.device_cgm_bg_mmol);
+            if (showUnitMeasure){
+                reply += context.getString(R.string.device_cgm_bg_mgdl);
+                if (showConverted) reply += " (" + Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + context.getString(R.string.device_cgm_bg_mmol);
+            }
             return reply;
         } else {
-            reply = Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + context.getString(R.string.device_cgm_bg_mmol);
-            Double toMgdl = (bgValue * Constants.CGM.MMOLL_TO_MGDL);
-            if (showConverted) reply += " (" + toMgdl.intValue() + context.getString(R.string.device_cgm_bg_mgdl);
+            reply = Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1).toString();
+            if (showUnitMeasure){
+                reply += context.getString(R.string.device_cgm_bg_mmol);
+                Double toMgdl = (bgValue * Constants.CGM.MMOLL_TO_MGDL);
+                if (showConverted) reply += " (" + toMgdl.intValue() + context.getString(R.string.device_cgm_bg_mgdl);
+            }
             return reply;
         }
     }
@@ -175,11 +179,11 @@ public class DeviceCGM extends PluginDevice {
     public String displayDelta(Double delta){
         if (delta == Constants.CGM.DELTA_OLD || delta == Constants.CGM.DELTA_NULL) return "-";
         if (delta > 0){
-            return "+" + displayBG(delta ,false);
+            return "+" + displayBG(delta, true, false);
         } else if (delta < 0){
-            return "-" + displayBG(delta ,false);
+            return "-" + displayBG(delta, true, false);
         } else {
-            return displayBG(delta ,false);
+            return displayBG(delta, true, false);
         }
     }
 
@@ -245,7 +249,7 @@ public class DeviceCGM extends PluginDevice {
             lastAge         =   "-";
             avgDelta        =   "-";
         } else {
-            lastReading =   displayBG(cgmValue, false);
+            lastReading =   displayBG(cgmValue, true, false);
             lastDelta   =   displayDelta(getDelta(getLastCGMValue()));
             lastAge     =   Utilities.displayAge(cgmValue.getTimestamp());
             avgDelta    =   getDelta(getLastCGMValue()).toString();
