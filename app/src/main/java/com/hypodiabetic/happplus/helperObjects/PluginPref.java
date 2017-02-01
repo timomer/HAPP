@@ -21,8 +21,6 @@ public class PluginPref<T> {
     public static final int PREF_TYPE_DOUBLE = 2;
     public static final int PREF_TYPE_STRING = 3;
 
-
-
     private String prefName;
     private String prefDisplayName;
     private String prefDescription;
