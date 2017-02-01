@@ -1,9 +1,8 @@
-package com.hypodiabetic.happplus.plugins.devices;
+package com.hypodiabetic.happplus.plugins.AbstractClasses;
 
 import android.graphics.drawable.Drawable;
 
 import com.hypodiabetic.happplus.database.RealmHelper;
-import com.hypodiabetic.happplus.plugins.PluginBase;
 
 import layout.RecyclerViewDevices;
 
@@ -12,12 +11,12 @@ import layout.RecyclerViewDevices;
  * Base functions for Plugin type Device, new Device Plugins should extend from this
  */
 
-public abstract class PluginDevice extends PluginBase {
+public abstract class AbstractDevice extends AbstractPluginBase {
 
     //Devices own RealHelper object
     protected RealmHelper realmHelper;
 
-    public PluginDevice() {
+    public AbstractDevice() {
         super();
         realmHelper =   new RealmHelper();
     }

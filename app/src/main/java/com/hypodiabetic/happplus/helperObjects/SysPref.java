@@ -6,14 +6,12 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.Profile;
-import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.devices.DeviceSysProfile;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONObject;
 
 import java.util.List;
-
-import io.realm.Realm;
 
 /**
  * Created by Tim on 14/01/2017.
@@ -83,8 +81,8 @@ public class SysPref<T> {
         if (prefType == PluginPref.PREF_TYPE_LIST) {
             //Finds the display value for this pref from the Display Values List
             for (int i = 0; i < prefValues.size(); i++) {
-                if (PluginBase.class.isAssignableFrom(prefValues.get(i).getClass())) {
-                    PluginBase pluginBase = (PluginBase) prefValues.get(i);
+                if (AbstractPluginBase.class.isAssignableFrom(prefValues.get(i).getClass())) {
+                    AbstractPluginBase pluginBase = (AbstractPluginBase) prefValues.get(i);
                     if (pluginBase.getPluginName().equals(prefValue)) {
                         displayValue = prefDisplayValues.get(i).toString();
                         break;
@@ -114,11 +112,11 @@ public class SysPref<T> {
 
 
     public SysPref(String name, String displayName, String description, List<T> prefValues, List<T> prefDisplayValues, int prefType, String profileID){
-        DeviceSysProfile deviceSysProfile   =   (DeviceSysProfile) MainApp.getPluginByClass(DeviceSysProfile.class);
+        SysProfileDevice deviceSysProfile   =   (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
         setPrefObject(name, displayName, description, deviceSysProfile.getProfile(profileID), deviceSysProfile.getDefaultProfile(), prefValues, prefDisplayValues, prefType);
     }
     public SysPref(String name, String displayName, String description,  List<T> prefValues, List<T> prefDisplayValues, int prefType){
-        DeviceSysProfile deviceSysProfile   =   (DeviceSysProfile) MainApp.getPluginByClass(DeviceSysProfile.class);
+        SysProfileDevice deviceSysProfile   =   (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
         setPrefObject(name, displayName, description, deviceSysProfile.getLoadedProfile(), deviceSysProfile.getDefaultProfile(), prefValues, prefDisplayValues, prefType);
     }
 
@@ -127,7 +125,7 @@ public class SysPref<T> {
     }
 
     public void update(String value){
-        DeviceSysProfile deviceSysProfile   = (DeviceSysProfile) MainApp.getPluginByClass(DeviceSysProfile.class);
+        SysProfileDevice deviceSysProfile   = (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
         this.prefValue  =   value;
         deviceSysProfile.savePref(prefName, value);
     }

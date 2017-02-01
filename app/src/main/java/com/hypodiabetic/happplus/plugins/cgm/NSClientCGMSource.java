@@ -12,6 +12,7 @@ import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,14 +27,14 @@ import java.util.List;
  * CGM Data from Nightscout via NSClient Android app
  */
 
-public class NSClientCGM extends PluginCGM {
+public class NSClientCGMSource extends AbstractCGMSource {
 
     private static final String NSCLIENT_ACTION_NEW_SGV =   "info.nightscout.client.NEW_SGV";
     private final static String NSCLIENT_SGV_VALUES     =   "sgvs";
 
     private BroadcastReceiver mCGMReceiver;
 
-    public NSClientCGM(){
+    public NSClientCGMSource(){
         super();
     }
 

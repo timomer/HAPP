@@ -1,4 +1,4 @@
-package com.hypodiabetic.happplus.plugins;
+package com.hypodiabetic.happplus.plugins.AbstractClasses;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +16,7 @@ import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
-import com.hypodiabetic.happplus.plugins.devices.DeviceSysProfile;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONArray;
 
@@ -33,7 +33,7 @@ import layout.PrefPopupWindow;
  * example: PluginBase > PluginBaseCGM > xDripCGM
  */
 
-public abstract class PluginBase<T> extends Fragment {
+public abstract class AbstractPluginBase extends Fragment {
 
     final public String TAG;
     final protected Context context;
@@ -51,7 +51,7 @@ public abstract class PluginBase<T> extends Fragment {
 
     private static final String PREF_ENABLED    =   "enabled";
 
-    public PluginBase (){
+    public AbstractPluginBase(){
         this.TAG                =   getTagName();
         this.context            =   MainApp.getInstance();
         this.PREF_PREFIX        =   TAG + ":";
@@ -200,7 +200,7 @@ public abstract class PluginBase<T> extends Fragment {
         savePluginPref(PREF_PREFIX + prefName, prefValue.toString());
     }
     protected void savePluginPref(String prefName, String prefValue){
-        DeviceSysProfile deviceSysProfile = (DeviceSysProfile) MainApp.getPluginByClass(DeviceSysProfile.class);
+        SysProfileDevice deviceSysProfile = (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
         deviceSysProfile.savePref(prefName, prefValue);
         loadPrefs();
 

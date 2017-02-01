@@ -13,7 +13,7 @@ import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.SingleFragmentActivity;
-import com.hypodiabetic.happplus.plugins.PluginBase;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class RecyclerViewPlugins extends RecyclerView.Adapter<RecyclerViewPlugins.PluginViewHolder> {
 
-    private List<PluginBase> plugins;
+    private List<AbstractPluginBase> plugins;
 
     public static class PluginViewHolder extends RecyclerView.ViewHolder {
 
@@ -45,7 +45,7 @@ public class RecyclerViewPlugins extends RecyclerView.Adapter<RecyclerViewPlugin
         }
     }
 
-    public RecyclerViewPlugins(List<PluginBase> plugins) {
+    public RecyclerViewPlugins(List<AbstractPluginBase> plugins) {
         this.plugins = plugins;
     }
 

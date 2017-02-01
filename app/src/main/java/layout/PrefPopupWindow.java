@@ -25,8 +25,8 @@ import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.database.dbHelperProfile;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
-import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.devices.DeviceSysProfile;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -40,7 +40,7 @@ public class PrefPopupWindow extends android.widget.PopupWindow {
 
     private Context mContext;
     private final SysPref sysPref;
-    private final PluginBase plugin;
+    private final AbstractPluginBase plugin;
     private ListView sysPrefItems;
     private EditText sysPrefTextValue;
     private final TextView textView;
@@ -50,7 +50,7 @@ public class PrefPopupWindow extends android.widget.PopupWindow {
     private Button btnSave;
     private Spinner sysPrefSysProfiles;
 
-    public PrefPopupWindow(Context context,final SysPref sysPref, PluginBase plugin,final TextView textView) {
+    public PrefPopupWindow(Context context, final SysPref sysPref, AbstractPluginBase plugin, final TextView textView) {
         super(context);
 
         this.mContext =   context;
@@ -74,8 +74,8 @@ public class PrefPopupWindow extends android.widget.PopupWindow {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //Save pref, if a list of Plugins is displayed, save the plugin name and not toString value
-                if (PluginBase.class.isAssignableFrom(parent.getItemAtPosition(position).getClass())){
-                    PluginBase pluginBase = (PluginBase) sysPref.getPefValues().get(position);
+                if (AbstractPluginBase.class.isAssignableFrom(parent.getItemAtPosition(position).getClass())){
+                    AbstractPluginBase pluginBase = (AbstractPluginBase) sysPref.getPefValues().get(position);
                     updatePref(pluginBase.getPluginName());
                 } else {
                     updatePref(sysPref.getPefValues().get(position).toString());
@@ -145,7 +145,7 @@ public class PrefPopupWindow extends android.widget.PopupWindow {
                 btnSave.setVisibility(View.GONE);
                 sysPrefTextValue.setVisibility(View.GONE);
                 sysPrefSysProfiles.setAdapter(  new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1 , dbHelperProfile.getProfileList(realmHelper.getRealm(), Profile.TYPE_SYS_PROFILE)));
-                sysPrefSysProfiles.setSelection(Utilities.getIndex(sysPrefSysProfiles, DeviceSysProfile.DEFAULT_SYS_PROFILE_NAME), false);
+                sysPrefSysProfiles.setSelection(Utilities.getIndex(sysPrefSysProfiles, SysProfileDevice.DEFAULT_SYS_PROFILE_NAME), false);
                 sysPrefSysProfiles.setPrompt(mContext.getString(R.string.pref_compare_profile));
                 setPrefList(sysPref.getDefaultStringValue());
                 break;

@@ -4,16 +4,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,12 +24,18 @@ import java.util.List;
  * xDrip CGM Plugin, receives Broadcast CGM values from local xDrip / xDrip+ app
  */
 
-public class xDripCGM extends PluginCGM {
+public class xDripCGMSource extends AbstractCGMSource {
 
     private static final String XDRIP_BGESTIMATE    =   "com.eveningoutpost.dexdrip.BgEstimate";
     private BroadcastReceiver mCGMReceiver;
 
-    public xDripCGM(){
+    private final String EXTRA_BG_ESTIMATE    = "com.eveningoutpost.dexdrip.Extras.BgEstimate";
+    private final String EXTRA_BG_SLOPE       = "com.eveningoutpost.dexdrip.Extras.BgSlope";
+    private final String EXTRA_BG_SLOPE_NAME  = "com.eveningoutpost.dexdrip.Extras.BgSlopeName";
+    private final String EXTRA_SENSOR_BATTERY = "com.eveningoutpost.dexdrip.Extras.SensorBattery";
+    private final String EXTRA_TIMESTAMP      = "com.eveningoutpost.dexdrip.Extras.Time";
+
+    public xDripCGMSource(){
         super();
     }
 
@@ -39,7 +48,17 @@ public class xDripCGM extends PluginCGM {
         mCGMReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //saveNewCGMValue(new CGMValue());
+                if (intent == null){
+                    Log.e(TAG, "onReceive: Intent empty");
+                    return;
+                }
+                Bundle bundle = intent.getExtras();
+                if (bundle == null) {
+                    Log.e(TAG, "onReceive: Bundle empty");
+                    return;
+                }
+
+                getCGMValues(bundle);
             }
         };
         context.registerReceiver(mCGMReceiver, new IntentFilter(XDRIP_BGESTIMATE));
@@ -59,6 +78,17 @@ public class xDripCGM extends PluginCGM {
             Log.d(TAG, "Listener Unregistered");
         }
         return true;
+    }
+
+    private void getCGMValues(Bundle bundle){
+
+        double bgEstimate   = bundle.getDouble(EXTRA_BG_ESTIMATE,0);
+        Date bgDate         =  new Date(bundle.getLong(EXTRA_TIMESTAMP, new Date().getTime()));
+        if (bgEstimate != 0) {
+            saveNewCGMValue((float) bgEstimate, bgDate);
+        } else {
+            Log.e(TAG, "getCGMValues: No BG Value Received");
+        }
     }
 
     public List<PluginPref> getPrefsList(){

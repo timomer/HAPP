@@ -12,7 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 
 import java.util.List;
 
@@ -29,9 +29,9 @@ public class RecyclerViewDevices extends RecyclerView.Adapter<RecyclerViewDevice
         }
     }
 
-    private List<PluginDevice> devices;
+    private List<AbstractDevice> devices;
 
-    public RecyclerViewDevices(List<PluginDevice> devices){
+    public RecyclerViewDevices(List<AbstractDevice> devices){
         this.devices = devices;
     }
 

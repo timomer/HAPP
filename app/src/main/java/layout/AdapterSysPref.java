@@ -10,8 +10,7 @@ import android.widget.CheckedTextView;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.Utilities;
-import com.hypodiabetic.happplus.plugins.PluginBase;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 import java.util.List;
 
@@ -65,7 +64,7 @@ public class AdapterSysPref<T> extends ArrayAdapter{
         }
 
         if (mDefaultPrefValue != null) {
-            if (PluginBase.class.isAssignableFrom(getItem(position).getClass())) {
+            if (AbstractPluginBase.class.isAssignableFrom(getItem(position).getClass())) {
                 if (MainApp.getPluginByName(mDefaultPrefValue).getPluginDisplayName().equals(strValue)){
                     strValue = strValue + " *";
                 }

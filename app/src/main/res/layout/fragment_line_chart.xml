@@ -4,7 +4,7 @@
     android:layout_height="0dp"
      android:layout_weight="1"
     android:orientation="vertical"
-    tools:context=".charts.FragmentLineChartBase"
+    tools:context=".charts.AbstractFragmentLineChart"
      android:id="@+id/FragmentLineChart">
 
     <LinearLayout

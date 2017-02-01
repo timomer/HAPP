@@ -1,10 +1,11 @@
 package com.hypodiabetic.happplus;
 
 import android.app.Application;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.hypodiabetic.happplus.plugins.cgm.NSClientCGM;
-import com.hypodiabetic.happplus.plugins.devices.DeviceCGM;
+import com.hypodiabetic.happplus.plugins.cgm.NSClientCGMSource;
+import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +13,9 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
-import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.cgm.xDripCGM;
-import com.hypodiabetic.happplus.plugins.devices.DeviceSysProfile;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.cgm.xDripCGMSource;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 /**
  * Created by Tim on 25/12/2016.
@@ -26,7 +27,7 @@ public class MainApp extends Application {
     final static String TAG = "MainApp";
     private static MainApp sInstance;
 
-    public static List<PluginBase> plugins = new ArrayList<>();                 //List of all plugins
+    public static List<AbstractPluginBase> plugins = new ArrayList<>();                 //List of all plugins
 
     @Override
     public void onCreate() {
@@ -39,12 +40,12 @@ public class MainApp extends Application {
         HAPP+ plugin list, add additional plugins here
          */
         //Device Plugins
-        plugins.add(new DeviceSysProfile());
-        plugins.add(new DeviceCGM());
+        plugins.add(new SysProfileDevice());
+        plugins.add(new CGMDevice());
 
         //CGM Source Plugins
-        plugins.add(new xDripCGM());
-        plugins.add(new NSClientCGM());
+        plugins.add(new xDripCGMSource());
+        plugins.add(new NSClientCGMSource());
 
         //APS Source Plugins
 
@@ -56,14 +57,14 @@ public class MainApp extends Application {
 
 
     public static void loadBackgroundPlugins(){
-        for (PluginBase plugin : plugins){
+        for (AbstractPluginBase plugin : plugins){
             if (plugin.getLoadInBackground())   plugin.load();
         }
         Log.i(TAG, "loadBackgroundPlugins: Completed");
     }
 
     public static void reLoadPlugins(){
-        for (PluginBase plugin : plugins){
+        for (AbstractPluginBase plugin : plugins){
             if (plugin.getIsLoaded() || plugin.getLoadInBackground()){
                 plugin.unLoad();
                 plugin.load();
@@ -72,33 +73,33 @@ public class MainApp extends Application {
         Log.i(TAG, "reLoadPlugins: Completed");
     }
 
-    public static PluginBase getPlugin(String pluginName, Class pluginClass){
-        for (PluginBase plugin : plugins){
+    public static AbstractPluginBase getPlugin(String pluginName, Class pluginClass){
+        for (AbstractPluginBase plugin : plugins){
             if (plugin.getPluginName().equals(pluginName) && pluginClass.isAssignableFrom(plugin.getClass())) return plugin;
         }
         Log.e(TAG, "getPlugin: Cannot find plugin: " + pluginName + " " + pluginClass.getName());
         return null;
     }
 
-    public static PluginBase getPluginByClass(Class pluginClass){
-        for (PluginBase plugin : plugins){
+    public static AbstractPluginBase getPluginByClass(Class pluginClass){
+        for (AbstractPluginBase plugin : plugins){
             if (pluginClass.isAssignableFrom(plugin.getClass())) return plugin;
         }
         Log.e(TAG, "getPluginByClass: Cannot find plugin: " + pluginClass.getName());
         return null;
     }
 
-    public static PluginBase getPluginByName(String pluginName){
-        for (PluginBase plugin : plugins){
+    public static AbstractPluginBase getPluginByName(String pluginName){
+        for (AbstractPluginBase plugin : plugins){
             if (plugin.getPluginName().equals(pluginName)) return plugin;
         }
         Log.e(TAG, "getPluginByName: Cannot find plugin: " + pluginName);
         return null;
     }
 
-    public static List<? extends PluginBase> getPluginList(Class pluginClass){
-        List<PluginBase> pluginBaseList = new ArrayList<>();
-        for (PluginBase plugin : plugins){
+    public static List<? extends AbstractPluginBase> getPluginList(Class pluginClass){
+        List<AbstractPluginBase> pluginBaseList = new ArrayList<>();
+        for (AbstractPluginBase plugin : plugins){
             if (pluginClass.isAssignableFrom(plugin.getClass()))     pluginBaseList.add(plugin);
         }
         if (pluginBaseList.isEmpty())   Log.e(TAG, "getPluginList: Cannot find plugins: " + pluginClass.getName());

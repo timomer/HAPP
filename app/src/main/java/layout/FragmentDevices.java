@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 
 import java.util.List;
 
@@ -74,7 +74,7 @@ public class FragmentDevices extends Fragment {
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        adapterDevices = new RecyclerViewDevices((List<PluginDevice>) MainApp.getPluginList(PluginDevice.class));
+        adapterDevices = new RecyclerViewDevices((List<AbstractDevice>) MainApp.getPluginList(AbstractDevice.class));
         rv.setAdapter(adapterDevices);
 
         return view;

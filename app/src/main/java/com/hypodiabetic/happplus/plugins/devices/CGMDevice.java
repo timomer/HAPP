@@ -31,8 +31,9 @@ import java.util.List;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
-import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.cgm.PluginCGM;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 
 import io.realm.RealmResults;
 import layout.RecyclerViewDevices;
@@ -44,18 +45,18 @@ import layout.RecyclerViewPlugins;
  * HAPP CGM Device
  */
 
-public class DeviceCGM extends PluginDevice {
+public class CGMDevice extends AbstractDevice {
 
     private final static String PREF_BG_UNITS       =   "bg_units";
     private final static String PREF_BG_UNITS_MGDL  =   "mgdl";
     private final static String PREF_BG_UNITS_MMOLL =   "mmoll";
     private final static String PREF_CGM_SOURCE     =   "cgm_source";
 
-    private PluginCGM pluginCGMSource;
+    private AbstractCGMSource pluginCGMSource;
     private RecyclerView rv;
     private RecyclerViewPlugins adapterPlugins;
 
-    public DeviceCGM(){
+    public CGMDevice(){
         super();
     }
 
@@ -103,7 +104,7 @@ public class DeviceCGM extends PluginDevice {
 
     private void setCGMPluginSource(){
         if (getPref(PREF_CGM_SOURCE).getStringValue() != null){
-            pluginCGMSource = (PluginCGM) MainApp.getPlugin(getPref(PREF_CGM_SOURCE).getStringValue(),PluginCGM.class);
+            pluginCGMSource = (AbstractCGMSource) MainApp.getPlugin(getPref(PREF_CGM_SOURCE).getStringValue(),AbstractCGMSource.class);
         }
     }
 
@@ -123,8 +124,8 @@ public class DeviceCGM extends PluginDevice {
                 PREF_CGM_SOURCE,
                 context.getString(R.string.device_cgm_data_source),
                 context.getString(R.string.device_cgm_data_source_desc),
-                (List<PluginBase>) MainApp.getPluginList(PluginCGM.class),
-                (List<PluginBase>) MainApp.getPluginList(PluginCGM.class)));
+                (List<AbstractPluginBase>) MainApp.getPluginList(AbstractCGMSource.class),
+                (List<AbstractPluginBase>) MainApp.getPluginList(AbstractCGMSource.class)));
 
         return prefs;
     }
@@ -217,8 +218,8 @@ public class DeviceCGM extends PluginDevice {
         rv.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
         rv.setHasFixedSize(true);
 
-        List<PluginBase> pB = new ArrayList<>();
-        pB.addAll(MainApp.getPluginList(PluginCGM.class));
+        List<AbstractPluginBase> pB = new ArrayList<>();
+        pB.addAll(MainApp.getPluginList(AbstractCGMSource.class));
         adapterPlugins = new RecyclerViewPlugins(pB);
 
         rv.setAdapter(adapterPlugins);

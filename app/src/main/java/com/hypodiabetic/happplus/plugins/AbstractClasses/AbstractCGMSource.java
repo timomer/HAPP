@@ -1,4 +1,4 @@
-package com.hypodiabetic.happplus.plugins.cgm;
+package com.hypodiabetic.happplus.plugins.AbstractClasses;
 
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
@@ -10,7 +10,6 @@ import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.CGMValue;
 import com.hypodiabetic.happplus.database.RealmHelper;
 import com.hypodiabetic.happplus.database.dbHelperCGM;
-import com.hypodiabetic.happplus.plugins.PluginBase;
 
 import java.util.Date;
 
@@ -22,9 +21,9 @@ import io.realm.RealmResults;
  * Common CGM Functions for use with CGM Plugins
  */
 
-public abstract class PluginCGM extends PluginBase {
+public abstract class AbstractCGMSource extends AbstractPluginBase {
 
-    public PluginCGM(){
+    public AbstractCGMSource(){
         super();
     }
 
@@ -66,17 +65,20 @@ public abstract class PluginCGM extends PluginBase {
 
     public double getDelta(CGMValue cgmValue, Realm realm){
         CGMValue lastCGMValue   =   dbHelperCGM.getReadingsBefore(getPluginName(), cgmValue.getTimestamp(), realm).get(0);
-
-        if (lastCGMValue == null){
+        return buildDelta(lastCGMValue, cgmValue);
+    }
+    public double getDelta(CGMValue cgmValueLast, CGMValue cgmValueRecent){
+        return buildDelta(cgmValueLast, cgmValueRecent);
+    }
+    private double buildDelta(CGMValue cgmValueLast, CGMValue cgmValueRecent) {
+        if (cgmValueLast == null){
             return Constants.CGM.DELTA_NULL;
-        } else if (Utilities.getDiffInMins(lastCGMValue.getTimestamp(), cgmValue.getTimestamp()) > 14){
+        } else if (Utilities.getDiffInMins(cgmValueLast.getTimestamp(), cgmValueRecent.getTimestamp()) > 14){
             return Constants.CGM.DELTA_OLD;
         } else {
-            return (cgmValue.getSgv() - lastCGMValue.getSgv())*5*60*1000/(cgmValue.getTimestamp().getTime() - lastCGMValue.getTimestamp().getTime());
+            return (cgmValueRecent.getSgv() - cgmValueLast.getSgv())*5*60*1000/(cgmValueRecent.getTimestamp().getTime() - cgmValueLast.getTimestamp().getTime());
+            //return (cgmValueRecent.getSgv() - cgmValueLast.getSgv());
         }
     }
 
-    //public List<CGMValue> getCGMValues(Date sinceDate){
-        // TODO: 25/12/2016 CGM Database helper
-    //}
 }

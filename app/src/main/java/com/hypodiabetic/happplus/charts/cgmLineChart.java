@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -20,7 +21,7 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.CGMValue;
-import com.hypodiabetic.happplus.plugins.devices.DeviceCGM;
+import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -30,7 +31,7 @@ import io.realm.Sort;
  * CGM Readings Line chart with APS Predicted BG(s)
  */
 
-public class cgmLineChart extends FragmentLineChartBase {
+public class cgmLineChart extends AbstractFragmentLineChart {
 
     private BroadcastReceiver mCGMNewCGMReading;
 
@@ -53,10 +54,10 @@ public class cgmLineChart extends FragmentLineChartBase {
         super.onStart();
 
         //CGM Readings Line Chart
-        DeviceCGM deviceCGM = (DeviceCGM) MainApp.getPluginByClass(DeviceCGM.class);
+        CGMDevice deviceCGM = (CGMDevice) MainApp.getPluginByClass(CGMDevice.class);
         LineChart cgmLineChart  =   this.getChart();
 
-        if (deviceCGM != null && cgmLineChart != null) {
+        if (deviceCGM.getIsLoaded() && cgmLineChart != null) {
             //DataSet
             RealmResults<CGMValue> cgmReadings = deviceCGM.getReadingsSince(Utilities.getDateHoursAgo(8));
             cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING);
@@ -65,7 +66,7 @@ public class cgmLineChart extends FragmentLineChartBase {
             //yAxis
             YAxis yAxisL = cgmLineChart.getAxisLeft();
             yAxisL.setValueFormatter(new IAxisValueFormatter() {
-                DeviceCGM deviceCGM = (DeviceCGM) MainApp.getPluginByClass(DeviceCGM.class);
+                CGMDevice deviceCGM = (CGMDevice) MainApp.getPluginByClass(CGMDevice.class);
 
                 @Override
                 public String getFormattedValue(float value, AxisBase axis) {

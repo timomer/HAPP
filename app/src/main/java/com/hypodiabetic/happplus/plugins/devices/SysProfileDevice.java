@@ -31,6 +31,7 @@ import com.hypodiabetic.happplus.database.dbHelperProfile;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,7 +48,7 @@ import layout.AdapterRealmList;
  * HAPP Profile Manager Device, used to manage HAPP multiple profile system
  */
 
-public class DeviceSysProfile extends PluginDevice {
+public class SysProfileDevice extends AbstractDevice {
 
     private static final String PREF_DEFAULT_SYS_PROFILE    =   "default_sys_profile_id";
     public static final String DEFAULT_SYS_PROFILE_NAME     =   "Default";

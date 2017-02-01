@@ -1,17 +1,12 @@
 package com.hypodiabetic.happplus;
 
-import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 
-import com.hypodiabetic.happplus.plugins.PluginBase;
-import com.hypodiabetic.happplus.plugins.devices.PluginDevice;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 
 public class SingleFragmentActivity extends FragmentActivity {
@@ -32,7 +27,7 @@ public class SingleFragmentActivity extends FragmentActivity {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                PluginBase plugin = MainApp.getPluginByName(pluginName);
+                AbstractPluginBase plugin = MainApp.getPluginByName(pluginName);
 
                 if (plugin != null){
                     fragmentTransaction.add(R.id.fragmentHolder, plugin);
