@@ -74,7 +74,7 @@
             android:text="@android:string/cancel"/>
         <Button
             android:id="@+id/sysPrefSave"
-            style="Widget.AppCompat.Button.Borderless.Colored"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/ok"

@@ -83,22 +83,8 @@ public class CGMDevice extends AbstractDevice {
     public DeviceStatus getPluginStatus(){
         DeviceStatus deviceStatus = new DeviceStatus();
 
-        //Can we find the CGM Source Plugin?
-        if (pluginCGMSource == null){
-            deviceStatus.hasError(true);
-            deviceStatus.addComment(context.getString(R.string.device_cgm_missing_plugin));
-        } else {
-            if (!pluginCGMSource.getIsLoaded()){
-                deviceStatus.hasError(true);
-                deviceStatus.addComment(context.getString(R.string.device_cgm_data_source) + " '" + pluginCGMSource.getPluginDisplayName() + "' " + context.getString(R.string.plugin_not_loaded));
-            } else {
-                DeviceStatus pluginStatus = pluginCGMSource.getStatus();
-                if (!pluginStatus.getIsUsable()) {
-                    deviceStatus.hasError(true);
-                    deviceStatus.addComment(context.getString(R.string.device_cgm_data_source) + " '" + pluginCGMSource.getPluginDisplayName() + "': " + pluginStatus.getComment());
-                }
-            }
-        }
+        deviceStatus.checkPluginIDependOn(pluginCGMSource, context.getString(R.string.device_cgm_data_source));
+
         return deviceStatus;
     }
 
@@ -288,7 +274,6 @@ public class CGMDevice extends AbstractDevice {
     }
 
 
-    @Override
     public JSONArray getDebug(){
         return new JSONArray();
     }

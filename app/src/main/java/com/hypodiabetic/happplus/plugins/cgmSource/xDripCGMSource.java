@@ -1,4 +1,4 @@
-package com.hypodiabetic.happplus.plugins.cgm;
+package com.hypodiabetic.happplus.plugins.cgmSource;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -98,7 +98,7 @@ public class xDripCGMSource extends AbstractCGMSource {
     protected void onPrefChange(SysPref sysPref){
     }
 
-    public DeviceStatus getPluginStatus(){
+    protected DeviceStatus getPluginStatus(){
         DeviceStatus deviceStatus = new DeviceStatus();
 
         if (mCGMReceiver == null){

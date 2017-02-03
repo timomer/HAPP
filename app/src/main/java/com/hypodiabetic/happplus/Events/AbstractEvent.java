@@ -6,20 +6,18 @@ import com.hypodiabetic.happplus.database.Event;
 import org.json.JSONObject;
 
 import java.util.Date;
-import java.util.UUID;
-
-import io.realm.RealmObject;
 
 /**
  * Created by Tim on 01/02/2017.
  * Base Event Object, all HAPP Events are created from this Base
- * This Class will handel Saving and Retrieving the Event Object from Realm
+ * This Class will handel Saving and Retrieving the Event Object from Realm Using Delegation
+ *
  */
 
 public abstract class AbstractEvent {
 
-    protected String TAG;
-    protected Event mEvent;
+    protected final Event mEvent;
+    protected final String TAG;
 
     public AbstractEvent(){
         mEvent  =   new Event();
@@ -30,10 +28,19 @@ public abstract class AbstractEvent {
         TAG     =   this.getClass().getName();
     }
 
-    public void setAccepted(boolean accepted){
-        this.mEvent.setAccepted(accepted);
-        if (accepted)   this.mEvent.setDateAccepted(new Date());
+    public Event getEvent() {
+        return mEvent;
     }
 
+    public void setAccepted(boolean accepted) {
+        mEvent.setAccepted(accepted);
+    }
 
+    public void setDateAccepted(Date dateAccepted) {
+        mEvent.setDateAccepted(dateAccepted);
+    }
+
+    public void setData(JSONObject jsonObject) {
+        mEvent.setData(jsonObject);
+    }
 }

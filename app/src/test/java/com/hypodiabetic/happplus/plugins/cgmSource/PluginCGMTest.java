@@ -1,4 +1,4 @@
-package com.hypodiabetic.happplus.plugins.cgm;
+package com.hypodiabetic.happplus.plugins.cgmSource;
 
 import com.hypodiabetic.happplus.Constants;
 import com.hypodiabetic.happplus.database.CGMValue;

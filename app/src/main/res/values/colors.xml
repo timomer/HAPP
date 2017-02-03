@@ -12,6 +12,7 @@
 
     <color name="colorCGM">#c0392b</color>
     <color name="colorProfileManager">#546E7A</color>
+    <color name="colorSysFunctions">#7e57c2</color>
     <color name="colorImageBackground">#54000000</color>
 
     <color name="backgroundLight">#50fafafa</color>

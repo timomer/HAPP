@@ -2,6 +2,7 @@ package com.hypodiabetic.happplus.helperObjects;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 import java.util.Date;
 
@@ -63,5 +64,15 @@ public class DeviceStatus {
 
     public void hasWarning(Boolean warning){
         this.warning    =   warning;
+    }
+
+    public void checkPluginIDependOn(AbstractPluginBase plugin, String nameOfPlugin){
+        if (plugin == null){
+            error   =   true;
+            addComment(nameOfPlugin + " " + MainApp.getInstance().getString(R.string.plugin_not_found));
+        } else if (!plugin.getStatus().getIsUsable()){
+            error   =   true;
+            addComment(nameOfPlugin + " " + MainApp.getInstance().getString(R.string.plugin_has_errors) + ": " + plugin.getStatus().getComment());
+        }
     }
 }

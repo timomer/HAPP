@@ -27,7 +27,7 @@ public abstract class AbstractCGMSource extends AbstractPluginBase {
         super();
     }
 
-    public int getPluginType(){             return PLUGIN_TYPE_SOURCE;}
+    public String getPluginType(){             return PLUGIN_TYPE_SOURCE;}
     public boolean getLoadInBackground(){   return true;}
 
     //Database actions

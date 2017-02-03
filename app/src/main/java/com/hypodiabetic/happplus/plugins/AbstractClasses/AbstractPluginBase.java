@@ -42,9 +42,10 @@ public abstract class AbstractPluginBase extends Fragment {
     private boolean isLoaded;
     private List<SysPref> pluginPrefs;
 
-    public static final int PLUGIN_TYPE_SOURCE  =   1;
-    public static final int PLUGIN_TYPE_DEVICE  =   2;
-    public static final int PLUGIN_TYPE_SYNC    =   3;
+    public static final String PLUGIN_TYPE_SOURCE          =   "SOURCE";
+    public static final String PLUGIN_TYPE_DEVICE          =   "DEVICE";
+    public static final String PLUGIN_TYPE_SYNC            =   "SYNC";
+    public static final String PLUGIN_TYPE_BOLUS_WIZARD    =   "BOLUS_WIZARD";
 
     public static final int DATA_TYPE_CGM       =   1;
     public static final int DATA_TYPE_APS       =   2;
@@ -58,21 +59,7 @@ public abstract class AbstractPluginBase extends Fragment {
     }
 
     private String getTagName(){
-        String type;
-        switch (getPluginType()){
-            case PLUGIN_TYPE_SOURCE:
-                type    =   "SOURCE";
-                break;
-            case PLUGIN_TYPE_DEVICE:
-                type    =   "DEVICE";
-                break;
-            case PLUGIN_TYPE_SYNC:
-                type    =   "SYNC";
-                break;
-            default:
-                type    =   "unknown Plugin Type";
-        }
-        return "Plugin:" + type + ":" + getPluginName();
+        return "Plugin:" + getPluginType() + ":" + getPluginName();
     }
 
     /**
@@ -90,7 +77,7 @@ public abstract class AbstractPluginBase extends Fragment {
     protected abstract boolean onLoad();
     public boolean load(){
         loadPrefs();
-        if (getPluginType() == PLUGIN_TYPE_DEVICE) {        //always load Device Plugins
+        if (getPluginType().equals(PLUGIN_TYPE_DEVICE)) {        //always load Device Plugins
             if (onLoad()) {
                 isLoaded = true;
                 Log.d(TAG, "load: Successful");
@@ -236,8 +223,14 @@ public abstract class AbstractPluginBase extends Fragment {
      * @return count of prefs
      */
     public Integer getPrefCount(){
-        //Remove one for the default pref "enabled"
-        return pluginPrefs.size() - 1;
+        if (pluginPrefs == null){
+            return 0;
+        }if (pluginPrefs.size() > 0){
+            //Remove one for the default pref "enabled"
+            return pluginPrefs.size() - 1;
+        } else {
+            return pluginPrefs.size();
+        }
     }
 
     /**
@@ -254,10 +247,10 @@ public abstract class AbstractPluginBase extends Fragment {
             deviceStatus.addComment(prefCheck);
         }
         //enabled
-        if (getPluginType() != PLUGIN_TYPE_DEVICE) {
+        if (!getPluginType().equals(PLUGIN_TYPE_DEVICE)) {
             if (!getPref(PREF_ENABLED).getBooleanValue()) {
                 deviceStatus.hasError(true);
-                deviceStatus.addComment(context.getString(R.string.plugin_not_enabled));
+                deviceStatus.addComment(getPluginDisplayName() + " " + context.getString(R.string.plugin_not_enabled));
             }
         }
 
@@ -272,7 +265,7 @@ public abstract class AbstractPluginBase extends Fragment {
         String summary = "";
         if (pluginPrefs != null) {
             for (SysPref pref : pluginPrefs){
-                if (pref.getStringValue() == null && !pref.getPrefName().equals(TAG + ":" + PREF_ENABLED)) summary += context.getString(R.string.pref) + " '" + pref.getPrefName() + "' " + context.getString(R.string.pref_missing) + ". ";
+                if (pref.getStringValue() == null && !pref.getPrefName().equals(TAG + ":" + PREF_ENABLED)) summary += context.getString(R.string.pref) + " '" + pref.getPrefDisplayName() + "' " + context.getString(R.string.pref_missing) + ". ";
             }
         }
         return summary;
@@ -321,9 +314,9 @@ public abstract class AbstractPluginBase extends Fragment {
 
     /**
      * Type of plugin this is
-     * @return int as listed in PluginBase, example PLUGIN_TYPE_SOURCE
+     * @return String as listed in PluginBase, example PLUGIN_TYPE_SOURCE
      */
-    public abstract int getPluginType();
+    public abstract String getPluginType();
 
     /**
      * Type of data this plugin handel's

@@ -15,11 +15,12 @@
     <string name="misc_default">Default</string>
     <string name="misc_item_mark">*</string>
     <string name="misc_error">error</string>
+    <string name="misc_empty_string">-</string>
 
     //Main Activity
     <string name="activity_main_fragment_now">Now</string>
     <string name="activity_main_fragment_devices">Devices</string>
-    <string name="activity_main_fragment_events">Events</string>
+    <string name="activity_main_fragment_activities">Activities</string>
 
     //Menus
     <string name="menu_back">back</string>
@@ -28,6 +29,8 @@
     <string name="plugin_not_enabled">"Plugin is not enabled."</string>
     <string name="plugin_receiver_isnull">Broadcast Receiver is not registered.</string>
     <string name="plugin_not_loaded">is not loaded.</string>
+    <string name="plugin_not_found">is required &amp; cannot be found</string>
+    <string name="plugin_has_errors">is required &amp; has errors</string>
 
     //Prefs
     <string name="pref_enabled_desc">Is this plugin enabled</string>
@@ -49,7 +52,6 @@
     <string name="age">age</string>
 
     //Device CGM
-    <string name="device_cgm_missing_plugin">CGM Source Plugin cannot be found.</string>
     <string name="device_cgm_bg_delta">delta</string>
     <string name="device_cgm_units">Blood Glucose Units</string>
     <string name="device_cgm_units_desc">Blood Glucose displayed in the following format</string>
@@ -70,6 +72,26 @@
     <string name="device_profile_new">New Profile</string>
     <string name="device_profile_copy">Copy</string>
 
+    //Device Sys Functions
+    <string name="device_sysf_bw_plugin">Bolus Wizard Plugin</string>
+    <string name="device_sysf_bw_plugin_desc">Plugin used for Bolus Wizard Calculations</string>
+    <string name="device_sysf_name">System Functions</string>
+    <string name="device_sysf_desc">Core System Functions used by HAPP</string>
+
+    //Plugin HAPPBolusWizard
+    <string name="plugin_HAPPBolusWizard_name">HAPP Bolus Wizard</string>
+    <string name="plugin_HAPPBolusWizard_desc">Bolus Wizard based on original HAPP Code</string>
+    <string name="plugin_HAPPBolusWizard_critical_low_no_bolus">Critical Low, no Bolus allowed</string>
+    <string name="plugin_HAPPBolusWizard_carbBolus">Carb Bolus</string>
+    <string name="plugin_HAPPBolusWizard_sgvCorrection">SGV Correction</string>
+    <string name="plugin_HAPPBolusWizard_iobCorrection">IOB Correction</string>
+    <string name="plugin_HAPPBolusWizard_enter_carb">Enter Carb Value</string>
+    <string name="plugin_HAPPBolusWizard_bolus">Bolus</string>
+    <string name="plugin_HAPPBolusWizard_correction">Correction</string>
+    <string name="plugin_HAPPBolusWizard_show_calc">Show Calc</string>
+
+    //Event Strings
+    <string name="event_bolus_wizard">Bolus Wizard</string>
 
     //Time Strings
     <string name="time_just_now">just now</string>

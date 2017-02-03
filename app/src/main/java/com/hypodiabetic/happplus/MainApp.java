@@ -1,10 +1,10 @@
 package com.hypodiabetic.happplus;
 
 import android.app.Application;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.hypodiabetic.happplus.plugins.cgm.NSClientCGMSource;
+import com.hypodiabetic.happplus.plugins.bolusWizard.HappBolusWizard;
+import com.hypodiabetic.happplus.plugins.cgmSource.NSClientCGMSource;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
 import java.util.ArrayList;
@@ -14,7 +14,8 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
-import com.hypodiabetic.happplus.plugins.cgm.xDripCGMSource;
+import com.hypodiabetic.happplus.plugins.cgmSource.xDripCGMSource;
+import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 /**
@@ -41,11 +42,15 @@ public class MainApp extends Application {
          */
         //Device Plugins
         plugins.add(new SysProfileDevice());
+        plugins.add(new SysFunctionsDevice());
         plugins.add(new CGMDevice());
 
         //CGM Source Plugins
         plugins.add(new xDripCGMSource());
         plugins.add(new NSClientCGMSource());
+
+        //SysFunction Plugins
+        plugins.add(new HappBolusWizard());
 
         //APS Source Plugins
 

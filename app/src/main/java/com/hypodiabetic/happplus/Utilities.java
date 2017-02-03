@@ -35,6 +35,20 @@ public class Utilities {
         }
     }
 
+    public static String displayInsulin(Double value, int decPoints){
+        return round(value,decPoints) + "u";
+    }
+
+    public static String displayPosNeg(Double value){
+        if (value > 0 ){
+            return "+";
+        } else if (value < 0){
+            return "-";
+        } else {
+            return "";
+        }
+    }
+
     public static double getDiffInMins(Date timestampFrom, Date timestampTo) {
         return (timestampTo.getTime() - timestampFrom.getTime()) /(1000*60);
     }

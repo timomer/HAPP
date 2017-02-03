@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:orientation="horizontal"
+        android:paddingTop="0dp"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:layout_gravity="center">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="22dp"
+                android:text="@string/misc_empty_string"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:id="@+id/bwDisplayCarbCorr"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="18dp"
+                android:text="@string/plugin_HAPPBolusWizard_carbBolus"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:textColor="#B8B8B8"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="22dp"
+                android:text="@string/misc_empty_string"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:id="@+id/bwDisplayBGCorr"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="18dp"
+                android:text="@string/plugin_HAPPBolusWizard_sgvCorrection"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:textColor="#B8B8B8"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="22dp"
+                android:text="@string/misc_empty_string"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:id="@+id/bwDisplayIOBCorr"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="18dp"
+                android:text="@string/plugin_HAPPBolusWizard_iobCorrection"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:textColor="#B8B8B8"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal">
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:hint="@string/plugin_HAPPBolusWizard_enter_carb"
+                android:id="@+id/wizardCarbValue"
+                android:inputType="number"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:hint="@string/plugin_HAPPBolusWizard_bolus"
+                android:id="@+id/wizardSuggestedBolus"
+                android:inputType="numberDecimal"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:hint="@string/plugin_HAPPBolusWizard_correction"
+                android:id="@+id/wizardSuggestedCorrection"
+                android:inputType="numberDecimal|numberSigned"
+                android:textSize="14sp"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/wizardCriticalLow"
+        android:textColor="#FF5722"
+        android:gravity="center"
+        android:text="@string/plugin_HAPPBolusWizard_critical_low_no_bolus"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/wizardShowCalc">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/information_outline"
+                android:layout_gravity="center_vertical"
+                style="@style/iconButton"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/plugin_HAPPBolusWizard_show_calc"
+                android:gravity="center_vertical"
+                android:paddingEnd="8dp"
+                android:paddingStart="0dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_weight="1">
+            <Button
+                android:layout_width="wrap_content"
+                android:minWidth="88dp"
+                android:layout_height="46dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@android:string/ok"
+                android:id="@+id/wizardAccept"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

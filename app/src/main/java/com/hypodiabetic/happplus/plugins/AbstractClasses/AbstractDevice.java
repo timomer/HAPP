@@ -1,8 +1,16 @@
 package com.hypodiabetic.happplus.plugins.AbstractClasses;
 
 import android.graphics.drawable.Drawable;
+import android.support.v7.widget.CardView;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.database.RealmHelper;
+import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 
 import layout.RecyclerViewDevices;
 
@@ -21,7 +29,7 @@ public abstract class AbstractDevice extends AbstractPluginBase {
         realmHelper =   new RealmHelper();
     }
 
-    public int getPluginType(){             return PLUGIN_TYPE_DEVICE;}
+    public String getPluginType(){          return PLUGIN_TYPE_DEVICE;}
     public boolean getLoadInBackground(){   return true;}
 
     public boolean onUnLoad(){

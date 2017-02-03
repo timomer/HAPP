@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -239,11 +240,13 @@ public class SysProfileDevice extends AbstractDevice {
         deviceActionTwo                 = (ImageButton) rootView.findViewById(R.id.deviceActionTwo);
         ImageButton deviceActionThree   = (ImageButton) rootView.findViewById(R.id.deviceActionThree);
         deviceActionRight               = (ImageButton) rootView.findViewById(R.id.deviceActionRight);
+        ImageView deviceImage           = (ImageView)rootView.findViewById(R.id.deviceImage);
 
         deviceName.setText(             getDetailedName());
         DeviceStatus status             = getStatus();
         deviceStatus.setText(           status.getStatusDisplay());
         deviceStatusText.setText(       status.getComment());
+        deviceImage.setBackground(          getImage());
 
         //Setup Prefs
         spLoadedProfile =   (Spinner) rootView.findViewById(R.id.prefProfileSelected);
