@@ -36,7 +36,7 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
  * Plugin owner of this pref is notified of the change
  */
 
-public class PrefPopupWindow extends android.widget.PopupWindow {
+public class PopupWindowPref extends android.widget.PopupWindow {
 
     private Context mContext;
     private final SysPref sysPref;
@@ -50,7 +50,7 @@ public class PrefPopupWindow extends android.widget.PopupWindow {
     private Button btnSave;
     private Spinner sysPrefSysProfiles;
 
-    public PrefPopupWindow(Context context, final SysPref sysPref, AbstractPluginBase plugin, final TextView textView) {
+    public PopupWindowPref(Context context, final SysPref sysPref, AbstractPluginBase plugin, final TextView textView) {
         super(context);
 
         this.mContext =   context;

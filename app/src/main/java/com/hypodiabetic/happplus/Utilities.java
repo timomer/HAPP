@@ -39,11 +39,9 @@ public class Utilities {
         return round(value,decPoints) + "u";
     }
 
-    public static String displayPosNeg(Double value){
+    public static String displayPosSign(Double value){
         if (value > 0 ){
             return "+";
-        } else if (value < 0){
-            return "-";
         } else {
             return "";
         }

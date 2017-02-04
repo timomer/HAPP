@@ -1,8 +1,6 @@
 package com.hypodiabetic.happplus.plugins.bolusWizard;
 
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -11,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.MainApp;
@@ -236,9 +232,9 @@ public class HappBolusWizard extends AbstractPluginBase implements InterfaceBolu
         bolusWizardResult.setSuggestedCorrectionBolus(suggested_correction);
         JSONObject miscData = new JSONObject();
         try {
-            miscData.put("net_biob", Utilities.displayPosNeg(net_correction_biob) + Utilities.displayInsulin(net_correction_biob, 1));
-            miscData.put("insulin_correction_carbs", Utilities.displayPosNeg(insulin_correction_carbs) + Utilities.displayInsulin(insulin_correction_carbs, 1));
-            miscData.put("insulin_correction_bg", Utilities.displayPosNeg(insulin_correction_bg) + Utilities.displayInsulin(insulin_correction_bg, 1));
+            miscData.put("net_biob", Utilities.displayPosSign(net_correction_biob) + Utilities.displayInsulin(net_correction_biob, 1));
+            miscData.put("insulin_correction_carbs", Utilities.displayPosSign(insulin_correction_carbs) + Utilities.displayInsulin(insulin_correction_carbs, 1));
+            miscData.put("insulin_correction_bg", Utilities.displayPosSign(insulin_correction_bg) + Utilities.displayInsulin(insulin_correction_bg, 1));
         } catch (JSONException e){
             Log.e(TAG, "runBolusWizard: Failed to add Bolus Wizard Data");
         }

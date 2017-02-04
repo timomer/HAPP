@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="0dp"
         android:layout_gravity="center">
 
         <LinearLayout
@@ -20,18 +24,17 @@
             android:layout_gravity="center">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="22dp"
+                android:layout_height="wrap_content"
                 android:text="@string/misc_empty_string"
-                android:textSize="20sp"
                 android:gravity="center"
-                android:id="@+id/bwDisplayCarbCorr"/>
+                android:id="@+id/bwDisplayCarbCorr"
+                style="@style/TitleSecondaryDark"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="18dp"
+                android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_carbBolus"
-                android:textSize="12sp"
                 android:gravity="center"
-                android:textColor="#B8B8B8"/>
+                style="@style/TitleSecondaryDark"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
@@ -41,18 +44,17 @@
             android:layout_weight="1">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="22dp"
+                android:layout_height="wrap_content"
                 android:text="@string/misc_empty_string"
-                android:textSize="20sp"
+                style="@style/TitleSecondaryDark"
                 android:gravity="center"
                 android:id="@+id/bwDisplayBGCorr"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="18dp"
+                android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_sgvCorrection"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:textColor="#B8B8B8"/>
+                style="@style/TitleSecondaryDark"
+                android:gravity="center"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="0dp"
@@ -62,50 +64,54 @@
             android:layout_weight="1">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="22dp"
+                android:layout_height="wrap_content"
                 android:text="@string/misc_empty_string"
-                android:textSize="20sp"
+                style="@style/TitleSecondaryDark"
                 android:gravity="center"
                 android:id="@+id/bwDisplayIOBCorr"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="18dp"
+                android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_iobCorrection"
-                android:textSize="12sp"
                 android:gravity="center"
-                android:textColor="#B8B8B8"/>
+                style="@style/TitleSecondaryDark"/>
         </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
             <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.5"
                 android:hint="@string/plugin_HAPPBolusWizard_enter_carb"
                 android:id="@+id/wizardCarbValue"
                 android:inputType="number"
-                android:textSize="14sp"/>
+                style="@style/TitleSecondaryDark"/>
 
             <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:hint="@string/plugin_HAPPBolusWizard_bolus"
                 android:id="@+id/wizardSuggestedBolus"
                 android:inputType="numberDecimal"
-                android:textSize="14sp"/>
+                style="@style/TitleSecondaryDark"/>
 
             <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:hint="@string/plugin_HAPPBolusWizard_correction"
                 android:id="@+id/wizardSuggestedCorrection"
                 android:inputType="numberDecimal|numberSigned"
-                android:textSize="14sp"/>
+                style="@style/TitleSecondaryDark"/>
 
     </LinearLayout>
 
@@ -116,12 +122,14 @@
         android:textColor="#FF5722"
         android:gravity="center"
         android:text="@string/plugin_HAPPBolusWizard_critical_low_no_bolus"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        style="@style/TitleSecondaryDark"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
 
         <LinearLayout
             android:layout_width="wrap_content"

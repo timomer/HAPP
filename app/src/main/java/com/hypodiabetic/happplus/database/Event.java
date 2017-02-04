@@ -45,4 +45,6 @@ public class Event extends RealmObject {
     public void setData(JSONObject jsonObject){
         this.data   =   jsonObject.toString();
     }
+
+    public Date getDateCreated(){ return this.dateCreated; }
 }

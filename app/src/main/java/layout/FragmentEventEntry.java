@@ -84,17 +84,16 @@ public class FragmentEventEntry extends Fragment {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-
-            //Main Activity Fragments, only one instance of each should be created
-            //if (mFragmentNow==null) mFragmentNow =  FragmentNow.newInstance("","");
+            // If Fragment already exists, the FragmentPagerAdapter uses the cached copy (no need to handle yourself with find tag by ID, etc)
+            // http://stackoverflow.com/questions/6976027/reusing-fragments-in-a-fragmentpageradapter
 
             switch (position){
                 case 0:
                     return sysFun.getBolusWizard();
                 case 1:
-                    return FragmentNow.newInstance("","");
+                    return null;
                 case 2:
-                    return FragmentNow.newInstance("","");
+                    return null;
                 default:
                     return null;
             }

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import layout.PrefPopupWindow;
+import layout.PopupWindowPref;
 
 
 /**
@@ -210,7 +210,7 @@ public abstract class AbstractPluginBase extends Fragment {
         RelativeLayout prefValueLayout  =   (RelativeLayout) linearLayout.findViewById(R.id.prefValueLayout);
         prefTitle.setText(              sysPref.getPrefDisplayName());
         prefValue.setText(              sysPref.getPrefDisplayValue());
-        final PrefPopupWindow popupWindow = new PrefPopupWindow(rootView.getContext(), sysPref, this, prefValue);
+        final PopupWindowPref popupWindow = new PopupWindowPref(rootView.getContext(), sysPref, this, prefValue);
         prefValueLayout.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 popupWindow.show(v.getRootView(), 0, -250);

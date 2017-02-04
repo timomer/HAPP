@@ -1,26 +1,18 @@
 package layout;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
-import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.charts.cgmLineChart;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
-import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
-import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 
 /**
- * A simple {@link Fragment} subclass.
-
+ * This Fragment displays ways to Add Events and View Events
  */
 public class FragmentActivities extends Fragment {
 
@@ -35,37 +27,35 @@ public class FragmentActivities extends Fragment {
      */
     // TODO: Rename and change types and number of parameters
     public static FragmentActivities newInstance() {
-        FragmentActivities fragment = new FragmentActivities();
-        return fragment;
+        return new FragmentActivities();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_activities, container, false);
+        return inflater.inflate(R.layout.fragment_activities, container, false);
+    }
 
-        LinearLayout mContainer = (LinearLayout) view.findViewById(R.id.FragmentActivities);
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-
-
-        FragmentEventEntry fragmentEventEntry = FragmentEventEntry.newInstance();
-        //SysFunctionsDevice sysFunctionsDevice = (SysFunctionsDevice) MainApp.getPluginByClass(SysFunctionsDevice.class);
-
-
-        ft.add(mContainer.getId(), fragmentEventEntry, "fragmentEventEntry");
-        ft.commit();
-
-
-        return view;
+        //Load Sub Fragments, get from memory if already exist
+        FragmentManager fm = getChildFragmentManager();
+        FragmentEventEntry fragmentEventEntry = (FragmentEventEntry) fm.findFragmentByTag("fragmentEventEntryOnActivitiesTab");
+        if (fragmentEventEntry == null) {
+            fragmentEventEntry = FragmentEventEntry.newInstance();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.add(R.id.FragmentActivities, fragmentEventEntry, "fragmentEventEntryOnActivitiesTab");
+            ft.commit();
+            fm.executePendingTransactions();
+        }
     }
 
 
