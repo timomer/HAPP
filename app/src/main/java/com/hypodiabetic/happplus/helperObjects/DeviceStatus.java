@@ -54,7 +54,7 @@ public class DeviceStatus {
         if (this.comment == null) {
             this.comment = comment;
         } else {
-            this.comment = this.comment + " " + comment;
+            this.comment = this.comment + ". " + comment;
         }
     }
 
@@ -69,10 +69,10 @@ public class DeviceStatus {
     public void checkPluginIDependOn(AbstractPluginBase plugin, String nameOfPlugin){
         if (plugin == null){
             error   =   true;
-            addComment(nameOfPlugin + " " + MainApp.getInstance().getString(R.string.plugin_not_found));
+            addComment("'" + nameOfPlugin + "' " + MainApp.getInstance().getString(R.string.plugin_not_found));
         } else if (!plugin.getStatus().getIsUsable()){
             error   =   true;
-            addComment(nameOfPlugin + " " + MainApp.getInstance().getString(R.string.plugin_has_errors) + ": " + plugin.getStatus().getComment());
+            addComment("'" + nameOfPlugin + "' " + MainApp.getInstance().getString(R.string.plugin_has_errors) + ": " + plugin.getStatus().getComment());
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.hypodiabetic.happplus.database;
+package com.hypodiabetic.happplus.helperObjects;
 
 import io.realm.Realm;
 

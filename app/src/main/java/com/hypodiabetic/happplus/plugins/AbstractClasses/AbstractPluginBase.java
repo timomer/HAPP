@@ -2,6 +2,7 @@ package com.hypodiabetic.happplus.plugins.AbstractClasses;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONArray;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,9 +48,6 @@ public abstract class AbstractPluginBase extends Fragment {
     public static final String PLUGIN_TYPE_DEVICE          =   "DEVICE";
     public static final String PLUGIN_TYPE_SYNC            =   "SYNC";
     public static final String PLUGIN_TYPE_BOLUS_WIZARD    =   "BOLUS_WIZARD";
-
-    public static final int DATA_TYPE_CGM       =   1;
-    public static final int DATA_TYPE_APS       =   2;
 
     private static final String PREF_ENABLED    =   "enabled";
 
@@ -248,9 +247,14 @@ public abstract class AbstractPluginBase extends Fragment {
         }
         //enabled
         if (!getPluginType().equals(PLUGIN_TYPE_DEVICE)) {
-            if (!getPref(PREF_ENABLED).getBooleanValue()) {
+            if (getPref(PREF_ENABLED) == null){
                 deviceStatus.hasError(true);
                 deviceStatus.addComment(getPluginDisplayName() + " " + context.getString(R.string.plugin_not_enabled));
+            } else {
+                if (!getPref(PREF_ENABLED).getBooleanValue()) {
+                    deviceStatus.hasError(true);
+                    deviceStatus.addComment(getPluginDisplayName() + " " + context.getString(R.string.plugin_not_enabled));
+                }
             }
         }
 
@@ -335,5 +339,18 @@ public abstract class AbstractPluginBase extends Fragment {
      * @return JSONArray of details
      */
     public abstract JSONArray getDebug();
+
+
+    /**
+     * If there is a saved instance of this Fragment, reinitialise the pluginPrefs Variable
+     * @param savedInstanceState saved instance, if any
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            loadPrefs();
+        }
+    }
 
 }

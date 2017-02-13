@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.database.RealmHelper;
+import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;

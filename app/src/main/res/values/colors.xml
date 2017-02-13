@@ -20,4 +20,7 @@
 
     <color name="colorCGMMinLine">#FF5722</color>
     <color name="colorCGMMaxLine">#FF9800</color>
+
+    <!-- Events -->
+    <color name="eventBolus">#2196f3</color>
 </resources>

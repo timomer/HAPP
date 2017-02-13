@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.util.UUID;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by Tim on 14/01/2017.
@@ -21,6 +22,7 @@ public class Profile extends RealmObject{
     private String name;
     private String data;
     private int type;
+    @PrimaryKey
     private String id;
 
     public Profile(){}

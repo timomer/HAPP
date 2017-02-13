@@ -24,6 +24,7 @@ import com.hypodiabetic.happplus.charts.cgmLineChart;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
+import layout.DynamicFragmentPagerAdapter;
 import layout.FragmentActivities;
 import layout.FragmentDevices;
 import layout.FragmentNow;
@@ -31,8 +32,6 @@ import layout.FragmentNow;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +39,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +58,21 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        loadFragments();
+    }
+
+    private void loadFragments(){
+        // Create the adapter that will return a fragment for each of the three primary sections of the activity.
+        DynamicFragmentPagerAdapter mSectionsPagerAdapter;
+        mSectionsPagerAdapter = new DynamicFragmentPagerAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter.addFragment(FragmentDevices.newInstance(),    getString(R.string.activity_main_fragment_devices));
+        mSectionsPagerAdapter.addFragment(FragmentNow.newInstance(),        getString(R.string.activity_main_fragment_now));
+        mSectionsPagerAdapter.addFragment(FragmentActivities.newInstance(), getString(R.string.activity_main_fragment_activities));
+
+        // Set up the ViewPager with the sections adapter.
+        ViewPager mViewPager;
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
     @Override
@@ -125,51 +132,4 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // If Fragment already exists, the FragmentPagerAdapter uses the cached copy (no need to handle yourself with find tag by ID, etc)
-            // http://stackoverflow.com/questions/6976027/reusing-fragments-in-a-fragmentpageradapter
-
-            switch (position){
-                case 0:
-                    return FragmentDevices.newInstance();
-                case 1:
-                    return FragmentNow.newInstance();
-                case 2:
-                    return FragmentActivities.newInstance();
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return getString(R.string.activity_main_fragment_devices);
-                case 1:
-                    return getString(R.string.activity_main_fragment_now);
-                case 2:
-                    return getString(R.string.activity_main_fragment_activities);
-            }
-            return null;
-        }
-    }
 }

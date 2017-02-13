@@ -76,7 +76,9 @@ public class SysFunctionsDevice extends AbstractDevice {
     private void setPlugins(){
         if (getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue() != null){
             pluginBolusWizard = MainApp.getPlugin(getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue(),InterfaceBolusWizard.class);
-            if (pluginBolusWizard != null) pluginBolusWizard.load();
+            if (pluginBolusWizard != null) {
+                pluginBolusWizard.load();
+            }
         }
     }
 
@@ -97,6 +99,11 @@ public class SysFunctionsDevice extends AbstractDevice {
     }
 
     public AbstractPluginBase getBolusWizard(){
+        //if (pluginBolusWizard.getStatus().getIsUsable()){
+        //    return pluginBolusWizard;
+        //} else {
+        //    return null;
+        //}
         return pluginBolusWizard;
     }
 
@@ -119,7 +126,7 @@ public class SysFunctionsDevice extends AbstractDevice {
          RecyclerView rv;
          RecyclerViewPlugins adapterPlugins;
 
-        View rootView = inflater.inflate(R.layout.fragment_device_sys_functions, container, false);
+        View rootView = inflater.inflate(R.layout.plugin__fragment_device_sys_functions, container, false);
 
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
         TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);

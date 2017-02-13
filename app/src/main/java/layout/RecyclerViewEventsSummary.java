@@ -1,10 +1,11 @@
 package layout;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -45,15 +46,17 @@ public class RecyclerViewEventsSummary extends RecyclerView.Adapter<RecyclerView
 
     @Override
     public RecyclerViewEventsSummary.EventSummaryViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_event, viewGroup, false);
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_item_event_summary, viewGroup, false);
         return new RecyclerViewEventsSummary.EventSummaryViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(final RecyclerViewEventsSummary.EventSummaryViewHolder pluginViewHolder, int i) {
 
-        pluginViewHolder.eventMainIcon.setBackground(       events.get(i).getIcon());
-        pluginViewHolder.eventMainIcon.setBackgroundColor(  events.get(i).getIconColour());
+        Drawable icon   =   events.get(i).getIcon();
+        icon.setTint(events.get(i).getIconColour());
+
+        pluginViewHolder.eventMainIcon.setBackground(       icon);
         pluginViewHolder.eventTitle.setText(                events.get(i).getMainText());
     }
 

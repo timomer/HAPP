@@ -1,6 +1,7 @@
 package com.hypodiabetic.happplus.plugins.bolusWizard;
 
 import android.os.Bundle;
+import android.support.design.widget.TextInputEditText;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -9,17 +10,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.hypodiabetic.happplus.Events.AbstractEvent;
+import com.hypodiabetic.happplus.Events.BolusEvent;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.CGMValue;
 import com.hypodiabetic.happplus.helperObjects.BolusWizardResult;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.helperObjects.DialogHelper;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractEventActivates;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
@@ -31,15 +36,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * Created by Tim on 03/02/2017.
  * Bolus Wizard based on Original HAPP App code
  */
 
-public class HappBolusWizard extends AbstractPluginBase implements InterfaceBolusWizard {
+public class HappBolusWizard extends AbstractEventActivates implements InterfaceBolusWizard {
 
-    public String  getPluginType(){         return PLUGIN_TYPE_SOURCE;}
+    public String  getPluginType(){         return PLUGIN_TYPE_BOLUS_WIZARD;}
     public String getPluginName(){          return "happBolusWizard";}
     public String getPluginDisplayName(){   return context.getString(R.string.plugin_HAPPBolusWizard_name);}
     public String getPluginDescription(){   return context.getString(R.string.plugin_HAPPBolusWizard_desc);}
@@ -71,33 +75,37 @@ public class HappBolusWizard extends AbstractPluginBase implements InterfaceBolu
     private TextView bwDisplayIOBCorr;
     private TextView bwDisplayCarbCorr;
     private TextView bwDisplayBGCorr;
-    private EditText wizardCarbs;
-    private EditText wizardSuggestedBolus;
-    private EditText wizardSuggestedCorrection;
+    private TextInputEditText wizardCarbs;
+    private TextInputEditText wizardSuggestedBolus;
+    private TextInputEditText wizardSuggestedCorrection;
     private Button buttonAccept;
     private TextView wizardCriticalLow;
+    private BolusWizardResult bolusWizardResult;
+    private LinearLayout showCalcLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_bolus_wizard_happ, container, false);
+        View rootView = inflater.inflate(R.layout.plugin__fragment_bolus_wizard_happ, container, false);
 
         //Bolus wizard summaries
         bwDisplayIOBCorr    = (TextView) rootView.findViewById(R.id.bwDisplayIOBCorr);
         bwDisplayCarbCorr   = (TextView) rootView.findViewById(R.id.bwDisplayCarbCorr);
         bwDisplayBGCorr     = (TextView) rootView.findViewById(R.id.bwDisplayBGCorr);
         //Inputs
-        wizardCarbs                 = (EditText) rootView.findViewById(R.id.wizardCarbValue);
-        wizardSuggestedBolus        = (EditText) rootView.findViewById(R.id.wizardSuggestedBolus);
-        wizardSuggestedCorrection   = (EditText) rootView.findViewById(R.id.wizardSuggestedCorrection);
+        wizardCarbs                 = (TextInputEditText) rootView.findViewById(R.id.wizardCarbValue);
+        wizardSuggestedBolus        = (TextInputEditText) rootView.findViewById(R.id.wizardSuggestedBolus);
+        wizardSuggestedCorrection   = (TextInputEditText) rootView.findViewById(R.id.wizardSuggestedCorrection);
 
         buttonAccept            = (Button) rootView.findViewById(R.id.wizardAccept);
         buttonAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setupUIWithResults(runBolusWizard(Utilities.stringToDouble(wizardCarbs.toString()), 0, 0));
+                saveResults();
             }
         });
         wizardCriticalLow       = (TextView) rootView.findViewById(R.id.wizardCriticalLow);
+
+        showCalcLayout          = (LinearLayout) rootView.findViewById(R.id.wizardShowCalc);
 
         //Run Bolus Wizard on suggested carb amount change
         wizardCarbs.addTextChangedListener(new TextWatcher() {
@@ -106,17 +114,53 @@ public class HappBolusWizard extends AbstractPluginBase implements InterfaceBolu
             }
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                setupUIWithResults(runBolusWizard(Utilities.stringToDouble(charSequence.toString()), 0, 0));
+                bolusWizardResult   =   runBolusWizard(Utilities.stringToDouble(charSequence.toString()), 0, 0);
+                setupUIWithResults();
             }
             @Override
             public void afterTextChanged(Editable editable) {
             }
         });
+        wizardSuggestedBolus.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                bolusWizardResult.setSuggestedBolus(Utilities.stringToDouble(charSequence.toString()));
+                setButtonAccept();
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+        wizardSuggestedCorrection.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                bolusWizardResult.setSuggestedCorrectionBolus(Utilities.stringToDouble(charSequence.toString()));
+                setButtonAccept();
+            }
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
+        showCalcLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogHelper.newWithCopyToClipboard(bolusWizardResult.getBolusCalculations(), getActivity());
+            }
+        });
 
+
+        //bolusWizardResult   =   new BolusWizardResult();
+        wizardCarbs.setText("0");
         return rootView;
     }
 
-    private void setupUIWithResults(BolusWizardResult bolusWizardResult){
+    private void setupUIWithResults(){
         //Bolus Wizard Display
         bwDisplayIOBCorr.setText(           bolusWizardResult.getData().optString("net_biob", getString(R.string.misc_empty_string)));
         bwDisplayCarbCorr.setText(          bolusWizardResult.getData().optString("insulin_correction_carbs", getString(R.string.misc_empty_string)));
@@ -131,11 +175,27 @@ public class HappBolusWizard extends AbstractPluginBase implements InterfaceBolu
             wizardCriticalLow.setVisibility(View.GONE);
         }
 
-        if (Utilities.stringToDouble(wizardCarbs.getText().toString()).equals(0D) && bolusWizardResult.getSuggestedBolus().equals(0D) && bolusWizardResult.getSuggestedCorrectionBolus().equals(0D)){
+        setButtonAccept();
+    }
+
+    private void setButtonAccept(){
+        if (Utilities.stringToDouble(wizardCarbs.getText().toString()).equals(0D) && bolusWizardResult.getSuggestedBolus().equals(0D) && bolusWizardResult.getSuggestedCorrectionBolus() <= 0D){
             buttonAccept.setEnabled(false);
         } else {
             buttonAccept.setEnabled(true);
         }
+    }
+
+    private void saveResults(){
+        List<AbstractEvent> events = new ArrayList<>();
+        if (bolusWizardResult.getSuggestedCorrectionBolus() > 0D) {
+            events.add(new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS_WITH_CORRECTION, bolusWizardResult.getSuggestedBolus(), bolusWizardResult.getSuggestedCorrectionBolus()));
+        } else if (!bolusWizardResult.getSuggestedBolus().equals(0D)) {
+            events.add(new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS, bolusWizardResult.getSuggestedBolus(), 0D));
+        }
+        //if (!Utilities.stringToDouble(wizardCarbs.getText().toString()).equals(0D))  // TODO: 08/02/2017 carbs
+
+        if (events.size() > 0) addEventsToHAPP(events, true);
     }
 
     @Override

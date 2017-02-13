@@ -27,9 +27,9 @@
 
     //Shared plugin strings
     <string name="plugin_not_enabled">"Plugin is not enabled."</string>
-    <string name="plugin_receiver_isnull">Broadcast Receiver is not registered.</string>
+    <string name="plugin_receiver_isnull">Broadcast Receiver is not registered</string>
     <string name="plugin_not_loaded">is not loaded.</string>
-    <string name="plugin_not_found">is required &amp; cannot be found.</string>
+    <string name="plugin_not_found">is required &amp; cannot be found</string>
     <string name="plugin_has_errors">is required &amp; has errors</string>
 
     //Prefs
@@ -93,11 +93,22 @@
     //Event Strings
     <string name="event_bolus_wizard">Bolus Wizard</string>
     <string name="event_pump_events">Pump Events</string>
+    <string name="event_to_save">Save</string>
+    <string name="event_reject">Reject</string>
+    <string name="event_warning">Warn</string>
+    <string name="event_to_action">Action</string>
+    <string name="event_new">New Events</string>
+
 
     //Time Strings
     <string name="time_just_now">just now</string>
     <string name="time_min_ago">min ago</string>
     <string name="time_mins_ago">mins ago</string>
 
+    //Dialogs
+    <string name="dialog_copy_to_clipboard">Copy To Clipboard</string>
+
+    //Fragment Missing
+    <string name="fragment_missing_cannot_find">cannot be found.</string>
 
 </resources>

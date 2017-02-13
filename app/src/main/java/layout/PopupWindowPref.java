@@ -21,7 +21,7 @@ import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.Profile;
-import com.hypodiabetic.happplus.database.RealmHelper;
+import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.database.dbHelperProfile;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
@@ -58,7 +58,7 @@ public class PopupWindowPref extends android.widget.PopupWindow {
         this.plugin     =   plugin;
         this.textView   =   textView;
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView       =   inflater.inflate(R.layout.pref_popup, null);
+        View popupView       =   inflater.inflate(R.layout.dialog_pref_popup, null);
         setContentView(popupView);
 
         sysPrefPopupTitle           =   (TextView) popupView.findViewById(R.id.sysPrefPopupTitle);

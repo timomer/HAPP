@@ -12,7 +12,11 @@ public class BolusWizardResult {
         if (haveError){
             return 0D;
         } else {
-            return suggestedBolus;
+            if (suggestedBolus == null){
+                return 0D;
+            } else {
+                return suggestedBolus;
+            }
         }
     }
     public void setSuggestedBolus(double suggestedBolus) {
@@ -22,7 +26,11 @@ public class BolusWizardResult {
         if (haveError){
             return 0D;
         } else {
-            return suggestedCorrectionBolus;
+            if (suggestedCorrectionBolus == null){
+                return 0D;
+            } else {
+                return suggestedCorrectionBolus;
+            }
         }
     }
     public void setSuggestedCorrectionBolus(double suggestedCorrectionBolus) {
@@ -53,8 +61,8 @@ public class BolusWizardResult {
         return data;
     }
 
-    private double suggestedBolus;
-    private double suggestedCorrectionBolus;
+    private Double suggestedBolus;
+    private Double suggestedCorrectionBolus;
     private String bolusCalculations;
     private boolean haveError;
     private String errorReason;

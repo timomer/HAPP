@@ -10,11 +10,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/ListItemSecondaryTextDark"
-        android:paddingBottom="0dp"
+        style="@style/ListItemPrimaryTextDark"
         android:text="@string/misc_placeholder"
         android:id="@+id/eventTitle"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/eventMainIcon" />
+        android:layout_toEndOf="@id/eventMainIcon"/>
 
 </RelativeLayout>

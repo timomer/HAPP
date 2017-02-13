@@ -1,23 +1,20 @@
 package layout;
 
-import android.app.Activity;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hypodiabetic.happplus.MainActivity;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,10 +22,8 @@ import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
  */
 public class FragmentEventEntry extends Fragment {
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private DynamicFragmentPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
-
-    private SysFunctionsDevice sysFun;
 
     public FragmentEventEntry() {
         // Required empty public constructor
@@ -49,12 +44,43 @@ public class FragmentEventEntry extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
 
+    @Override
+    public void onResume(){
+        super.onResume();
+        loadFragments();
+    }
+
+    private void loadFragments(){
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
-        sysFun  = (SysFunctionsDevice) MainApp.getPluginByClass(SysFunctionsDevice.class);
+
+
+         mSectionsPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
+
+        SysFunctionsDevice sysFun  = (SysFunctionsDevice) MainApp.getPluginByClass(SysFunctionsDevice.class);
+       // mSectionsPagerAdapter.clearFragments();
+       // mSectionsPagerAdapter.removeAllSavedState();
+
+
+
+
+
+        Fragment bw = sysFun.getBolusWizard();
+        mSectionsPagerAdapter.addFragment(bw, getString(R.string.event_bolus_wizard));
+        //mSectionsPagerAdapter.addFragment( FragmentMissingFragment.newInstance("test"), getString(R.string.event_bolus_wizard));
+
+        // Set up the ViewPager with the sections adapter.
+
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        //mSectionsPagerAdapter.notifyChangeInPosition(0);
+        //mSectionsPagerAdapter.notifyDataSetChanged();
+
+
+        //getView().refreshDrawableState();
     }
 
     @Override
@@ -63,60 +89,9 @@ public class FragmentEventEntry extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_entry, container, false);
 
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) view.findViewById(R.id.eventEntryContainer);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
 
         return view;
-    }
-
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // If Fragment already exists, the FragmentPagerAdapter uses the cached copy (no need to handle yourself with find tag by ID, etc)
-            // http://stackoverflow.com/questions/6976027/reusing-fragments-in-a-fragmentpageradapter
-
-            switch (position){
-                case 0:
-                    return sysFun.getBolusWizard();
-                case 1:
-                    return null;
-                case 2:
-                    return null;
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 1;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return getString(R.string.event_bolus_wizard);
-                case 1:
-                    return getString(R.string.activity_main_fragment_now);
-                case 2:
-                    return getString(R.string.activity_main_fragment_activities);
-            }
-            return null;
-        }
     }
 
 }

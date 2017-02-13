@@ -8,7 +8,7 @@ import com.hypodiabetic.happplus.Constants;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.CGMValue;
-import com.hypodiabetic.happplus.database.RealmHelper;
+import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.database.dbHelperCGM;
 
 import java.util.Date;

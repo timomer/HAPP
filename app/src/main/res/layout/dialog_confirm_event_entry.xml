@@ -1,51 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/backgroundLight"
-    style="@style/Card">
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventPumpActions">
-
-        <TextView
-            android:id="@+id/eventsPumpTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/event_pump_events"
-            style="@style/TitlePrimaryDark"/>
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/eventsPump"
-            android:layout_below="@id/eventsPumpTitle"/>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/eventEvents">
-
-        <TextView
-            android:id="@+id/eventsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/event_pump_events"
-            style="@style/TitlePrimaryDark"/>
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/events"
-            android:layout_below="@id/eventsTitle"/>
-    </RelativeLayout>
+    android:layout_height="100dp"
+    android:background="@color/backgroundLight">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:id="@+id/eventDialogCommands"
+        android:layout_alignParentBottom="true">
         <Button
             android:id="@+id/eventCancel"
             style="?android:attr/borderlessButtonStyle"
@@ -59,8 +23,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/ok"
-            android:layout_toStartOf="@id/sysPrefCancel"/>
+            android:layout_toStartOf="@id/eventCancel"/>
 
     </RelativeLayout>
 
-</LinearLayout>
+    <android.support.v4.view.ViewPager
+        android:id="@+id/eventListTabContainer"
+        android:layout_width="match_parent"
+        android:minHeight="200dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_height="match_parent"
+        android:layout_above="@id/eventDialogCommands">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/eventList_pager_title_strip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed"
+            app:tabGravity="fill"/>
+
+    </android.support.v4.view.ViewPager>
+
+
+
+</RelativeLayout>

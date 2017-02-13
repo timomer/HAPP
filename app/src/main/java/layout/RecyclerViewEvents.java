@@ -1,6 +1,7 @@
 package layout;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,8 +66,10 @@ public class RecyclerViewEvents extends RecyclerView.Adapter<RecyclerViewEvents.
     @Override
     public void onBindViewHolder(final RecyclerViewEvents.EventViewHolder pluginViewHolder, int i) {
 
-        pluginViewHolder.eventMainIcon.setBackground(       events.get(i).getIcon());
-        pluginViewHolder.eventMainIcon.setBackgroundColor(  events.get(i).getIconColour());
+        Drawable icon   =   events.get(i).getIcon();
+        icon.setTint(events.get(i).getIconColour());
+        pluginViewHolder.eventMainIcon.setBackground(       icon);
+
         pluginViewHolder.eventTitle.setText(                events.get(i).getMainText());
         pluginViewHolder.eventTime.setText(                 events.get(i).getDateCreated().toString());
         pluginViewHolder.eventSubText.setText(              events.get(i).getSubText());

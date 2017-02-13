@@ -1,31 +1,17 @@
 package com.hypodiabetic.happplus.Events;
 
-
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import com.hypodiabetic.happplus.MainApp;
-import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.database.Event;
-import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.database.dbHelperEvent;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceValidated;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import layout.RecyclerViewPlugins;
+import io.realm.Realm;
 
 /**
  * Created by Tim on 01/02/2017.
@@ -34,7 +20,7 @@ import layout.RecyclerViewPlugins;
  *
  */
 
-public abstract class AbstractEvent {
+public abstract class AbstractEvent implements InterfaceValidated {
 
     protected final Event mEvent;
     protected final String TAG;
@@ -46,6 +32,10 @@ public abstract class AbstractEvent {
     public AbstractEvent(Event event){
         mEvent  =   event;
         TAG     =   this.getClass().getName();
+    }
+
+    public void saveEvent(Realm realm){
+        dbHelperEvent.saveEvent(mEvent, realm);
     }
 
     public Event getEvent() {
@@ -64,6 +54,19 @@ public abstract class AbstractEvent {
 
     public void setData(JSONObject jsonObject) {
         mEvent.setData(jsonObject);
+    }
+
+    public JSONObject getData() {
+        if (mEvent.getData() == null) {
+            return new JSONObject();
+        } else {
+            try {
+                return new JSONObject(mEvent.getData());
+            } catch (JSONException e) {
+                Log.e(TAG, "getData: Failed to load data JSON for Event, JSON:" + mEvent.getData());
+                return new JSONObject();
+            }
+        }
     }
 
     /**
@@ -88,5 +91,53 @@ public abstract class AbstractEvent {
 
     public abstract String getSubText();
 
+    public abstract String getValue();
+
     public abstract View.OnClickListener getOnPrimaryActionClick();
+
+
+    /*
+    Validation Interface Code
+     */
+    private String validationReason;
+    private int validationResult    =   InterfaceValidated.ACCEPTED;
+
+    public String getValidationReason(){
+        return validationReason;
+    }
+    public void setValidationReason(String reason) {validationReason    =   reason;}
+
+    public boolean isUsable(){
+        switch (validationResult){
+            case InterfaceValidated.REJECTED:
+                return false;
+            case InterfaceValidated.ACCEPTED:
+            case InterfaceValidated.WARNING:
+            case InterfaceValidated.TO_ACTION:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean notifyUser(){
+        switch (validationResult){
+            case InterfaceValidated.REJECTED:
+            case InterfaceValidated.WARNING:
+            case InterfaceValidated.TO_ACTION:
+                return true;
+            case InterfaceValidated.ACCEPTED:
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    public int getValidationResult(){
+        return validationResult;
+    }
+    public int setValidationResult(@ValidationResult int validationResult){
+        return validationResult;
+    }
+
 }
