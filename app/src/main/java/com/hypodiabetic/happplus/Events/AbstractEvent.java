@@ -22,16 +22,18 @@ import io.realm.Realm;
 
 public abstract class AbstractEvent implements InterfaceValidated {
 
-    protected final Event mEvent;
+    protected  Event mEvent;
     protected final String TAG;
 
     public AbstractEvent(){
         mEvent  =   new Event();
-        TAG     =   this.getClass().getName();
+        TAG     =   getClass().getSimpleName();
+        mEvent.setType(this.getClass());
     }
     public AbstractEvent(Event event){
         mEvent  =   event;
-        TAG     =   this.getClass().getName();
+        TAG     =   getClass().getSimpleName();
+        mEvent.setType(this.getClass());
     }
 
     public void saveEvent(Realm realm){

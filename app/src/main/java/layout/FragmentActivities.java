@@ -49,10 +49,11 @@ public class FragmentActivities extends Fragment {
         //Load Sub Fragments, get from memory if already exist
         FragmentManager fm = getChildFragmentManager();
         FragmentEventEntry fragmentEventEntry = (FragmentEventEntry) fm.findFragmentByTag("fragmentEventEntryOnActivitiesTab");
-        if (fragmentEventEntry == null) {
-            fragmentEventEntry = FragmentEventEntry.newInstance();
+        FragmentEventLists fragmentEventLists = (FragmentEventLists) fm.findFragmentByTag("fragmentEventListsOnActivitiesTab");
+        if (fragmentEventEntry == null || fragmentEventLists == null) {
             FragmentTransaction ft = fm.beginTransaction();
-            ft.add(R.id.FragmentActivities, fragmentEventEntry, "fragmentEventEntryOnActivitiesTab");
+            if (fragmentEventEntry == null) ft.add(R.id.FragmentActivitiesEventEntry, FragmentEventEntry.newInstance(), "fragmentEventEntryOnActivitiesTab");
+            if (fragmentEventLists == null) ft.add(R.id.FragmentActivitiesEventLists, FragmentEventLists.newInstance(), "fragmentEventListsOnActivitiesTab");
             ft.commit();
             fm.executePendingTransactions();
         }

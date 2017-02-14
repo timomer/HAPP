@@ -98,6 +98,8 @@
     <string name="event_warning">Warn</string>
     <string name="event_to_action">Action</string>
     <string name="event_new">New Events</string>
+    <string name="event_recent">Recent</string>
+    <string name="event_today">Today</string>
 
 
     //Time Strings

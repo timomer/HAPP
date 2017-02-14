@@ -111,7 +111,9 @@ public abstract class HAPPFragmentStatePagerAdapter extends PagerAdapter {
         if (mFragments.size() > position) {
             Fragment f = mFragments.get(position);
             if (f != null) {
-                return f;
+                if (!isFragmentPluginAndNotUsable(f)) { //not a Plugin that cannot be loaded
+                    return f;
+                }
             }
         }
 
@@ -167,7 +169,7 @@ public abstract class HAPPFragmentStatePagerAdapter extends PagerAdapter {
      */
     private Fragment getFragmentCannotLoadPlugin(Fragment fragment){
         AbstractPluginBase plugin = (AbstractPluginBase) fragment;
-        return FragmentCannotLoadFragment.newInstance("'" + plugin.getPluginDisplayName() + "' " + MainApp.getInstance().getString(R.string.plugin_not_loaded) + ": " + plugin.getStatus().getComment());
+        return FragmentCannotLoadFragment.newInstance("'" + plugin.getPluginDisplayName() + "' " + MainApp.getInstance().getString(R.string.plugin_not_loaded) + " " + plugin.getStatus().getComment());
     }
 
     @Override

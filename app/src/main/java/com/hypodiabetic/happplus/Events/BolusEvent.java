@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.database.Event;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +32,9 @@ public class BolusEvent extends AbstractEvent {
     private static final String BOLUS_AMOUNT             =   "bolus_amount";
     private static final String BOLUS_SECONDARY_AMOUNT   =   "bolus_secondary_amount";   //Used for extended boluses, correction amount, etc
 
+    public BolusEvent(Event event){
+        mEvent  =   event;
+    }
 
     public BolusEvent(@BolusType int bolusType, double bolusAmount, double secondaryBolusAmount){
         super();

@@ -1,6 +1,10 @@
 package com.hypodiabetic.happplus.database;
 
 
+import android.util.Log;
+
+import com.hypodiabetic.happplus.Events.AbstractEvent;
+
 import org.json.JSONObject;
 import java.util.Date;
 import java.util.UUID;
@@ -26,13 +30,11 @@ public class Event extends RealmObject {
     protected String id;
 
     public Event(){
-        type            =   this.getClass().getName();
         dateCreated     =   new Date();
         id              =   UUID.randomUUID().toString();
     }
     public Event(JSONObject data){
         this.data       =   data.toString();
-        type            =   this.getClass().getName();
         dateCreated     =   new Date();
         id              =   UUID.randomUUID().toString();
     }
@@ -46,6 +48,7 @@ public class Event extends RealmObject {
     public void setData(JSONObject jsonObject){
         this.data   =   jsonObject.toString();
     }
+    public void setType(Class<? extends AbstractEvent> eventType){this.type =   eventType.getSimpleName();}
 
     public String getData() { return this.data;}
     public Date getDateCreated(){ return this.dateCreated; }

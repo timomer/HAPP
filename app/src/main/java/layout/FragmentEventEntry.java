@@ -2,9 +2,6 @@ package layout;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,15 +11,13 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 
-import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment that displays multiple sub fragments for Event entry
  *
  */
 public class FragmentEventEntry extends Fragment {
 
-    private DynamicFragmentPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
     public FragmentEventEntry() {
@@ -35,10 +30,8 @@ public class FragmentEventEntry extends Fragment {
      *
      * @return A new instance of fragment FragmentEventEntry.
      */
-    // TODO: Rename and change types and number of parameters
     public static FragmentEventEntry newInstance() {
-        FragmentEventEntry fragment = new FragmentEventEntry();
-        return fragment;
+        return new FragmentEventEntry();
     }
 
     @Override
@@ -55,32 +48,14 @@ public class FragmentEventEntry extends Fragment {
     private void loadFragments(){
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-
-
-
-         mSectionsPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
+        DynamicFragmentPagerAdapter mSectionsPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
 
         SysFunctionsDevice sysFun  = (SysFunctionsDevice) MainApp.getPluginByClass(SysFunctionsDevice.class);
-       // mSectionsPagerAdapter.clearFragments();
-       // mSectionsPagerAdapter.removeAllSavedState();
-
-
-
-
-
-        Fragment bw = sysFun.getBolusWizard();
-        mSectionsPagerAdapter.addFragment(bw, getString(R.string.event_bolus_wizard));
-        //mSectionsPagerAdapter.addFragment( FragmentMissingFragment.newInstance("test"), getString(R.string.event_bolus_wizard));
+        mSectionsPagerAdapter.addFragment(sysFun.getBolusWizard(), getString(R.string.event_bolus_wizard));
 
         // Set up the ViewPager with the sections adapter.
-
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        //mSectionsPagerAdapter.notifyChangeInPosition(0);
-        //mSectionsPagerAdapter.notifyDataSetChanged();
-
-
-        //getView().refreshDrawableState();
     }
 
     @Override
