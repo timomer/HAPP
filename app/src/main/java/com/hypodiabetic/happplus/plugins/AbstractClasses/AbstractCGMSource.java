@@ -7,6 +7,7 @@ import android.util.Log;
 import com.hypodiabetic.happplus.Constants;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.CGMValue;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.database.dbHelperCGM;
@@ -73,7 +74,7 @@ public abstract class AbstractCGMSource extends AbstractPluginBase {
     private double buildDelta(CGMValue cgmValueLast, CGMValue cgmValueRecent) {
         if (cgmValueLast == null){
             return Constants.CGM.DELTA_NULL;
-        } else if (Utilities.getDiffInMins(cgmValueLast.getTimestamp(), cgmValueRecent.getTimestamp()) > 14){
+        } else if (UtilitiesTime.getDiffInMins(cgmValueLast.getTimestamp(), cgmValueRecent.getTimestamp()) > 14){
             return Constants.CGM.DELTA_OLD;
         } else {
             return (cgmValueRecent.getSgv() - cgmValueLast.getSgv())*5*60*1000/(cgmValueRecent.getTimestamp().getTime() - cgmValueLast.getTimestamp().getTime());

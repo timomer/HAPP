@@ -42,14 +42,14 @@ public abstract class AbstractPluginBase extends Fragment {
     final protected String PREF_PREFIX;
 
     private boolean isLoaded;
-    private List<SysPref> pluginPrefs;
+    private List<SysPref> pluginPrefs                       =   new ArrayList<>();
 
-    public static final String PLUGIN_TYPE_SOURCE          =   "SOURCE";
-    public static final String PLUGIN_TYPE_DEVICE          =   "DEVICE";
-    public static final String PLUGIN_TYPE_SYNC            =   "SYNC";
-    public static final String PLUGIN_TYPE_BOLUS_WIZARD    =   "BOLUS_WIZARD";
+    public static final String PLUGIN_TYPE_SOURCE           =   "SOURCE";
+    public static final String PLUGIN_TYPE_DEVICE           =   "DEVICE";
+    public static final String PLUGIN_TYPE_SYNC             =   "SYNC";
+    public static final String PLUGIN_TYPE_BOLUS_WIZARD     =   "BOLUS_WIZARD";
 
-    private static final String PREF_ENABLED    =   "enabled";
+    private static final String PREF_ENABLED                =   "enabled";
 
     public AbstractPluginBase(){
         this.TAG                =   getTagName();

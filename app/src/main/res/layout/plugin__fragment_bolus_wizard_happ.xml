@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="16dp"
-    android:paddingBottom="8dp"
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
@@ -14,12 +12,12 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_gravity="center"
-        android:baselineAligned="false">
+        android:baselineAligned="false"
+        android:id="@+id/bwTitles">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_weight="1"
             android:layout_gravity="center">
             <TextView
@@ -28,19 +26,21 @@
                 android:text="@string/misc_empty_string"
                 android:gravity="center"
                 android:id="@+id/bwDisplayCarbCorr"
-                style="@style/TitleSecondaryDark"/>
+                style="@style/TitleSecondaryDark"
+                />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_carbBolus"
                 android:gravity="center"
-                style="@style/TitleSecondaryDark"/>
-        </LinearLayout>
-        <LinearLayout
+                style="@style/TitleSecondaryDark"
+                android:paddingTop="4dp"
+                android:layout_below="@id/bwDisplayCarbCorr"/>
+        </RelativeLayout>
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:orientation="vertical"
             android:layout_weight="1">
             <TextView
                 android:layout_width="match_parent"
@@ -54,13 +54,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_sgvCorrection"
                 style="@style/TitleSecondaryDark"
-                android:gravity="center"/>
-        </LinearLayout>
-        <LinearLayout
+                android:gravity="center"
+                android:paddingTop="4dp"
+                android:layout_below="@id/bwDisplayBGCorr"/>
+        </RelativeLayout>
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:orientation="vertical"
             android:layout_weight="1">
             <TextView
                 android:layout_width="match_parent"
@@ -74,8 +75,10 @@
                 android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_iobCorrection"
                 android:gravity="center"
-                style="@style/TitleSecondaryDark"/>
-        </LinearLayout>
+                style="@style/TitleSecondaryDark"
+                android:paddingTop="4dp"
+                android:layout_below="@id/bwDisplayIOBCorr"/>
+        </RelativeLayout>
 
     </LinearLayout>
 
@@ -83,9 +86,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:baselineAligned="false">
+        android:paddingTop="8dp"
+        android:baselineAligned="false"
+        android:layout_below="@id/bwTitles"
+        android:id="@+id/bwEntry">
         <android.support.design.widget.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -132,51 +136,46 @@
         android:gravity="center"
         android:text="@string/plugin_HAPPBolusWizard_critical_low_no_bolus"
         android:visibility="gone"
-        style="@style/TitleSecondaryDark"/>
+        style="@style/TitleSecondaryDark"
+        android:layout_below="@id/bwEntry"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="false">
+        android:layout_below="@+id/wizardCriticalLow">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/wizardShowCalc">
+            android:layout_height="wrap_content"
+            android:id="@+id/wizardShowCalc"
+            android:layout_centerVertical="true">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/information_outline"
-                android:layout_gravity="center_vertical"
-                style="@style/iconButton"/>
+                style="@style/iconButton"
+                android:id="@+id/showCalcIcon"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="18dp" />
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:text="@string/plugin_HAPPBolusWizard_show_calc"
-                android:gravity="center_vertical"
-                android:paddingEnd="8dp"
-                android:paddingStart="0dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_weight="1">
+                android:layout_centerVertical="true"
+                android:paddingStart="0dp"
+                android:paddingEnd="18dp"
+                android:id="@+id/showCalcLabel"
+                android:layout_toEndOf="@id/showCalcIcon"/>
+        </RelativeLayout>
             <Button
                 android:layout_width="wrap_content"
-                android:minWidth="88dp"
-                android:layout_height="46dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
+                android:layout_height="wrap_content"
                 android:text="@android:string/ok"
                 android:id="@+id/wizardAccept"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
-        </LinearLayout>
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_alignParentEnd="true"/>
 
-    </LinearLayout>
-</LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

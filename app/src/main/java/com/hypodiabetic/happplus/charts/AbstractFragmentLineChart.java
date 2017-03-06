@@ -20,6 +20,7 @@ import com.github.mikephil.charting.data.realm.implementation.RealmLineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesTime;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -84,7 +85,7 @@ public abstract class AbstractFragmentLineChart extends Fragment {
                 xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
                 xAxis.setDrawGridLines(false);
                 xAxis.setAxisMaximum(new Date().getTime() + (60000 * 30)); //30mins // TODO: 31/01/2017 set to APS Projected BG Prediction time?
-                xAxis.setAxisMinimum(Utilities.getDateHoursAgo(mNumHours).getTime());
+                xAxis.setAxisMinimum(UtilitiesTime.getDateHoursAgo(mNumHours).getTime());
                 xAxis.setValueFormatter(new IAxisValueFormatter() {
                     SimpleDateFormat friendlyTime = new SimpleDateFormat("h:mm a", Locale.getDefault());
                     @Override

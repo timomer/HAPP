@@ -26,15 +26,28 @@ public class dbHelperEvent {
                 .greaterThanOrEqualTo("dateCreated", timestamp)
                 .findAllSorted("dateCreated", Sort.DESCENDING);
 
-        List<AbstractEvent> abstractEvent = new ArrayList<>();
-        for (Event event : results){
+        return convertEventToAbstractEvent(results);
+    }
+
+    public static List<AbstractEvent> getEventsBetween(Date from, Date until, Realm realm) {
+        RealmResults<Event> results = realm.where(Event.class)
+                .greaterThanOrEqualTo("dateCreated", from)
+                .lessThanOrEqualTo("dateCreated", until)
+                .findAllSorted("dateCreated", Sort.DESCENDING);
+
+        return convertEventToAbstractEvent(results);
+    }
+
+    private static List<AbstractEvent> convertEventToAbstractEvent(RealmResults<Event> events){
+        List<AbstractEvent> abstractEvents = new ArrayList<>();
+        for (Event event : events){
             switch (event.type){
                 case "BolusEvent":
-                    abstractEvent.add(new BolusEvent(event));
+                    abstractEvents.add(new BolusEvent(event));
             }
         }
 
-        return abstractEvent;
+        return abstractEvents;
     }
 
     public static void saveEvent(Event event, Realm realm){

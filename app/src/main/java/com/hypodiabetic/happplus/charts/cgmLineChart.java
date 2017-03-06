@@ -20,6 +20,7 @@ import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.CGMValue;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
@@ -59,7 +60,7 @@ public class cgmLineChart extends AbstractFragmentLineChart {
 
         if (deviceCGM.getIsLoaded() && cgmLineChart != null) {
             //DataSet
-            RealmResults<CGMValue> cgmReadings = deviceCGM.getReadingsSince(Utilities.getDateHoursAgo(8));
+            RealmResults<CGMValue> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(8));
             cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING);
             RealmLineDataSet<CGMValue> cgmReadingsDataSet = new RealmLineDataSet<>(cgmReadings, "timestamp", "sgv");
 

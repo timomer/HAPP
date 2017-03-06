@@ -16,6 +16,8 @@ import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.SingleFragmentActivity;
+import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 import java.util.List;
@@ -71,7 +73,7 @@ public class RecyclerViewEvents extends RecyclerView.Adapter<RecyclerViewEvents.
         pluginViewHolder.eventMainIcon.setBackground(       icon);
 
         pluginViewHolder.eventTitle.setText(                events.get(i).getMainText());
-        pluginViewHolder.eventTime.setText(                 events.get(i).getDateCreated().toString());
+        pluginViewHolder.eventTime.setText(                 UtilitiesTime.displayAge(events.get(i).getDateCreated()));
         pluginViewHolder.eventSubText.setText(              events.get(i).getSubText());
 
         View.OnClickListener onClickListener =              events.get(i).getOnPrimaryActionClick();

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
@@ -81,7 +82,7 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
     private Button buttonAccept;
     private TextView wizardCriticalLow;
     private BolusWizardResult bolusWizardResult;
-    private LinearLayout showCalcLayout;
+    private RelativeLayout showCalcLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -105,7 +106,7 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
         });
         wizardCriticalLow       = (TextView) rootView.findViewById(R.id.wizardCriticalLow);
 
-        showCalcLayout          = (LinearLayout) rootView.findViewById(R.id.wizardShowCalc);
+        showCalcLayout          = (RelativeLayout) rootView.findViewById(R.id.wizardShowCalc);
 
         //Run Bolus Wizard on suggested carb amount change
         wizardCarbs.addTextChangedListener(new TextWatcher() {
@@ -156,7 +157,9 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
 
 
         //bolusWizardResult   =   new BolusWizardResult();
-        wizardCarbs.setText("0");
+        //wizardCarbs.setText("0");
+        bolusWizardResult   =   runBolusWizard(0, 0, 0);
+        setupUIWithResults();
         return rootView;
     }
 

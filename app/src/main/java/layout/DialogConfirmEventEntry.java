@@ -1,6 +1,7 @@
 package layout;
 
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
@@ -26,6 +27,9 @@ import java.util.List;
 
 public class DialogConfirmEventEntry extends DialogFragment {
 
+    public static int USER_SAVE     =   0;
+    public static int USER_CANCEL   =   1;
+
     List<AbstractEvent> eventList;
     List<AbstractEvent> eventListToAction;
     List<AbstractEvent> eventListWarning;
@@ -50,12 +54,16 @@ public class DialogConfirmEventEntry extends DialogFragment {
         eventCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.putExtra("eventCount", eventList.size());
+                getTargetFragment().onActivityResult(getTargetRequestCode(), USER_CANCEL, intent);
                 getDialog().dismiss();
             }
         });
         eventSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getTargetFragment().onActivityResult(getTargetRequestCode(), USER_SAVE, null);
                 saveEvents();
                 getDialog().dismiss();
             }

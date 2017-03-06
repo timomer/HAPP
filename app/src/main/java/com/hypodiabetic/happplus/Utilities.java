@@ -1,6 +1,5 @@
 package com.hypodiabetic.happplus;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -8,11 +7,8 @@ import android.widget.Spinner;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Date;
 import java.util.Locale;
 
-import io.realm.RealmResults;
-import layout.AdapterRealmList;
 
 /**
  * Created by Tim on 02/01/2017.
@@ -23,19 +19,12 @@ public class Utilities {
 
     private final static String TAG = "Utilities";
 
-    public static String displayAge(Date timestamp) {
-        int minutesAgo = (int) Math.floor(getDiffInMins(timestamp, new Date()));
-        switch (minutesAgo){
-            case 0:
-                return MainApp.getInstance().getString(R.string.time_just_now);
-            case 1:
-                return minutesAgo + " " + MainApp.getInstance().getString(R.string.time_min_ago);
-            default:
-                return minutesAgo + " " + MainApp.getInstance().getString(R.string.time_mins_ago);
-        }
-    }
-
     public static String displayInsulin(Double value, int decPoints){
+        return round(value,decPoints) + "u";
+    }
+    public static String displayInsulin(Double value){
+        int decPoints = 1;
+        if (getPrecisionRounding()) decPoints = 2;
         return round(value,decPoints) + "u";
     }
 
@@ -46,11 +35,6 @@ public class Utilities {
             return "";
         }
     }
-
-    public static double getDiffInMins(Date timestampFrom, Date timestampTo) {
-        return (timestampTo.getTime() - timestampFrom.getTime()) /(1000*60);
-    }
-
 
     public static Double round(Double value, int decPoints){
         if (value == null || value.isInfinite() || value.isNaN()) return 0D;
@@ -127,7 +111,5 @@ public class Utilities {
         return index;
     }
 
-    public static Date getDateHoursAgo(int hours){
-        return new Date(new Date().getTime() - ((60000 * 60 * hours)));
-    }
+
 }

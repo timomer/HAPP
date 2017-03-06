@@ -14,6 +14,7 @@ public class Intents {
         public final static String NEW_LOCAL_EVENT_SGV          =   "newLocalEvent.sgv";
         public final static String NEW_LOCAL_EVENT_PREF_UPDATE  =   "newLocalEvent.prefUpdate";
         public final static String SYS_PROFILE_CHANGE           =   "newLocalEvent.sysProfileChange";
+        public final static String NEW_LOCAL_EVENTS_SAVED       =   "newLocalEvent.newEventsSaved";
     }
 
     public class extras{

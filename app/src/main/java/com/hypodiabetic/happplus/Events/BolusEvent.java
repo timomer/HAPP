@@ -8,6 +8,7 @@ import android.view.View;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.Event;
 
 import org.json.JSONException;
@@ -50,8 +51,10 @@ public class BolusEvent extends AbstractEvent {
         mEvent.setData(jsonData);
     }
 
-    public String getMainText(){ return "TEST";}
-    public String getSubText(){ return "TEST";}
+    public String getMainText(){
+        return Utilities.displayInsulin(getBolusAmount()) + " " + getBolusTypeDisplay();
+    }
+    public String getSubText(){ return "TODO TIME REMAINING";}
     public String getValue(){
         switch (getBolusType()){
             case TYPE_STANDARD_BOLUS:
@@ -87,6 +90,13 @@ public class BolusEvent extends AbstractEvent {
     public View.OnClickListener getOnPrimaryActionClick() { return null;}
 
 
-
+    private String getBolusTypeDisplay(){
+        switch (getBolusType()){
+            case 0:
+                return MainApp.getInstance().getString(R.string.event_bolus_type_bolus);
+            default:
+                return MainApp.getInstance().getString(R.string.event_bolus_type_unknown);
+        }
+    }
 
 }

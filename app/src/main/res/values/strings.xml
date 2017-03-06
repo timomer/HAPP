@@ -83,8 +83,8 @@
     <string name="plugin_HAPPBolusWizard_desc">Bolus Wizard based on original HAPP Code</string>
     <string name="plugin_HAPPBolusWizard_critical_low_no_bolus">Critical Low, no Bolus allowed</string>
     <string name="plugin_HAPPBolusWizard_carbBolus">Carb Bolus</string>
-    <string name="plugin_HAPPBolusWizard_sgvCorrection">SGV Correction</string>
-    <string name="plugin_HAPPBolusWizard_iobCorrection">IOB Correction</string>
+    <string name="plugin_HAPPBolusWizard_sgvCorrection">SGV Corr</string>
+    <string name="plugin_HAPPBolusWizard_iobCorrection">IOB Corr</string>
     <string name="plugin_HAPPBolusWizard_enter_carb">Enter Carb Value</string>
     <string name="plugin_HAPPBolusWizard_bolus">Bolus</string>
     <string name="plugin_HAPPBolusWizard_correction">Correction</string>
@@ -100,12 +100,18 @@
     <string name="event_new">New Events</string>
     <string name="event_recent">Recent</string>
     <string name="event_today">Today</string>
+    <string name="event_rejected">Events Rejected</string>
 
+    //Event Bolus
+    <string name="event_bolus_type_bolus">Bolus</string>
+    <string name="event_bolus_type_unknown">Unknown Bolus Type</string>
 
     //Time Strings
     <string name="time_just_now">just now</string>
     <string name="time_min_ago">min ago</string>
     <string name="time_mins_ago">mins ago</string>
+    <string name="time_hour_ago">hour ago</string>
+    <string name="time_hours_ago">hours ago</string>
 
     //Dialogs
     <string name="dialog_copy_to_clipboard">Copy To Clipboard</string>

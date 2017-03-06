@@ -19,6 +19,7 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.SingleFragmentActivity;
 import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.CGMValue;
 
 import org.json.JSONArray;
@@ -238,7 +239,7 @@ public class CGMDevice extends AbstractDevice {
         } else {
             lastReading =   displayBG(cgmValue, true, false);
             lastDelta   =   displayDelta(getDelta(getLastCGMValue()));
-            lastAge     =   Utilities.displayAge(cgmValue.getTimestamp());
+            lastAge     =   UtilitiesTime.displayAge(cgmValue.getTimestamp());
             avgDelta    =   getDelta(getLastCGMValue()).toString();
         }
 

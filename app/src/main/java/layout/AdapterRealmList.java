@@ -16,7 +16,7 @@ import io.realm.RealmModel;
 
 /**
  * Created by Tim on 25/01/2017.
- * Simple Realm List Adapter
+ * Simple Realm List Adapter for use with Spinners that auto update with a Realm data source
  */
 
 public class AdapterRealmList<T extends RealmModel> extends RealmBaseAdapter<T> implements ListAdapter {
