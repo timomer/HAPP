@@ -8,6 +8,9 @@ import android.util.Log;
 
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
+import layout.FragmentCannotLoadFragment;
+import layout.FragmentEventEntry;
+
 
 public class SingleFragmentActivity extends FragmentActivity {
 
@@ -22,10 +25,24 @@ public class SingleFragmentActivity extends FragmentActivity {
 
         if (extras != null) {
             String pluginName   =   extras.getString(Intents.extras.PLUGIN_NAME);
+            String fragmentName =   extras.getString(Intents.extras.FRAGMENT_NAME);
 
-            if (pluginName != null){
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            if (fragmentName != null){
+                switch (fragmentName){
+                    case "FragmentEventEntry":
+                        fragmentTransaction.add(R.id.fragmentHolder, FragmentEventEntry.newInstance());
+                        fragmentTransaction.commit();
+                        break;
+                    default:
+                        Log.d(TAG, "onCreate: exiting, unknown Fragment: " + fragmentName);
+                        this.finish();
+                }
+
+            } else if (pluginName != null){
+
 
                 AbstractPluginBase plugin = MainApp.getPluginByName(pluginName);
 
@@ -34,8 +51,9 @@ public class SingleFragmentActivity extends FragmentActivity {
                     fragmentTransaction.commit();
 
                 } else {
-                    Log.d(TAG, "onCreate: exiting, cannot find plugin");
-                    this.finish();
+                    Log.d(TAG, "onCreate: cannot find plugin");
+                    fragmentTransaction.add(R.id.fragmentHolder, FragmentCannotLoadFragment.newInstance("'" + pluginName + "' " + MainApp.getInstance().getString(R.string.fragment_missing_cannot_find)));
+                    fragmentTransaction.commit();
                 }
             } else {
                 Log.d(TAG, "onCreate: exiting, missing Intent Data");

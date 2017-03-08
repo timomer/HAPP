@@ -126,7 +126,7 @@ public class SysFunctionsDevice extends AbstractDevice {
          RecyclerView rv;
          RecyclerViewPlugins adapterPlugins;
 
-        View rootView = inflater.inflate(R.layout.plugin__fragment_device_sys_functions, container, false);
+        View rootView = inflater.inflate(R.layout.plugin__device_sys_functions, container, false);
 
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
         TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);

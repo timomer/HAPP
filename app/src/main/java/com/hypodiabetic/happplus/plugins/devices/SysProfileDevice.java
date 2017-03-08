@@ -231,7 +231,7 @@ public class SysProfileDevice extends AbstractDevice {
     ImageButton deviceActionRight;
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.plugin__fragment_device_profile_manager, container, false);
+        View rootView = inflater.inflate(R.layout.plugin__device_profile_manager, container, false);
 
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
         TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);

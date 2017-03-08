@@ -2,19 +2,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="layout.FragmentActivities"
     android:orientation="vertical"
     android:id="@+id/FragmentActivities">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:id="@+id/FragmentActivitiesEventEntry"/>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:id="@+id/FragmentActivitiesEventLists"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/activities_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@android:drawable/ic_dialog_email" />
 
 </LinearLayout>

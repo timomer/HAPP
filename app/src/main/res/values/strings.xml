@@ -117,6 +117,6 @@
     <string name="dialog_copy_to_clipboard">Copy To Clipboard</string>
 
     //Fragment Missing
-    <string name="fragment_missing_cannot_find">cannot be found.</string>
+    <string name="fragment_missing_cannot_find">cannot be found. Check that the plugin is Enabled.</string>
 
 </resources>

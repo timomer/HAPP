@@ -181,7 +181,7 @@ public class CGMDevice extends AbstractDevice {
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.plugin__fragment_device_cgm, container, false);
+        View rootView = inflater.inflate(R.layout.plugin__device_cgm, container, false);
 
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
         TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);

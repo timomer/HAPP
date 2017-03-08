@@ -27,14 +27,14 @@ public class FragmentCannotLoadFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param missingFragmentName Name of the missing Fragment
+     * @param errorMsg Message displayed in the Fragment
      * @return A new instance of fragment FragmentMissingFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static FragmentCannotLoadFragment newInstance(String missingFragmentName) {
+    public static FragmentCannotLoadFragment newInstance(String errorMsg) {
         FragmentCannotLoadFragment fragment = new FragmentCannotLoadFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, missingFragmentName);
+        args.putString(ARG_PARAM1, errorMsg);
         fragment.setArguments(args);
         return fragment;
     }

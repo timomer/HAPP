@@ -13,7 +13,9 @@
         android:orientation="horizontal"
         android:layout_gravity="center"
         android:baselineAligned="false"
-        android:id="@+id/bwTitles">
+        android:id="@+id/bwTitles"
+        android:paddingTop="18dp"
+        android:paddingBottom="18dp">
 
         <RelativeLayout
             android:layout_width="0dp"
@@ -142,7 +144,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/wizardCriticalLow">
+        android:layout_below="@+id/wizardCriticalLow"
+        android:paddingTop="18dp">
 
         <RelativeLayout
             android:layout_width="wrap_content"

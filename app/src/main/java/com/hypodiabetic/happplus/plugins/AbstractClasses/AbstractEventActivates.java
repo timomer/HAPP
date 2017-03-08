@@ -25,9 +25,11 @@ import layout.DialogConfirmEventEntry;
 public abstract class AbstractEventActivates extends AbstractPluginBase {
 
     private int myRequestCode   =   100;
+    private boolean killActivity=   false;
 
-    protected void addEventsToHAPP(List<AbstractEvent> eventList, boolean notifyUser){
+    protected void addEventsToHAPP(List<AbstractEvent> eventList, boolean notifyUser, boolean killActivityIfSaveSuccess){
         boolean validationRequestsNotifyUser    =   false;
+        killActivity   =   killActivityIfSaveSuccess;
 
         //Pass the list of Events to be validated to each validator
         List<? extends AbstractPluginBase> pluginValidators =  MainApp.getPluginList(InterfaceEventValidator.class);
@@ -52,6 +54,7 @@ public abstract class AbstractEventActivates extends AbstractPluginBase {
             dialogEvents.show(getFragmentManager(), "dialogEventEntry");
         } else {
             saveNewEvents(eventList);
+            if (killActivity) getActivity().finish();
         }
     }
 
@@ -61,6 +64,7 @@ public abstract class AbstractEventActivates extends AbstractPluginBase {
         if (requestCode == myRequestCode) {
             if (resultCode == DialogConfirmEventEntry.USER_SAVE) {
                 saveNewEvents(null);    //Null, as the Dialog has saved them for us
+                if (killActivity) getActivity().finish();
             } else {
                 String eventCount = data.getStringExtra("eventCount");
                 Toast.makeText(getActivity(), eventCount + " " + getString(R.string.event_rejected), Toast.LENGTH_LONG).show();

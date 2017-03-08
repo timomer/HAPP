@@ -9,8 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -86,7 +84,7 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.plugin__fragment_bolus_wizard_happ, container, false);
+        View rootView = inflater.inflate(R.layout.plugin__bolus_wizard_happ, container, false);
 
         //Bolus wizard summaries
         bwDisplayIOBCorr    = (TextView) rootView.findViewById(R.id.bwDisplayIOBCorr);
@@ -198,7 +196,7 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
         }
         //if (!Utilities.stringToDouble(wizardCarbs.getText().toString()).equals(0D))  // TODO: 08/02/2017 carbs
 
-        if (events.size() > 0) addEventsToHAPP(events, true);
+        if (events.size() > 0) addEventsToHAPP(events, true, true);
     }
 
     @Override
