@@ -17,6 +17,7 @@ import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONArray;
@@ -48,6 +49,7 @@ public abstract class AbstractPluginBase extends Fragment {
     public static final String PLUGIN_TYPE_DEVICE           =   "DEVICE";
     public static final String PLUGIN_TYPE_SYNC             =   "SYNC";
     public static final String PLUGIN_TYPE_BOLUS_WIZARD     =   "BOLUS_WIZARD";
+    public static final String PLUGIN_TYPE_EVENT_VALIDATOR  =   "EVENT_VALIDATOR";
 
     private static final String PREF_ENABLED                =   "enabled";
 
@@ -186,7 +188,7 @@ public abstract class AbstractPluginBase extends Fragment {
         savePluginPref(PREF_PREFIX + prefName, prefValue.toString());
     }
     protected void savePluginPref(String prefName, String prefValue){
-        SysProfileDevice deviceSysProfile = (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
+        SysProfileDevice deviceSysProfile = (SysProfileDevice) PluginManager.getPluginByClass(SysProfileDevice.class);
         deviceSysProfile.savePref(prefName, prefValue);
         loadPrefs();
 

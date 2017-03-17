@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -19,9 +19,9 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.CGMValue;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
 import io.realm.RealmResults;
@@ -35,6 +35,7 @@ import io.realm.Sort;
 public class cgmLineChart extends AbstractFragmentLineChart {
 
     private BroadcastReceiver mCGMNewCGMReading;
+    private final static String TAG   =   "cgmLineChart";
 
     //Create a new instance of this Fragment
     public static cgmLineChart newInstance(Integer numHours, String title, String summary, String yAxisLDesc, @ColorInt int lineColour) {
@@ -55,35 +56,39 @@ public class cgmLineChart extends AbstractFragmentLineChart {
         super.onStart();
 
         //CGM Readings Line Chart
-        CGMDevice deviceCGM = (CGMDevice) MainApp.getPluginByClass(CGMDevice.class);
+        CGMDevice deviceCGM = (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
         LineChart cgmLineChart  =   this.getChart();
 
-        if (deviceCGM.getIsLoaded() && cgmLineChart != null) {
-            //DataSet
-            RealmResults<CGMValue> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(8));
-            cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING);
-            RealmLineDataSet<CGMValue> cgmReadingsDataSet = new RealmLineDataSet<>(cgmReadings, "timestamp", "sgv");
+        if (deviceCGM != null) {
+            if (deviceCGM.getIsLoaded() && cgmLineChart != null) {
+                //DataSet
+                RealmResults<CGMValue> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(8));
+                cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING);
+                RealmLineDataSet<CGMValue> cgmReadingsDataSet = new RealmLineDataSet<>(cgmReadings, "timestamp", "sgv");
 
-            //yAxis
-            YAxis yAxisL = cgmLineChart.getAxisLeft();
-            yAxisL.setValueFormatter(new IAxisValueFormatter() {
-                CGMDevice deviceCGM = (CGMDevice) MainApp.getPluginByClass(CGMDevice.class);
+                //yAxis
+                YAxis yAxisL = cgmLineChart.getAxisLeft();
+                yAxisL.setValueFormatter(new IAxisValueFormatter() {
+                    CGMDevice deviceCGM = (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
 
-                @Override
-                public String getFormattedValue(float value, AxisBase axis) {
-                    return deviceCGM.displayBG((double) value, false, false);
-                }
-            });
-            yAxisL.setAxisMaximum(200);
-            yAxisL.setAxisMinimum(20);
-            LimitLine cgmReadingsMaxLine = new LimitLine(150);
-            cgmReadingsMaxLine.setLineColor(ContextCompat.getColor(getContext(), R.color.colorCGMMaxLine));
-            yAxisL.addLimitLine(cgmReadingsMaxLine);
-            LimitLine cgmReadingsMinLine = new LimitLine(50);
-            cgmReadingsMinLine.setLineColor(ContextCompat.getColor(getContext(), R.color.colorCGMMinLine));
-            yAxisL.addLimitLine(cgmReadingsMinLine);
+                    @Override
+                    public String getFormattedValue(float value, AxisBase axis) {
+                        return deviceCGM.displayBG((double) value, false, false);
+                    }
+                });
+                yAxisL.setAxisMaximum(200);
+                yAxisL.setAxisMinimum(20);
+                LimitLine cgmReadingsMaxLine = new LimitLine(150);
+                cgmReadingsMaxLine.setLineColor(ContextCompat.getColor(getContext(), R.color.colorCGMMaxLine));
+                yAxisL.addLimitLine(cgmReadingsMaxLine);
+                LimitLine cgmReadingsMinLine = new LimitLine(50);
+                cgmReadingsMinLine.setLineColor(ContextCompat.getColor(getContext(), R.color.colorCGMMinLine));
+                yAxisL.addLimitLine(cgmReadingsMinLine);
 
-            this.renderChart(cgmReadingsDataSet);
+                this.renderChart(cgmReadingsDataSet);
+            }
+        } else {
+            Log.d(TAG, "onStart: could not find Device CGM");
         }
     }
 

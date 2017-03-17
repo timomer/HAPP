@@ -5,7 +5,8 @@
 
     <ImageView
         style="@style/ListIconMainIcon"
-        android:id="@+id/eventMainIcon"/>
+        android:id="@+id/eventMainIcon"
+        android:contentDescription="@string/event_icon"/>
 
     <TextView
         android:layout_width="wrap_content"

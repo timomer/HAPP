@@ -35,6 +35,7 @@ import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import io.realm.RealmResults;
 import layout.RecyclerViewDevices;
@@ -54,7 +55,6 @@ public class CGMDevice extends AbstractDevice {
     private final static String PREF_CGM_SOURCE     =   "cgm_source";
 
     private AbstractCGMSource pluginCGMSource;
-    private RecyclerView rv;
     private RecyclerViewPlugins adapterPlugins;
 
     public CGMDevice(){
@@ -91,7 +91,7 @@ public class CGMDevice extends AbstractDevice {
 
     private void setCGMPluginSource(){
         if (getPref(PREF_CGM_SOURCE).getStringValue() != null){
-            pluginCGMSource = (AbstractCGMSource) MainApp.getPlugin(getPref(PREF_CGM_SOURCE).getStringValue(),AbstractCGMSource.class);
+            pluginCGMSource = (AbstractCGMSource) PluginManager.getPlugin(getPref(PREF_CGM_SOURCE).getStringValue(),AbstractCGMSource.class);
         }
     }
 
@@ -111,8 +111,8 @@ public class CGMDevice extends AbstractDevice {
                 PREF_CGM_SOURCE,
                 context.getString(R.string.device_cgm_data_source),
                 context.getString(R.string.device_cgm_data_source_desc),
-                (List<AbstractPluginBase>) MainApp.getPluginList(AbstractCGMSource.class),
-                (List<AbstractPluginBase>) MainApp.getPluginList(AbstractCGMSource.class)));
+                (List<AbstractPluginBase>) PluginManager.getPluginList(AbstractCGMSource.class),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(AbstractCGMSource.class)));
 
         return prefs;
     }
@@ -201,12 +201,13 @@ public class CGMDevice extends AbstractDevice {
         setPluginPref((LinearLayout) rootView.findViewById(R.id.prefCGMSource), rootView, getPref(PREF_CGM_SOURCE));
 
         //Setup the Plugin Cards list
+        RecyclerView rv;
         rv=(RecyclerView)rootView.findViewById(R.id.pluginList);
         rv.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
         rv.setHasFixedSize(true);
 
         List<AbstractPluginBase> pB = new ArrayList<>();
-        pB.addAll(MainApp.getPluginList(AbstractCGMSource.class));
+        pB.addAll(PluginManager.getPluginList(AbstractCGMSource.class));
         adapterPlugins = new RecyclerViewPlugins(pB);
 
         rv.setAdapter(adapterPlugins);

@@ -31,6 +31,7 @@
     <string name="plugin_not_loaded">is not loaded.</string>
     <string name="plugin_not_found">is required &amp; cannot be found</string>
     <string name="plugin_has_errors">is required &amp; has errors</string>
+    <string name="plugin_settings">Plugin settings</string>
 
     //Prefs
     <string name="pref_enabled_desc">Is this plugin enabled</string>
@@ -50,6 +51,10 @@
     //Device Strings
     <string name="last_reading">last reading</string>
     <string name="age">age</string>
+    <string name="device_icon">Device Icon</string>
+    <string name="device_first_action">Device First Action</string>
+    <string name="device_second_action">Device Second Action</string>
+    <string name="device_third_action">Device Third Action</string>
 
     //Device CGM
     <string name="device_cgm_bg_delta">delta</string>
@@ -90,6 +95,10 @@
     <string name="plugin_HAPPBolusWizard_correction">Correction</string>
     <string name="plugin_HAPPBolusWizard_show_calc">Show Calc</string>
 
+    //HAPP Validator
+    <string name="validator_happ_name">HAPP Event Validator</string>
+    <string name="validator_happ_desc">HAPP default Event validator plugin. All Events must pass this validator checks.</string>
+
     //Event Strings
     <string name="event_bolus_wizard">Bolus Wizard</string>
     <string name="event_pump_events">Pump Events</string>
@@ -101,6 +110,9 @@
     <string name="event_recent">Recent</string>
     <string name="event_today">Today</string>
     <string name="event_rejected">Events Rejected</string>
+    <string name="event_icon">Event Icon</string>
+    <string name="event_primary_action">Event Primary Action</string>
+    <string name="event_menu">Event Menu</string>
 
     //Event Bolus
     <string name="event_bolus_type_bolus">Bolus</string>

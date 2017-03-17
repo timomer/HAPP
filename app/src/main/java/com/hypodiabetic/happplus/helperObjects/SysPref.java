@@ -7,6 +7,7 @@ import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.Profile;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONObject;
@@ -112,12 +113,12 @@ public class SysPref<T> {
 
 
     public SysPref(String name, String displayName, String description, List<T> prefValues, List<T> prefDisplayValues, int prefType, String profileID){
-        SysProfileDevice deviceSysProfile   =   (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
-        setPrefObject(name, displayName, description, deviceSysProfile.getProfile(profileID), deviceSysProfile.getDefaultProfile(), prefValues, prefDisplayValues, prefType);
+        SysProfileDevice deviceSysProfile   =   (SysProfileDevice) PluginManager.getPluginByClass(SysProfileDevice.class);
+        if (deviceSysProfile != null)   setPrefObject(name, displayName, description, deviceSysProfile.getProfile(profileID), deviceSysProfile.getDefaultProfile(), prefValues, prefDisplayValues, prefType);
     }
     public SysPref(String name, String displayName, String description,  List<T> prefValues, List<T> prefDisplayValues, int prefType){
-        SysProfileDevice deviceSysProfile   =   (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
-        setPrefObject(name, displayName, description, deviceSysProfile.getLoadedProfile(), deviceSysProfile.getDefaultProfile(), prefValues, prefDisplayValues, prefType);
+        SysProfileDevice deviceSysProfile   =   (SysProfileDevice) PluginManager.getPluginByClass(SysProfileDevice.class);
+        if (deviceSysProfile != null)   setPrefObject(name, displayName, description, deviceSysProfile.getLoadedProfile(), deviceSysProfile.getDefaultProfile(), prefValues, prefDisplayValues, prefType);
     }
 
     public boolean isSet(){
@@ -125,9 +126,9 @@ public class SysPref<T> {
     }
 
     public void update(String value){
-        SysProfileDevice deviceSysProfile   = (SysProfileDevice) MainApp.getPluginByClass(SysProfileDevice.class);
+        SysProfileDevice deviceSysProfile   = (SysProfileDevice) PluginManager.getPluginByClass(SysProfileDevice.class);
         this.prefValue  =   value;
-        deviceSysProfile.savePref(prefName, value);
+        if (deviceSysProfile != null)   deviceSysProfile.savePref(prefName, value);
     }
 
     private void setPrefObject(String name, String displayName, String description,  Profile requestedProfile, Profile defaultProfile, List<T> prefValues, List<T> prefDisplayValues, int prefType){

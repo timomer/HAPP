@@ -9,5 +9,5 @@ import com.hypodiabetic.happplus.helperObjects.BolusWizardResult;
 public interface InterfaceBolusWizard {
 
 
-    public BolusWizardResult runBolusWizard(double pram1, double pram2, double pram3);
+    BolusWizardResult runBolusWizard(double pram1, double pram2, double pram3);
 }

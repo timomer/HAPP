@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import layout.FragmentCannotLoadFragment;
 import layout.FragmentEventEntry;
@@ -44,7 +45,7 @@ public class SingleFragmentActivity extends FragmentActivity {
             } else if (pluginName != null){
 
 
-                AbstractPluginBase plugin = MainApp.getPluginByName(pluginName);
+                AbstractPluginBase plugin = PluginManager.getPluginByName(pluginName);
 
                 if (plugin != null){
                     fragmentTransaction.add(R.id.fragmentHolder, plugin);

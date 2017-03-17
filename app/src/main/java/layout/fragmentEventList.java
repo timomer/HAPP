@@ -23,8 +23,6 @@ public class FragmentEventList extends Fragment {
     private static final String ARG_PARAM1 = "detailed_view";
 
     private Boolean detailedView = false;
-    private RecyclerViewEvents recyclerViewEvents;
-    private RecyclerViewEventsSummary recyclerViewEventsSummary;
     private List<AbstractEvent> eventList;
     private RecyclerView recyclerViewList;
 
@@ -76,10 +74,10 @@ public class FragmentEventList extends Fragment {
     private void updateList(){
         if (eventList != null) {
             if (detailedView) {
-                recyclerViewEvents = new RecyclerViewEvents(eventList);
+                RecyclerViewEvents recyclerViewEvents               =   new RecyclerViewEvents(eventList);
                 recyclerViewList.setAdapter(recyclerViewEvents);
             } else {
-                recyclerViewEventsSummary = new RecyclerViewEventsSummary(eventList);
+                RecyclerViewEventsSummary recyclerViewEventsSummary =   new RecyclerViewEventsSummary(eventList);
                 recyclerViewList.setAdapter(recyclerViewEventsSummary);
             }
         }

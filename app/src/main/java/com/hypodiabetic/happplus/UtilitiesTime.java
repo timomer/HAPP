@@ -23,7 +23,7 @@ public class UtilitiesTime {
                 if (minutesAgo < 60) {
                     return minutesAgo + " " + MainApp.getInstance().getString(R.string.time_mins_ago);
                 } else {
-                    return (minutesAgo / 60) + " " + MainApp.getInstance().getString(R.string.time_hours_ago);
+                    return Utilities.round((double) minutesAgo / 60, 1) + " " + MainApp.getInstance().getString(R.string.time_hours_ago);
                 }
         }
     }

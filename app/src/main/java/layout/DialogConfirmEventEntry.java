@@ -36,7 +36,6 @@ public class DialogConfirmEventEntry extends DialogFragment {
     List<AbstractEvent> eventListAccepted;
     List<AbstractEvent> eventListRejected;
 
-    private DynamicFragmentPagerAdapter dynamicFragmentPagerAdapter;
     private ViewPager mViewPager;
 
     Button eventCancel;
@@ -136,7 +135,8 @@ public class DialogConfirmEventEntry extends DialogFragment {
         if (mViewPager != null) {
             // Create the adapter that will return a fragment for each of the three
             // primary sections of the activity.
-            dynamicFragmentPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
+
+            DynamicFragmentPagerAdapter dynamicFragmentPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
             if (eventListToAction.size() > 0) {
                 FragmentEventList fragmentEventListAction = FragmentEventList.newInstance(false);
                 fragmentEventListAction.setListData(eventListToAction);

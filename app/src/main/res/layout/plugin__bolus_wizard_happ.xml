@@ -161,7 +161,8 @@
                 android:id="@+id/showCalcIcon"
                 android:layout_centerVertical="true"
                 android:layout_alignParentStart="true"
-                android:layout_marginStart="18dp" />
+                android:layout_marginStart="18dp"
+                android:contentDescription="@string/plugin_HAPPBolusWizard_show_calc"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

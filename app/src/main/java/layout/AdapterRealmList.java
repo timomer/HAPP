@@ -43,9 +43,10 @@ public class AdapterRealmList<T extends RealmModel> extends RealmBaseAdapter<T> 
 
         CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(android.R.id.text1);
         String strValue;
-        try {
-            strValue    =   getItem(position).toString();
-        } catch (NullPointerException n){
+        T item = getItem(position);
+        if (item != null){
+            strValue    =   item.toString();
+        } else {
             strValue    =   "";
         }
 

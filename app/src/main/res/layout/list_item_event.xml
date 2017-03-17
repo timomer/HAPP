@@ -5,7 +5,8 @@
 
     <ImageView
         style="@style/ListIconMainIcon"
-        android:id="@+id/eventMainIcon"/>
+        android:id="@+id/eventMainIcon"
+        android:contentDescription="@string/event_icon"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -44,9 +45,11 @@
 
     <ImageButton
         style="@style/ListIconMainIcon"
-        android:id="@+id/eventActionPrimary"/>
+        android:id="@+id/eventActionPrimary"
+        android:contentDescription="@string/event_primary_action"/>
 
     <ImageButton
         style="@style/ListIconMainIcon"
-        android:id="@+id/eventMenu"/>
+        android:id="@+id/eventMenu"
+        android:contentDescription="@string/event_menu"/>
 </LinearLayout>

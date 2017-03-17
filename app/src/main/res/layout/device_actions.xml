@@ -9,15 +9,18 @@
     <ImageButton
         style="@style/CardImageAction"
         android:layout_alignParentStart="true"
-        android:id="@+id/deviceActionOne"/>
+        android:id="@+id/deviceActionOne"
+        android:contentDescription="@string/device_first_action"/>
     <ImageButton
         style="@style/CardImageAction"
         android:layout_toEndOf="@id/deviceActionOne"
-        android:id="@+id/deviceActionTwo"/>
+        android:id="@+id/deviceActionTwo"
+        android:contentDescription="@string/device_second_action"/>
     <ImageButton
         style="@style/CardImageAction"
         android:layout_toEndOf="@id/deviceActionTwo"
-        android:id="@+id/deviceActionThree"/>
+        android:id="@+id/deviceActionThree"
+        android:contentDescription="@string/device_third_action"/>
     <ImageButton
         style="@style/CardImageAction"
         android:layout_alignParentEnd="true"

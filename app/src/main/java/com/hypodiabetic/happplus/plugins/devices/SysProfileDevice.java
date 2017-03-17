@@ -33,6 +33,7 @@ import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -138,9 +139,9 @@ public class SysProfileDevice extends AbstractDevice {
         editor.apply();
 
         Log.i(TAG, "Selected Profile changed to: " + selectedSysProfile.getName());
-        MainApp.reLoadPlugins();
+        PluginManager.reLoadPlugins();
 
-        Intent sysProfileChange = new Intent(Intents.newLocalEvent.SYS_PROFILE_CHANGE);;
+        Intent sysProfileChange = new Intent(Intents.newLocalEvent.SYS_PROFILE_CHANGE);
         LocalBroadcastManager.getInstance(context).sendBroadcast(sysProfileChange);
     }
 

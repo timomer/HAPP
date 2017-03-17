@@ -11,6 +11,7 @@ import android.widget.CheckedTextView;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import java.util.List;
 
@@ -57,16 +58,21 @@ public class AdapterSysPref<T> extends ArrayAdapter{
 
         CheckedTextView checkedTextView = (CheckedTextView) view.findViewById(android.R.id.text1);
         String strValue;
-        try {
-            strValue    =   getItem(position).toString();
-        } catch (NullPointerException n){
+        Object item  =   getItem(position);
+        if (item != null){
+            strValue    =   item.toString();
+        } else {
             strValue    =   "";
         }
 
-        if (mDefaultPrefValue != null) {
-            if (AbstractPluginBase.class.isAssignableFrom(getItem(position).getClass())) {
-                if (MainApp.getPluginByName(mDefaultPrefValue).getPluginDisplayName().equals(strValue)){
-                    strValue = strValue + " *";
+        if (mDefaultPrefValue != null && item != null) {
+            if (AbstractPluginBase.class.isAssignableFrom(item.getClass())) {
+                //This pref values are plugins
+                AbstractPluginBase plugin   =   PluginManager.getPluginByName(mDefaultPrefValue);
+                if (plugin != null) {
+                    if (plugin.getPluginDisplayName().equals(strValue)) {
+                        strValue = strValue + " *";
+                    }
                 }
             } else {
                 if (mDefaultPrefValue.equals(strValue)) {

@@ -24,6 +24,7 @@ import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import org.json.JSONArray;
 
@@ -75,7 +76,7 @@ public class SysFunctionsDevice extends AbstractDevice {
 
     private void setPlugins(){
         if (getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue() != null){
-            pluginBolusWizard = MainApp.getPlugin(getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue(),InterfaceBolusWizard.class);
+            pluginBolusWizard = PluginManager.getPlugin(getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue(),InterfaceBolusWizard.class);
             if (pluginBolusWizard != null) {
                 pluginBolusWizard.load();
             }
@@ -88,8 +89,8 @@ public class SysFunctionsDevice extends AbstractDevice {
                 PREF_BOLUS_WIZARD_PLUGIN,
                 context.getString(R.string.device_sysf_bw_plugin),
                 context.getString(R.string.device_sysf_bw_plugin_desc),
-                (List<AbstractPluginBase>) MainApp.getPluginList(InterfaceBolusWizard.class),
-                (List<AbstractPluginBase>) MainApp.getPluginList(InterfaceBolusWizard.class)));
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceBolusWizard.class),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceBolusWizard.class)));
 
         return prefs;
     }
@@ -154,7 +155,7 @@ public class SysFunctionsDevice extends AbstractDevice {
         rv.setHasFixedSize(true);
 
         List<AbstractPluginBase> pB = new ArrayList<>();
-        pB.addAll(MainApp.getPluginList(InterfaceBolusWizard.class));
+        pB.addAll(PluginManager.getPluginList(InterfaceBolusWizard.class));
         //add other Sys Functions Plugins here // TODO: 03/02/2017
         adapterPlugins = new RecyclerViewPlugins(pB);
 

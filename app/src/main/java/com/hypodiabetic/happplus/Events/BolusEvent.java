@@ -19,6 +19,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by Tim on 01/02/2017.
+ * A Bolus Event Object, different types of Bolues are supported by this one Event Object
  */
 
 public class BolusEvent extends AbstractEvent {

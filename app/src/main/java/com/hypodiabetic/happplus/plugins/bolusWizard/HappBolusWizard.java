@@ -23,8 +23,9 @@ import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.DialogHelper;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractEventActivates;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractEventActivities;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 
@@ -40,7 +41,7 @@ import java.util.List;
  * Bolus Wizard based on Original HAPP App code
  */
 
-public class HappBolusWizard extends AbstractEventActivates implements InterfaceBolusWizard {
+public class HappBolusWizard extends AbstractEventActivities implements InterfaceBolusWizard {
 
     public String  getPluginType(){         return PLUGIN_TYPE_BOLUS_WIZARD;}
     public String getPluginName(){          return "happBolusWizard";}
@@ -80,31 +81,30 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
     private Button buttonAccept;
     private TextView wizardCriticalLow;
     private BolusWizardResult bolusWizardResult;
-    private RelativeLayout showCalcLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.plugin__bolus_wizard_happ, container, false);
 
         //Bolus wizard summaries
-        bwDisplayIOBCorr    = (TextView) rootView.findViewById(R.id.bwDisplayIOBCorr);
-        bwDisplayCarbCorr   = (TextView) rootView.findViewById(R.id.bwDisplayCarbCorr);
-        bwDisplayBGCorr     = (TextView) rootView.findViewById(R.id.bwDisplayBGCorr);
+        bwDisplayIOBCorr                = (TextView) rootView.findViewById(R.id.bwDisplayIOBCorr);
+        bwDisplayCarbCorr               = (TextView) rootView.findViewById(R.id.bwDisplayCarbCorr);
+        bwDisplayBGCorr                 = (TextView) rootView.findViewById(R.id.bwDisplayBGCorr);
         //Inputs
-        wizardCarbs                 = (TextInputEditText) rootView.findViewById(R.id.wizardCarbValue);
-        wizardSuggestedBolus        = (TextInputEditText) rootView.findViewById(R.id.wizardSuggestedBolus);
-        wizardSuggestedCorrection   = (TextInputEditText) rootView.findViewById(R.id.wizardSuggestedCorrection);
+        wizardCarbs                     = (TextInputEditText) rootView.findViewById(R.id.wizardCarbValue);
+        wizardSuggestedBolus            = (TextInputEditText) rootView.findViewById(R.id.wizardSuggestedBolus);
+        wizardSuggestedCorrection       = (TextInputEditText) rootView.findViewById(R.id.wizardSuggestedCorrection);
 
-        buttonAccept            = (Button) rootView.findViewById(R.id.wizardAccept);
+        buttonAccept                    = (Button) rootView.findViewById(R.id.wizardAccept);
         buttonAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveResults();
             }
         });
-        wizardCriticalLow       = (TextView) rootView.findViewById(R.id.wizardCriticalLow);
+        wizardCriticalLow               = (TextView) rootView.findViewById(R.id.wizardCriticalLow);
 
-        showCalcLayout          = (RelativeLayout) rootView.findViewById(R.id.wizardShowCalc);
+        RelativeLayout showCalcLayout   = (RelativeLayout) rootView.findViewById(R.id.wizardShowCalc);
 
         //Run Bolus Wizard on suggested carb amount change
         wizardCarbs.addTextChangedListener(new TextWatcher() {
@@ -166,7 +166,7 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
         bwDisplayIOBCorr.setText(           bolusWizardResult.getData().optString("net_biob", getString(R.string.misc_empty_string)));
         bwDisplayCarbCorr.setText(          bolusWizardResult.getData().optString("insulin_correction_carbs", getString(R.string.misc_empty_string)));
         bwDisplayBGCorr.setText(            bolusWizardResult.getData().optString("insulin_correction_bg", getString(R.string.misc_empty_string)));
-        wizardSuggestedBolus.setText(       bolusWizardResult.getSuggestedBolus().toString());
+        wizardSuggestedBolus.setText(       String.format(bolusWizardResult.getSuggestedBolus().toString()));
         wizardSuggestedCorrection.setText(  bolusWizardResult.getSuggestedCorrectionBolus().toString());
 
         if (bolusWizardResult.isHaveError()){
@@ -208,15 +208,18 @@ public class HappBolusWizard extends AbstractEventActivates implements Interface
         
         BolusWizardResult bolusWizardResult = new BolusWizardResult();
 
-        SysFunctionsDevice sysFun   =   (SysFunctionsDevice)  MainApp.getPluginByClass(SysFunctionsDevice.class);
-        CGMDevice cgmDevice         =   (CGMDevice) MainApp.getPluginByClass(CGMDevice.class);
-        CGMValue lastCGMValue       =   cgmDevice.getLastCGMValue();
-        
-        double lastSGV  =   0D;
-        if (lastCGMValue != null) lastSGV = lastCGMValue.getSgv().doubleValue();
-        
-        double iob      =   sysFun.getIOB();
-        double cob      =   sysFun.getCOB();
+        SysFunctionsDevice sysFun   =   (SysFunctionsDevice)  PluginManager.getPluginByClass(SysFunctionsDevice.class);
+        CGMDevice cgmDevice         =   (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
+
+        double lastSGV = 0D, iob = 0, cob =0;
+        if (cgmDevice != null) {
+            CGMValue lastCGMValue   =   cgmDevice.getLastCGMValue();
+            if (lastCGMValue != null) lastSGV   =   lastCGMValue.getSgv().doubleValue();
+        }
+        if (sysFun != null) {
+            iob =   sysFun.getIOB();
+            cob =   sysFun.getCOB();
+        }
 
         // TODO: 03/02/2017 values to bring in from devices that do not exist yet 
         double profileMinSGV    =   0;

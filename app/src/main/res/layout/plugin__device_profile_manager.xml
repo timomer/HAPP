@@ -60,6 +60,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:id="@+id/prefProfileName"
+                android:inputType="text"
                 style="@style/TitleSecondaryDark"/>
         </LinearLayout>
 

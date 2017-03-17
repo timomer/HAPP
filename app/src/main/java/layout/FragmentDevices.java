@@ -18,6 +18,7 @@ import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import java.util.List;
 
@@ -28,7 +29,6 @@ import java.util.List;
  */
 public class FragmentDevices extends Fragment {
 
-    private RecyclerView rv;
     private RecyclerViewDevices adapterDevices;
 
     private BroadcastReceiver mCGMNewCGMReading;
@@ -40,8 +40,7 @@ public class FragmentDevices extends Fragment {
 
 
     public static FragmentDevices newInstance() {
-        FragmentDevices fragment = new FragmentDevices();
-        return fragment;
+        return new FragmentDevices();
     }
 
     @Override
@@ -69,12 +68,12 @@ public class FragmentDevices extends Fragment {
         View view = inflater.inflate(R.layout.fragment_devices, container, false);
 
         //Setup the Device Cards list
-        rv=(RecyclerView)view.findViewById(R.id.deviceList);
+        RecyclerView rv =   (RecyclerView)view.findViewById(R.id.deviceList);
         LinearLayoutManager llm = new LinearLayoutManager(view.getContext());
         rv.setLayoutManager(llm);
         rv.setHasFixedSize(true);
 
-        adapterDevices = new RecyclerViewDevices((List<AbstractDevice>) MainApp.getPluginList(AbstractDevice.class));
+        adapterDevices = new RecyclerViewDevices((List<AbstractDevice>) PluginManager.getPluginList(AbstractDevice.class));
         rv.setAdapter(adapterDevices);
 
         return view;

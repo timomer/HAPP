@@ -37,10 +37,9 @@ public class dbHelperProfile {
     }
 
     public static RealmResults<Profile> getProfileList(Realm realm, int profileType){
-        RealmResults<Profile> results =   realm.where(Profile.class)
+        return realm.where(Profile.class)
                 .equalTo("type", profileType)
                 .findAll();
-        return results;
     }
 
     public static Profile getProfile(String id, Realm realm){

@@ -80,6 +80,8 @@ public class RecyclerViewEvents extends RecyclerView.Adapter<RecyclerViewEvents.
         if (onClickListener != null) {
             pluginViewHolder.eventActionPrimary.setOnClickListener( onClickListener);
             pluginViewHolder.eventActionPrimary.setBackground(      events.get(i).getPrimaryActionIcon());
+        } else {
+            pluginViewHolder.eventActionPrimary.setVisibility(View.GONE);
         }
 
     }

@@ -2,14 +2,15 @@ package layout;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 
 
@@ -20,6 +21,7 @@ import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 public class FragmentEventEntry extends Fragment {
 
     private ViewPager mViewPager;
+    private static final String TAG = "FragmentEventEntry";
 
     public FragmentEventEntry() {
         // Required empty public constructor
@@ -51,8 +53,12 @@ public class FragmentEventEntry extends Fragment {
         // primary sections of the activity.
         DynamicFragmentPagerAdapter mSectionsPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
 
-        SysFunctionsDevice sysFun  = (SysFunctionsDevice) MainApp.getPluginByClass(SysFunctionsDevice.class);
-        mSectionsPagerAdapter.addFragment(sysFun.getBolusWizard(), getString(R.string.event_bolus_wizard));
+        SysFunctionsDevice sysFun  = (SysFunctionsDevice) PluginManager.getPluginByClass(SysFunctionsDevice.class);
+        if (sysFun != null) {
+            mSectionsPagerAdapter.addFragment(sysFun.getBolusWizard(), getString(R.string.event_bolus_wizard));
+        } else {
+            Log.d(TAG, "loadFragments: Could not find Device SysFunctions");
+        }
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.setAdapter(mSectionsPagerAdapter);

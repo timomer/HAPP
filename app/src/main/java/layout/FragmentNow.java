@@ -13,6 +13,7 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.charts.AbstractFragmentLineChart;
 import com.hypodiabetic.happplus.charts.cgmLineChart;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 
@@ -57,7 +58,7 @@ public class FragmentNow extends Fragment {
         //CGM Readings Line Chart
         AbstractFragmentLineChart CGMLineChartFragment = (AbstractFragmentLineChart) fm.findFragmentByTag("CGMLineChartFragment");
         if (CGMLineChartFragment == null) {
-            AbstractDevice deviceCGM    =   (AbstractDevice) MainApp.getPluginByClass(CGMDevice.class);
+            AbstractDevice deviceCGM    =   (AbstractDevice) PluginManager.getPluginByClass(CGMDevice.class);
             if (deviceCGM != null) {
                 CGMLineChartFragment = cgmLineChart.newInstance(8, "CGM Readings", "Summary", "mmoll", deviceCGM.getColour());
                 FragmentTransaction ft = fm.beginTransaction();

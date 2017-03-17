@@ -38,6 +38,7 @@
     <ImageView
         android:background="@drawable/settings"
         style="@style/iconButton"
-        android:id="@+id/pluginSettings"/>
+        android:id="@+id/pluginSettings"
+        android:contentDescription="@string/plugin_settings"/>
 
 </LinearLayout>

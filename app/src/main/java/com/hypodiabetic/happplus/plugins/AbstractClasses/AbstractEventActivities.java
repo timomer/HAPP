@@ -12,7 +12,9 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceEventValidator;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
+import com.hypodiabetic.happplus.plugins.validators.HappValidator;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ import layout.DialogConfirmEventEntry;
  * Created by Tim on 08/02/2017.
  */
 
-public abstract class AbstractEventActivates extends AbstractPluginBase {
+public abstract class AbstractEventActivities extends AbstractPluginBase {
 
     private int myRequestCode   =   100;
     private boolean killActivity=   false;
@@ -32,29 +34,34 @@ public abstract class AbstractEventActivates extends AbstractPluginBase {
         killActivity   =   killActivityIfSaveSuccess;
 
         //Pass the list of Events to be validated to each validator
-        List<? extends AbstractPluginBase> pluginValidators =  MainApp.getPluginList(InterfaceEventValidator.class);
+        List<? extends AbstractPluginBase> pluginValidators =  PluginManager.getPluginList(InterfaceEventValidator.class);
         for (AbstractPluginBase validatorPlugin :  pluginValidators){
-            if (!validatorPlugin.getPluginName().getClass().equals(CGMDevice.class)) { // TODO: 08/02/2017 change
+            if (!validatorPlugin.getClass().equals(HappValidator.class)) { 
                 InterfaceEventValidator validator = (InterfaceEventValidator) validatorPlugin;
                 eventList = validator.checkEvents(eventList);
             }
         }
         //Now finally check with the HAPP Event Validator Plugin
-        // TODO: 08/02/2017
+        HappValidator happValidator =   (HappValidator) PluginManager.getPluginByClass(HappValidator.class);
+        if (happValidator != null) {
+            eventList = happValidator.checkEvents(eventList);
 
-        //Has a validator plugin insisted we notify the user?
-        for (AbstractEvent validateEvent : eventList){
-            if (validateEvent.notifyUser())  validationRequestsNotifyUser    =   true;
-        }
+            //Has a validator plugin insisted we notify the user?
+            for (AbstractEvent validateEvent : eventList) {
+                if (validateEvent.notifyUser()) validationRequestsNotifyUser = true;
+            }
 
-        if (notifyUser || validationRequestsNotifyUser){
-            DialogConfirmEventEntry dialogEvents = new DialogConfirmEventEntry();
-            dialogEvents.setTargetFragment(this, myRequestCode);
-            dialogEvents.setEvents(eventList);
-            dialogEvents.show(getFragmentManager(), "dialogEventEntry");
+            if (notifyUser || validationRequestsNotifyUser) {
+                DialogConfirmEventEntry dialogEvents = new DialogConfirmEventEntry();
+                dialogEvents.setTargetFragment(this, myRequestCode);
+                dialogEvents.setEvents(eventList);
+                dialogEvents.show(getFragmentManager(), "dialogEventEntry");
+            } else {
+                saveNewEvents(eventList);
+                if (killActivity) getActivity().finish();
+            }
         } else {
-            saveNewEvents(eventList);
-            if (killActivity) getActivity().finish();
+            Log.d(TAG, "addEventsToHAPP: could not find HAPP Default Event Validator, all events rejected");
         }
     }
 

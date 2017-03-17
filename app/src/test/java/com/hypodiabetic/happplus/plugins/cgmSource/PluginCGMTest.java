@@ -36,8 +36,7 @@ public class PluginCGMTest {
         assertEquals(Constants.CGM.DELTA_OLD,xDripCGM.getDelta(cgmValueLast,cgmValueRecent),0);
 
         //Delta is Null
-        cgmValueLast = null;
-        assertEquals(Constants.CGM.DELTA_NULL,xDripCGM.getDelta(cgmValueLast,cgmValueRecent),0);
+        assertEquals(Constants.CGM.DELTA_NULL,xDripCGM.getDelta(null,cgmValueRecent),0);
     }
 
 
