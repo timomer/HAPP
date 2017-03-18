@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.hypodiabetic.happ.Constants;
 import com.hypodiabetic.happ.MainApp;
+import com.hypodiabetic.happ.TimeSpan;
 import com.hypodiabetic.happ.UserPrefs;
 import com.hypodiabetic.happ.tools;
 
@@ -14,7 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import com.hypodiabetic.happ.tools.TimeSpan;
+
 
 /**
  * Created by tim on 03/08/2015.

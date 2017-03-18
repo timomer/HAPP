@@ -9,7 +9,7 @@ import com.hypodiabetic.happ.tools;
 
 import java.util.Date;
 import java.util.List;
-import com.hypodiabetic.happ.tools.TimeSpan;
+import com.hypodiabetic.happ.TimeSpan;
 
 /**
  * Created by Tim on 19/02/2016.

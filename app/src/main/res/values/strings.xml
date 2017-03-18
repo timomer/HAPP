@@ -35,6 +35,8 @@
     <string name="title_activity_integration__report">Integration_Report</string>
     <string name="title_activity_activity_license_agreement">activity_license_agreement</string>
     <string name="title_activity_license_agreement">license_agreement</string>
+    <string name="title_activity_profile_editor">profile_editor</string>
+
 
     <!-- Treatments -->
     <string name="treatments_carbs_entered">Carbs entered</string>

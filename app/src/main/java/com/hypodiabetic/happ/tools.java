@@ -727,28 +727,14 @@ public class tools {
         TimeSpan timeSpan = new TimeSpan();
 
         try {
-            timeSpan.time      = sdfTimeDisplay.parse("00:00");
-            timeSpan.endTime   = sdfTimeDisplay.parse("23:59");
+            timeSpan.setStartTime(  sdfTimeDisplay.parse("00:00"));
+            timeSpan.setEndTime(    sdfTimeDisplay.parse("23:59"));
         }catch (ParseException e) {}
-        timeSpan.value =   0D;
+        timeSpan.setValue(          0D);
         profile.add(timeSpan);
 
         return profile;
     }
 
-    public static class TimeSpan {
-        Date time;
-        Date endTime;
-        Double value;
 
-        public Double getValue(){
-            return value;
-        }
-        public Date getStartTime(){
-            return time;
-        }
-        public Date getEndTime(){
-            return endTime;
-        }
-    }
 }

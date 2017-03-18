@@ -46,6 +46,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".Profile_EditorV2"
+            android:label="@string/title_activity_profile_editor" />
+        <activity
             android:name=".EnterTreatment"
             android:label="@string/title_activity_enter_treatment" />
         <activity

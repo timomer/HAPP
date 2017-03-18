@@ -124,7 +124,7 @@ public class SettingsActivity extends PreferenceActivity {
             isf_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent start_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    Intent start_profile = new Intent(MainApp.instance(), Profile_EditorV2.class);
                     start_profile.putExtra("PROFILE", Constants.profile.ISF_PROFILE);
                     startActivity(start_profile);
                     return true;
@@ -134,7 +134,7 @@ public class SettingsActivity extends PreferenceActivity {
             carb_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent start_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    Intent start_profile = new Intent(MainApp.instance(), Profile_EditorV2.class);
                     start_profile.putExtra("PROFILE", Constants.profile.CARB_PROFILE);
                     startActivity(start_profile);
                     return true;
@@ -144,7 +144,7 @@ public class SettingsActivity extends PreferenceActivity {
             basal_profile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent start_profile = new Intent(MainApp.instance(), Profile_Editor.class);
+                    Intent start_profile = new Intent(MainApp.instance(), Profile_EditorV2.class);
                     start_profile.putExtra("PROFILE", Constants.profile.BASAL_PROFILE);
                     startActivity(start_profile);
                     return true;

@@ -20,8 +20,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 22
 
-        versionCode 47
-        versionName "1.4.2"
+        versionCode 48
+        versionName "1.5"
 
         multiDexEnabled true
 
@@ -61,6 +61,7 @@ dependencies {
     compile 'com.eclipsesource.j2v8:j2v8:4.5.0@aar'
     compile 'com.github.tony19:logback-android-classic:1.1.1-4'
     compile 'org.slf4j:slf4j-api:1.7.12'
+    compile 'com.android.support:recyclerview-v7:23+'
 
     //For NS Package
     compile 'com.google.guava:guava:11.0'

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.hypodiabetic.happ.tools.TimeSpan;
+import com.hypodiabetic.happ.TimeSpan;
 
 /**
  * Created by Tim on 31/10/2016.
@@ -75,16 +75,16 @@ public class Migration {
 
                     if (value.equals("") && !h.equals(0)){
                         //We have no value for this hour, extend previous hour added to cover this
-                        profileTimeSpansList.get(profileTimeSpansList.size()-1).endTime = endTime;
+                        profileTimeSpansList.get(profileTimeSpansList.size()-1).setEndTime(endTime);
                     } else {
                         if (value.equals("") && h.equals(0)){
                             //We have no value for the first hour, set 0
                             value = "0";
                         }
                         timeSpan            = new TimeSpan();
-                        timeSpan.time = startTime;
-                        timeSpan.endTime    = endTime;
-                        timeSpan.value      = tools.stringToDouble(value);
+                        timeSpan.setStartTime(  startTime);
+                        timeSpan.setEndTime(    endTime);
+                        timeSpan.setValue(      tools.stringToDouble(value));
                         profileTimeSpansList.add(timeSpan);
                     }
                 }
