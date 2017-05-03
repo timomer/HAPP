@@ -14,13 +14,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Constants;
+import com.hypodiabetic.happplus.Events.SGVEvent;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.SingleFragmentActivity;
-import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesDisplay;
 import com.hypodiabetic.happplus.UtilitiesTime;
-import com.hypodiabetic.happplus.database.CGMValue;
 
 import org.json.JSONArray;
 
@@ -49,10 +49,10 @@ import layout.RecyclerViewPlugins;
 
 public class CGMDevice extends AbstractDevice {
 
-    private final static String PREF_BG_UNITS       =   "bg_units";
-    private final static String PREF_BG_UNITS_MGDL  =   "mgdl";
-    private final static String PREF_BG_UNITS_MMOLL =   "mmoll";
-    private final static String PREF_CGM_SOURCE     =   "cgm_source";
+    public final static String PREF_BG_UNITS       =   "bg_units";
+    public final static String PREF_BG_UNITS_MGDL  =   "mgdl";
+    public final static String PREF_BG_UNITS_MMOLL =   "mmoll";
+    public final static String PREF_CGM_SOURCE     =   "cgm_source";
 
     private AbstractCGMSource pluginCGMSource;
     private RecyclerViewPlugins adapterPlugins;
@@ -117,7 +117,7 @@ public class CGMDevice extends AbstractDevice {
         return prefs;
     }
 
-    public CGMValue getLastCGMValue(){
+    public SGVEvent getLastCGMValue(){
         if (pluginCGMSource != null) {
             return pluginCGMSource.getLastReading(realmHelper.getRealm());
         } else {
@@ -125,15 +125,15 @@ public class CGMDevice extends AbstractDevice {
         }
     }
 
-    public Double getDelta(CGMValue cgmValue){
+    public Double getDelta(SGVEvent sgvEvent){
         if (pluginCGMSource != null) {
-            return pluginCGMSource.getDelta(cgmValue, realmHelper.getRealm());
+            return pluginCGMSource.getDelta(sgvEvent, realmHelper.getRealm());
         } else {
             return null;
         }
     }
 
-    public RealmResults<CGMValue> getReadingsSince(Date timeStamp){
+    public List<SGVEvent> getReadingsSince(Date timeStamp){
         if (pluginCGMSource != null) {
             return pluginCGMSource.getReadingsSince(timeStamp, realmHelper.getRealm());
         } else {
@@ -141,37 +141,16 @@ public class CGMDevice extends AbstractDevice {
         }
     }
 
-    public String displayBG(CGMValue cgmValue, Boolean showUnitMeasure, Boolean showConverted){
-        return displayBG(cgmValue.getSgv().doubleValue(), showUnitMeasure, showConverted);
-    }
 
-    public String displayBG(Double bgValue, Boolean showUnitMeasure, Boolean showConverted){
-        String reply    =   String.valueOf(bgValue.intValue());
-        if(getPref(PREF_BG_UNITS).getStringValue().equals(PREF_BG_UNITS_MGDL)) {
-            if (showUnitMeasure){
-                reply += context.getString(R.string.device_cgm_bg_mgdl);
-                if (showConverted) reply += " (" + Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1) + context.getString(R.string.device_cgm_bg_mmol);
-            }
-            return reply;
-        } else {
-            reply = Utilities.round(bgValue * Constants.CGM.MGDL_TO_MMOLL ,1).toString();
-            if (showUnitMeasure){
-                reply += context.getString(R.string.device_cgm_bg_mmol);
-                Double toMgdl = (bgValue * Constants.CGM.MMOLL_TO_MGDL);
-                if (showConverted) reply += " (" + toMgdl.intValue() + context.getString(R.string.device_cgm_bg_mgdl);
-            }
-            return reply;
-        }
-    }
 
     public String displayDelta(Double delta){
         if (delta == Constants.CGM.DELTA_OLD || delta == Constants.CGM.DELTA_NULL) return "-";
         if (delta > 0){
-            return "+" + displayBG(delta, true, false);
+            return "+" + UtilitiesDisplay.sgv(delta, true, false, getPref(PREF_BG_UNITS).getStringValue());
         } else if (delta < 0){
-            return "-" + displayBG(delta, true, false);
+            return "-" + UtilitiesDisplay.sgv(delta, true, false, getPref(PREF_BG_UNITS).getStringValue());
         } else {
-            return displayBG(delta, true, false);
+            return UtilitiesDisplay.sgv(delta, true, false, getPref(PREF_BG_UNITS).getStringValue());
         }
     }
 
@@ -230,7 +209,7 @@ public class CGMDevice extends AbstractDevice {
     public void setDeviceCardData(RecyclerViewDevices.ViewHolder viewHolder){
         RecyclerViewDevices.DeviceViewHolder deviceViewHolder = (RecyclerViewDevices.DeviceViewHolder) viewHolder;
         String lastReading, lastDelta, lastAge, avgDelta;
-        CGMValue cgmValue = getLastCGMValue();
+        SGVEvent sgvEvent = getLastCGMValue();
 
         if (getLastCGMValue() == null){
             lastReading     =   "-";
@@ -238,9 +217,9 @@ public class CGMDevice extends AbstractDevice {
             lastAge         =   "-";
             avgDelta        =   "-";
         } else {
-            lastReading =   displayBG(cgmValue, true, false);
+            lastReading =   UtilitiesDisplay.sgv(sgvEvent, true, false, getPref(PREF_BG_UNITS).getStringValue());
             lastDelta   =   displayDelta(getDelta(getLastCGMValue()));
-            lastAge     =   UtilitiesTime.displayAge(cgmValue.getTimestamp());
+            lastAge     =   UtilitiesTime.displayAge(sgvEvent.getTimeStamp());
             avgDelta    =   getDelta(getLastCGMValue()).toString();
         }
 

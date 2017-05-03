@@ -32,8 +32,8 @@ public class UtilitiesTime {
         return (timestampTo.getTime() - timestampFrom.getTime()) /(1000*60);
     }
 
-    public static Date getDateHoursAgo(int hours){
-        return new Date(new Date().getTime() - ((60000 * 60 * hours)));
+    public static Date getDateHoursAgo(Date date, int hours){
+        return new Date(date.getTime() - ((60000 * 60 * hours)));
     }
 
     public static Date getStartOfDay(Date date) {
@@ -51,4 +51,6 @@ public class UtilitiesTime {
         // 24 hours * 60 minutes * 60 seconds * 1000 milliseconds = 1 day
         return new Date(getStartOfDay(date).getTime() + (24 * 60 * 60 * 1000) - 1000);
     }
+
+
 }

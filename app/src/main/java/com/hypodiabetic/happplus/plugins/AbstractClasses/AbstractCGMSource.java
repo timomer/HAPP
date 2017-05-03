@@ -5,24 +5,23 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.Constants;
+import com.hypodiabetic.happplus.Events.AbstractEvent;
+import com.hypodiabetic.happplus.Events.SGVEvent;
 import com.hypodiabetic.happplus.Intents;
-import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.UtilitiesTime;
-import com.hypodiabetic.happplus.database.CGMValue;
-import com.hypodiabetic.happplus.helperObjects.RealmHelper;
-import com.hypodiabetic.happplus.database.dbHelperCGM;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 /**
  * Created by Tim on 25/12/2016.
  * Common CGM Functions for use with CGM Plugins
  */
 
-public abstract class AbstractCGMSource extends AbstractPluginBase {
+public abstract class AbstractCGMSource extends AbstractEventActivities{
 
     public AbstractCGMSource(){
         super();
@@ -36,50 +35,41 @@ public abstract class AbstractCGMSource extends AbstractPluginBase {
         if (sgv==null || timestamp==null){
             Log.d(TAG, "saveNewCGMValue: New Value rejected, missing data");
         } else {
-            RealmHelper realmHelper = new RealmHelper();
-            CGMValue cgmValue = new CGMValue();
-            cgmValue.setSgv(sgv);
-            cgmValue.setTimestamp(timestamp);
-            cgmValue.setSource(getPluginName());
-
-            dbHelperCGM.saveNewCGMValue(cgmValue, realmHelper.getRealm());
-            realmHelper.closeRealm();
+            List<AbstractEvent> sgvEventList = new ArrayList<>();
+            SGVEvent sgvEvent = new SGVEvent(sgv, getPluginName(), timestamp);
+            sgvEventList.add(sgvEvent);
+            addEventsToHAPP(sgvEventList, false, false);
 
             LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Intents.newLocalEvent.NEW_LOCAL_EVENT_SGV));
             Log.d(TAG, "saveNewCGMValue: New Value Saved");
         }
     }
 
-
-    public CGMValue getLastReading(Realm realm) {
-        return dbHelperCGM.getLastReading(getPluginName(), realm);
+    public SGVEvent getLastReading(Realm realm) {
+        return (SGVEvent) getLastEvent(realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName());
     }
 
     public boolean haveBGTimestamped(Date timestamp, Realm realm){
-        CGMValue cgmValue = dbHelperCGM.getReadingTimestamped(getPluginName(), timestamp, realm);
-        return (cgmValue != null);
+        return (getEventTimestamped(timestamp,realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName()) != null);
     }
 
-    public RealmResults<CGMValue> getReadingsSince(Date timeStamp, Realm realm){
-        return dbHelperCGM.getReadingsSince(getPluginName(), timeStamp, realm);
+    public List<SGVEvent> getReadingsSince(Date timeStamp, Realm realm){
+        return (List<SGVEvent>) getEventsSince(timeStamp, realm, SGVEvent.class.getSimpleName(),SGVEvent.SOURCE, getPluginName());
     }
 
-    public double getDelta(CGMValue cgmValue, Realm realm){
-        CGMValue lastCGMValue   =   dbHelperCGM.getReadingsBefore(getPluginName(), cgmValue.getTimestamp(), realm).get(0);
-        return buildDelta(lastCGMValue, cgmValue);
-    }
-    public double getDelta(CGMValue cgmValueLast, CGMValue cgmValueRecent){
-        return buildDelta(cgmValueLast, cgmValueRecent);
-    }
-    private double buildDelta(CGMValue cgmValueLast, CGMValue cgmValueRecent) {
-        if (cgmValueLast == null){
+    public double getDelta(SGVEvent sgvEvent, SGVEvent lastSGVEvent){
+        if (lastSGVEvent == null){
             return Constants.CGM.DELTA_NULL;
-        } else if (UtilitiesTime.getDiffInMins(cgmValueLast.getTimestamp(), cgmValueRecent.getTimestamp()) > 14){
+        } else if (UtilitiesTime.getDiffInMins(lastSGVEvent.getTimeStamp(), lastSGVEvent.getTimeStamp()) > 14){
             return Constants.CGM.DELTA_OLD;
         } else {
-            return (cgmValueRecent.getSgv() - cgmValueLast.getSgv())*5*60*1000/(cgmValueRecent.getTimestamp().getTime() - cgmValueLast.getTimestamp().getTime());
+            return (sgvEvent.getSGV() - lastSGVEvent.getSGV())*5*60*1000/(sgvEvent.getTimeStamp().getTime() - lastSGVEvent.getTimeStamp().getTime());
             //return (cgmValueRecent.getSgv() - cgmValueLast.getSgv());
         }
+    }
+    public double getDelta(SGVEvent sgvEvent, Realm realm){
+        SGVEvent lastSGVEvent = (SGVEvent) getEventsBetween(sgvEvent.getTimeStamp(), UtilitiesTime.getDateHoursAgo(sgvEvent.getTimeStamp(), 1), realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName()).get(0);
+        return getDelta(sgvEvent, lastSGVEvent);
     }
 
 }

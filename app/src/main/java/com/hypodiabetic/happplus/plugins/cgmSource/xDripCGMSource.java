@@ -82,8 +82,9 @@ public class xDripCGMSource extends AbstractCGMSource {
 
     private void getCGMValues(Bundle bundle){
 
-        double bgEstimate   = bundle.getDouble(EXTRA_BG_ESTIMATE,0);
-        Date bgDate         =  new Date(bundle.getLong(EXTRA_TIMESTAMP, new Date().getTime()));
+        double bgEstimate   =   bundle.getDouble(EXTRA_BG_ESTIMATE,0);
+        double bgDelta      =   bundle.getDouble(EXTRA_BG_ESTIMATE,0);
+        Date bgDate         =   new Date(bundle.getLong(EXTRA_TIMESTAMP, new Date().getTime()));
         if (bgEstimate != 0) {
             saveNewCGMValue((float) bgEstimate, bgDate);
         } else {

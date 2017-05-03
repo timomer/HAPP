@@ -1,11 +1,15 @@
 package com.hypodiabetic.happplus.database;
 
 
+import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
 
 import org.json.JSONObject;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 import java.util.UUID;
 
@@ -20,6 +24,14 @@ import io.realm.annotations.PrimaryKey;
  */
 
 public class Event extends RealmObject {
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({PREF_TYPE_INT, PREF_TYPE_DOUBLE, PREF_TYPE_STRING})
+    private @interface PrefType {}
+    public static final int PREF_TYPE_LIST = 0;
+    public static final int PREF_TYPE_INT = 1;
+    public static final int PREF_TYPE_DOUBLE = 2;
+    public static final int PREF_TYPE_STRING = 3;
 
     protected String type;
     protected Date dateCreated;
@@ -48,7 +60,7 @@ public class Event extends RealmObject {
     public void setData(JSONObject jsonObject){
         this.data   =   jsonObject.toString();
     }
-    public void setType(Class<? extends AbstractEvent> eventType){this.type =   eventType.getSimpleName();}
+    public void setType(Class<? extends AbstractEvent> eventType){this.type =   eventType.getClass().getSimpleName();}
 
     public String getData() { return this.data;}
     public Date getDateCreated(){ return this.dateCreated; }

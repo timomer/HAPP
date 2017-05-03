@@ -8,7 +8,7 @@ import android.view.View;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.Utilities;
+import com.hypodiabetic.happplus.UtilitiesDisplay;
 import com.hypodiabetic.happplus.database.Event;
 
 import org.json.JSONException;
@@ -53,7 +53,7 @@ public class BolusEvent extends AbstractEvent {
     }
 
     public String getMainText(){
-        return Utilities.displayInsulin(getBolusAmount()) + " " + getBolusTypeDisplay();
+        return UtilitiesDisplay.displayInsulin(getBolusAmount()) + " " + getBolusTypeDisplay();
     }
     public String getSubText(){ return "TODO TIME REMAINING";}
     public String getValue(){

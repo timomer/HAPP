@@ -81,7 +81,7 @@ public class FragmentEventLists extends Fragment {
 
         RealmHelper realmHelper = new RealmHelper();
         FragmentEventList eventListRecent   =   FragmentEventList.newInstance(true);
-        eventListRecent.setListData(dbHelperEvent.getEventsSince(UtilitiesTime.getDateHoursAgo(4), realmHelper.getRealm()));
+        eventListRecent.setListData(dbHelperEvent.getEventsSince(UtilitiesTime.getDateHoursAgo(new Date(), 4), realmHelper.getRealm()));
         FragmentEventList eventListToday    =   FragmentEventList.newInstance(true);
         eventListToday.setListData(dbHelperEvent.getEventsBetween(UtilitiesTime.getStartOfDay(new Date()), UtilitiesTime.getEndOfDay(new Date()), realmHelper.getRealm()));
         realmHelper.closeRealm();

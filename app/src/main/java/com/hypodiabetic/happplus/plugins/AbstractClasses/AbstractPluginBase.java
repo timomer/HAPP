@@ -163,7 +163,7 @@ public abstract class AbstractPluginBase extends Fragment {
      * @param prefName name of pref
      * @return SysPref object
      */
-    protected SysPref getPref(String prefName){
+    public SysPref getPref(String prefName){
         for (SysPref pref : pluginPrefs){
             if (pref.getPrefName().equals(PREF_PREFIX + prefName)) return pref;
         }

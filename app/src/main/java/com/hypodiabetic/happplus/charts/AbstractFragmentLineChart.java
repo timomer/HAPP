@@ -75,17 +75,17 @@ public abstract class AbstractFragmentLineChart extends Fragment {
 
     /**
      * Loads the chart with HAPP Default settings for Line Charts
-     * @param realmLineDataSet RealmLineDataSet to be loaded
+     * @param lineDataSet RealmLineDataSet to be loaded
      */
-    protected void renderChart(RealmLineDataSet realmLineDataSet){
-        if (realmLineDataSet != null) {
-            if (!realmLineDataSet.getResults().isEmpty()) {
+    protected void renderChart(LineDataSet lineDataSet){
+        if (lineDataSet != null) {
+            if (lineDataSet.getEntryCount() != 0) {
 
                 XAxis xAxis = mLineChart.getXAxis();
                 xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
                 xAxis.setDrawGridLines(false);
                 xAxis.setAxisMaximum(new Date().getTime() + (60000 * 30)); //30mins // TODO: 31/01/2017 set to APS Projected BG Prediction time?
-                xAxis.setAxisMinimum(UtilitiesTime.getDateHoursAgo(mNumHours).getTime());
+                xAxis.setAxisMinimum(UtilitiesTime.getDateHoursAgo(new Date(), mNumHours).getTime());
                 xAxis.setValueFormatter(new IAxisValueFormatter() {
                     SimpleDateFormat friendlyTime = new SimpleDateFormat("h:mm a", Locale.getDefault());
                     @Override
@@ -107,13 +107,13 @@ public abstract class AbstractFragmentLineChart extends Fragment {
                 description.setText(mLAxisDesc);
                 description.setPosition(0,0);
 
-                realmLineDataSet.setDrawValues(false);
-                realmLineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-                realmLineDataSet.setColor(mLineColour);
-                realmLineDataSet.setCircleColor(mLineColour);
-                realmLineDataSet.setCircleColorHole(mLineColour);
-                realmLineDataSet.setLineWidth(2f);
-                LineData data = new LineData(realmLineDataSet);
+                lineDataSet.setDrawValues(false);
+                lineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+                lineDataSet.setColor(mLineColour);
+                lineDataSet.setCircleColor(mLineColour);
+                lineDataSet.setCircleColorHole(mLineColour);
+                lineDataSet.setLineWidth(2f);
+                LineData data = new LineData(lineDataSet);
 
                 mLineChart.setScaleEnabled(false);
                 mLineChart.setData(data);

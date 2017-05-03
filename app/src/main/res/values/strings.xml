@@ -16,6 +16,7 @@
     <string name="misc_item_mark">*</string>
     <string name="misc_error">error</string>
     <string name="misc_empty_string">-</string>
+    <string name="misc_missing_value">\???</string>
 
     //Main Activity
     <string name="activity_main_fragment_now">Now</string>

@@ -19,23 +19,6 @@ public class Utilities {
 
     private final static String TAG = "Utilities";
 
-    public static String displayInsulin(Double value, int decPoints){
-        return round(value,decPoints) + "u";
-    }
-    public static String displayInsulin(Double value){
-        int decPoints = 1;
-        if (getPrecisionRounding()) decPoints = 2;
-        return round(value,decPoints) + "u";
-    }
-
-    public static String displayPosSign(Double value){
-        if (value > 0 ){
-            return "+";
-        } else {
-            return "";
-        }
-    }
-
     public static Double round(Double value, int decPoints){
         if (value == null || value.isInfinite() || value.isNaN()) return 0D;
         DecimalFormat df;

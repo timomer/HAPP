@@ -19,21 +19,54 @@ import io.realm.Sort;
 
 public class dbHelperEvent {
 
-    public static final String BolusEventType   =   BolusEvent.class.getName();
-
-    public static List<AbstractEvent> getEventsSince(Date timestamp, Realm realm) {
-        RealmResults<Event> results = realm.where(Event.class)
+    private static RealmResults<Event> getFromRealmEventsSince(Date timestamp, Realm realm) {
+        return realm.where(Event.class)
                 .greaterThanOrEqualTo("dateCreated", timestamp)
                 .findAllSorted("dateCreated", Sort.DESCENDING);
+    }
+    public static List<AbstractEvent> getEventsSince(Date timestamp, Realm realm) {
+        RealmResults<Event> results = getFromRealmEventsSince(timestamp, realm);
+        return convertEventToAbstractEvent(results);
+    }
+    public static List<AbstractEvent> getEventsSince(Date timestamp, Realm realm, String eventClassSimpleName) {
+        RealmResults<Event> results = getFromRealmEventsSince(timestamp, realm).where()
+                .equalTo("type", eventClassSimpleName)
+                .findAll();
+
+        return convertEventToAbstractEvent(results);
+    }
+    public static List<AbstractEvent> getEventsSince(Date timestamp, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
+        RealmResults<Event> results = getFromRealmEventsSince(timestamp, realm).where()
+                .equalTo("type", eventClassSimpleName)
+                .contains("data", filterField + ":" + filterValue)
+                .findAll();
 
         return convertEventToAbstractEvent(results);
     }
 
-    public static List<AbstractEvent> getEventsBetween(Date from, Date until, Realm realm) {
-        RealmResults<Event> results = realm.where(Event.class)
+    private static RealmResults<Event> getFromRealmEventsBetween(Date from, Date until, Realm realm) {
+        return realm.where(Event.class)
                 .greaterThanOrEqualTo("dateCreated", from)
                 .lessThanOrEqualTo("dateCreated", until)
                 .findAllSorted("dateCreated", Sort.DESCENDING);
+    }
+    public static List<AbstractEvent> getEventsBetween(Date from, Date until, Realm realm) {
+        RealmResults<Event> results = getFromRealmEventsBetween(from, until, realm);
+
+        return convertEventToAbstractEvent(results);
+    }
+    public static List<AbstractEvent> getEventsBetween(Date from, Date until, Realm realm, String eventClassSimpleName) {
+        RealmResults<Event> results = getFromRealmEventsBetween(from, until, realm).where()
+                .equalTo("type", eventClassSimpleName)
+                .findAll();
+
+        return convertEventToAbstractEvent(results);
+    }
+    public static List<AbstractEvent> getEventsBetween(Date from, Date until, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
+        RealmResults<Event> results = getFromRealmEventsBetween(from, until, realm).where()
+                .equalTo("type", eventClassSimpleName)
+                .contains("data", filterField + ":" + filterValue)
+                .findAll();
 
         return convertEventToAbstractEvent(results);
     }

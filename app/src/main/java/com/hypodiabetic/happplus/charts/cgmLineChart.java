@@ -14,18 +14,22 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.realm.implementation.RealmLineDataSet;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.hypodiabetic.happplus.Events.SGVEvent;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.UtilitiesDisplay;
 import com.hypodiabetic.happplus.UtilitiesTime;
-import com.hypodiabetic.happplus.database.CGMValue;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
-import io.realm.RealmResults;
-import io.realm.Sort;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 
 /**
  * Created by Tim on 31/01/2017.
@@ -62,9 +66,13 @@ public class cgmLineChart extends AbstractFragmentLineChart {
         if (deviceCGM != null) {
             if (deviceCGM.getIsLoaded() && cgmLineChart != null) {
                 //DataSet
-                RealmResults<CGMValue> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(8));
-                cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING);
-                RealmLineDataSet<CGMValue> cgmReadingsDataSet = new RealmLineDataSet<>(cgmReadings, "timestamp", "sgv");
+                List<SGVEvent> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(new Date(), 8));
+                //cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING); // TODO: 03/05/2017 still needs sorting?
+                List<Entry> entries = new ArrayList<>();
+                for (SGVEvent sgvEvent : cgmReadings) {
+                    entries.add(new Entry((float) sgvEvent.getTimeStamp().getTime(), sgvEvent.getSGV().floatValue()));
+                }
+                LineDataSet cgmReadingsDataSet = new LineDataSet(entries, "label");
 
                 //yAxis
                 YAxis yAxisL = cgmLineChart.getAxisLeft();
@@ -73,7 +81,7 @@ public class cgmLineChart extends AbstractFragmentLineChart {
 
                     @Override
                     public String getFormattedValue(float value, AxisBase axis) {
-                        return deviceCGM.displayBG((double) value, false, false);
+                        return UtilitiesDisplay.sgv((double) value, false, false, deviceCGM.getPref(CGMDevice.PREF_BG_UNITS).getStringValue());
                     }
                 });
                 yAxisL.setAxisMaximum(200);

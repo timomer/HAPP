@@ -23,4 +23,5 @@
 
     <!-- Events -->
     <color name="eventBolus">#2196f3</color>
+    <color name="eventSGV">#FF5722</color>
 </resources>
