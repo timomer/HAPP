@@ -14,6 +14,11 @@
                     android:key="temp_basal_notification"
                     android:summary="Suggested Temp Basal have to be confirmed by the user"
                     android:defaultValue="true"/>
+                <CheckBoxPreference
+                    android:key="temp_basal_notification_make_sound"
+                    android:title="Play Notification Sound"
+                    android:summary="Make a sound for new Temp Basal Notifications"
+                    android:defaultValue="false" />
             </PreferenceCategory>
 
             <PreferenceCategory

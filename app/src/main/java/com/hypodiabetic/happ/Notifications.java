@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 
@@ -146,6 +148,12 @@ public class Notifications {
         notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
         notificationBuilder.setVibrate(new long[]{500, 1000, 500, 500, 500, 1000, 500});
         notificationBuilder.addAction(R.drawable.exit_to_app, "Accept Temp", pending_intent_accept_temp);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        if (prefs.getBoolean("temp_basal_notification_make_sound", false)) {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            notificationBuilder.setSound(notification);
+        }
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainApp.instance());
         notificationManager.notify(NEW_TEMP, notificationBuilder.build());
