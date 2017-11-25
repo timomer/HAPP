@@ -1,5 +1,6 @@
 package com.hypodiabetic.happplus.charts;
 
+import android.bluetooth.BluetoothClass;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,8 +16,10 @@ import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.utils.EntryXComparator;
 import com.hypodiabetic.happplus.Events.SGVEvent;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
@@ -27,6 +30,7 @@ import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -64,15 +68,7 @@ public class cgmLineChart extends AbstractFragmentLineChart {
         LineChart cgmLineChart  =   this.getChart();
 
         if (deviceCGM != null) {
-            if (deviceCGM.getIsLoaded() && cgmLineChart != null) {
-                //DataSet
-                List<SGVEvent> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(new Date(), 8));
-                //cgmReadings = cgmReadings.sort("timestamp", Sort.ASCENDING); // TODO: 03/05/2017 still needs sorting?
-                List<Entry> entries = new ArrayList<>();
-                for (SGVEvent sgvEvent : cgmReadings) {
-                    entries.add(new Entry((float) sgvEvent.getTimeStamp().getTime(), sgvEvent.getSGV().floatValue()));
-                }
-                LineDataSet cgmReadingsDataSet = new LineDataSet(entries, "label");
+            if (deviceCGM.getPluginStatus().getIsUsable() && cgmLineChart != null) {
 
                 //yAxis
                 YAxis yAxisL = cgmLineChart.getAxisLeft();
@@ -93,11 +89,32 @@ public class cgmLineChart extends AbstractFragmentLineChart {
                 cgmReadingsMinLine.setLineColor(ContextCompat.getColor(getContext(), R.color.colorCGMMinLine));
                 yAxisL.addLimitLine(cgmReadingsMinLine);
 
-                this.renderChart(cgmReadingsDataSet);
+                this.renderChart(getDataSet());
             }
         } else {
             Log.d(TAG, "onStart: could not find Device CGM");
         }
+    }
+
+    public LineDataSet getDataSet(){
+        //DataSet
+        CGMDevice deviceCGM = (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
+        LineChart cgmLineChart  =   this.getChart();
+
+        if (deviceCGM != null) {
+            if (deviceCGM.getPluginStatus().getIsUsable() && cgmLineChart != null) {
+                List<SGVEvent> cgmReadings = deviceCGM.getReadingsSince(UtilitiesTime.getDateHoursAgo(new Date(), 8));
+                List<Entry> entries = new ArrayList<>();
+                for (SGVEvent sgvEvent : cgmReadings) {
+                    entries.add(new Entry(sgvEvent.getTimeStamp().getTime(), sgvEvent.getSGV().floatValue()));
+                }
+                Collections.sort(entries, new EntryXComparator()); //sort is required or following issue it hit: https://github.com/PhilJay/MPAndroidChart/issues/2074
+
+                return new LineDataSet(entries, "label");
+            }
+        }
+        List<Entry> emptyList = new ArrayList<>();
+        return new LineDataSet(emptyList, "empty");
     }
 
     @Override

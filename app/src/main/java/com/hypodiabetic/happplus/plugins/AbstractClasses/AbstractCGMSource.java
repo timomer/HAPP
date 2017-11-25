@@ -46,15 +46,17 @@ public abstract class AbstractCGMSource extends AbstractEventActivities{
     }
 
     public SGVEvent getLastReading(Realm realm) {
-        return (SGVEvent) getLastEvent(realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName());
+        SGVEvent lastReading = (SGVEvent) getLastEvent(realm, true, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName());
+        Log.d(TAG, "getLastReading: " + lastReading.getValue());
+        return lastReading;
     }
 
     public boolean haveBGTimestamped(Date timestamp, Realm realm){
-        return (getEventTimestamped(timestamp,realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName()) != null);
+        return (getEventTimestamped(timestamp, true, realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName()) != null);
     }
 
     public List<SGVEvent> getReadingsSince(Date timeStamp, Realm realm){
-        return (List<SGVEvent>) getEventsSince(timeStamp, realm, SGVEvent.class.getSimpleName(),SGVEvent.SOURCE, getPluginName());
+        return (List<SGVEvent>) getEventsSince(timeStamp, true, realm, SGVEvent.class.getSimpleName(),  SGVEvent.SOURCE ,  getPluginName() );
     }
 
     public double getDelta(SGVEvent sgvEvent, SGVEvent lastSGVEvent){
@@ -68,8 +70,12 @@ public abstract class AbstractCGMSource extends AbstractEventActivities{
         }
     }
     public double getDelta(SGVEvent sgvEvent, Realm realm){
-        SGVEvent lastSGVEvent = (SGVEvent) getEventsBetween(sgvEvent.getTimeStamp(), UtilitiesTime.getDateHoursAgo(sgvEvent.getTimeStamp(), 1), realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName()).get(0);
-        return getDelta(sgvEvent, lastSGVEvent);
+        List<SGVEvent> lastSGVEvents = (List<SGVEvent>) getEventsBetween(UtilitiesTime.getDateHoursAgo(sgvEvent.getTimeStamp(), 1), sgvEvent.getTimeStamp(), true, realm, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName());
+        if (lastSGVEvents.isEmpty()){
+            return 0;
+        } else {
+            return getDelta(sgvEvent, lastSGVEvents.get(0));
+        }
     }
 
 }

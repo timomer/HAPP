@@ -20,7 +20,9 @@ public class Intents {
     public class extras{
         public static final String PLUGIN_NAME          =   "plugin_name";
         public static final String PLUGIN_TYPE          =   "plugin_type";
+        public static final String PLUGIN_CLASS_NAME    =   "plugin_class_name";
         public static final String PLUGIN_PREF_NAME     =   "plugin_pref_name";
         public static final String FRAGMENT_NAME        =   "fragment_name";
+        public static final String EVENT_COUNT          =   "event_count";
     }
 }

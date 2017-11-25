@@ -28,6 +28,16 @@ public class UtilitiesDisplay {
         return Utilities.round(value,decPoints) + "u";
     }
 
+    public static String displayCarbs(Double value, int decPoints){
+        return Utilities.round(value,decPoints) + "g";
+    }
+
+    public static String displayCarbs(Double value){
+        int decPoints = 1;
+        if (Utilities.getPrecisionRounding()) decPoints = 2;
+        return Utilities.round(value,decPoints) + "g";
+    }
+
     public static String sgv(SGVEvent cgmValue, Boolean showUnitMeasure, Boolean showConverted, String sgvUnits){
         return sgv(cgmValue.getSGV(), showUnitMeasure, showConverted, sgvUnits);
     }

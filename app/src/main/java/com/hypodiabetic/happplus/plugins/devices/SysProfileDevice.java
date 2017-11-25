@@ -59,6 +59,9 @@ public class SysProfileDevice extends AbstractDevice {
     private Profile defaultSysProfile;
     private Profile selectedSysProfile;
 
+    private TextView deviceStatus;
+    private TextView deviceStatusText;
+
     public String getPluginName(){          return "sys_profile";}
     public String getPluginDisplayName(){   return context.getString(R.string.device_profile_name);}
     public String getPluginDescription(){   return context.getString(R.string.device_profile_desc);}
@@ -115,6 +118,7 @@ public class SysProfileDevice extends AbstractDevice {
     public boolean onLoad(){
         return true;
     }
+
 
 
     private Profile saveNewSysProfile(String name){
@@ -235,8 +239,8 @@ public class SysProfileDevice extends AbstractDevice {
         View rootView = inflater.inflate(R.layout.plugin__device_profile_manager, container, false);
 
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
-        TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);
-        TextView deviceStatusText       = (TextView)rootView.findViewById(R.id.statusText);
+        deviceStatus                    = (TextView)rootView.findViewById(R.id.deviceStatus);
+        deviceStatusText                = (TextView)rootView.findViewById(R.id.statusText);
         ImageButton deviceActionOne     = (ImageButton) rootView.findViewById(R.id.deviceActionOne);
         deviceActionTwo                 = (ImageButton) rootView.findViewById(R.id.deviceActionTwo);
         ImageButton deviceActionThree   = (ImageButton) rootView.findViewById(R.id.deviceActionThree);
@@ -244,9 +248,7 @@ public class SysProfileDevice extends AbstractDevice {
         ImageView deviceImage           = (ImageView)rootView.findViewById(R.id.deviceImage);
 
         deviceName.setText(             getDetailedName());
-        DeviceStatus status             = getStatus();
-        deviceStatus.setText(           status.getStatusDisplay());
-        deviceStatusText.setText(       status.getComment());
+        updateStatus();
         deviceImage.setBackground(          getImage());
 
         //Setup Prefs
@@ -341,6 +343,12 @@ public class SysProfileDevice extends AbstractDevice {
 
         fragmentSetUI();
         return rootView;
+    }
+
+    protected void updateStatus(){
+        DeviceStatus status = getStatus();
+        deviceStatus.setText(       status.getStatusDisplay());
+        deviceStatusText.setText(   status.getComment());
     }
 
     private void fragmentSetUI(){

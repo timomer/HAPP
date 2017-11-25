@@ -12,12 +12,13 @@ import org.json.JSONObject;
 import java.util.Date;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by Tim on 01/02/2017.
  * Base Event Object, all HAPP Events are created from this Base
  * This Class will handel Saving and Retrieving the Event Object from Realm Using Delegation
- *
+ * NOTE: New Event Objects must be added here {@link com.hypodiabetic.happplus.database.dbHelperEvent#convertEventToAbstractEvent(RealmResults)}
  */
 
 public abstract class AbstractEvent implements InterfaceValidated {
@@ -29,6 +30,7 @@ public abstract class AbstractEvent implements InterfaceValidated {
         mEvent  =   new Event();
         TAG     =   getClass().getSimpleName();
         mEvent.setType(this.getClass());
+        mEvent.setHidden(isEventHidden());
     }
     public AbstractEvent(Event event){
         mEvent  =   event;
@@ -70,6 +72,12 @@ public abstract class AbstractEvent implements InterfaceValidated {
             }
         }
     }
+
+    /**
+     * Should this event type be hidden from the UI? For example CGM SGV
+     * @return hidden event?
+     */
+    protected abstract boolean isEventHidden();
 
     /**
      * Colour of Icon

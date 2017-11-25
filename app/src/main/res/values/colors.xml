@@ -24,4 +24,5 @@
     <!-- Events -->
     <color name="eventBolus">#2196f3</color>
     <color name="eventSGV">#FF5722</color>
+    <color name="eventCarbs">#8BC34A</color>
 </resources>

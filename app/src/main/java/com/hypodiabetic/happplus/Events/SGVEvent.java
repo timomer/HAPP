@@ -67,6 +67,8 @@ public class SGVEvent extends AbstractEvent {
     public Drawable getIcon(){              return ContextCompat.getDrawable(MainApp.getInstance(), R.drawable.invert_colors);}
     public int getIconColour(){             return ContextCompat.getColor(MainApp.getInstance(), R.color.eventSGV);}
 
+    protected boolean isEventHidden(){        return true;}
+
     public Drawable getPrimaryActionIcon(){                 return ContextCompat.getDrawable(MainApp.getInstance(), R.drawable.invert_colors);}
     public View.OnClickListener getOnPrimaryActionClick() { return null;}
 

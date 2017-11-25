@@ -80,12 +80,14 @@ public class FragmentEventLists extends Fragment {
         DynamicFragmentPagerAdapter dynamicFragmentPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
 
         RealmHelper realmHelper = new RealmHelper();
+        //Recent List of Events
         FragmentEventList eventListRecent   =   FragmentEventList.newInstance(true);
-        eventListRecent.setListData(dbHelperEvent.getEventsSince(UtilitiesTime.getDateHoursAgo(new Date(), 4), realmHelper.getRealm()));
+        eventListRecent.setListData(dbHelperEvent.getEventsSince(UtilitiesTime.getDateHoursAgo(new Date(), 4), false, realmHelper.getRealm()));
+        //Today's List of Events
         FragmentEventList eventListToday    =   FragmentEventList.newInstance(true);
-        eventListToday.setListData(dbHelperEvent.getEventsBetween(UtilitiesTime.getStartOfDay(new Date()), UtilitiesTime.getEndOfDay(new Date()), realmHelper.getRealm()));
-        realmHelper.closeRealm();
+        eventListToday.setListData(dbHelperEvent.getEventsBetween(UtilitiesTime.getStartOfDay(new Date()), UtilitiesTime.getEndOfDay(new Date()), false, realmHelper.getRealm()));
 
+        realmHelper.closeRealm();
         dynamicFragmentPagerAdapter.addFragment(eventListRecent, getString(R.string.event_recent));
         dynamicFragmentPagerAdapter.addFragment(eventListToday, getString(R.string.event_today));
 

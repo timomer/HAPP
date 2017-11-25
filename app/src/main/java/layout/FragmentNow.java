@@ -1,14 +1,20 @@
 package layout;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.charts.AbstractFragmentLineChart;
@@ -22,6 +28,9 @@ import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
  */
 public class FragmentNow extends Fragment {
 
+    private AbstractFragmentLineChart mCGMLineChartFragment;
+    private BroadcastReceiver mNewSGVReading;
+
     public FragmentNow() {
         // Required empty public constructor
     }
@@ -33,6 +42,18 @@ public class FragmentNow extends Fragment {
      */
     public static FragmentNow newInstance() {
         return new FragmentNow();
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if (mNewSGVReading != null)  LocalBroadcastManager.getInstance(MainApp.getInstance()).unregisterReceiver(mNewSGVReading);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        registerReceivers();
     }
 
     @Override
@@ -56,18 +77,26 @@ public class FragmentNow extends Fragment {
         FragmentManager fm = getChildFragmentManager();
 
         //CGM Readings Line Chart
-        AbstractFragmentLineChart CGMLineChartFragment = (AbstractFragmentLineChart) fm.findFragmentByTag("CGMLineChartFragment");
-        if (CGMLineChartFragment == null) {
+        mCGMLineChartFragment = (AbstractFragmentLineChart) fm.findFragmentByTag("mCGMLineChartFragment");
+        if (mCGMLineChartFragment == null) {
             AbstractDevice deviceCGM    =   (AbstractDevice) PluginManager.getPluginByClass(CGMDevice.class);
             if (deviceCGM != null) {
-                CGMLineChartFragment = cgmLineChart.newInstance(8, "CGM Readings", "Summary", "mmoll", deviceCGM.getColour());
+                mCGMLineChartFragment = cgmLineChart.newInstance(8, "CGM Readings", "Summary", "mmoll", deviceCGM.getColour());
                 FragmentTransaction ft = fm.beginTransaction();
-                ft.add(R.id.FragmentNowCharts, CGMLineChartFragment, "CGMLineChartFragment");
+                ft.add(R.id.FragmentNowCharts, mCGMLineChartFragment, "mCGMLineChartFragment");
                 ft.commit();
                 fm.executePendingTransactions();
             }
         }
     }
 
-
+    private void registerReceivers(){
+        mNewSGVReading = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mCGMLineChartFragment.refreshChart();
+            }
+        };
+        LocalBroadcastManager.getInstance(MainApp.getInstance()).registerReceiver(mNewSGVReading, new IntentFilter(Intents.newLocalEvent.NEW_LOCAL_EVENT_SGV));
+    }
 }

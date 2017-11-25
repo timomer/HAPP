@@ -110,14 +110,24 @@
     <string name="event_new">New Events</string>
     <string name="event_recent">Recent</string>
     <string name="event_today">Today</string>
-    <string name="event_rejected">Events Rejected</string>
+    <string name="event_rejected">Event Rejected</string>
+    <string name="events_rejected">Events Rejected</string>
     <string name="event_icon">Event Icon</string>
     <string name="event_primary_action">Event Primary Action</string>
     <string name="event_menu">Event Menu</string>
 
     //Event Bolus
     <string name="event_bolus_type_bolus">Bolus</string>
+    <string name="event_bolus_type_bolus_with_corr">Bolus With Correction</string>
     <string name="event_bolus_type_unknown">Unknown Bolus Type</string>
+
+    //Event Food
+    <string name="event_food_size_small">Small Meal</string>
+    <string name="event_food_size_large">Large Meal</string>
+    <string name="event_food_size_avg">Medium Meal</string>
+    <string name="event_food_carbs_fast">High GI</string>
+    <string name="event_food_carbs_slow">Low GI</string>
+    <string name="event_food_carbs_avg">Avg GI</string>
 
     //Time Strings
     <string name="time_just_now">just now</string>

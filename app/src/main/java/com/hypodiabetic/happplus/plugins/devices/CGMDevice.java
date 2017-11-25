@@ -37,7 +37,6 @@ import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 
-import io.realm.RealmResults;
 import layout.RecyclerViewDevices;
 import layout.RecyclerViewPlugins;
 
@@ -56,6 +55,8 @@ public class CGMDevice extends AbstractDevice {
 
     private AbstractCGMSource pluginCGMSource;
     private RecyclerViewPlugins adapterPlugins;
+    private TextView deviceStatus;
+    private TextView deviceStatusText;
 
     public CGMDevice(){
         super();
@@ -85,7 +86,6 @@ public class CGMDevice extends AbstractDevice {
         DeviceStatus deviceStatus = new DeviceStatus();
 
         deviceStatus.checkPluginIDependOn(pluginCGMSource, context.getString(R.string.device_cgm_data_source));
-
         return deviceStatus;
     }
 
@@ -162,18 +162,17 @@ public class CGMDevice extends AbstractDevice {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.plugin__device_cgm, container, false);
 
-        TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
-        TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);
-        TextView deviceStatusText       = (TextView)rootView.findViewById(R.id.statusText);
+        TextView deviceName                 = (TextView)rootView.findViewById(R.id.deviceName);
+        deviceStatus                        = (TextView)rootView.findViewById(R.id.deviceStatus);
+        deviceStatusText                    = (TextView)rootView.findViewById(R.id.statusText);
         ImageButton deviceActionOne         = (ImageButton) rootView.findViewById(R.id.deviceActionOne);
         ImageButton deviceActionTwo         = (ImageButton) rootView.findViewById(R.id.deviceActionTwo);
         ImageButton deviceActionThree       = (ImageButton) rootView.findViewById(R.id.deviceActionThree);
         ImageButton deviceActionRight       = (ImageButton) rootView.findViewById(R.id.deviceActionRight);
 
         deviceName.setText(             getDetailedName());
-        DeviceStatus status             = getStatus();
-        deviceStatus.setText(           status.getStatusDisplay());
-        deviceStatusText.setText(       status.getComment());
+
+        updateStatus();
 
         //Setup Prefs
         setPluginPref((LinearLayout) rootView.findViewById(R.id.prefBGUnits), rootView, getPref(PREF_BG_UNITS));
@@ -200,8 +199,11 @@ public class CGMDevice extends AbstractDevice {
         return rootView;
     }
 
-
-
+    protected void updateStatus(){
+        DeviceStatus status = getStatus();
+        deviceStatus.setText(       status.getStatusDisplay());
+        deviceStatusText.setText(   status.getComment());
+    }
 
     /**
      * Device UI Card Functions
@@ -218,9 +220,9 @@ public class CGMDevice extends AbstractDevice {
             avgDelta        =   "-";
         } else {
             lastReading =   UtilitiesDisplay.sgv(sgvEvent, true, false, getPref(PREF_BG_UNITS).getStringValue());
-            lastDelta   =   displayDelta(getDelta(getLastCGMValue()));
+            lastDelta   =   displayDelta(getDelta(sgvEvent));
             lastAge     =   UtilitiesTime.displayAge(sgvEvent.getTimeStamp());
-            avgDelta    =   getDelta(getLastCGMValue()).toString();
+            avgDelta    =   getDelta(sgvEvent).toString();
         }
 
         deviceViewHolder.deviceName.setText(            getDetailedName());
@@ -253,6 +255,8 @@ public class CGMDevice extends AbstractDevice {
         );
 
     }
+    
+
 
 
     public JSONArray getDebug(){

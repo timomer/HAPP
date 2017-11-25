@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.hypodiabetic.happplus.Events.AbstractEvent;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.dbHelperEvent;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceEventValidator;
@@ -73,8 +74,14 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
                 saveNewEvents(null);    //Null, as the Dialog has saved them for us
                 if (killActivity) getActivity().finish();
             } else {
-                String eventCount = data.getStringExtra("eventCount");
-                Toast.makeText(getActivity(), eventCount + " " + getString(R.string.event_rejected), Toast.LENGTH_LONG).show();
+                Integer eventCount = data.getIntExtra(Intents.extras.EVENT_COUNT,0);
+                String userMsg;
+                if (eventCount > 1){
+                    userMsg = eventCount + " " + getString(R.string.events_rejected);
+                } else {
+                    userMsg = eventCount + " " + getString(R.string.event_rejected);
+                }
+                Toast.makeText(getActivity(), userMsg, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -93,36 +100,36 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
         Log.d(TAG, "saveNewEvents: New Events Saved");
     }
 
-    public static List<? extends AbstractEvent> getEventsSince(Date timestamp, Realm realm) {
-        return dbHelperEvent.getEventsSince(timestamp, realm);
+    public static List<? extends AbstractEvent> getEventsSince(Date timestamp, boolean getHiddenEvents, Realm realm) {
+        return dbHelperEvent.getEventsSince(timestamp, getHiddenEvents, realm);
     }
-    public static List<? extends AbstractEvent> getEventsSince(Date timestamp, Realm realm, String eventClassSimpleName) {
-        return dbHelperEvent.getEventsSince(timestamp, realm, eventClassSimpleName);
+    public static List<? extends AbstractEvent> getEventsSince(Date timestamp, boolean getHiddenEvents, Realm realm, String eventClassSimpleName) {
+        return dbHelperEvent.getEventsSince(timestamp, realm, getHiddenEvents, eventClassSimpleName);
     }
-    public static List<? extends AbstractEvent> getEventsSince(Date timestamp, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
-        return dbHelperEvent.getEventsSince(timestamp, realm, eventClassSimpleName, filterField, filterValue);
-    }
-
-    public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, Realm realm) {
-        return dbHelperEvent.getEventsBetween(from, until, realm);
-    }
-    public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, Realm realm, String eventClassSimpleName) {
-        return dbHelperEvent.getEventsBetween(from, until, realm, eventClassSimpleName);
-    }
-    public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
-        return dbHelperEvent.getEventsBetween(from, until, realm, eventClassSimpleName, filterField, filterValue);
+    public static List<? extends AbstractEvent> getEventsSince(Date timestamp, boolean getHiddenEvents, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
+        return dbHelperEvent.getEventsSince(timestamp, realm, getHiddenEvents, eventClassSimpleName, filterField, filterValue);
     }
 
-    public static AbstractEvent getLastEvent(Realm realm, String eventClassSimpleName){
-        List<? extends AbstractEvent> results = getEventsSince(new Date(), realm, eventClassSimpleName);
+    public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, boolean getHiddenEvents, Realm realm) {
+        return dbHelperEvent.getEventsBetween(from, until, getHiddenEvents, realm);
+    }
+    public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, boolean getHiddenEvents, Realm realm, String eventClassSimpleName) {
+        return dbHelperEvent.getEventsBetween(from, until, getHiddenEvents, realm, eventClassSimpleName);
+    }
+    public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, boolean getHiddenEvents, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
+        return dbHelperEvent.getEventsBetween(from, until, getHiddenEvents, realm, eventClassSimpleName, filterField, filterValue);
+    }
+
+    public static AbstractEvent getLastEvent(Realm realm, boolean getHiddenEvents, String eventClassSimpleName){
+        List<? extends AbstractEvent> results = getEventsSince(new Date(), getHiddenEvents, realm, eventClassSimpleName);
         if (results.isEmpty()) {
             return null;
         } else {
             return results.get(0);
         }
     }
-    public static AbstractEvent getLastEvent(Realm realm, String eventClassSimpleName, String filterField, String filterValue){
-        List<? extends AbstractEvent> results = getEventsSince(new Date(), realm, eventClassSimpleName, filterField, filterValue);
+    public static AbstractEvent getLastEvent(Realm realm, boolean getHiddenEvents, String eventClassSimpleName, String filterField, String filterValue){
+        List<? extends AbstractEvent> results = getEventsSince(UtilitiesTime.getDateHoursAgo(new Date(), 8), getHiddenEvents, realm, eventClassSimpleName, filterField, filterValue);
         if (results.isEmpty()) {
             return null;
         } else {
@@ -130,8 +137,8 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
         }
     }
 
-    public static AbstractEvent getEventTimestamped(Date timestamp, Realm realm, String eventClassSimpleName, String filterField, String filterValue){
-        List<AbstractEvent> results = dbHelperEvent.getEventsBetween(timestamp, timestamp, realm, eventClassSimpleName, filterField, filterValue);
+    public static AbstractEvent getEventTimestamped(Date timestamp, boolean getHiddenEvents, Realm realm, String eventClassSimpleName, String filterField, String filterValue){
+        List<AbstractEvent> results = dbHelperEvent.getEventsBetween(timestamp, timestamp, getHiddenEvents, realm, eventClassSimpleName, filterField, filterValue);
         if (results.isEmpty()) {
             return null;
         } else {

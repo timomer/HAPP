@@ -46,6 +46,9 @@ public class SysFunctionsDevice extends AbstractDevice {
     //Device Prefs
     private static String PREF_BOLUS_WIZARD_PLUGIN  =   "bolus_wizard_plugin";
 
+    private TextView deviceStatus;
+    private TextView deviceStatusText;
+
 
     public String getPluginName(){          return "sysfunctions";}
     public String getPluginDisplayName(){   return context.getString(R.string.device_sysf_name);}
@@ -130,14 +133,12 @@ public class SysFunctionsDevice extends AbstractDevice {
         View rootView = inflater.inflate(R.layout.plugin__device_sys_functions, container, false);
 
         TextView deviceName             = (TextView)rootView.findViewById(R.id.deviceName);
-        TextView deviceStatus           = (TextView)rootView.findViewById(R.id.deviceStatus);
-        TextView deviceStatusText       = (TextView)rootView.findViewById(R.id.statusText);
+        deviceStatus                    = (TextView)rootView.findViewById(R.id.deviceStatus);
+        deviceStatusText                = (TextView)rootView.findViewById(R.id.statusText);
         ImageView deviceImage           = (ImageView)rootView.findViewById(R.id.deviceImage);
 
         deviceName.setText(                 getDetailedName());
-        DeviceStatus status                 = getStatus();
-        deviceStatus.setText(               status.getStatusDisplay());
-        deviceStatusText.setText(           status.getComment());
+        updateStatus();
         deviceImage.setBackground(          getImage());
 
         ImageButton deviceActionOne         = (ImageButton) rootView.findViewById(R.id.deviceActionOne);
@@ -168,6 +169,12 @@ public class SysFunctionsDevice extends AbstractDevice {
         deviceActionRight.setVisibility(View.GONE);
 
         return rootView;
+    }
+
+    protected void updateStatus(){
+        DeviceStatus status = getStatus();
+        deviceStatus.setText(       status.getStatusDisplay());
+        deviceStatusText.setText(   status.getComment());
     }
 
     /**

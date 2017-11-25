@@ -58,9 +58,16 @@ public abstract class AbstractFragmentLineChart extends Fragment {
     }
 
     /**
+     * Load the Charts data into a LineDataSet
+     * @return LineDataSet of data
+     */
+    public abstract LineDataSet getDataSet();
+
+    /**
      * Public Method to inform the Chart of Data Set change and reload
      */
     public void refreshChart(){
+        renderChart(getDataSet());
         mLineChart.notifyDataSetChanged();
         mLineChart.invalidate();
     }
@@ -112,7 +119,7 @@ public abstract class AbstractFragmentLineChart extends Fragment {
                 lineDataSet.setColor(mLineColour);
                 lineDataSet.setCircleColor(mLineColour);
                 lineDataSet.setCircleColorHole(mLineColour);
-                lineDataSet.setLineWidth(2f);
+                lineDataSet.setLineWidth(1f);
                 LineData data = new LineData(lineDataSet);
 
                 mLineChart.setScaleEnabled(false);

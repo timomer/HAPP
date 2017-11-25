@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
+import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceValidated;
@@ -54,7 +55,7 @@ public class DialogConfirmEventEntry extends DialogFragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.putExtra("eventCount", eventList.size());
+                intent.putExtra(Intents.extras.EVENT_COUNT, eventList.size());
                 getTargetFragment().onActivityResult(getTargetRequestCode(), USER_CANCEL, intent);
                 getDialog().dismiss();
             }

@@ -195,6 +195,7 @@ public abstract class AbstractPluginBase extends Fragment {
         Intent prefUpdate = new Intent(Intents.newLocalEvent.NEW_LOCAL_EVENT_PREF_UPDATE);
         prefUpdate.putExtra(Intents.extras.PLUGIN_NAME, getPluginName());
         prefUpdate.putExtra(Intents.extras.PLUGIN_TYPE, getPluginType());
+        prefUpdate.putExtra(Intents.extras.PLUGIN_CLASS_NAME, this.getClass().getSimpleName());
         prefUpdate.putExtra(Intents.extras.PLUGIN_PREF_NAME, prefName);
         LocalBroadcastManager.getInstance(context).sendBroadcast(prefUpdate);
     }

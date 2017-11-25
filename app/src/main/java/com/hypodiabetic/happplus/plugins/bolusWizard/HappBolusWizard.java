@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
 import com.hypodiabetic.happplus.Events.BolusEvent;
+import com.hypodiabetic.happplus.Events.FoodEvent;
 import com.hypodiabetic.happplus.Events.SGVEvent;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
@@ -189,12 +190,26 @@ public class HappBolusWizard extends AbstractEventActivities implements Interfac
 
     private void saveResults(){
         List<AbstractEvent> events = new ArrayList<>();
-        if (bolusWizardResult.getSuggestedCorrectionBolus() > 0D) {
-            events.add(new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS_WITH_CORRECTION, bolusWizardResult.getSuggestedBolus(), bolusWizardResult.getSuggestedCorrectionBolus()));
-        } else if (!bolusWizardResult.getSuggestedBolus().equals(0D)) {
-            events.add(new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS, bolusWizardResult.getSuggestedBolus(), 0D));
+        Double bolus        =   bolusWizardResult.getSuggestedBolus();
+        Double corrBolus    =   bolusWizardResult.getSuggestedCorrectionBolus();
+        Double carbsValue   =   Utilities.stringToDouble(wizardCarbs.getText().toString());
+
+        if (corrBolus != 0D) {
+            if (bolus == 0D && corrBolus > 0D){
+                events.add(new BolusEvent(BolusEvent.TYPE_CORRECTION_BOLUS, bolus, corrBolus));
+            } else {
+                Double netBolus = (bolus + corrBolus);
+                if (netBolus > 0D) {
+                    events.add(new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS_WITH_CORRECTION, bolus, corrBolus));
+                }
+            }
+        } else if (bolus != 0D) {
+            events.add(new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS, bolus, 0D));
         }
-        //if (!Utilities.stringToDouble(wizardCarbs.getText().toString()).equals(0D))  // TODO: 08/02/2017 carbs
+
+        if (carbsValue > 0D) {
+            events.add(new FoodEvent(FoodEvent.TYPE_AVG, carbsValue));
+        }
 
         if (events.size() > 0) addEventsToHAPP(events, true, true);
     }
