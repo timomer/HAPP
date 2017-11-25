@@ -564,6 +564,7 @@ public class tools {
             if (activeProfileIndex.equals(-1)){
                 //Could not find the profile, return an empty one
                 activeProfile = newEmptyProfile();
+                Crashlytics.log(1,TAG,"Could not find the profile, return an empty one "  + profile);
             } else {
                 activeProfile = getProfile(profile, activeProfileIndex, prefs);
             }
@@ -637,6 +638,7 @@ public class tools {
 
         if (profileArrayName.equals("")){
             Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
+            Crashlytics.log(1,TAG,"Unknown profile: " + profile + ", not sure what profile to load");
             return newEmptyProfile();
 
         } else {
@@ -644,6 +646,7 @@ public class tools {
 
             if (profileArrayJSON.equals("")) {
                 //cannot find any profiles, return an empty one
+                Crashlytics.log(1,TAG,"cannot find any profiles, return an empty one: " + profile);
                 timeSpansList = newEmptyProfile();
             } else {
                 profileArray = new Gson().fromJson(profileArrayJSON, new TypeToken<List<String>>() {}.getType());   //The array of Profiles
@@ -681,6 +684,7 @@ public class tools {
 
         if (profileArrayName.equals("")){
             Log.e(TAG, "Unknown profile: " + profile + ", cannot save");
+            Crashlytics.log(1,TAG,"Unknown profile: " + profile + ", cannot save");
         } else {
 
             String profileDetailsArrayJSON = prefs.getString(profile, "");

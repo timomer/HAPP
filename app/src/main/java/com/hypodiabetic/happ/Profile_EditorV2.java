@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -70,6 +72,7 @@ public class Profile_EditorV2 extends AppCompatActivity {
                         break;
                     default:
                         Log.e(TAG, "Unknown profile: " + profile + ", not sure what profile to load");
+                        Crashlytics.log(1,TAG,"Unknown profile: " + profile + ", not sure what profile to load");
                         this.finish();
                 }
 
@@ -78,10 +81,12 @@ public class Profile_EditorV2 extends AppCompatActivity {
 
             } else {
                 Log.e(TAG, "No Extra String 'PROFILE' passed, not sure what profile to load");
+                Crashlytics.log(1,TAG,"No Extra String 'PROFILE' passed, not sure what profile to load");
                 this.finish();
             }
         } else {
             Log.e(TAG, "No profile Extra passed, not sure what profile to load");
+            Crashlytics.log(1,TAG,"No profile Extra passed, not sure what profile to load");
             this.finish();
         }
 
