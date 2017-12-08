@@ -37,6 +37,7 @@
     //Prefs
     <string name="pref_enabled_desc">Is this plugin enabled</string>
     <string name="pref_compare_profile">Compare to this profile</string>
+    <string name="pref_compare_profile_short">Compare to</string>
     <string name="pref">Pref</string>
     <string name="pref_missing">is missing</string>
     <string name="pref_not_set">not set</string>
@@ -77,12 +78,38 @@
     <string name="device_profile_name_not_allowed">Profile name is not allowed, please change</string>
     <string name="device_profile_new">New Profile</string>
     <string name="device_profile_copy">Copy</string>
+    <string name="device_profile_sys_prefs_source">App Preferences</string>
+    <string name="device_profile_sys_prefs_source_desc">HAPP+ Application Preferences</string>
+    <string name="device_profile_patient_prefs_source">Patient Preferences</string>
+    <string name="device_profile_patient_prefs_source_desc">Patient Preferences</string>
 
     //Device Sys Functions
     <string name="device_sysf_bw_plugin">Bolus Wizard Plugin</string>
     <string name="device_sysf_bw_plugin_desc">Plugin used for Bolus Wizard Calculations</string>
     <string name="device_sysf_name">System Functions</string>
     <string name="device_sysf_desc">Core System Functions used by HAPP</string>
+
+    //Device Pump
+    <string name="device_pump_name">Pump</string>
+    <string name="device_pump_desc">HAPP Pump Device</string>
+    <string name="device_pump_pref_pump">Pump</string>
+    <string name="device_pump_pref_pump_desc">Pump plugin in use</string>
+
+    //PatientPrefs
+    <string name="plugin_PatientPrefs_pref_dia">DIA</string>
+    <string name="plugin_PatientPrefs_pref_dia_desc">Duration of Insulin Action (Hours)</string>
+    <string name="plugin_PatientPrefs_pref_high_sgv">High SGV</string>
+    <string name="plugin_PatientPrefs_pref_high_sgv_desc">High Sugar Glucose Value</string>
+    <string name="plugin_PatientPrefs_pref_target_sgv">Target SGV</string>
+    <string name="plugin_PatientPrefs_pref_target_sgv_desc">Target Sugar Glucose Value</string>
+    <string name="plugin_PatientPrefs_pref_low_sgv">Low SGV</string>
+    <string name="plugin_PatientPrefs_pref_low_sgv_desc">Low Sugar Glucose Value</string>
+    <string name="plugin_PatientPrefs_pref_carb_absorption_rate">Carb Absorption Rate</string>
+    <string name="plugin_PatientPrefs_pref_carb_absorption_rate_desc">Amount of Carbs digested per hour (grams)</string>
+    <string name="plugin_PatientPrefs_pref_isf">Insulin Sensitivity Factor</string>
+    <string name="plugin_PatientPrefs_pref_isf_desc">How much would 1U of Insulin lower your Blood Glucose</string>
+    <string name="plugin_PatientPrefs_pref_carb_ratio">Carbohydrate Ratio</string>
+    <string name="plugin_PatientPrefs_pref_carb_ratio_desc">How much Carbs are covered by 1U of Insulin</string>
 
     //Plugin HAPPBolusWizard
     <string name="plugin_HAPPBolusWizard_name">HAPP Bolus Wizard</string>

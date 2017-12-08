@@ -52,6 +52,8 @@ public abstract class AbstractEvent implements InterfaceValidated {
         mEvent.setAccepted(accepted);
     }
 
+    public boolean isAccepted(){ return mEvent.isAccepted(); }
+
     public void setDateAccepted(Date dateAccepted) {
         mEvent.setDateAccepted(dateAccepted);
     }

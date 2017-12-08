@@ -5,7 +5,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 
-import com.hypodiabetic.happplus.Constants;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.UtilitiesDisplay;
@@ -57,7 +56,7 @@ public class SGVEvent extends AbstractEvent {
 
     public String getMainText(){
         CGMDevice cgmDevice         =   (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
-        return UtilitiesDisplay.sgv(getSGV(),true,false, cgmDevice.getPref(cgmDevice.PREF_BG_UNITS).getStringValue());
+        return UtilitiesDisplay.displaySGV(this,true,false, cgmDevice.getPref(cgmDevice.PREF_BG_UNITS).getStringValue());
     }
     public String getSubText(){ return "SOMETHING";}
     public String getValue(){

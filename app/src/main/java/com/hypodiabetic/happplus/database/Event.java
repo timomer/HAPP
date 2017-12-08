@@ -71,4 +71,5 @@ public class Event extends RealmObject {
 
     public String getData() { return this.data;}
     public Date getDateCreated(){ return this.dateCreated; }
+    public boolean isAccepted(){ return this.accepted; }
 }

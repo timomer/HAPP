@@ -72,7 +72,7 @@ public class DeviceStatus {
             addComment("'" + nameOfPlugin + "' " + MainApp.getInstance().getString(R.string.plugin_not_found));
         } else if (!plugin.getStatus().getIsUsable()){
             error   =   true;
-            addComment("'" + nameOfPlugin + "' " + MainApp.getInstance().getString(R.string.plugin_has_errors) + ": " + plugin.getStatus().getComment());
+            addComment("'" + plugin.getPluginDisplayName() + "' " + MainApp.getInstance().getString(R.string.plugin_has_errors) + ": " + plugin.getStatus().getComment());
         }
     }
 }

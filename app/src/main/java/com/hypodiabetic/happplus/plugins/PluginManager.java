@@ -8,6 +8,7 @@ import com.hypodiabetic.happplus.plugins.bolusWizard.HappBolusWizard;
 import com.hypodiabetic.happplus.plugins.cgmSource.NSClientCGMSource;
 import com.hypodiabetic.happplus.plugins.cgmSource.xDripCGMSource;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
+import com.hypodiabetic.happplus.plugins.devices.PumpDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 import com.hypodiabetic.happplus.plugins.validators.HappValidator;
@@ -17,7 +18,7 @@ import java.util.List;
 
 /**
  * Created by Tim on 09/03/2017.
- * Manages all activities related to
+ * Manages all activities related to Plugin management
  */
 
 public class PluginManager {
@@ -29,6 +30,7 @@ public class PluginManager {
         plugins.add(new SysProfileDevice());
         plugins.add(new SysFunctionsDevice());
         plugins.add(new CGMDevice());
+        plugins.add(new PumpDevice());
         return plugins;
     }
 
@@ -48,6 +50,7 @@ public class PluginManager {
     private static List<AbstractPluginBase> getSysFunctionPlugins() {
         List<AbstractPluginBase> plugins = new ArrayList<>();
         plugins.add(new HappBolusWizard());
+        plugins.add(new HappPatientPrefs());
         return plugins;
     }
 

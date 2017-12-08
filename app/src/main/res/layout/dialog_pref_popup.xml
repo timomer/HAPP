@@ -8,45 +8,53 @@
     android:background="@color/backgroundLight"
     style="@style/Card">
 
-    <TextView
-        android:id="@+id/sysPrefPopupTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/misc_placeholder"
-        style="@style/TitlePrimaryDark"/>
+        android:orientation="vertical"
+        android:background="@color/colorPrimaryDark"
+        android:paddingBottom="8dp">
+        <TextView
+            android:id="@+id/sysPrefPopupTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/misc_placeholder"
+            style="@style/TitlePrimary"/>
+        <TextView
+            android:id="@+id/sysPrefPopupDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/misc_placeholder"
+            style="@style/TitleSubtext"/>
+    </LinearLayout>
     <TextView
         android:id="@+id/sysPrefPopupSubTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/misc_placeholder"
         style="@style/SubtextDark"/>
-    <TextView
-        android:id="@+id/sysPrefPopupDesc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/misc_placeholder"
-        style="@style/TitleSubtextDark"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textAlignment="center"
-            android:text="@string/misc_item_mark"
-            style="@style/TitleSecondaryDark"
-            android:paddingEnd="0dp"/>
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/sysPrefSysProfiles"
             style="@style/TitleSecondaryDark"
             android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:spinnerMode="dialog">
         </Spinner>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/sysPrefCompareValue"
+            android:layout_gravity="center"
+            android:text="@string/misc_placeholder"
+            style="@style/TitleSecondaryDark"
+            android:paddingEnd="0dp"/>
     </LinearLayout>
     <ImageView
         android:layout_width="match_parent"

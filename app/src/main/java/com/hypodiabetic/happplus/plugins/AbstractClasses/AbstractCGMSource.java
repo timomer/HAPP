@@ -47,7 +47,6 @@ public abstract class AbstractCGMSource extends AbstractEventActivities{
 
     public SGVEvent getLastReading(Realm realm) {
         SGVEvent lastReading = (SGVEvent) getLastEvent(realm, true, SGVEvent.class.getSimpleName(), SGVEvent.SOURCE, getPluginName());
-        Log.d(TAG, "getLastReading: " + lastReading.getValue());
         return lastReading;
     }
 

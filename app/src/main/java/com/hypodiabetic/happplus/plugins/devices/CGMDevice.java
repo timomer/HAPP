@@ -146,11 +146,11 @@ public class CGMDevice extends AbstractDevice {
     public String displayDelta(Double delta){
         if (delta == Constants.CGM.DELTA_OLD || delta == Constants.CGM.DELTA_NULL) return "-";
         if (delta > 0){
-            return "+" + UtilitiesDisplay.sgv(delta, true, false, getPref(PREF_BG_UNITS).getStringValue());
+            return "+" + UtilitiesDisplay.displaySGV(delta, true, false, PREF_BG_UNITS_MGDL, getPref(PREF_BG_UNITS).getStringValue());
         } else if (delta < 0){
-            return "-" + UtilitiesDisplay.sgv(delta, true, false, getPref(PREF_BG_UNITS).getStringValue());
+            return "-" + UtilitiesDisplay.displaySGV(delta, true, false, PREF_BG_UNITS_MGDL, getPref(PREF_BG_UNITS).getStringValue());
         } else {
-            return UtilitiesDisplay.sgv(delta, true, false, getPref(PREF_BG_UNITS).getStringValue());
+            return UtilitiesDisplay.displaySGV(delta, true, false, PREF_BG_UNITS_MGDL, getPref(PREF_BG_UNITS).getStringValue());
         }
     }
 
@@ -219,7 +219,7 @@ public class CGMDevice extends AbstractDevice {
             lastAge         =   "-";
             avgDelta        =   "-";
         } else {
-            lastReading =   UtilitiesDisplay.sgv(sgvEvent, true, false, getPref(PREF_BG_UNITS).getStringValue());
+            lastReading =   UtilitiesDisplay.displaySGV(sgvEvent, true, false, getPref(PREF_BG_UNITS).getStringValue());
             lastDelta   =   displayDelta(getDelta(sgvEvent));
             lastAge     =   UtilitiesTime.displayAge(sgvEvent.getTimeStamp());
             avgDelta    =   getDelta(sgvEvent).toString();

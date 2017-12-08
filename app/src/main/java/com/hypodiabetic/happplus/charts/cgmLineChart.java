@@ -1,6 +1,5 @@
 package com.hypodiabetic.happplus.charts;
 
-import android.bluetooth.BluetoothClass;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +15,6 @@ import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.EntryXComparator;
@@ -77,7 +75,7 @@ public class cgmLineChart extends AbstractFragmentLineChart {
 
                     @Override
                     public String getFormattedValue(float value, AxisBase axis) {
-                        return UtilitiesDisplay.sgv((double) value, false, false, deviceCGM.getPref(CGMDevice.PREF_BG_UNITS).getStringValue());
+                        return UtilitiesDisplay.displaySGV((double) value, false, false, CGMDevice.PREF_BG_UNITS_MGDL, deviceCGM.getPref(CGMDevice.PREF_BG_UNITS).getStringValue());
                     }
                 });
                 yAxisL.setAxisMaximum(200);

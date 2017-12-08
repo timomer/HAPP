@@ -1,70 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/colorProfileManager">
+        android:background="@color/colorProfileManager"
+        android:orientation="vertical">
 
-        <include layout="@layout/device_title"/>
+        <include layout="@layout/device_title" />
 
         <TextView
+            android:id="@+id/statusText"
+            style="@style/TitleSecondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/misc_placeholder"
-            style="@style/TitleSecondary"
-            android:id="@+id/statusText"
-            android:paddingBottom="8dp"/>
+            android:paddingBottom="8dp"
+            android:text="@string/misc_placeholder" />
 
     </LinearLayout>
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:fillViewport="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/backgroundLight"
-        android:paddingBottom="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
 
         <TextView
+            style="@style/TitlePrimaryDark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/device_profile_loaded"
-            style="@style/TitlePrimaryDark"/>
+            android:text="@string/device_profile_loaded" />
 
         <Spinner
+            android:id="@+id/prefProfileSelected"
+            style="@style/TitleSecondaryDark"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/TitleSecondaryDark"
-            android:layout_marginStart="0dp"
             android:layout_marginEnd="16dp"
-            android:paddingStart="0dp"
-            android:id="@+id/prefProfileSelected"/>
+            android:layout_marginStart="0dp"
+            android:paddingBottom="0dp"
+            android:paddingStart="0dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
+                style="@style/TitleSecondaryDark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/device_profile_loaded_name"
-                style="@style/TitleSecondaryDark"/>
+                android:paddingTop="0dp"
+                android:text="@string/device_profile_loaded_name" />
+
             <EditText
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
                 android:id="@+id/prefProfileName"
+                style="@style/TitleSecondaryDark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:inputType="text"
-                style="@style/TitleSecondaryDark"/>
+                android:paddingTop="0dp" />
+        </LinearLayout>
+
+
+        <include layout="@layout/device_actions" />
+
+        <LinearLayout
+            android:id="@+id/prefSysPrefsSource"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <include layout="@layout/pref_layout"></include>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/prefPatientPrefsSource"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <include layout="@layout/pref_layout"></include>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/settingBG2"
+            style="@style/TitlePrimaryDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/misc_plugins" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/pluginList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
         </LinearLayout>
 
     </LinearLayout>
 
-    <include layout="@layout/device_actions"/>
+
+    </ScrollView>
 </LinearLayout>
+

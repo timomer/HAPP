@@ -10,9 +10,7 @@
     <color name="colorPrimaryTextDark">#212121</color>
     <color name="colorSecondaryTextDark">#757575</color>
 
-    <color name="colorCGM">#c0392b</color>
-    <color name="colorProfileManager">#546E7A</color>
-    <color name="colorSysFunctions">#7e57c2</color>
+
     <color name="colorImageBackground">#54000000</color>
 
     <color name="backgroundLight">#50fafafa</color>
@@ -21,8 +19,14 @@
     <color name="colorCGMMinLine">#FF5722</color>
     <color name="colorCGMMaxLine">#FF9800</color>
 
+    <!-- Devices -->
+    <color name="colorCGM">#c0392b</color>
+    <color name="colorProfileManager">#546E7A</color>
+    <color name="colorSysFunctions">#7e57c2</color>
+    <color name="colorPump">#2196f3</color>
     <!-- Events -->
     <color name="eventBolus">#2196f3</color>
     <color name="eventSGV">#FF5722</color>
     <color name="eventCarbs">#8BC34A</color>
+    <color name="eventTempBasal">#6200ea</color>
 </resources>

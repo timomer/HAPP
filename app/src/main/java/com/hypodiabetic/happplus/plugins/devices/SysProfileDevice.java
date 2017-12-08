@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +35,11 @@ import com.hypodiabetic.happplus.database.dbHelperProfile;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfacePatientPrefs;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceSystemPrefs;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import org.json.JSONArray;
@@ -41,9 +48,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.AbstractPreferences;
 
 import layout.RecyclerViewDevices;
 import layout.AdapterRealmList;
+import layout.RecyclerViewPlugins;
 
 /**
  * Created by Tim on 22/01/2017.
@@ -55,10 +64,16 @@ public class SysProfileDevice extends AbstractDevice {
     private static final String PREF_DEFAULT_SYS_PROFILE    =   "default_sys_profile_id";
     public static final String DEFAULT_SYS_PROFILE_NAME     =   "Default";
     private static final String PREF_SELECTED_SYS_PROFILE   =   "user_selected_sys_profile_id";
+    public final static String PREF_SYS_PREFS_PLUGIN        =   "pref_sys_prefs";
+    public final static String PREF_PATIENT_PREFS_PLUGIN    =   "pref_patient_prefs";
+
+    private AbstractPluginBase pluginPatientPrefsPlugin;
+    private AbstractPluginBase pluginSysPrefsPlugin;
 
     private Profile defaultSysProfile;
     private Profile selectedSysProfile;
 
+    private RecyclerViewPlugins adapterPlugins;
     private TextView deviceStatus;
     private TextView deviceStatusText;
 
@@ -73,7 +88,21 @@ public class SysProfileDevice extends AbstractDevice {
     }
 
     protected List<PluginPref> getPrefsList(){
-        return new ArrayList<>();
+        List<PluginPref> prefs = new ArrayList<>();
+        prefs.add(new PluginPref<>(
+                PREF_SYS_PREFS_PLUGIN,
+                context.getString(R.string.device_profile_sys_prefs_source),
+                context.getString(R.string.device_profile_sys_prefs_source_desc),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceSystemPrefs.class),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceSystemPrefs.class)));
+        prefs.add(new PluginPref<>(
+                PREF_PATIENT_PREFS_PLUGIN,
+                context.getString(R.string.device_profile_patient_prefs_source),
+                context.getString(R.string.device_profile_patient_prefs_source_desc),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfacePatientPrefs.class),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfacePatientPrefs.class)));
+
+        return prefs;
     }
 
     public DeviceStatus getPluginStatus(){
@@ -85,7 +114,8 @@ public class SysProfileDevice extends AbstractDevice {
                 deviceStatus.addComment("Loaded Profile is the same as Default Profile.");
             }
         }
-
+        deviceStatus.checkPluginIDependOn(pluginPatientPrefsPlugin, getPref(PREF_PATIENT_PREFS_PLUGIN).getPrefDisplayName());
+        deviceStatus.checkPluginIDependOn(pluginSysPrefsPlugin, getPref(PREF_SYS_PREFS_PLUGIN).getPrefDisplayName());
         return deviceStatus;
     }
 
@@ -109,6 +139,8 @@ public class SysProfileDevice extends AbstractDevice {
                 Log.e(TAG, "loadProfiles: Cannot find User Selected Profile, returning Default Sys Profile");
             }
         }
+        //now we have set the System Profile, load prefs for this Device
+        super.loadPrefs();
     }
     @Override
     public boolean onUnLoad(){
@@ -116,9 +148,22 @@ public class SysProfileDevice extends AbstractDevice {
     }
 
     public boolean onLoad(){
+        setPlugins();
         return true;
     }
 
+    private void setPlugins(){
+        if (getPref(PREF_PATIENT_PREFS_PLUGIN).getStringValue() != null){
+            pluginPatientPrefsPlugin = PluginManager.getPlugin(getPref(PREF_PATIENT_PREFS_PLUGIN).getStringValue(),InterfacePatientPrefs.class);
+            if (pluginPatientPrefsPlugin != null) {
+                pluginPatientPrefsPlugin.load();
+            }
+        }
+    }
+
+    public InterfacePatientPrefs getPatientPref(){
+        return (InterfacePatientPrefs) pluginPatientPrefsPlugin;
+    }
 
 
     private Profile saveNewSysProfile(String name){
@@ -225,6 +270,7 @@ public class SysProfileDevice extends AbstractDevice {
              }
          }
         );
+
     }
 
     /**
@@ -252,6 +298,23 @@ public class SysProfileDevice extends AbstractDevice {
         deviceImage.setBackground(          getImage());
 
         //Setup Prefs
+        setPluginPref((LinearLayout) rootView.findViewById(R.id.prefPatientPrefsSource), rootView, getPref(PREF_PATIENT_PREFS_PLUGIN));
+        setPluginPref((LinearLayout) rootView.findViewById(R.id.prefSysPrefsSource), rootView, getPref(PREF_SYS_PREFS_PLUGIN));
+
+        //Setup the Plugin Cards list
+        RecyclerView rv;
+        rv=(RecyclerView)rootView.findViewById(R.id.pluginList);
+        rv.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
+        rv.setHasFixedSize(true);
+
+        List<AbstractPluginBase> pB = new ArrayList<>();
+        pB.addAll(PluginManager.getPluginList(InterfacePatientPrefs.class));
+        pB.addAll(PluginManager.getPluginList(InterfaceSystemPrefs.class));
+        adapterPlugins = new RecyclerViewPlugins(pB);
+
+        rv.setAdapter(adapterPlugins);
+
+        //Profiles
         spLoadedProfile =   (Spinner) rootView.findViewById(R.id.prefProfileSelected);
         final AdapterRealmList profileList  =   new AdapterRealmList<>(inflater.getContext() , dbHelperProfile.getProfileList(realmHelper.getRealm(), Profile.TYPE_SYS_PROFILE));
         spLoadedProfile.setAdapter(profileList);
@@ -340,6 +403,7 @@ public class SysProfileDevice extends AbstractDevice {
                 }
             }
         });
+
 
         fragmentSetUI();
         return rootView;

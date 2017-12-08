@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Intents;
+import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.database.Profile;
@@ -47,6 +50,7 @@ public class PopupWindowPref extends android.widget.PopupWindow {
     private TextView sysPrefPopupDesc;
     private TextView sysPrefPopupSubTitle;
     private TextView sysPrefPopupTitle;
+    private TextView sysPrefCompareValue;
     private Button btnSave;
     private Spinner sysPrefSysProfiles;
 
@@ -64,11 +68,12 @@ public class PopupWindowPref extends android.widget.PopupWindow {
         sysPrefPopupTitle           =   (TextView) popupView.findViewById(R.id.sysPrefPopupTitle);
         sysPrefPopupSubTitle        =   (TextView) popupView.findViewById(R.id.sysPrefPopupSubTitle);
         sysPrefPopupDesc            =   (TextView) popupView.findViewById(R.id.sysPrefPopupDesc);
-        sysPrefSysProfiles       =   (Spinner) popupView.findViewById(R.id.sysPrefSysProfiles);
-        sysPrefItems                    =   (ListView) popupView.findViewById(R.id.sysPrefItems);
-        btnSave                         =   (Button) popupView.findViewById(R.id.sysPrefSave);
-        Button btnCancel                =   (Button) popupView.findViewById(R.id.sysPrefCancel);
-        sysPrefTextValue                =   (EditText) popupView.findViewById(R.id.sysPrefText);
+        sysPrefCompareValue         =   (TextView) popupView.findViewById(R.id.sysPrefCompareValue);
+        sysPrefSysProfiles          =   (Spinner) popupView.findViewById(R.id.sysPrefSysProfiles);
+        sysPrefItems                =   (ListView) popupView.findViewById(R.id.sysPrefItems);
+        btnSave                     =   (Button) popupView.findViewById(R.id.sysPrefSave);
+        Button btnCancel            =   (Button) popupView.findViewById(R.id.sysPrefCancel);
+        sysPrefTextValue            =   (EditText) popupView.findViewById(R.id.sysPrefText);
 
         sysPrefItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -87,14 +92,32 @@ public class PopupWindowPref extends android.widget.PopupWindow {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //Updated the highlighted pref with the value set in the selected profile
                 Profile profile = (Profile) parent.getSelectedItem();
-                setPrefList(new SysPref<>(
-                        sysPref.getPrefName(),
-                        sysPref.getPrefDisplayName(),
-                        sysPref.getPrefDescription(),
-                        sysPref.getPefValues(),
-                        sysPref.getPrefDisplayValues(),
-                        PluginPref.PREF_TYPE_LIST,
-                        profile.getId()).getDefaultStringValue());
+                switch (sysPref.getPrefType()){
+                    case SysPref.PREF_TYPE_LIST:
+                        //Highlights the pref in a list of options
+                        setPrefListWithPrefHighlighted(new SysPref<>(
+                                sysPref.getPrefName(),
+                                sysPref.getPrefDisplayName(),
+                                sysPref.getPrefDescription(),
+                                sysPref.getPefValues(),
+                                sysPref.getPrefDisplayValues(),
+                                SysPref.PREF_TYPE_LIST,
+                                sysPref.getPrefDisplayFormat(),
+                                profile.getId()).getDefaultStringValue());
+                        sysPrefCompareValue.setText(    MainApp.getInstance().getString(R.string.misc_item_mark));
+                        break;
+                    default:
+                        sysPrefCompareValue.setText(    new SysPref<>(
+                                sysPref.getPrefName(),
+                                sysPref.getPrefDisplayName(),
+                                sysPref.getPrefDescription(),
+                                sysPref.getPefValues(),
+                                sysPref.getPrefDisplayValues(),
+                                sysPref.getPrefType(),
+                                sysPref.getPrefDisplayFormat(),
+                                profile.getId()).getDefaultStringValue());
+                }
+
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -112,6 +135,8 @@ public class PopupWindowPref extends android.widget.PopupWindow {
                 updatePref(sysPrefTextValue.getText().toString());
             }
         });
+
+
 
         setHeight(WindowManager.LayoutParams.WRAP_CONTENT);
         setWidth(WindowManager.LayoutParams.WRAP_CONTENT);
@@ -135,31 +160,37 @@ public class PopupWindowPref extends android.widget.PopupWindow {
         // Setup the UI
         RealmHelper realmHelper = new RealmHelper();
         sysPrefPopupTitle.setText(      sysPref.getPrefDisplayName());
-        String subTitle =               sysPref.getSysProfileName() + " " + mContext.getString(R.string.device_profile);
+        String subTitle =               sysPref.getSysProfileName() + " " + mContext.getString(R.string.device_profile_loaded);
         sysPrefPopupSubTitle.setText(   subTitle);
         sysPrefPopupDesc.setText(       sysPref.getPrefDescription());
 
+        //Compare with Profile
+        sysPrefSysProfiles.setAdapter(  new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1 , dbHelperProfile.getProfileList(realmHelper.getRealm(), Profile.TYPE_SYS_PROFILE)));
+        sysPrefSysProfiles.setSelection(Utilities.getIndex(sysPrefSysProfiles, SysProfileDevice.DEFAULT_SYS_PROFILE_NAME), false);
+        sysPrefSysProfiles.setPrompt(   mContext.getString(R.string.pref_compare_profile));
+
         //Customise UI based on Pref Type
         switch (sysPref.getPrefType()){
-            case PluginPref.PREF_TYPE_LIST:
-                btnSave.setVisibility(View.GONE);
-                sysPrefTextValue.setVisibility(View.GONE);
-                sysPrefSysProfiles.setAdapter(  new ArrayAdapter<>(mContext, android.R.layout.simple_list_item_1 , dbHelperProfile.getProfileList(realmHelper.getRealm(), Profile.TYPE_SYS_PROFILE)));
-                sysPrefSysProfiles.setSelection(Utilities.getIndex(sysPrefSysProfiles, SysProfileDevice.DEFAULT_SYS_PROFILE_NAME), false);
-                sysPrefSysProfiles.setPrompt(mContext.getString(R.string.pref_compare_profile));
-                setPrefList(sysPref.getDefaultStringValue());
+            case SysPref.PREF_TYPE_LIST:
+                btnSave.setVisibility(          View.GONE);
+                sysPrefTextValue.setVisibility( View.GONE);
+                setPrefListWithPrefHighlighted(sysPref.getDefaultStringValue());
                 break;
-            case PluginPref.PREF_TYPE_DOUBLE:
-                sysPrefItems.setVisibility(View.GONE);
-
+            case SysPref.PREF_TYPE_DOUBLE:
+                sysPrefItems.setVisibility(     View.GONE);
+                sysPrefTextValue.setText(       sysPref.getStringValue());
+                sysPrefTextValue.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 break;
-            case PluginPref.PREF_TYPE_INT:
+            case SysPref.PREF_TYPE_INT:
                 sysPrefItems.setVisibility(View.GONE);
-
+                sysPrefTextValue.setText(       sysPref.getStringValue());
+                sysPrefTextValue.setInputType(InputType.TYPE_CLASS_NUMBER);
+                sysPrefTextValue.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
                 break;
-            case PluginPref.PREF_TYPE_STRING:
+            case SysPref.PREF_TYPE_STRING:
                 sysPrefItems.setVisibility(View.GONE);
-
+                sysPrefTextValue.setText(       sysPref.getStringValue());
+                sysPrefTextValue.setInputType(InputType.TYPE_CLASS_TEXT);
                 break;
         }
 
@@ -181,7 +212,7 @@ public class PopupWindowPref extends android.widget.PopupWindow {
     }
 
 
-    private void setPrefList(String prefOptionToHighlight){
+    private void setPrefListWithPrefHighlighted(String prefOptionToHighlight){
         sysPrefItems.setAdapter(        new AdapterSysPref<>(mContext, sysPref.getPrefDisplayValues(), prefOptionToHighlight));
     }
 

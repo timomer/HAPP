@@ -18,14 +18,17 @@
         android:layout_weight="1"
         android:orientation="horizontal"
         android:id="@+id/prefValueLayout">
+
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/misc_placeholder"
-            style="@style/TitleSecondaryDark"
             android:id="@+id/prefValue"
-            android:paddingEnd="0dp"/>
+            style="@style/TitleSecondaryDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/prefEdit"
+            android:paddingEnd="4dp"
+            android:text="@string/misc_placeholder" />
         <ImageView
+            android:id="@+id/prefEdit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/arrow_down_drop_circle_outline"

@@ -3,6 +3,8 @@ package com.hypodiabetic.happplus.plugins.AbstractClasses;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
+import android.support.annotation.StringDef;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -22,12 +24,14 @@ import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONArray;
 
-import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import layout.PopupWindowPref;
+
 
 
 /**
@@ -45,11 +49,15 @@ public abstract class AbstractPluginBase extends Fragment {
     private boolean isLoaded;
     private List<SysPref> pluginPrefs                       =   new ArrayList<>();
 
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({PLUGIN_TYPE_SOURCE, PLUGIN_TYPE_DEVICE, PLUGIN_TYPE_SYNC, PLUGIN_TYPE_BOLUS_WIZARD, PLUGIN_TYPE_EVENT_VALIDATOR, PLUGIN_TYPE_IOB_CALC})
+    private @interface PLUGIN_TYPE{}
     public static final String PLUGIN_TYPE_SOURCE           =   "SOURCE";
     public static final String PLUGIN_TYPE_DEVICE           =   "DEVICE";
     public static final String PLUGIN_TYPE_SYNC             =   "SYNC";
     public static final String PLUGIN_TYPE_BOLUS_WIZARD     =   "BOLUS_WIZARD";
     public static final String PLUGIN_TYPE_EVENT_VALIDATOR  =   "EVENT_VALIDATOR";
+    public static final String PLUGIN_TYPE_IOB_CALC         =   "IOB_CALC";
 
     private static final String PREF_ENABLED                =   "enabled";
 
@@ -149,9 +157,9 @@ public abstract class AbstractPluginBase extends Fragment {
     protected void loadPrefs(){
         Log.i(TAG, "loadPrefs: for " + TAG + " Started");
         pluginPrefs =   new ArrayList<>();
-        pluginPrefs.add(new SysPref<>(PREF_PREFIX + PREF_ENABLED, PREF_ENABLED, context.getString(R.string.pref_enabled_desc), Arrays.asList("true", "false"), Arrays.asList("true", "false"), PluginPref.PREF_TYPE_LIST));
+        pluginPrefs.add(new SysPref<>(PREF_PREFIX + PREF_ENABLED, PREF_ENABLED, context.getString(R.string.pref_enabled_desc), Arrays.asList("true", "false"), Arrays.asList("true", "false"), SysPref.PREF_TYPE_LIST, SysPref.PREF_DISPLAY_FORMAT_NONE));
         for (PluginPref pref : getPrefsList()) {
-            SysPref sysPref =   new SysPref<>(PREF_PREFIX + pref.getName(), pref.getDisplayName(), pref.getDescription(), pref.getValues(), pref.getDisplayValues(), pref.getPrefType());
+            SysPref sysPref =   new SysPref<>(PREF_PREFIX + pref.getName(), pref.getDisplayName(), pref.getDescription(), pref.getValues(), pref.getDisplayValues(), pref.getPrefType(), pref.getPrefDisplayFormat());
             pluginPrefs.add(sysPref);
             Log.i(TAG, sysPref.getPrefName() + "=" + sysPref.getStringValue() + " | " + sysPref.getPrefDescription());
         }
@@ -323,7 +331,7 @@ public abstract class AbstractPluginBase extends Fragment {
      * Type of plugin this is
      * @return String as listed in PluginBase, example PLUGIN_TYPE_SOURCE
      */
-    public abstract String getPluginType();
+    public abstract @PLUGIN_TYPE String getPluginType();
 
     /**
      * Type of data this plugin handel's

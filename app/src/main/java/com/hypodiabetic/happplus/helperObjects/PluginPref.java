@@ -1,9 +1,5 @@
 package com.hypodiabetic.happplus.helperObjects;
 
-import android.support.annotation.IntDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -13,37 +9,21 @@ import java.util.List;
 
 public class PluginPref<T> {
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({PREF_TYPE_INT, PREF_TYPE_DOUBLE, PREF_TYPE_STRING})
-    private @interface PrefType {}
-    public static final int PREF_TYPE_LIST = 0;
-    public static final int PREF_TYPE_INT = 1;
-    public static final int PREF_TYPE_DOUBLE = 2;
-    public static final int PREF_TYPE_STRING = 3;
-
     private String prefName;
     private String prefDisplayName;
     private String prefDescription;
     private List<T> prefValues;
     private List<T> prefDisplayValues;
     private int prefType;
+    private int prefDisplayFormat;
 
-    public String getName(){
-        return prefName;
-    }
-    public String getDisplayName(){
-        return prefDisplayName;
-    }
-    public String getDescription(){
-        return prefDescription;
-    }
-    public List<T> getValues(){
-        return prefValues;
-    }
-    public List<T> getDisplayValues(){
-        return prefDisplayValues;
-    }
-    public int getPrefType(){ return prefType; }
+    public String getName(){            return prefName;}
+    public String getDisplayName(){     return prefDisplayName;}
+    public String getDescription(){     return prefDescription;}
+    public List<T> getValues(){         return prefValues;}
+    public List<T> getDisplayValues(){  return prefDisplayValues;}
+    public int getPrefType(){           return prefType; }
+    public int getPrefDisplayFormat(){  return prefDisplayFormat; }
 
     /**
      * Plugin Pref with a List of possible values
@@ -59,7 +39,7 @@ public class PluginPref<T> {
         this.prefDescription    =   prefDescription;
         this.prefValues         =   prefValues;
         this.prefDisplayValues  =   prefDisplayValues;
-        this.prefType           =   PREF_TYPE_LIST;
+        this.prefType           =   SysPref.PREF_TYPE_LIST;
     }
 
     /**
@@ -68,13 +48,15 @@ public class PluginPref<T> {
      * @param prefDisplayName Display Name used in UI
      * @param prefDescription Short description about this pref used in UI
      * @param prefType Variable type this pref is, used to validate user input
+     * @param displayFormat Custom display format for this pref
      */
-    public PluginPref(String prefName, String prefDisplayName, String prefDescription, @PrefType int prefType){
+    public PluginPref(String prefName, String prefDisplayName, String prefDescription, @SysPref.PrefType int prefType, @SysPref.PREF_DISPLAY_FORMAT int displayFormat){
         this.prefName           =   prefName;
         this.prefDisplayName    =   prefDisplayName;
         this.prefDescription    =   prefDescription;
         this.prefValues         =   null;
         this.prefDisplayValues  =   null;
         this.prefType           =   prefType;
+        this.prefDisplayFormat  =   displayFormat;
     }
 }

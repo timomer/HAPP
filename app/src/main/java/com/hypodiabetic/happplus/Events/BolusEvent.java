@@ -2,6 +2,7 @@ package com.hypodiabetic.happplus.Events;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IntDef;
+import android.support.annotation.StringDef;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +18,7 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Date;
 
 import io.realm.RealmResults;
 
@@ -38,6 +40,7 @@ public class BolusEvent extends AbstractEvent {
     private static final String BOLUS_TYPE               =   "bolus_type";
     private static final String BOLUS_AMOUNT             =   "bolus_amount";
     private static final String BOLUS_SECONDARY_AMOUNT   =   "bolus_secondary_amount";   //Used for extended boluses, correction amount, etc
+    private static final String BOLUS_DATE_DELIVERED     =   "bolus_delivery_date";
 
     public BolusEvent(Event event){
         mEvent  =   event;
@@ -116,6 +119,24 @@ public class BolusEvent extends AbstractEvent {
             default:
                 return MainApp.getInstance().getString(R.string.event_bolus_type_unknown);
         }
+    }
+
+    /**
+     * Allows us to set the date when a Bolus was delivered
+     * @param when Date Bolus was Delivered
+     */
+    public void setDeliveredDate(Date when){
+        try {
+            JSONObject jsonData = new JSONObject(mEvent.getData());
+            jsonData.put(BOLUS_DATE_DELIVERED,  when.getTime());
+            mEvent.setData(jsonData);
+        } catch (JSONException e){
+            Log.e(TAG, "BolusEvent: error setting Delivered Date");
+        }
+    }
+
+    public Date getDeliveredDate(){
+        return new Date(this.getData().optLong(BOLUS_DATE_DELIVERED, 0));
     }
 
 }

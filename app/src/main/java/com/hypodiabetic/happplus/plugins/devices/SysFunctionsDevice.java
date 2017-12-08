@@ -24,6 +24,7 @@ import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfacePatientPrefs;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import org.json.JSONArray;
