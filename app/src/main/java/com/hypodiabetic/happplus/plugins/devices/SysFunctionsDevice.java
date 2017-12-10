@@ -45,7 +45,8 @@ public class SysFunctionsDevice extends AbstractDevice {
     private AbstractPluginBase pluginBolusWizard;
 
     //Device Prefs
-    private static String PREF_BOLUS_WIZARD_PLUGIN  =   "bolus_wizard_plugin";
+    private static String PREF_BOLUS_WIZARD_PLUGIN              =   "bolus_wizard_plugin";
+    public static String PREF_DEFAULT_24H_PROFILE_TIMESLOTS    =   "default_24h_profile_timeslots";
 
     private TextView deviceStatus;
     private TextView deviceStatusText;
@@ -95,7 +96,12 @@ public class SysFunctionsDevice extends AbstractDevice {
                 context.getString(R.string.device_sysf_bw_plugin_desc),
                 (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceBolusWizard.class),
                 (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceBolusWizard.class)));
-
+        prefs.add(new PluginPref(
+                PREF_DEFAULT_24H_PROFILE_TIMESLOTS,
+                context.getString(R.string.profile_editor_default_time_slots),
+                context.getString(R.string.profile_editor_default_time_slots),
+                SysPref.PREF_TYPE_STRING,
+                SysPref.PREF_DISPLAY_FORMAT_NONE));
         return prefs;
     }
 

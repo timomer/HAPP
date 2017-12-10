@@ -1,21 +1,33 @@
 package com.hypodiabetic.happplus;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceNotifyFragmentBackPress;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import layout.FragmentCannotLoadFragment;
 import layout.FragmentEventEntry;
+import layout.FragmentProfileEditor24H;
 
 
 public class SingleFragmentActivity extends FragmentActivity {
 
     private final static String TAG = "SingleFragmentActivity";
+
+    public final static String FRAGMENT_EVENT_ENTRY     =   "FragmentEventEntry";
+    public final static String FRAGMENT_PROFILE_EDITOR  =   "FragmentProfileEditor";
+
+    private String fragmentTag;
+
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +44,15 @@ public class SingleFragmentActivity extends FragmentActivity {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             if (fragmentName != null){
+                fragmentTag = fragmentName;
                 switch (fragmentName){
-                    case "FragmentEventEntry":
-                        fragmentTransaction.add(R.id.fragmentHolder, FragmentEventEntry.newInstance());
+                    case FRAGMENT_EVENT_ENTRY:
+                        fragmentTransaction.add(R.id.fragmentHolder, FragmentEventEntry.newInstance(), fragmentTag);
+                        fragmentTransaction.commit();
+                        break;
+                    case FRAGMENT_PROFILE_EDITOR:
+                        fragmentTransaction.add(R.id.fragmentHolder, FragmentProfileEditor24H.newInstance(extras.getString(FragmentProfileEditor24H.ARG_PREF_NAME), extras.getString(FragmentProfileEditor24H.ARG_PREF_PLUGIN)),fragmentTag);
+
                         fragmentTransaction.commit();
                         break;
                     default:
@@ -67,4 +85,30 @@ public class SingleFragmentActivity extends FragmentActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        //Notify the Fragment user has Back Pressed
+        final InterfaceNotifyFragmentBackPress fragment = (InterfaceNotifyFragmentBackPress) getSupportFragmentManager().findFragmentByTag(fragmentTag);
+
+        if (fragment != null){
+            if(fragment.onBackPress()){
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        return false;
+    }
 }

@@ -27,12 +27,13 @@ import java.util.List;
 public class SysPref<T> {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({PREF_TYPE_LIST, PREF_TYPE_INT, PREF_TYPE_DOUBLE, PREF_TYPE_STRING})
+    @IntDef({PREF_TYPE_LIST, PREF_TYPE_INT, PREF_TYPE_DOUBLE, PREF_TYPE_STRING, PREF_TYPE_24H_PROFILE})
     public  @interface PrefType {}
     public static final int PREF_TYPE_LIST = 0;
     public static final int PREF_TYPE_INT = 1;
     public static final int PREF_TYPE_DOUBLE = 2;
     public static final int PREF_TYPE_STRING = 3;
+    public static final int PREF_TYPE_24H_PROFILE = 4;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({PREF_DISPLAY_FORMAT_NONE, PREF_DISPLAY_FORMAT_SGV, PREF_DISPLAY_FORMAT_INSULIN, PREF_DISPLAY_FORMAT_CARB})
@@ -84,24 +85,28 @@ public class SysPref<T> {
         if (prefValue == null) return MainApp.getInstance().getString(R.string.pref_not_set);
         String displayValue = null;
 
-        if (prefType == PREF_TYPE_LIST) {
-            //Finds the display value for this pref from the Display Values List
-            for (int i = 0; i < prefValues.size(); i++) {
-                if (AbstractPluginBase.class.isAssignableFrom(prefValues.get(i).getClass())) {
-                    AbstractPluginBase pluginBase = (AbstractPluginBase) prefValues.get(i);
-                    if (pluginBase.getPluginName().equals(prefValue)) {
-                        displayValue = prefDisplayValues.get(i).toString();
-                        break;
-                    }
-                } else {
-                    if (prefValues.get(i).toString().equals(prefValue)) {
-                        displayValue = prefDisplayValues.get(i).toString();
-                        break;
+        switch (prefType){
+            case  PREF_TYPE_LIST:
+                //Finds the display value for this pref from the Display Values List
+                for (int i = 0; i < prefValues.size(); i++) {
+                    if (AbstractPluginBase.class.isAssignableFrom(prefValues.get(i).getClass())) {
+                        AbstractPluginBase pluginBase = (AbstractPluginBase) prefValues.get(i);
+                        if (pluginBase.getPluginName().equals(prefValue)) {
+                            displayValue = prefDisplayValues.get(i).toString();
+                            break;
+                        }
+                    } else {
+                        if (prefValues.get(i).toString().equals(prefValue)) {
+                            displayValue = prefDisplayValues.get(i).toString();
+                            break;
+                        }
                     }
                 }
-            }
-        } else {
-            displayValue    =   prefValue;
+                break;
+            case PREF_TYPE_24H_PROFILE:
+                return MainApp.getInstance().getString(R.string.pref_open_profile_editor);
+            default:
+                displayValue    =   prefValue;
         }
 
         if (displayValue != null){
@@ -127,6 +132,20 @@ public class SysPref<T> {
         }else {
             Log.e(TAG, "getPrefDisplayValue: Cannot find Display value for pref: " + prefValue);
             return MainApp.getInstance().getString(R.string.misc_error);
+        }
+    }
+
+    public String getPrefUnitOfMeasure(){
+        switch (prefDisplayFormat) {
+            case PREF_DISPLAY_FORMAT_SGV:
+                CGMDevice cgmDevice =   (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
+                return cgmDevice.getPref(CGMDevice.PREF_BG_UNITS).getStringValue();
+            case PREF_DISPLAY_FORMAT_INSULIN:
+                return "u";
+            case PREF_DISPLAY_FORMAT_CARB:
+                return "g";
+            default:
+                return "";
         }
     }
 

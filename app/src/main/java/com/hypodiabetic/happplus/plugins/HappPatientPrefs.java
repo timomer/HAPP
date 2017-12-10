@@ -1,31 +1,24 @@
 package com.hypodiabetic.happplus.plugins;
 
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
-import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfacePatientPrefs;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import layout.RecyclerViewPlugins;
 
 /**
  * Created by Tim on 02/12/2017.
@@ -76,13 +69,13 @@ public class HappPatientPrefs extends AbstractPluginBase implements InterfacePat
                 PREF_ISF,
                 context.getString(R.string.plugin_PatientPrefs_pref_isf),
                 context.getString(R.string.plugin_PatientPrefs_pref_isf_desc),
-                SysPref.PREF_TYPE_STRING,
+                SysPref.PREF_TYPE_24H_PROFILE,
                 SysPref.PREF_DISPLAY_FORMAT_SGV));
         prefs.add(new PluginPref<>(
                 PREF_CARB_RATIO,
                 context.getString(R.string.plugin_PatientPrefs_pref_carb_ratio),
                 context.getString(R.string.plugin_PatientPrefs_pref_carb_ratio_desc),
-                SysPref.PREF_TYPE_STRING,
+                SysPref.PREF_TYPE_24H_PROFILE,
                 SysPref.PREF_DISPLAY_FORMAT_CARB));
 
         return prefs;
@@ -144,6 +137,8 @@ public class HappPatientPrefs extends AbstractPluginBase implements InterfacePat
         setPluginPref((LinearLayout) rootView.findViewById(R.id.prefLowSGV), rootView, getPref(PREF_LOW_SGV));
         setPluginPref((LinearLayout) rootView.findViewById(R.id.prefDIA), rootView, getPref(PREF_DIA));
         setPluginPref((LinearLayout) rootView.findViewById(R.id.prefCarbAbsorptionRate), rootView, getPref(PREF_CARB_ABSORPTION_RATE));
+        setPluginPref((LinearLayout) rootView.findViewById(R.id.prefCarbRatio), rootView, getPref(PREF_CARB_RATIO));
+        setPluginPref((LinearLayout) rootView.findViewById(R.id.prefISF), rootView, getPref(PREF_ISF));
 
         return rootView;
     }

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.SingleFragmentActivity;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import layout.FragmentProfileEditor24H;
 import layout.PopupWindowPref;
 
 
@@ -175,6 +177,10 @@ public abstract class AbstractPluginBase extends Fragment {
         for (SysPref pref : pluginPrefs){
             if (pref.getPrefName().equals(PREF_PREFIX + prefName)) return pref;
         }
+        //lets try again but this tine without PREF_PREFIX (as prefName may already have it)
+        for (SysPref pref : pluginPrefs){
+            if (pref.getPrefName().equals(prefName)) return pref;
+        }
         return null;
     }
 
@@ -214,18 +220,32 @@ public abstract class AbstractPluginBase extends Fragment {
      * @param rootView view of parent plugin
      * @param sysPref the sysPref we are displaying
      */
-    protected void setPluginPref(LinearLayout linearLayout, View rootView, SysPref sysPref){
+    protected void setPluginPref(LinearLayout linearLayout, View rootView, final SysPref sysPref){
         final TextView prefValue        =   (TextView) linearLayout.findViewById(R.id.prefValue);
         TextView prefTitle              =   (TextView) linearLayout.findViewById(R.id.prefTitle);
         RelativeLayout prefValueLayout  =   (RelativeLayout) linearLayout.findViewById(R.id.prefValueLayout);
         prefTitle.setText(              sysPref.getPrefDisplayName());
         prefValue.setText(              sysPref.getPrefDisplayValue());
-        final PopupWindowPref popupWindow = new PopupWindowPref(rootView.getContext(), sysPref, this, prefValue);
-        prefValueLayout.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                popupWindow.show(v.getRootView(), 0, -250);
-            }
-        });
+        switch (sysPref.getPrefType()){
+            case SysPref.PREF_TYPE_24H_PROFILE:
+                prefValueLayout.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent loadFragment = new Intent(v.getContext(), SingleFragmentActivity.class);
+                        loadFragment.putExtra(Intents.extras.FRAGMENT_NAME, SingleFragmentActivity.FRAGMENT_PROFILE_EDITOR);
+                        loadFragment.putExtra(FragmentProfileEditor24H.ARG_PREF_NAME, sysPref.getPrefName());
+                        loadFragment.putExtra(FragmentProfileEditor24H.ARG_PREF_PLUGIN, getPluginName());
+                        v.getContext().startActivity(loadFragment);
+                    }
+                });
+                break;
+            default:
+                final PopupWindowPref popupWindow = new PopupWindowPref(rootView.getContext(), sysPref, this, prefValue);
+                prefValueLayout.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        popupWindow.show(v.getRootView(), 0, -250);
+                    }
+                });
+        }
     }
 
     /**

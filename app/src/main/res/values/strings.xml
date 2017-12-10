@@ -17,6 +17,8 @@
     <string name="misc_error">error</string>
     <string name="misc_empty_string">-</string>
     <string name="misc_missing_value">\???</string>
+    <string name="misc_save">save</string>
+    <string name="misc_reject">reject</string>
 
     //Main Activity
     <string name="activity_main_fragment_now">Now</string>
@@ -42,6 +44,7 @@
     <string name="pref_missing">is missing</string>
     <string name="pref_not_set">not set</string>
     <string name="pref_inherited">inherited</string>
+    <string name="pref_open_profile_editor">Open Profile Editor</string>
 
     //Device
     <string name="device_status_error">Error</string>
@@ -168,5 +171,14 @@
 
     //Fragment Missing
     <string name="fragment_missing_cannot_find">cannot be found. Check that the plugin is Enabled.</string>
+
+    //Profile Editor 24H
+    <string name="profile_editor_profile_save_error">Gaps between time slots, fix before saving</string>
+    <string name="profile_editor_unsaved_profile">Profile changes have not been saved</string>
+    <string name="profile_editor_timeslot_no_room">Cannot add additional 30mins between this and next time slot</string>
+    <string name="profile_editor_saved">Updated Profile Saved</string>
+    <string name="profile_editor_default_time_slots">Default Time Slots</string>
+    <string name="profile_editor_time_slot_30min">30mins</string>
+    <string name="profile_editor_time_slot_60min">60mins</string>
 
 </resources>

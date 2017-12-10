@@ -33,6 +33,18 @@
         android:id="@+id/prefCarbAbsorptionRate">
         <include layout="@layout/pref_layout"></include>
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/prefCarbRatio">
+        <include layout="@layout/pref_layout"></include>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/prefISF">
+        <include layout="@layout/pref_layout"></include>
+    </LinearLayout>
 
 
 

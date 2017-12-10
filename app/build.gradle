@@ -37,5 +37,6 @@ dependencies {
     compile 'io.realm:android-adapters:1.4.0'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.1'
     compile 'com.github.PhilJay:MPAndroidChart-Realm:v2.0.2@aar'
+    compile 'com.google.code.gson:gson:2.8.1'
     testCompile 'junit:junit:4.12'
 }

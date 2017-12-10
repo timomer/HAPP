@@ -46,7 +46,6 @@ public class cgmLineChart extends AbstractFragmentLineChart {
     //Create a new instance of this Fragment
     public static cgmLineChart newInstance(Integer numHours, String title, String summary, String yAxisLDesc, @ColorInt int lineColour) {
         cgmLineChart fragment = new cgmLineChart();
-
         Bundle args = new Bundle();
         args.putInt(ARG_NUM_HOURS, numHours);
         args.putInt(ARG_LINE_COLOUR, lineColour);

@@ -16,10 +16,8 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.data.realm.implementation.RealmLineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.UtilitiesTime;
 
 import java.text.SimpleDateFormat;
