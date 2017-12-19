@@ -2,10 +2,12 @@ package layout;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.helperObjects.TimeSpan;
@@ -52,6 +55,7 @@ public class FragmentProfileEditor24H extends Fragment implements InterfaceNotif
     private RecyclerViewTimeSpans adapter;
 
     private SysPref sysPref;
+    AbstractPluginBase plugin;
 
     public static final String ARG_PREF_NAME = "pref_name";
     public static final String ARG_PREF_PLUGIN = "plugin_name";
@@ -75,7 +79,7 @@ public class FragmentProfileEditor24H extends Fragment implements InterfaceNotif
             String prefName     = getArguments().getString(ARG_PREF_NAME);
             String prefPlugin   = getArguments().getString(ARG_PREF_PLUGIN);
 
-            AbstractPluginBase plugin = PluginManager.getPluginByName(prefPlugin);
+            plugin = PluginManager.getPluginByName(prefPlugin);
             sysPref = plugin.getPref(prefName);
 
             SysFunctionsDevice sysFunctionsDevice = (SysFunctionsDevice) PluginManager.getPluginByClass(SysFunctionsDevice.class);
@@ -226,8 +230,16 @@ public class FragmentProfileEditor24H extends Fragment implements InterfaceNotif
             if (adapter.profileChanged) {
                 sysPref.update(new Gson().toJson(timeSpansList, new TypeToken<List<TimeSpan>>() {}.getType()));
 
+                plugin.refreshPrefs(sysPref);
+
+                Intent prefUpdate = new Intent(Intents.newLocalEvent.NEW_LOCAL_EVENT_PREF_UPDATE);
+                prefUpdate.putExtra(Intents.extras.PLUGIN_NAME, plugin.getPluginName());
+                prefUpdate.putExtra(Intents.extras.PLUGIN_TYPE, plugin.getPluginType());
+                prefUpdate.putExtra(Intents.extras.PLUGIN_PREF_NAME, sysPref.getPrefName());
+                LocalBroadcastManager.getInstance(this.getContext()).sendBroadcast(prefUpdate);
+
                 Log.d(TAG, "onOptionsItemSelected: Profile: " + sysPref.getPrefDisplayName() + " Changes Saved");
-                Toast.makeText(this.getContext(), R.string.profile_editor_saved, Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getContext(), sysPref.getPrefDisplayName() + " " + R.string.profile_editor_saved, Toast.LENGTH_LONG).show();
             }
             adapter.profileChanged  = false;
             getActivity().onBackPressed();

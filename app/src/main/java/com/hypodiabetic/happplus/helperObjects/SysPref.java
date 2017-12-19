@@ -3,10 +3,14 @@ package com.hypodiabetic.happplus.helperObjects;
 import android.support.annotation.IntDef;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.UtilitiesDisplay;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.Profile;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.PluginManager;
@@ -17,6 +21,9 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -66,14 +73,72 @@ public class SysPref<T> {
     public String getPrefName(){            return prefName;}
     public String getStringValue(){         return prefValue;}
     public String getDefaultStringValue(){  return prefDefaultValue;}
-    public Double getDoubleValue(){         return Utilities.stringToDouble(prefValue);}
-    public Integer getIntValue(){           return Utilities.stringToDouble(prefValue).intValue();}
+    public Double getDoubleValue(Date when){return Utilities.stringToDouble(getPrefValue(when));}
+    public Double getDoubleValue(){         return Utilities.stringToDouble(getPrefValue());}
+    public Integer getIntValue(Date when){  return Utilities.stringToDouble(getPrefValue(when)).intValue();}
+    public Integer getIntValue(){           return Utilities.stringToDouble(getPrefValue()).intValue();}
     public int getPrefDisplayFormat(){      return prefDisplayFormat;}
     public Boolean getBooleanValue(){
-        if (prefValue == null){
+        if (!isSet()){
             return false;
         } else {
             return Boolean.valueOf(prefValue);
+        }
+    }
+
+    /**
+     * Gets the String of this Pref, if PREF_TYPE_24H_PROFILE returns the value for requested date
+     * @param when hour of day in PREF_TYPE_24H_PROFILE
+     * @return String value of Pref
+     */
+    private String getPrefValue(Date when){
+        switch (prefType){
+            case PREF_TYPE_24H_PROFILE:
+                TimeSpan timeSpan = getTimeSpan(when);
+                if (timeSpan == null){
+                    return null;
+                } else {
+                    return timeSpan.getValue().toString();
+                }
+            default:
+                return prefValue;
+        }
+    }
+    private String getPrefValue(){
+        return getPrefValue(new Date());
+    }
+
+    /**
+     * Finds a TimeSpan in a 24h Profile
+     * @param when time we are looking for
+     * @return TimeSpan tha falls within this time
+     */
+    private TimeSpan getTimeSpan(Date when){
+        //Extract just the Time from when
+        when    =   new Date(when.getTime() - UtilitiesTime.getStartOfDay(when).getTime());
+
+        if (!isSet()) {
+            //cannot find any data, return an empty profile
+            Log.d(TAG,"No Profile Data set for: " + getPrefDisplayName());
+            return null;
+        } else {
+            List<TimeSpan> timeSpansList;
+            try {
+                timeSpansList = new Gson().fromJson(prefValue, new TypeToken<List<TimeSpan>>() {}.getType()); //The Profile itself
+            } catch (JsonSyntaxException j){
+                // TODO: 09/12/2017 crash logging
+                //Crashlytics.log("profileJSON: " + profileJSON);
+                //Crashlytics.logException(j);
+                Log.e(TAG, "Error getting profileJSON: " + j.getLocalizedMessage() + " " + getPrefDisplayValue());
+                return null;
+            }
+
+            for (TimeSpan timeSpan : timeSpansList){
+                if (when.after(timeSpan.getStartTime()) && when.before(timeSpan.getEndTime())){     return timeSpan;}
+                if (timeSpan.getStartTime().equals(when) || timeSpan.getEndTime().equals(when)) {   return timeSpan;}
+            }
+            Log.e(TAG, "getTimeSpan: Cannot find this TimeSpan: " + when.getTime() + " in " + prefValue);
+            return null;
         }
     }
 
@@ -82,7 +147,7 @@ public class SysPref<T> {
      * @return Display value, highlighted if it is Inherited from Default Profile
      */
     public String getPrefDisplayValue(){
-        if (prefValue == null) return MainApp.getInstance().getString(R.string.pref_not_set);
+        if (!isSet()) return MainApp.getInstance().getString(R.string.pref_not_set);
         String displayValue = null;
 
         switch (prefType){
@@ -159,7 +224,7 @@ public class SysPref<T> {
     }
 
     public boolean isSet(){
-        return prefValue != null;
+        return prefValue != null && !prefValue.equals("");
     }
 
     public void update(String value){

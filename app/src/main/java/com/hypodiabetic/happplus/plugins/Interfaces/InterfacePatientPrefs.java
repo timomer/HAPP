@@ -27,4 +27,5 @@ public interface InterfacePatientPrefs {
 
     public double getISF(Date when);
     public double getCarbRatio(Date when);
+
 }

@@ -67,8 +67,8 @@ public class SysProfileDevice extends AbstractDevice {
     public final static String PREF_SYS_PREFS_PLUGIN        =   "pref_sys_prefs";
     public final static String PREF_PATIENT_PREFS_PLUGIN    =   "pref_patient_prefs";
 
-    private AbstractPluginBase pluginPatientPrefsPlugin;
-    private AbstractPluginBase pluginSysPrefsPlugin;
+    private InterfacePatientPrefs pluginPatientPrefsPlugin;
+    private InterfaceSystemPrefs pluginSysPrefsPlugin;
 
     private Profile defaultSysProfile;
     private Profile selectedSysProfile;
@@ -114,8 +114,8 @@ public class SysProfileDevice extends AbstractDevice {
                 deviceStatus.addComment("Loaded Profile is the same as Default Profile.");
             }
         }
-        deviceStatus.checkPluginIDependOn(pluginPatientPrefsPlugin, getPref(PREF_PATIENT_PREFS_PLUGIN).getPrefDisplayName());
-        deviceStatus.checkPluginIDependOn(pluginSysPrefsPlugin, getPref(PREF_SYS_PREFS_PLUGIN).getPrefDisplayName());
+        deviceStatus.checkPluginIDependOn((AbstractPluginBase) pluginPatientPrefsPlugin, getPref(PREF_PATIENT_PREFS_PLUGIN).getPrefDisplayName());
+        deviceStatus.checkPluginIDependOn((AbstractPluginBase) pluginSysPrefsPlugin, getPref(PREF_SYS_PREFS_PLUGIN).getPrefDisplayName());
         return deviceStatus;
     }
 
@@ -154,10 +154,10 @@ public class SysProfileDevice extends AbstractDevice {
 
     private void setPlugins(){
         if (getPref(PREF_PATIENT_PREFS_PLUGIN).getStringValue() != null){
-            pluginPatientPrefsPlugin = PluginManager.getPlugin(getPref(PREF_PATIENT_PREFS_PLUGIN).getStringValue(),InterfacePatientPrefs.class);
-            if (pluginPatientPrefsPlugin != null) {
-                pluginPatientPrefsPlugin.load();
-            }
+            pluginPatientPrefsPlugin = (InterfacePatientPrefs) PluginManager.getPlugin(getPref(PREF_PATIENT_PREFS_PLUGIN).getStringValue(),InterfacePatientPrefs.class);
+        }
+        if (getPref(PREF_SYS_PREFS_PLUGIN).getStringValue() != null){
+            pluginSysPrefsPlugin = (InterfaceSystemPrefs) PluginManager.getPlugin(getPref(PREF_SYS_PREFS_PLUGIN).getStringValue(),InterfaceSystemPrefs.class);
         }
     }
 
@@ -235,6 +235,7 @@ public class SysProfileDevice extends AbstractDevice {
     }
 
     protected void onPrefChange(SysPref sysPref){
+        setPlugins();
     }
 
 

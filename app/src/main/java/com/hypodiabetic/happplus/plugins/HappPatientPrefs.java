@@ -94,30 +94,16 @@ public class HappPatientPrefs extends AbstractPluginBase implements InterfacePat
         return deviceStatus;
     }
 
-    public double getDIA(){
-        return 0;
-    }
+    public double getDIA(){         return getPref(PREF_DIA).getDoubleValue();}
 
-    public double getHighSGV(){
-        return 0;
-    }
-    public double getTargetSGV(){
-        return 0;
-    }
-    public double getLowSGV(){
-        return 0;
-    }
+    public double getHighSGV(){     return getPref(PREF_HIGH_SGV).getDoubleValue();}
+    public double getTargetSGV(){   return getPref(PREF_TARGET_SGV).getDoubleValue();}
+    public double getLowSGV(){      return getPref(PREF_LOW_SGV).getDoubleValue();}
 
-    public double getCarbAbsorptionRate(){
-        return 0;
-    }
+    public double getCarbAbsorptionRate(){  return getPref(PREF_CARB_ABSORPTION_RATE).getDoubleValue();}
 
-    public double getISF(Date when){
-        return 0;
-    }
-    public double getCarbRatio(Date when){
-        return 0;
-    }
+    public double getISF(Date when){        return getPref(PREF_ISF).getDoubleValue(when);}
+    public double getCarbRatio(Date when){  return getPref(PREF_CARB_RATIO).getDoubleValue(when);}
 
     public JSONArray getDebug(){
         return new JSONArray();

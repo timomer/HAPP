@@ -300,7 +300,7 @@ public abstract class AbstractPluginBase extends Fragment {
         String summary = "";
         if (pluginPrefs != null) {
             for (SysPref pref : pluginPrefs){
-                if (pref.getStringValue() == null && !pref.getPrefName().equals(TAG + ":" + PREF_ENABLED)) summary += context.getString(R.string.pref) + " '" + pref.getPrefDisplayName() + "' " + context.getString(R.string.pref_missing) + ". ";
+                if ((pref.getStringValue() == null || pref.getStringValue().equals("") ) && !pref.getPrefName().equals(TAG + ":" + PREF_ENABLED)) summary += context.getString(R.string.pref) + " '" + pref.getPrefDisplayName() + "' " + context.getString(R.string.pref_missing) + ". ";
             }
         }
         return summary;

@@ -88,13 +88,18 @@ public class SingleFragmentActivity extends FragmentActivity {
     @Override
     public void onBackPressed() {
         //Notify the Fragment user has Back Pressed
-        final InterfaceNotifyFragmentBackPress fragment = (InterfaceNotifyFragmentBackPress) getSupportFragmentManager().findFragmentByTag(fragmentTag);
+        final Fragment loadedFragment = getSupportFragmentManager().findFragmentByTag(fragmentTag);
 
-        if (fragment != null){
-            if(fragment.onBackPress()){
+        if (loadedFragment != null) {
+            if (InterfaceNotifyFragmentBackPress.class.isAssignableFrom(loadedFragment.getClass())) {
+                final InterfaceNotifyFragmentBackPress fragment = (InterfaceNotifyFragmentBackPress) loadedFragment;
+                if (fragment.onBackPress()) {
+                    super.onBackPressed();
+                }
+            } else {
                 super.onBackPressed();
             }
-        } else {
+        }else {
             super.onBackPressed();
         }
     }

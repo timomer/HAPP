@@ -26,15 +26,18 @@ import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractEventActivities;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceNotifyFragmentBackPress;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -223,8 +226,9 @@ public class HappBolusWizard extends AbstractEventActivities implements Interfac
         
         BolusWizardResult bolusWizardResult = new BolusWizardResult();
 
-        SysFunctionsDevice sysFun   =   (SysFunctionsDevice)  PluginManager.getPluginByClass(SysFunctionsDevice.class);
-        CGMDevice cgmDevice         =   (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
+        SysFunctionsDevice sysFun           =   (SysFunctionsDevice)    PluginManager.getPluginByClass(SysFunctionsDevice.class);
+        CGMDevice cgmDevice                 =   (CGMDevice)             PluginManager.getPluginByClass(CGMDevice.class);
+        SysProfileDevice sysProfileDevice   =   (SysProfileDevice)      PluginManager.getPluginByClass(SysProfileDevice.class);
 
         double lastSGV = 0D, iob = 0, cob =0;
         if (cgmDevice != null) {
@@ -236,12 +240,11 @@ public class HappBolusWizard extends AbstractEventActivities implements Interfac
             cob =   sysFun.getCOB();
         }
 
-        // TODO: 03/02/2017 values to bring in from devices that do not exist yet 
-        double profileMinSGV    =   0;
-        double profileMaxSGV    =   200; 
-        double profileTargetSGV =   100;
-        double profileISF       =   10;
-        int profileCarbRatio    =   5;
+        double profileMinSGV    =   sysProfileDevice.getPatientPref().getLowSGV();
+        double profileMaxSGV    =   sysProfileDevice.getPatientPref().getHighSGV();
+        double profileTargetSGV =   sysProfileDevice.getPatientPref().getTargetSGV();
+        double profileISF       =   sysProfileDevice.getPatientPref().getISF(new Date());
+        double profileCarbRatio =   sysProfileDevice.getPatientPref().getCarbRatio(new Date());
         
         Double insulin_correction_bg;
         Double suggested_bolus;

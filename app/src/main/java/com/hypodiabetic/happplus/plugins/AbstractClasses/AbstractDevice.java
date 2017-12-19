@@ -47,6 +47,7 @@ public abstract class AbstractDevice extends AbstractPluginBase {
     public void onResume(){
         super.onResume();
         registerReceivers();
+        updateStatus();
     }
 
     private void registerReceivers(){

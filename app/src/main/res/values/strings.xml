@@ -176,7 +176,7 @@
     <string name="profile_editor_profile_save_error">Gaps between time slots, fix before saving</string>
     <string name="profile_editor_unsaved_profile">Profile changes have not been saved</string>
     <string name="profile_editor_timeslot_no_room">Cannot add additional 30mins between this and next time slot</string>
-    <string name="profile_editor_saved">Updated Profile Saved</string>
+    <string name="profile_editor_saved">Profile Updated</string>
     <string name="profile_editor_default_time_slots">Default Time Slots</string>
     <string name="profile_editor_time_slot_30min">30mins</string>
     <string name="profile_editor_time_slot_60min">60mins</string>
