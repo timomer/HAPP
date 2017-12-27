@@ -67,6 +67,7 @@ public class Event extends RealmObject {
         this.type =   eventType.getSimpleName();
         //Log.e("TEST", "setType: " + eventType.getSimpleName() + " " + eventType.getCanonicalName() + " " + eventType.getName());
     }
+    public String getType(){return type;}
     public void setHidden(boolean isHidden){ this.hidden = isHidden;}
 
     public String getData() { return this.data;}

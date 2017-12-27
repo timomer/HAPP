@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface InterfaceIOB {
 
-    Double getMinsRemaining(BolusEvent bolusEvent);
+    Double getMinsRemaining(BolusEvent bolusEvent, Double dia);
 
     Double getIOB(List<BolusEvent> bolusEvents, Date asOf);
 

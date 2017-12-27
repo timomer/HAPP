@@ -1,9 +1,13 @@
 package com.hypodiabetic.happplus.plugins.devices;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.hypodiabetic.happplus.Events.BolusEvent;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
@@ -21,6 +26,7 @@ import com.hypodiabetic.happplus.SingleFragmentActivity;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractCGMSource;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPump;
@@ -43,6 +49,8 @@ import layout.RecyclerViewPlugins;
 public class PumpDevice extends AbstractDevice {
 
     public final static String PREF_PUMP_PLUGIN     =   "pref_pump_plugin";
+
+    private BroadcastReceiver mActionBolusReceiver;
 
     public PumpDevice(){
         super();
@@ -78,17 +86,52 @@ public class PumpDevice extends AbstractDevice {
         return prefs;
     }
     protected void onPrefChange(SysPref sysPref){
-
+        setPumpPlugin();
     }
 
     public boolean onLoad(){
+        setPumpPlugin();
+        registerReceivers();
         return getStatus().getIsUsable();
     }
 
     public DeviceStatus getPluginStatus(){
         DeviceStatus deviceStatus = new DeviceStatus();
-
+        if (mActionBolusReceiver == null){
+            deviceStatus.addComment(context.getString(R.string.device_pump_new_bolus_receiver_err));
+            deviceStatus.hasError(true);
+        }
+        deviceStatus.checkPluginIDependOn(pumpPlugin, context.getString(R.string.device_pump_plugin));
         return deviceStatus;
+    }
+
+    private void setPumpPlugin(){
+        if (getPref(PREF_PUMP_PLUGIN).getStringValue() != null){
+            pumpPlugin = (AbstractPump) PluginManager.getPlugin(getPref(PREF_PUMP_PLUGIN).getStringValue(),AbstractPump.class);
+            pumpPlugin.load();
+        }
+    }
+
+    /**
+     * Pickup any new Bolus Events that need to be actioned
+     */
+    private void registerReceivers(){
+        mActionBolusReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getStringExtra(Intents.extras.EVENT_TYPE).equals(BolusEvent.class.getSimpleName())) {
+                    List<BolusEvent> bolusEventsToBeActioned = getBolusesNotActioned();
+                    if (bolusEventsToBeActioned != null) {
+                        if (!bolusEventsToBeActioned.isEmpty()) {
+                            if (pumpPlugin != null) {
+                                pumpPlugin.actionBolusEvents(bolusEventsToBeActioned, realmHelper);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(MainApp.getInstance()).registerReceiver(mActionBolusReceiver, new IntentFilter(Intents.newLocalEvent.NEW_LOCAL_EVENTS_SAVED));
     }
 
     public Double getBasal(){
@@ -101,6 +144,21 @@ public class PumpDevice extends AbstractDevice {
     public Double getBasal(Date when){
         if (pumpPlugin != null){
             return pumpPlugin.getBasal(when);
+        } else {
+            return null;
+        }
+    }
+    public List<BolusEvent> getBolusesSince(Date timeStamp){
+        if (pumpPlugin != null) {
+            return pumpPlugin.getBolusesSince(timeStamp, realmHelper.getRealm());
+        } else {
+            return null;
+        }
+    }
+
+    private List<BolusEvent> getBolusesNotActioned(){
+        if (pumpPlugin != null) {
+            return pumpPlugin.getBolusesNotActioned(realmHelper.getRealm());
         } else {
             return null;
         }

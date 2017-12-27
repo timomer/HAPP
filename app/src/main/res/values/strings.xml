@@ -88,6 +88,8 @@
 
     //Device Sys Functions
     <string name="device_sysf_bw_plugin">Bolus Wizard Plugin</string>
+    <string name="device_sysf_iob_plugin">IOB Plugin</string>
+    <string name="device_sysf_iob_plugin_desc">Plugin used for Insulin On Board Calculations</string>
     <string name="device_sysf_bw_plugin_desc">Plugin used for Bolus Wizard Calculations</string>
     <string name="device_sysf_name">System Functions</string>
     <string name="device_sysf_desc">Core System Functions used by HAPP</string>
@@ -97,6 +99,10 @@
     <string name="device_pump_desc">HAPP Pump Device</string>
     <string name="device_pump_pref_pump">Pump</string>
     <string name="device_pump_pref_pump_desc">Pump plugin in use</string>
+    <string name="device_pump_plugin">Pump Plugin</string>
+    <string name="device_pump_user_rejected_bolus">Bolus rejected by User</string>
+    <string name="device_pump_new_bolus_receiver_err">New Bolus to Action Receiver not registered</string>
+
 
     //PatientPrefs
     <string name="plugin_PatientPrefs_pref_dia">DIA</string>

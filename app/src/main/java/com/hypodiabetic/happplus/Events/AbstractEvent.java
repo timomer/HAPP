@@ -1,8 +1,13 @@
 package com.hypodiabetic.happplus.Events;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+
+import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.database.Event;
 import com.hypodiabetic.happplus.database.dbHelperEvent;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceValidated;
@@ -38,13 +43,23 @@ public abstract class AbstractEvent implements InterfaceValidated {
         mEvent.setType(this.getClass());
     }
 
-    public void saveEvent(Realm realm){
+    public void saveEvent(Realm realm, Context context){
+        dbHelperEvent.saveEvent(mEvent, realm);
+
+        Intent newEvent = new Intent(Intents.newLocalEvent.NEW_LOCAL_EVENTS_SAVED);
+        newEvent.putExtra(Intents.extras.EVENT_TYPE, mEvent.getType());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(newEvent);
+        Log.d(TAG, "saveEvent: " + mEvent.getType() + ": " + mEvent.getData());
+    }
+    public void updateEvent(Realm realm){
         dbHelperEvent.saveEvent(mEvent, realm);
     }
 
     public Event getEvent() {
         return mEvent;
     }
+
+    public String getType(){ return mEvent.getType();}
 
     public Date getDateCreated() { return mEvent.getDateCreated(); }
 
@@ -148,8 +163,8 @@ public abstract class AbstractEvent implements InterfaceValidated {
     public int getValidationResult(){
         return validationResult;
     }
-    public int setValidationResult(@ValidationResult int validationResult){
-        return validationResult;
+    public void setValidationResult(@ValidationResult int setValidationResult){
+        validationResult = setValidationResult;
     }
 
 }

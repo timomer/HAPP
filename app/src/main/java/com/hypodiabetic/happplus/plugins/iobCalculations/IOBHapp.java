@@ -55,8 +55,9 @@ public class IOBHapp extends AbstractPluginBase implements InterfaceIOB {
         return 0D;
     }
 
-    public Double getMinsRemaining(BolusEvent bolusEvent){
-        return 0D;
+    public Double getMinsRemaining(BolusEvent bolusEvent, Double dia){
+        JSONObject jsonObject = iobCalc(bolusEvent, new Date(), dia);
+        return jsonObject.optDouble("iobContrib", 0D);
     }
 
 
@@ -96,7 +97,7 @@ public class IOBHapp extends AbstractPluginBase implements InterfaceIOB {
                 Double tempBolusSpacing = temp.getTempBasalDuration() / tempBolusCount;
                 for (int j = 0; j < tempBolusCount.intValue(); j++) {
                     BolusEvent tempBolus = new BolusEvent(BolusEvent.TYPE_STANDARD_BOLUS, tempBolusSize, 0D);
-                    tempBolus.setDeliveredDate(new Date(temp.getTempBasalStartTime().getTime() + j * tempBolusSpacing.longValue() * 60 * 1000));
+                    tempBolus.setDeliveredDate(new Date(temp.getTempBasalStartTime().getTime() + j * tempBolusSpacing.longValue() * 60 * 1000),null);
                     bolusEvents.add(tempBolus);
                 }
             }

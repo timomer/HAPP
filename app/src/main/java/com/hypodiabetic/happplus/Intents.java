@@ -24,5 +24,6 @@ public class Intents {
         public static final String PLUGIN_PREF_NAME     =   "plugin_pref_name";
         public static final String FRAGMENT_NAME        =   "fragment_name";
         public static final String EVENT_COUNT          =   "event_count";
+        public static final String EVENT_TYPE           =   "event_type";
     }
 }

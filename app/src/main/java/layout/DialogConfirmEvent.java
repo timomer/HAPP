@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.Button;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
 import com.hypodiabetic.happplus.Intents;
+import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceValidated;
@@ -26,7 +28,7 @@ import java.util.List;
  * Dialog that allows the user to review and accept a list of Events
  */
 
-public class DialogConfirmEventEntry extends DialogFragment {
+public class DialogConfirmEvent extends DialogFragment {
 
     public static int USER_SAVE     =   0;
     public static int USER_CANCEL   =   1;
@@ -82,7 +84,7 @@ public class DialogConfirmEventEntry extends DialogFragment {
     private void saveEvents(){
         RealmHelper realmHelper = new RealmHelper();
         for (AbstractEvent validatedEvent : eventList){
-            validatedEvent.saveEvent(realmHelper.getRealm());
+            validatedEvent.saveEvent(realmHelper.getRealm(), MainApp.getInstance());
         }
         realmHelper.closeRealm();
     }

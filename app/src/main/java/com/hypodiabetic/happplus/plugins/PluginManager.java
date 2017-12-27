@@ -11,6 +11,7 @@ import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 import com.hypodiabetic.happplus.plugins.devices.PumpDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
+import com.hypodiabetic.happplus.plugins.pumpSource.pumpRocheAccuChekCombo;
 import com.hypodiabetic.happplus.plugins.validators.HappValidator;
 
 import java.util.ArrayList;
@@ -47,6 +48,12 @@ public class PluginManager {
         return plugins;
     }
 
+    private static List<AbstractPluginBase> getPumpSourcePlugins() {
+        List<AbstractPluginBase> plugins = new ArrayList<>();
+        plugins.add(new pumpRocheAccuChekCombo());
+        return plugins;
+    }
+
     private static List<AbstractPluginBase> getSysFunctionPlugins() {
         List<AbstractPluginBase> plugins = new ArrayList<>();
         plugins.add(new HappBolusWizard());
@@ -69,6 +76,7 @@ public class PluginManager {
         plugins.addAll(getDevicePlugins());
         plugins.addAll(getValidatorPlugins());
         plugins.addAll(getCGMSourcePlugins());
+        plugins.addAll(getPumpSourcePlugins());
         plugins.addAll(getSysFunctionPlugins());
         plugins.addAll(getAPSSourcePlugins());
         plugins.addAll(getUIPlugins());

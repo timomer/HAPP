@@ -19,9 +19,11 @@ import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.charts.AbstractFragmentLineChart;
 import com.hypodiabetic.happplus.charts.cgmLineChart;
+import com.hypodiabetic.happplus.charts.iobLineChart;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
+import com.hypodiabetic.happplus.plugins.devices.PumpDevice;
 
 /**
  * Fragment that shows current Status of App Data
@@ -29,6 +31,7 @@ import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 public class FragmentNow extends Fragment {
 
     private AbstractFragmentLineChart mCGMLineChartFragment;
+    private AbstractFragmentLineChart mIOBLineChartFragment;
     private BroadcastReceiver mNewSGVReading;
 
     public FragmentNow() {
@@ -84,6 +87,19 @@ public class FragmentNow extends Fragment {
                 mCGMLineChartFragment = cgmLineChart.newInstance(8, "CGM Readings", "Summary", "mmoll", deviceCGM.getColour());
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.add(R.id.FragmentNowCharts, mCGMLineChartFragment, "mCGMLineChartFragment");
+                ft.commit();
+                fm.executePendingTransactions();
+            }
+        }
+
+        //IOB Line Chart
+        mIOBLineChartFragment = (AbstractFragmentLineChart) fm.findFragmentByTag("mIOBLineChartFragment");
+        if (mIOBLineChartFragment == null) {
+            AbstractDevice pumpDevice    =   (AbstractDevice) PluginManager.getPluginByClass(PumpDevice.class);
+            if (pumpDevice != null) {
+                mIOBLineChartFragment = iobLineChart.newInstance(8, "IOB", "Summary", "yAxis", pumpDevice.getColour());
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.add(R.id.FragmentNowCharts, mIOBLineChartFragment, "mIOBLineChartFragment");
                 ft.commit();
                 fm.executePendingTransactions();
             }

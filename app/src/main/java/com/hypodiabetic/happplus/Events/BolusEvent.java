@@ -12,6 +12,11 @@ import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.UtilitiesDisplay;
 import com.hypodiabetic.happplus.database.Event;
+import com.hypodiabetic.happplus.helperObjects.RealmHelper;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceIOB;
+import com.hypodiabetic.happplus.plugins.PluginManager;
+import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 
+import io.realm.Realm;
 import io.realm.RealmResults;
 
 /**
@@ -40,7 +46,7 @@ public class BolusEvent extends AbstractEvent {
     private static final String BOLUS_TYPE               =   "bolus_type";
     private static final String BOLUS_AMOUNT             =   "bolus_amount";
     private static final String BOLUS_SECONDARY_AMOUNT   =   "bolus_secondary_amount";   //Used for extended boluses, correction amount, etc
-    private static final String BOLUS_DATE_DELIVERED     =   "bolus_delivery_date";
+    public static final String BOLUS_DATE_DELIVERED      =   "bolus_delivery_date";
 
     public BolusEvent(Event event){
         mEvent  =   event;
@@ -63,7 +69,16 @@ public class BolusEvent extends AbstractEvent {
     public String getMainText(){
         return UtilitiesDisplay.displayInsulin(getBolusIncCorrectionAmount()) + " " + getBolusTypeDisplay();
     }
-    public String getSubText(){ return "TODO TIME REMAINING";}
+    public String getSubText(){
+        SysFunctionsDevice sysFunctionsDevice   = (SysFunctionsDevice) PluginManager.getPluginByClass(SysFunctionsDevice.class);
+        SysProfileDevice sysProfileDevice       = (SysProfileDevice) PluginManager.getPluginByClass(SysProfileDevice.class);
+        InterfaceIOB interfaceIOB = sysFunctionsDevice.getPluginIOB();
+        if (interfaceIOB != null){
+            return UtilitiesDisplay.displayInsulin(interfaceIOB.getMinsRemaining(this, sysProfileDevice.getPatientPref().getDIA()));
+        } else {
+            return "ADD TEXT HERE";
+        }
+    }
     public String getValue(){
         switch (getBolusType()){
             case TYPE_STANDARD_BOLUS:
@@ -125,14 +140,19 @@ public class BolusEvent extends AbstractEvent {
      * Allows us to set the date when a Bolus was delivered
      * @param when Date Bolus was Delivered
      */
-    public void setDeliveredDate(Date when){
+    public void setDeliveredDate(Date when, RealmHelper realmHelper){
+        //only save changes to Realm if the object is already saved
+        if (this.mEvent.isManaged()){ realmHelper.getRealm().beginTransaction();}
+
         try {
             JSONObject jsonData = new JSONObject(mEvent.getData());
-            jsonData.put(BOLUS_DATE_DELIVERED,  when.getTime());
+            jsonData.put(BOLUS_DATE_DELIVERED,  String.valueOf(when.getTime()));
             mEvent.setData(jsonData);
         } catch (JSONException e){
             Log.e(TAG, "BolusEvent: error setting Delivered Date");
         }
+
+        if (this.mEvent.isManaged()){ realmHelper.getRealm().commitTransaction();}
     }
 
     public Date getDeliveredDate(){

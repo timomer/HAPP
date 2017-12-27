@@ -9,13 +9,13 @@ import android.widget.Toast;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 /**
  * Created by Tim on 11/02/2017.
  */
 
 public class DialogHelper {
-
 
     public static void newWithCopyToClipboard(final String msg, final Context context){
             new AlertDialog.Builder(context)

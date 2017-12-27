@@ -49,6 +49,15 @@ public class dbHelperEvent {
         return convertEventToAbstractEvent(results);
     }
 
+    public static List<AbstractEvent> getEventsSinceWithMissingData(Date timestamp, Realm realm, boolean getHiddenEvents,  String eventClassSimpleName, String missingDataField) {
+        RealmResults<Event> results = getFromRealmEventsSince(timestamp, getHiddenEvents, realm).where()
+                .equalTo("type", eventClassSimpleName)
+                .not().contains("data",  missingDataField)
+                .findAll();
+
+        return convertEventToAbstractEvent(results);
+    }
+
     private static RealmResults<Event> getFromRealmEventsBetween(Date from, Date until, boolean getHiddenEvents, Realm realm) {
         RealmResults<Event> events = realm.where(Event.class)
                 .greaterThanOrEqualTo("dateCreated", from)

@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
 import com.hypodiabetic.happplus.Intents;
+import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.dbHelperEvent;
@@ -15,11 +16,12 @@ import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceEventValidator;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.validators.HappValidator;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
-import layout.DialogConfirmEventEntry;
+import layout.DialogConfirmEvent;
 
 /**
  * Created by Tim on 08/02/2017.
@@ -53,7 +55,7 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
             }
 
             if (notifyUser || validationRequestsNotifyUser) {
-                DialogConfirmEventEntry dialogEvents = new DialogConfirmEventEntry();
+                DialogConfirmEvent dialogEvents = new DialogConfirmEvent();
                 dialogEvents.setTargetFragment(this, myRequestCode);
                 dialogEvents.setEvents(eventList);
                 dialogEvents.show(getFragmentManager(), "dialogEventEntry");
@@ -70,8 +72,8 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == myRequestCode) {
-            if (resultCode == DialogConfirmEventEntry.USER_SAVE) {
-                saveNewEvents(null);    //Null, as the Dialog has saved them for us
+            if (resultCode == DialogConfirmEvent.USER_SAVE) {
+                //No need to Save, as the Dialog has saved them for us
                 if (killActivity) getActivity().finish();
             } else {
                 Integer eventCount = data.getIntExtra(Intents.extras.EVENT_COUNT,0);
@@ -90,14 +92,10 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
         if (events != null) {
             RealmHelper realmHelper = new RealmHelper();
             for (AbstractEvent validatedEvent : events) {
-                validatedEvent.saveEvent(realmHelper.getRealm());
+                validatedEvent.saveEvent(realmHelper.getRealm(), MainApp.getInstance());
             }
             realmHelper.closeRealm();
         }
-
-        //Notify that new Events have been saved
-        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(Intents.newLocalEvent.NEW_LOCAL_EVENTS_SAVED));
-        Log.d(TAG, "saveNewEvents: New Events Saved");
     }
 
     public static List<? extends AbstractEvent> getEventsSince(Date timestamp, boolean getHiddenEvents, Realm realm) {
@@ -108,6 +106,10 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
     }
     public static List<? extends AbstractEvent> getEventsSince(Date timestamp, boolean getHiddenEvents, Realm realm, String eventClassSimpleName, String filterField, String filterValue) {
         return dbHelperEvent.getEventsSince(timestamp, realm, getHiddenEvents, eventClassSimpleName, filterField, filterValue);
+    }
+
+    public static List<? extends AbstractEvent> getEventsSinceWithMissingData(Date timestamp, boolean getHiddenEvents, Realm realm, String eventClassSimpleName, String missingDataField) {
+        return dbHelperEvent.getEventsSinceWithMissingData(timestamp, realm, getHiddenEvents, eventClassSimpleName, missingDataField);
     }
 
     public static List<? extends AbstractEvent> getEventsBetween(Date from, Date until, boolean getHiddenEvents, Realm realm) {

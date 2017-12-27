@@ -16,8 +16,10 @@
     <color name="backgroundLight">#50fafafa</color>
     <color name="primary_text_material_light">#212121</color>
 
+    <!-- Charts -->
     <color name="colorCGMMinLine">#FF5722</color>
     <color name="colorCGMMaxLine">#FF9800</color>
+    <color name="colourIOBHighLine">#FF9800</color>
 
     <!-- Devices -->
     <color name="colorCGM">#c0392b</color>

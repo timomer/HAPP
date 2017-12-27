@@ -24,6 +24,7 @@ import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceIOB;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfacePatientPrefs;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 
@@ -43,10 +44,12 @@ import layout.RecyclerViewPlugins;
 public class SysFunctionsDevice extends AbstractDevice {
 
     private AbstractPluginBase pluginBolusWizard;
+    private AbstractPluginBase pluginIOB;
 
     //Device Prefs
     private static String PREF_BOLUS_WIZARD_PLUGIN              =   "bolus_wizard_plugin";
-    public static String PREF_DEFAULT_24H_PROFILE_TIMESLOTS    =   "default_24h_profile_timeslots";
+    private static String PREF_IOB_PLUGIN                       =   "iob_plugin";
+    public static String PREF_DEFAULT_24H_PROFILE_TIMESLOTS     =   "default_24h_profile_timeslots";
 
     private TextView deviceStatus;
     private TextView deviceStatusText;
@@ -66,6 +69,7 @@ public class SysFunctionsDevice extends AbstractDevice {
         DeviceStatus deviceStatus = new DeviceStatus();
 
         deviceStatus.checkPluginIDependOn(pluginBolusWizard, context.getString(R.string.device_sysf_bw_plugin));
+        deviceStatus.checkPluginIDependOn(pluginIOB, context.getString(R.string.device_sysf_iob_plugin));
 
         return deviceStatus;
     }
@@ -82,9 +86,11 @@ public class SysFunctionsDevice extends AbstractDevice {
     private void setPlugins(){
         if (getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue() != null){
             pluginBolusWizard = PluginManager.getPlugin(getPref(PREF_BOLUS_WIZARD_PLUGIN).getStringValue(),InterfaceBolusWizard.class);
-            if (pluginBolusWizard != null) {
-                pluginBolusWizard.load();
-            }
+            if (pluginBolusWizard != null) {    pluginBolusWizard.load(); }
+        }
+        if (getPref(PREF_IOB_PLUGIN).getStringValue() != null){
+            pluginIOB = PluginManager.getPlugin(getPref(PREF_IOB_PLUGIN).getStringValue(),InterfaceIOB.class);
+            if (pluginIOB != null) {    pluginIOB.load(); }
         }
     }
 
@@ -96,6 +102,12 @@ public class SysFunctionsDevice extends AbstractDevice {
                 context.getString(R.string.device_sysf_bw_plugin_desc),
                 (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceBolusWizard.class),
                 (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceBolusWizard.class)));
+        prefs.add(new PluginPref<>(
+                PREF_IOB_PLUGIN,
+                context.getString(R.string.device_sysf_iob_plugin),
+                context.getString(R.string.device_sysf_iob_plugin_desc),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceIOB.class),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceIOB.class)));
         prefs.add(new PluginPref(
                 PREF_DEFAULT_24H_PROFILE_TIMESLOTS,
                 context.getString(R.string.profile_editor_default_time_slots),
@@ -109,7 +121,7 @@ public class SysFunctionsDevice extends AbstractDevice {
         setPlugins();
     }
 
-    public AbstractPluginBase getBolusWizard(){
+    public AbstractPluginBase getPluginBolusWizard(){
         //if (pluginBolusWizard.getStatus().getIsUsable()){
         //    return pluginBolusWizard;
         //} else {
@@ -117,6 +129,7 @@ public class SysFunctionsDevice extends AbstractDevice {
         //}
         return pluginBolusWizard;
     }
+    public InterfaceIOB getPluginIOB() { return (InterfaceIOB) pluginIOB;}
 
     public double getIOB(){
         return 0;

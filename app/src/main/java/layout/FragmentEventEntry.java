@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
@@ -55,7 +54,7 @@ public class FragmentEventEntry extends Fragment {
 
         SysFunctionsDevice sysFun  = (SysFunctionsDevice) PluginManager.getPluginByClass(SysFunctionsDevice.class);
         if (sysFun != null) {
-            mSectionsPagerAdapter.addFragment(sysFun.getBolusWizard(), getString(R.string.event_bolus_wizard));
+            mSectionsPagerAdapter.addFragment(sysFun.getPluginBolusWizard(), getString(R.string.event_bolus_wizard));
         } else {
             Log.d(TAG, "loadFragments: Could not find Device SysFunctions");
         }
