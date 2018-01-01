@@ -1,5 +1,6 @@
 package layout;
 
+import android.support.v7.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,11 +9,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +29,7 @@ import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.helperObjects.TimeSpan;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceHasActionBar;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceNotifyFragmentBackPress;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
@@ -44,9 +44,8 @@ import java.util.List;
  * 24h Profile Editor migrated over from HAPP
  */
 
-public class FragmentProfileEditor24H extends Fragment implements InterfaceNotifyFragmentBackPress {
+public class FragmentProfileEditor24H extends Fragment implements InterfaceNotifyFragmentBackPress, InterfaceHasActionBar {
     private static String TAG = "ProfileEditor24H";
-    private Toolbar toolbar;
     private RecyclerView recyclerView;
     private List<TimeSpan> timeSpansList;
 
@@ -94,10 +93,7 @@ public class FragmentProfileEditor24H extends Fragment implements InterfaceNotif
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_profile_editor, container, false);
-        toolbar         =   (Toolbar) mView.findViewById(R.id.toolbarProfileEditor);
         recyclerView    =   (RecyclerView) mView.findViewById(R.id.profile_list);
-
-        toolbar.inflateMenu(R.menu.menu_profile_editor);
 
         sdfTimeDisplay = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
         loadProfile();
@@ -105,8 +101,11 @@ public class FragmentProfileEditor24H extends Fragment implements InterfaceNotif
     }
 
     private void loadProfile(){
-        toolbar.setTitle(   sysPref.getPrefDisplayName());
-        toolbar.setSubtitle(sysPref.getPrefDescription());
+        ActionBar toolbar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (toolbar != null) {
+            toolbar.setTitle(sysPref.getPrefDisplayName());
+            toolbar.setSubtitle(sysPref.getPrefDescription());
+        }
 
         String profileArrayJSON = sysPref.getStringValue();                                         //RAW Profile JSON String
 
@@ -239,7 +238,7 @@ public class FragmentProfileEditor24H extends Fragment implements InterfaceNotif
                 LocalBroadcastManager.getInstance(this.getContext()).sendBroadcast(prefUpdate);
 
                 Log.d(TAG, "onOptionsItemSelected: Profile: " + sysPref.getPrefDisplayName() + " Changes Saved");
-                Toast.makeText(this.getContext(), sysPref.getPrefDisplayName() + " " + R.string.profile_editor_saved, Toast.LENGTH_LONG).show();
+                Toast.makeText(this.getContext(), sysPref.getPrefDisplayName() + " " + getString(R.string.profile_editor_saved), Toast.LENGTH_LONG).show();
             }
             adapter.profileChanged  = false;
             getActivity().onBackPressed();

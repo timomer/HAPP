@@ -1,16 +1,16 @@
 package com.hypodiabetic.happplus;
 
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.View;
 
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceHasActionBar;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceNotifyFragmentBackPress;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 
@@ -18,11 +18,15 @@ import layout.FragmentCannotLoadFragment;
 import layout.FragmentEventEntry;
 import layout.FragmentProfileEditor24H;
 
+/**
+ * Activity container for displaying Fragments
+ */
 
-public class SingleFragmentActivity extends FragmentActivity {
+
+public class SingleFragmentActivity extends AppCompatActivity  {
 
     private final static String TAG = "SingleFragmentActivity";
-
+    Toolbar toolbar;
     public final static String FRAGMENT_EVENT_ENTRY     =   "FragmentEventEntry";
     public final static String FRAGMENT_PROFILE_EDITOR  =   "FragmentProfileEditor";
 
@@ -33,6 +37,9 @@ public class SingleFragmentActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_fragment);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().hide();
 
         Bundle extras = getIntent().getExtras();
 
@@ -51,8 +58,8 @@ public class SingleFragmentActivity extends FragmentActivity {
                         fragmentTransaction.commit();
                         break;
                     case FRAGMENT_PROFILE_EDITOR:
+                        setActionBar();
                         fragmentTransaction.add(R.id.fragmentHolder, FragmentProfileEditor24H.newInstance(extras.getString(FragmentProfileEditor24H.ARG_PREF_NAME), extras.getString(FragmentProfileEditor24H.ARG_PREF_PLUGIN)),fragmentTag);
-
                         fragmentTransaction.commit();
                         break;
                     default:
@@ -66,6 +73,7 @@ public class SingleFragmentActivity extends FragmentActivity {
                 AbstractPluginBase plugin = PluginManager.getPluginByName(pluginName);
 
                 if (plugin != null){
+                    if (InterfaceHasActionBar.class.isAssignableFrom(plugin.getClass())) { setActionBar();}
                     fragmentTransaction.add(R.id.fragmentHolder, plugin);
                     fragmentTransaction.commit();
 
@@ -83,6 +91,10 @@ public class SingleFragmentActivity extends FragmentActivity {
             this.finish();
         }
 
+    }
+
+    private void setActionBar(){
+        getSupportActionBar().show();
     }
 
     @Override
@@ -104,16 +116,5 @@ public class SingleFragmentActivity extends FragmentActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
 
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        return false;
-    }
 }

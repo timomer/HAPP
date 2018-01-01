@@ -5,12 +5,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.hypodiabetic.happplus.SingleFragmentActivity">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_alignParentTop="true"
+        android:id="@+id/appBarLayout">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            />
+    </android.support.design.widget.AppBarLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:id="@+id/fragmentHolder">
+        android:id="@+id/fragmentHolder"
+        android:layout_below="@id/appBarLayout">
 
     </LinearLayout>
 

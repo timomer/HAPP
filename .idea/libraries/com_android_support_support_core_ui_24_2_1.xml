@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="com.android.support:support-core-ui-24.2.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-24.2.1.aar/eb056386db519bc30db4f30e82ac8bd3/jars/libs/internal_impl-24.2.1.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-24.2.1.aar/eb056386db519bc30db4f30e82ac8bd3/res" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-24.2.1.aar/eb056386db519bc30db4f30e82ac8bd3/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-24.2.1.aar/0adf4c89ce257079acef3ba81629d992/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-24.2.1.aar/0adf4c89ce257079acef3ba81629d992/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-core-ui-24.2.1.aar/0adf4c89ce257079acef3ba81629d992/jars/libs/internal_impl-24.2.1.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/AppData/Local/Android/sdk/extras/android/m2repository/com/android/support/support-core-ui/24.2.1/support-core-ui-24.2.1-javadoc.jar!/" />
