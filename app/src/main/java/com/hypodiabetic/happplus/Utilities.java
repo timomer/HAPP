@@ -1,12 +1,17 @@
 package com.hypodiabetic.happplus;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Spinner;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -18,6 +23,25 @@ import java.util.Locale;
 public class Utilities {
 
     private final static String TAG = "Utilities";
+
+    public static boolean isJobScheduled(Context context, int jobid){
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (jobScheduler != null) {
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N) {
+                JobInfo jobInfo = jobScheduler.getPendingJob(jobid);
+                return (jobInfo != null);
+            } else {
+                List<JobInfo> jobInfoList = jobScheduler.getAllPendingJobs();
+                for (JobInfo jobInfo : jobInfoList) {
+                    if (jobInfo.getId() == jobid) return true;
+                }
+                return false;
+            }
+        } else {
+            Log.d(TAG, "isJobScheduled: Cannot find jobScheduler, this is bad");
+            return false;
+        }
+    }
 
     public static Double round(Double value, int decPoints){
         if (value == null || value.isInfinite() || value.isNaN()) return 0D;

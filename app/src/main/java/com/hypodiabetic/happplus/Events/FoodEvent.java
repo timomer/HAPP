@@ -1,15 +1,24 @@
 package com.hypodiabetic.happplus.Events;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IntDef;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.UtilitiesDisplay;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.Event;
+import com.hypodiabetic.happplus.helperObjects.ItemRemaining;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceCOB;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceIOB;
+import com.hypodiabetic.happplus.plugins.PluginManager;
+import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
+import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -122,10 +131,21 @@ public class FoodEvent extends AbstractEvent {
 
     public String getValue() { return String.valueOf(getCarbAmount()); }
 
+    public String getDisplayName(){ return MainApp.getInstance().getString(R.string.event_food);}
+
     public String getMainText(){
         return UtilitiesDisplay.displayCarbs(getCarbAmount()) + " " + getCarbTypeDisplay();
     }
-    public String getSubText(){ return "TODO TIME REMAINING";}
+    public String getSubText(){
+        SysFunctionsDevice sysFunctionsDevice   = (SysFunctionsDevice) PluginManager.getPluginByClass(SysFunctionsDevice.class);
+        InterfaceCOB interfaceCOB = sysFunctionsDevice.getPluginCOB();
+        if (interfaceCOB != null){
+            ItemRemaining cobRemaining  =   interfaceCOB.getCarbsRemaining(this);
+            return UtilitiesDisplay.displayCarbs(cobRemaining.getAmountRemaining()) + " " + UtilitiesTime.displayTimeRemaing(cobRemaining.getMinsRemaining().intValue());
+        } else {
+            return "ADD TEXT HERE";
+        }
+    }
 
     public Drawable getIcon(){              return ContextCompat.getDrawable(MainApp.getInstance(), R.drawable.food_apple);}
     public int getIconColour(){             return ContextCompat.getColor(MainApp.getInstance(), R.color.eventCarbs);}
@@ -136,4 +156,7 @@ public class FoodEvent extends AbstractEvent {
 
     protected boolean isEventHidden(){        return false;}
 
+    public LinearLayout getNewEventLayout(Context context) {
+        return new LinearLayout(context);
+    }
 }

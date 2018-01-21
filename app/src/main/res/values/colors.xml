@@ -31,4 +31,5 @@
     <color name="eventSGV">#FF5722</color>
     <color name="eventCarbs">#8BC34A</color>
     <color name="eventTempBasal">#6200ea</color>
+    <color name="eventCard">#ffffff</color>
 </resources>

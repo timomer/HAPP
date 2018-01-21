@@ -64,7 +64,7 @@ public abstract class AbstractEventActivities extends AbstractPluginBase {
                 if (killActivity) getActivity().finish();
             }
         } else {
-            Log.d(TAG, "addEventsToHAPP: could not find HAPP Default Event Validator, all events rejected");
+            Log.e(TAG, "addEventsToHAPP: could not find HAPP Default Event Validator, all events rejected");
         }
     }
 

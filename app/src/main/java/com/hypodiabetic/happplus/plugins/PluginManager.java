@@ -2,7 +2,16 @@ package com.hypodiabetic.happplus.plugins;
 
 import android.util.Log;
 
+import com.hypodiabetic.happplus.Events.AbstractEvent;
+import com.hypodiabetic.happplus.Events.BolusEvent;
+import com.hypodiabetic.happplus.Events.FoodEvent;
+import com.hypodiabetic.happplus.Events.SGVEvent;
+import com.hypodiabetic.happplus.Events.StatEvent;
+import com.hypodiabetic.happplus.Events.TempBasalEvent;
 import com.hypodiabetic.happplus.MainApp;
+import com.hypodiabetic.happplus.database.Event;
+import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.bolusWizard.HappBolusWizard;
 import com.hypodiabetic.happplus.plugins.cgmSource.NSClientCGMSource;
@@ -25,6 +34,22 @@ import java.util.List;
 public class PluginManager {
 
     public static final String TAG  =   "PluginManager";
+
+    /**
+     * Returns a list of all the Event Types supported by HAPP+
+     * Add new event types here
+     * @return The Events
+     */
+    public static List<AbstractEvent> getEventTypes(){
+        List<AbstractEvent> events = new ArrayList<>();
+        events.add(new BolusEvent(new Event()));
+        events.add(new FoodEvent(new Event()));
+        events.add(new SGVEvent(new Event()));
+        events.add(new StatEvent(new Event()));
+        events.add(new TempBasalEvent(new Event()));
+
+        return events;
+    }
 
     private static List<AbstractPluginBase> getDevicePlugins() {
         List<AbstractPluginBase> plugins = new ArrayList<>();
@@ -133,4 +158,36 @@ public class PluginManager {
 
         return pluginBaseList;
     }
+
+    /**
+     * Checks a list of Plugins if they are Usable
+     * @param pluginBaseList the Plugins to check
+     * @return if Usable
+     */
+    public static Boolean checkPluginsAreReady(List<AbstractPluginBase> pluginBaseList){
+        Boolean allOk = true;
+
+        for (AbstractPluginBase plugin : pluginBaseList){
+            DeviceStatus deviceStatus = plugin.getStatus();
+            if (!deviceStatus.getIsUsable()){
+                allOk = false;
+                Log.e(TAG, plugin.getPluginDisplayName() + ": " + deviceStatus.getComment());
+            }
+        }
+
+        if (!allOk) {
+            Log.e(TAG, "I am very sorry, but we cannot proceed as the above Plugins are not usable"); }
+
+        return allOk;
+    }
+
+    /**
+     * Checks that all HAPP+ Device Plugins are Usable
+     * @return if Usable
+     */
+    public static Boolean checkDevicePluginsAreReady(){
+        return checkPluginsAreReady((List<AbstractPluginBase>) PluginManager.getPluginList(AbstractDevice.class));
+    }
+
+
 }

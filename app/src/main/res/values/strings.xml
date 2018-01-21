@@ -90,9 +90,12 @@
     <string name="device_sysf_bw_plugin">Bolus Wizard Plugin</string>
     <string name="device_sysf_iob_plugin">IOB Plugin</string>
     <string name="device_sysf_iob_plugin_desc">Plugin used for Insulin On Board Calculations</string>
+    <string name="device_sysf_cob_plugin">COB Plugin</string>
+    <string name="device_sysf_cob_plugin_desc">Plugin used for Carbohydrate On Board Calculations</string>
     <string name="device_sysf_bw_plugin_desc">Plugin used for Bolus Wizard Calculations</string>
     <string name="device_sysf_name">System Functions</string>
     <string name="device_sysf_desc">Core System Functions used by HAPP</string>
+    <string name="device_sysf_service_stats_err">Stats Service is not scheduled to run</string>
 
     //Device Pump
     <string name="device_pump_name">Pump</string>
@@ -102,7 +105,8 @@
     <string name="device_pump_plugin">Pump Plugin</string>
     <string name="device_pump_user_rejected_bolus">Bolus rejected by User</string>
     <string name="device_pump_new_bolus_receiver_err">New Bolus to Action Receiver not registered</string>
-
+    <string name="device_pump_plugin_pref_basal_profile">Basal Profile</string>
+    <string name="device_pump_plugin_pref_basal_profile_desc">24h Pump Background Basal Profile</string>
 
     //PatientPrefs
     <string name="plugin_PatientPrefs_pref_dia">DIA</string>
@@ -151,13 +155,17 @@
     <string name="event_icon">Event Icon</string>
     <string name="event_primary_action">Event Primary Action</string>
     <string name="event_menu">Event Menu</string>
+    <string name="event_event">Event</string>
+
 
     //Event Bolus
     <string name="event_bolus_type_bolus">Bolus</string>
+    <string name="event_bolus_type_bolus_corr">Correction Bolus</string>
     <string name="event_bolus_type_bolus_with_corr">Bolus With Correction</string>
     <string name="event_bolus_type_unknown">Unknown Bolus Type</string>
 
     //Event Food
+    <string name="event_food">Food</string>
     <string name="event_food_size_small">Small Meal</string>
     <string name="event_food_size_large">Large Meal</string>
     <string name="event_food_size_avg">Medium Meal</string>
@@ -165,12 +173,25 @@
     <string name="event_food_carbs_slow">Low GI</string>
     <string name="event_food_carbs_avg">Avg GI</string>
 
+    //SGV Event
+    <string name="event_sgv">SGV</string>
+
+    //Stat Event
+    <string name="event_stat">Stat</string>
+
+    //Temp Basal Event
+    <string name="event_temp_basal">Temp Basal</string>
+
     //Time Strings
     <string name="time_just_now">just now</string>
     <string name="time_min_ago">min ago</string>
     <string name="time_mins_ago">mins ago</string>
     <string name="time_hour_ago">hour ago</string>
     <string name="time_hours_ago">hours ago</string>
+    <string name="time_min">min</string>
+    <string name="time_mins">mins</string>
+    <string name="time_hour">hour</string>
+    <string name="time_hours">hours</string>
 
     //Dialogs
     <string name="dialog_copy_to_clipboard">Copy To Clipboard</string>

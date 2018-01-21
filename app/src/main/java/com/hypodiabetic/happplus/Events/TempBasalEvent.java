@@ -1,13 +1,16 @@
 package com.hypodiabetic.happplus.Events;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IntDef;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.Event;
 
 import org.json.JSONException;
@@ -49,7 +52,7 @@ public class TempBasalEvent extends AbstractEvent {
         mEvent  =   event;
     }
 
-    public TempBasalEvent(@TempBasalType int TempBasalType, double TempBasalRate, double TempBasalDuration, Date TempBasalStartTime){
+    public TempBasalEvent(@TempBasalType int TempBasalType, double TempBasalRate, int TempBasalDuration, Date TempBasalStartTime){
         super();
 
         JSONObject jsonData = new JSONObject();
@@ -63,6 +66,8 @@ public class TempBasalEvent extends AbstractEvent {
         }
         mEvent.setData(jsonData);
     }
+
+    public String getDisplayName(){ return MainApp.getInstance().getString(R.string.event_temp_basal);}
 
     public String getMainText(){
         return "";
@@ -81,13 +86,21 @@ public class TempBasalEvent extends AbstractEvent {
 
     public int getTempBasalType(){          return this.getData().optInt(TEMP_BASAL_TYPE, 0); }
     public double getTempBasalRate(){       return this.getData().optDouble(TEMP_BASAL_RATE, 0D); }
-    public double getTempBasalDuration(){   return this.getData().optDouble(TEMP_BASAL_DURATION, 0D); }
+    public int getTempBasalDuration(){   return this.getData().optInt(TEMP_BASAL_DURATION, 0); }
     public Date getTempBasalStartTime() {
         if (this.isAccepted()) {
             return new Date(this.getData().optLong(TEMP_BASAL_START_TIME, 0));
         } else {
             return null;
         }
+    }
+
+    public boolean isActive(){
+        return isAccepted() && new Date().before(UtilitiesTime.getDateMinsAhead(getTempBasalStartTime(), getTempBasalDuration()));
+    }
+
+    public LinearLayout getNewEventLayout(Context context) {
+        return new LinearLayout(context);
     }
 
 }

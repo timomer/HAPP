@@ -1,17 +1,26 @@
 package com.hypodiabetic.happplus.Events;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.IntDef;
-import android.support.annotation.StringDef;
 import android.support.v4.content.ContextCompat;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
-import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.UtilitiesDisplay;
+import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.database.Event;
+import com.hypodiabetic.happplus.helperObjects.ItemRemaining;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceIOB;
 import com.hypodiabetic.happplus.plugins.PluginManager;
@@ -23,10 +32,12 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
-import io.realm.Realm;
 import io.realm.RealmResults;
+
 
 /**
  * Created by Tim on 01/02/2017.
@@ -66,6 +77,8 @@ public class BolusEvent extends AbstractEvent {
         mEvent.setData(jsonData);
     }
 
+    public String getDisplayName(){ return MainApp.getInstance().getString(R.string.event_bolus_type_bolus);}
+
     public String getMainText(){
         return UtilitiesDisplay.displayInsulin(getBolusIncCorrectionAmount()) + " " + getBolusTypeDisplay();
     }
@@ -74,7 +87,8 @@ public class BolusEvent extends AbstractEvent {
         SysProfileDevice sysProfileDevice       = (SysProfileDevice) PluginManager.getPluginByClass(SysProfileDevice.class);
         InterfaceIOB interfaceIOB = sysFunctionsDevice.getPluginIOB();
         if (interfaceIOB != null){
-            return UtilitiesDisplay.displayInsulin(interfaceIOB.getMinsRemaining(this, sysProfileDevice.getPatientPref().getDIA()));
+            ItemRemaining iobRemaining = interfaceIOB.getMinsRemaining(this, sysProfileDevice.getPatientPref().getDIA());
+            return UtilitiesDisplay.displayInsulin(iobRemaining.getAmountRemaining()) + " " + UtilitiesTime.displayTimeRemaing(iobRemaining.getMinsRemaining().intValue());
         } else {
             return "ADD TEXT HERE";
         }
@@ -130,7 +144,7 @@ public class BolusEvent extends AbstractEvent {
             case 1:
                 return MainApp.getInstance().getString(R.string.event_bolus_type_bolus_with_corr);
             case 2:
-                return MainApp.getInstance().getString(R.string.event_bolus_type_bolus);
+                return MainApp.getInstance().getString(R.string.event_bolus_type_bolus_corr);
             default:
                 return MainApp.getInstance().getString(R.string.event_bolus_type_unknown);
         }
@@ -158,5 +172,65 @@ public class BolusEvent extends AbstractEvent {
     public Date getDeliveredDate(){
         return new Date(this.getData().optLong(BOLUS_DATE_DELIVERED, 0));
     }
+
+    public LinearLayout getNewEventLayout(Context context){
+        LinearLayout linearLayout = new LinearLayout(context);
+
+        Spinner spiBolusType        =   new Spinner(context);
+        TextView txtBolusAmount     =   new TextView(context);
+        TextView txtBolusCorrection =   new TextView(context);
+
+        ArrayList<String> spinnerBolusTypes = new ArrayList<>();
+        spinnerBolusTypes.add(TYPE_STANDARD_BOLUS, context.getString(R.string.event_bolus_type_bolus));
+        spinnerBolusTypes.add(TYPE_STANDARD_BOLUS_WITH_CORRECTION, context.getString(R.string.event_bolus_type_bolus_with_corr));
+        spinnerBolusTypes.add(TYPE_CORRECTION_BOLUS, context.getString(R.string.event_bolus_type_bolus_corr));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item , spinnerBolusTypes);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spiBolusType.setAdapter(adapter);
+
+        txtBolusAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        txtBolusCorrection.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+        spiBolusType.setSelection(getBolusType());
+        txtBolusAmount.setText(getBolusAmount().toString());
+        txtBolusCorrection.setText(getCorrectionAmount().toString());
+
+        spiBolusType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Integer bolusType = i;
+                updateData(BOLUS_TYPE, bolusType.toString());
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+        txtBolusAmount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void afterTextChanged(Editable editable) {
+                updateData(BOLUS_AMOUNT, editable.toString());
+            }
+        });
+        txtBolusCorrection.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            @Override
+            public void afterTextChanged(Editable editable) {
+                updateData(BOLUS_SECONDARY_AMOUNT, editable.toString());
+            }
+        });
+
+        linearLayout.addView(spiBolusType);
+        linearLayout.addView(txtBolusAmount);
+        linearLayout.addView(txtBolusCorrection);
+
+       return linearLayout;
+    }
+
 
 }

@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.database.Event;
@@ -90,6 +91,22 @@ public abstract class AbstractEvent implements InterfaceValidated {
         }
     }
 
+    public void updateData(String name, String value){
+        try {
+            JSONObject mData = new JSONObject(mEvent.getData());
+            mData.putOpt(name, value);
+        } catch (JSONException e) {
+            Log.e(TAG, "updateData: Failed to update JSON data for Event, JSON:" + mEvent.getData());
+        }
+    }
+
+    /**
+     * Returns Layout for editing or manually adding this Event
+     * @param context current context
+     * @return LinearLayout to be displayed
+     */
+    public abstract LinearLayout getNewEventLayout(Context context);
+
     /**
      * Should this event type be hidden from the UI? For example CGM SGV
      * @return hidden event?
@@ -113,6 +130,8 @@ public abstract class AbstractEvent implements InterfaceValidated {
      * @return drawable resource
      */
     public abstract Drawable getPrimaryActionIcon();
+
+    public abstract String getDisplayName();
 
     public abstract String getMainText();
 

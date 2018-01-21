@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hypodiabetic.happplus.Events.BolusEvent;
+import com.hypodiabetic.happplus.Events.TempBasalEvent;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
@@ -134,6 +135,20 @@ public class PumpDevice extends AbstractDevice {
         LocalBroadcastManager.getInstance(MainApp.getInstance()).registerReceiver(mActionBolusReceiver, new IntentFilter(Intents.newLocalEvent.NEW_LOCAL_EVENTS_SAVED));
     }
 
+    public AbstractPump getPumpPlugin(){
+        if (pumpPlugin != null){
+            return pumpPlugin;
+        } else {
+            return null;
+        }
+    }
+    public TempBasalEvent getTempBasal(){
+        if (pumpPlugin != null){
+            return pumpPlugin.getTempBasal(realmHelper.getRealm());
+        } else {
+            return null;
+        }
+    }
     public Double getBasal(){
         if (pumpPlugin != null){
             return pumpPlugin.getBasal();

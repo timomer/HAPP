@@ -5,6 +5,9 @@ import com.hypodiabetic.happplus.Events.AbstractEvent;
 import com.hypodiabetic.happplus.Events.BolusEvent;
 import com.hypodiabetic.happplus.Events.FoodEvent;
 import com.hypodiabetic.happplus.Events.SGVEvent;
+import com.hypodiabetic.happplus.Events.StatEvent;
+import com.hypodiabetic.happplus.Events.TempBasalEvent;
+import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 
 import java.util.ArrayList;
@@ -88,21 +91,25 @@ public class dbHelperEvent {
     }
 
     /**
-     * Converts the Raw Event into a HAPP+ Abstract Event Object, new Events must be added here
+     * Converts the Raw Event into a HAPP+ Abstract Event Object
      * @param events List of Events read from DB
      * @return HAPP+ Abstract Event Objects
      */
     private static List<AbstractEvent> convertEventToAbstractEvent(RealmResults<Event> events){
         List<AbstractEvent> abstractEvents = new ArrayList<>();
 
-        //Note: Switch does not work here
         for (Event event : events){
+
             if (event.type.equals(BolusEvent.class.getSimpleName())){
                 abstractEvents.add(new BolusEvent(event));
             } else if (event.type.equals(SGVEvent.class.getSimpleName())){
                 abstractEvents.add(new SGVEvent(event));
             } else if (event.type.equals(FoodEvent.class.getSimpleName())){
                 abstractEvents.add(new FoodEvent(event));
+            } else if (event.type.equals(StatEvent.class.getSimpleName())){
+                abstractEvents.add(new StatEvent(event));
+            } else if (event.type.equals(TempBasalEvent.class.getSimpleName())){
+                abstractEvents.add(new TempBasalEvent(event));
             }
         }
 

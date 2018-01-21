@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -141,22 +140,22 @@ public class DialogConfirmEvent extends DialogFragment {
 
             DynamicFragmentPagerAdapter dynamicFragmentPagerAdapter = new DynamicFragmentPagerAdapter(getChildFragmentManager());
             if (eventListToAction.size() > 0) {
-                FragmentEventList fragmentEventListAction = FragmentEventList.newInstance(false);
+                FragmentEventList fragmentEventListAction = FragmentEventList.newInstance(FragmentEventList.VIEW_SIMPLE);
                 fragmentEventListAction.setListData(eventListToAction);
                 dynamicFragmentPagerAdapter.addFragment(fragmentEventListAction, getString(R.string.event_to_action) + " (" + eventListToAction.size() + ")");
             }
             if (eventListAccepted.size() > 0) {
-                FragmentEventList fragmentEventListAccepted = FragmentEventList.newInstance(false);
+                FragmentEventList fragmentEventListAccepted = FragmentEventList.newInstance(FragmentEventList.VIEW_SIMPLE);
                 fragmentEventListAccepted.setListData(eventListAccepted);
                 dynamicFragmentPagerAdapter.addFragment(fragmentEventListAccepted, getString(R.string.event_to_save) + " (" + eventListAccepted.size() + ")");
             }
             if (eventListWarning.size() > 0) {
-                FragmentEventList fragmentEventListWarn = FragmentEventList.newInstance(false);
+                FragmentEventList fragmentEventListWarn = FragmentEventList.newInstance(FragmentEventList.VIEW_SIMPLE);
                 fragmentEventListWarn.setListData(eventListWarning);
                 dynamicFragmentPagerAdapter.addFragment(fragmentEventListWarn, getString(R.string.event_warning) + " (" + eventListWarning.size() + ")");
             }
             if (eventListRejected.size() > 0) {
-                FragmentEventList fragmentEventListReject = FragmentEventList.newInstance(false);
+                FragmentEventList fragmentEventListReject = FragmentEventList.newInstance(FragmentEventList.VIEW_SIMPLE);
                 fragmentEventListReject.setListData(eventListRejected);
                 dynamicFragmentPagerAdapter.addFragment(fragmentEventListReject, getString(R.string.event_reject) + " (" + eventListRejected.size() + ")");
             }

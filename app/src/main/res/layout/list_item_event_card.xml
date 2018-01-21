@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        style="@style/Card"
+        android:id="@+id/RecyclerViewEventCard"
+        android:minHeight="110dp"
+        app:cardBackgroundColor="@color/eventCard">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                style="@style/ListIconMainIcon"
+                android:id="@+id/eventMainIcon"
+                android:contentDescription="@string/event_icon"
+                android:layout_centerInParent="true"
+                android:layout_alignParentTop="true"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/ListItemSecondaryTextDark"
+                android:text="@string/misc_placeholder"
+                android:id="@+id/eventName"
+                android:layout_below="@+id/eventMainIcon"
+                android:gravity="center_horizontal"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+
+</RelativeLayout>

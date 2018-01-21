@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hypodiabetic.happplus">
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
     <application
         android:name=".MainApp"
         android:allowBackup="true"
@@ -19,7 +21,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SingleFragmentActivity"></activity>
+        <activity android:name=".SingleFragmentActivity"/>
+
+        <service android:name=".services.jobServiceCollectStats"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <receiver android:name=".receivers.SystemBoot">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

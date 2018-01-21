@@ -2,6 +2,7 @@ package com.hypodiabetic.happplus.plugins.AbstractClasses;
 
 import com.hypodiabetic.happplus.Events.AbstractEvent;
 import com.hypodiabetic.happplus.Events.BolusEvent;
+import com.hypodiabetic.happplus.Events.TempBasalEvent;
 import com.hypodiabetic.happplus.UtilitiesTime;
 import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceEventValidator;
@@ -23,15 +24,11 @@ public abstract class AbstractPump extends AbstractEventActivities implements In
         super();
     }
 
-    public String getPluginType(){             return PLUGIN_TYPE_SOURCE;}
-    public boolean getLoadInBackground(){   return false;}
+    public String getPluginType(){              return PLUGIN_TYPE_SOURCE;}
+    public boolean getLoadInBackground(){       return false;}
 
-    public double getBasal(){
-        return 0D;
-    }
-    public double getBasal(Date when){
-        return 0D;
-    }
+    public abstract Double getBasal();
+    public abstract Double getBasal(Date when);
 
     public boolean onLoad(){
         return true;
@@ -39,6 +36,15 @@ public abstract class AbstractPump extends AbstractEventActivities implements In
     public boolean onUnLoad(){
         return true;
     }
+
+    public TempBasalEvent getTempBasal(Realm realm){
+        TempBasalEvent tempBasalEvent   =   (TempBasalEvent) getLastEvent(realm, true, TempBasalEvent.class.getSimpleName());
+        if (tempBasalEvent != null){
+            return tempBasalEvent;
+        }
+        return null;
+    }
+
 
     /**
      * validates Bolus Events, sends to the Pump Plugin a list of Bolus Events to be checked

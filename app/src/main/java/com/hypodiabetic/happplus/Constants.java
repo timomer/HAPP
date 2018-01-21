@@ -18,4 +18,9 @@ public class Constants {
         public static final double DELTA_OLD        =   998;
     }
 
+    public class service {
+        public class jobid{
+            public static final int STATS_SERVICE   =   1;
+        }
+    }
 }

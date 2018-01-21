@@ -58,7 +58,11 @@ public class BolusWizardResult {
         data    =   jsonObject;
     }
     public JSONObject getData(){
-        return data;
+        if (data == null){
+            return new JSONObject();
+        } else {
+            return data;
+        }
     }
 
     private Double suggestedBolus;

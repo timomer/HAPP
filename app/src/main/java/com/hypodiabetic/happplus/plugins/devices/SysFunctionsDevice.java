@@ -14,19 +14,23 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.hypodiabetic.happplus.Constants;
 import com.hypodiabetic.happplus.Intents;
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
 import com.hypodiabetic.happplus.SingleFragmentActivity;
+import com.hypodiabetic.happplus.Utilities;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
+import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceCOB;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceIOB;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfacePatientPrefs;
 import com.hypodiabetic.happplus.plugins.PluginManager;
+import com.hypodiabetic.happplus.services.jobServiceCollectStats;
 
 import org.json.JSONArray;
 
@@ -45,10 +49,12 @@ public class SysFunctionsDevice extends AbstractDevice {
 
     private AbstractPluginBase pluginBolusWizard;
     private AbstractPluginBase pluginIOB;
+    private AbstractPluginBase pluginCOB;
 
     //Device Prefs
     private static String PREF_BOLUS_WIZARD_PLUGIN              =   "bolus_wizard_plugin";
     private static String PREF_IOB_PLUGIN                       =   "iob_plugin";
+    private static String PREF_COB_PLUGIN                       =   "cob_plugin";
     public static String PREF_DEFAULT_24H_PROFILE_TIMESLOTS     =   "default_24h_profile_timeslots";
 
     private TextView deviceStatus;
@@ -68,8 +74,17 @@ public class SysFunctionsDevice extends AbstractDevice {
     protected DeviceStatus getPluginStatus(){
         DeviceStatus deviceStatus = new DeviceStatus();
 
+        //check core plugins
         deviceStatus.checkPluginIDependOn(pluginBolusWizard, context.getString(R.string.device_sysf_bw_plugin));
         deviceStatus.checkPluginIDependOn(pluginIOB, context.getString(R.string.device_sysf_iob_plugin));
+        deviceStatus.checkPluginIDependOn(pluginCOB, context.getString(R.string.device_sysf_cob_plugin));
+
+        //check core services
+        if (!Utilities.isJobScheduled(context, Constants.service.jobid.STATS_SERVICE)) {
+            deviceStatus.hasError(true);
+            deviceStatus.addComment(context.getString(R.string.device_sysf_service_stats_err));
+        }
+
 
         return deviceStatus;
     }
@@ -92,6 +107,10 @@ public class SysFunctionsDevice extends AbstractDevice {
             pluginIOB = PluginManager.getPlugin(getPref(PREF_IOB_PLUGIN).getStringValue(),InterfaceIOB.class);
             if (pluginIOB != null) {    pluginIOB.load(); }
         }
+        if (getPref(PREF_COB_PLUGIN).getStringValue() != null){
+            pluginCOB = PluginManager.getPlugin(getPref(PREF_COB_PLUGIN).getStringValue(),InterfaceCOB.class);
+            if (pluginCOB != null) {    pluginCOB.load(); }
+        }
     }
 
     protected List<PluginPref> getPrefsList(){
@@ -108,6 +127,12 @@ public class SysFunctionsDevice extends AbstractDevice {
                 context.getString(R.string.device_sysf_iob_plugin_desc),
                 (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceIOB.class),
                 (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceIOB.class)));
+        prefs.add(new PluginPref<>(
+                PREF_COB_PLUGIN,
+                context.getString(R.string.device_sysf_cob_plugin),
+                context.getString(R.string.device_sysf_cob_plugin_desc),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceCOB.class),
+                (List<AbstractPluginBase>) PluginManager.getPluginList(InterfaceCOB.class)));
         prefs.add(new PluginPref(
                 PREF_DEFAULT_24H_PROFILE_TIMESLOTS,
                 context.getString(R.string.profile_editor_default_time_slots),
@@ -130,16 +155,8 @@ public class SysFunctionsDevice extends AbstractDevice {
         return pluginBolusWizard;
     }
     public InterfaceIOB getPluginIOB() { return (InterfaceIOB) pluginIOB;}
+    public InterfaceCOB getPluginCOB() { return (InterfaceCOB) pluginCOB;}
 
-    public double getIOB(){
-        return 0;
-    }
-    public double getCOB(){
-        return 0;
-    }
-    public int getCarbRatio(){
-        return 0;
-    }
 
     /**
      * Device Fragment UI

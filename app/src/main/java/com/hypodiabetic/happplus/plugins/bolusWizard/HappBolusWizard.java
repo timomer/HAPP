@@ -25,10 +25,12 @@ import com.hypodiabetic.happplus.helperObjects.DialogHelper;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractEventActivities;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceBolusWizard;
 import com.hypodiabetic.happplus.plugins.Interfaces.InterfaceNotifyFragmentBackPress;
 import com.hypodiabetic.happplus.plugins.PluginManager;
 import com.hypodiabetic.happplus.plugins.devices.CGMDevice;
+import com.hypodiabetic.happplus.plugins.devices.PumpDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysFunctionsDevice;
 import com.hypodiabetic.happplus.plugins.devices.SysProfileDevice;
 
@@ -226,103 +228,112 @@ public class HappBolusWizard extends AbstractEventActivities implements Interfac
         
         BolusWizardResult bolusWizardResult = new BolusWizardResult();
 
-        SysFunctionsDevice sysFun           =   (SysFunctionsDevice)    PluginManager.getPluginByClass(SysFunctionsDevice.class);
-        CGMDevice cgmDevice                 =   (CGMDevice)             PluginManager.getPluginByClass(CGMDevice.class);
-        SysProfileDevice sysProfileDevice   =   (SysProfileDevice)      PluginManager.getPluginByClass(SysProfileDevice.class);
+        SysFunctionsDevice sysFunctionsDevice   =   (SysFunctionsDevice)    PluginManager.getPluginByClass(SysFunctionsDevice.class);
+        CGMDevice cgmDevice                     =   (CGMDevice)             PluginManager.getPluginByClass(CGMDevice.class);
+        SysProfileDevice sysProfileDevice       =   (SysProfileDevice)      PluginManager.getPluginByClass(SysProfileDevice.class);
 
-        double lastSGV = 0D, iob = 0, cob =0;
-        if (cgmDevice != null) {
-            SGVEvent lastSGVEvent   =   cgmDevice.getLastCGMValue();
-            if (lastSGVEvent != null) lastSGV   =   lastSGVEvent.getSGV();
-        }
-        if (sysFun != null) {
-            iob =   sysFun.getIOB();
-            cob =   sysFun.getCOB();
-        }
+        if (PluginManager.checkDevicePluginsAreReady()) {
 
-        double profileMinSGV    =   sysProfileDevice.getPatientPref().getLowSGV();
-        double profileMaxSGV    =   sysProfileDevice.getPatientPref().getHighSGV();
-        double profileTargetSGV =   sysProfileDevice.getPatientPref().getTargetSGV();
-        double profileISF       =   sysProfileDevice.getPatientPref().getISF(new Date());
-        double profileCarbRatio =   sysProfileDevice.getPatientPref().getCarbRatio(new Date());
-        
-        Double insulin_correction_bg;
-        Double suggested_bolus;
-        Double suggested_correction;
-        Double net_correction_biob;
+            double lastSGV = 0D, iob = 0, cob = 0;
+            SGVEvent lastSGVEvent = cgmDevice.getLastCGMValue();
+            if (lastSGVEvent != null) lastSGV = lastSGVEvent.getSGV();
 
-        //Net IOB after current pram1 taken into consideration
-        if (iob < 0){
-            net_correction_biob         =   (cob / profileCarbRatio) + iob;
-            if (net_correction_biob.isNaN() || net_correction_biob.isInfinite()) net_correction_biob = 0D;
-            bolusWizardResult.addBolusCalculations("Net Bolus IOB: (COB(" + cob + ") / Carb Ratio(" + profileCarbRatio + "g)) + IOB(" + UtilitiesDisplay.displayInsulin(iob,2) + ") = " + UtilitiesDisplay.displayInsulin(net_correction_biob,2));
+            iob = sysFunctionsDevice.getPluginIOB().getIOB(new Date());
+            cob = sysFunctionsDevice.getPluginCOB().getCOB(new Date());
+
+
+            double profileMinSGV = sysProfileDevice.getPatientPref().getLowSGV();
+            double profileMaxSGV = sysProfileDevice.getPatientPref().getHighSGV();
+            double profileTargetSGV = sysProfileDevice.getPatientPref().getTargetSGV();
+            double profileISF = sysProfileDevice.getPatientPref().getISF(new Date());
+            double profileCarbRatio = sysProfileDevice.getPatientPref().getCarbRatio(new Date());
+
+            Double insulin_correction_bg;
+            Double suggested_bolus;
+            Double suggested_correction;
+            Double net_correction_biob;
+
+            //Net IOB after current pram1 taken into consideration
+            if (iob < 0) {
+                net_correction_biob = (cob / profileCarbRatio) + iob;
+                if (net_correction_biob.isNaN() || net_correction_biob.isInfinite())
+                    net_correction_biob = 0D;
+                bolusWizardResult.addBolusCalculations("Net Bolus IOB: (COB(" + cob + ") / Carb Ratio(" + profileCarbRatio + "g)) + IOB(" + UtilitiesDisplay.displayInsulin(iob, 2) + ") = " + UtilitiesDisplay.displayInsulin(net_correction_biob, 2));
+            } else {
+                net_correction_biob = (cob / profileCarbRatio) - iob;
+                if (net_correction_biob.isNaN() || net_correction_biob.isInfinite())
+                    net_correction_biob = 0D;
+
+                //Ignore positive correction if lastCGMValue is low
+                if (lastSGV <= profileMinSGV && net_correction_biob > 0) {
+                    bolusWizardResult.addBolusCalculations("Net Bolus IOB: Low SGV: Suggested Corr " + UtilitiesDisplay.displayInsulin(net_correction_biob, 2) + " Setting to 0");
+                    net_correction_biob = 0D;
+                } else {
+                    bolusWizardResult.addBolusCalculations("Net Bolus IOB: (COB(" + cob + ") / Carb Ratio(" + profileCarbRatio + "g)) - IOB(" + UtilitiesDisplay.displayInsulin(iob, 2) + ") = " + UtilitiesDisplay.displayInsulin(net_correction_biob, 2));
+                }
+            }
+
+            //Insulin required for pram1 about to be consumed
+            Double insulin_correction_carbs = pram1 / profileCarbRatio;
+            if (insulin_correction_carbs.isNaN() || insulin_correction_carbs.isInfinite())
+                insulin_correction_carbs = 0D;
+            bolusWizardResult.addBolusCalculations("Carb Correction: pram1(" + pram1 + "g) / Carb Ratio(" + profileCarbRatio + "g) = " + UtilitiesDisplay.displayInsulin(insulin_correction_carbs, 2));
+
+            //Insulin required for lastCGMValue correction
+            if (lastSGV >= profileMaxSGV) {                                                             //True HIGH
+                insulin_correction_bg = (lastSGV - profileMaxSGV) / profileISF;
+                bolusWizardResult.addBolusCalculations("lastCGMValue(" + lastSGV + ") - (Max lastCGMValue(" + profileMaxSGV + ") / ISF(" + profileISF + ")) = " + UtilitiesDisplay.displayInsulin(insulin_correction_bg, 2));
+
+            } else if (lastSGV <= (profileMinSGV - 30)) {                                                  //Critical LOW
+                insulin_correction_bg = (lastSGV - profileTargetSGV) / profileISF;
+                bolusWizardResult.addErrorReason("Critical Low");
+                bolusWizardResult.setHaveError(true);
+                if (insulin_correction_carbs > 0) insulin_correction_carbs = 0D;
+                if (net_correction_biob > 0) net_correction_biob = 0D;
+                if (insulin_correction_bg > 0) {
+                    bolusWizardResult.addBolusCalculations("Suggestion " + insulin_correction_bg + "U, Blood Sugars below " + (profileMinSGV - 30) + ". Setting to 0.");
+                    insulin_correction_bg = 0D;
+                } else {
+                    bolusWizardResult.addBolusCalculations("(lastCGMValue(" + lastSGV + ") - Target lastCGMValue(" + profileTargetSGV + ") / ISF(" + profileISF + ") = " + UtilitiesDisplay.displayInsulin(insulin_correction_bg, 2));
+                }
+
+            } else if (lastSGV <= profileMinSGV) {                                                       //True LOW
+                insulin_correction_bg = (lastSGV - profileTargetSGV) / profileISF;
+                bolusWizardResult.addBolusCalculations("(lastCGMValue(" + lastSGV + ") - Target lastCGMValue(" + profileTargetSGV + ") / ISF(" + profileISF + ") = " + UtilitiesDisplay.displayInsulin(insulin_correction_bg, 2));
+            } else {                                                                                    //IN RANGE
+                insulin_correction_bg = 0D;
+                bolusWizardResult.addBolusCalculations("NA - lastCGMValue within Target");
+            }
+
+            if (insulin_correction_bg.isNaN() || insulin_correction_bg.isInfinite())
+                insulin_correction_bg = 0D;
+
+            suggested_correction = insulin_correction_bg + net_correction_biob;
+            bolusWizardResult.addBolusCalculations("Correction: SGV Corr(" + UtilitiesDisplay.displayInsulin(insulin_correction_bg, 2) + ") - Net Bolus(" + UtilitiesDisplay.displayInsulin(net_correction_biob, 2) + ") = " + UtilitiesDisplay.displayInsulin(suggested_correction, 2));
+            suggested_bolus = insulin_correction_carbs;
+            bolusWizardResult.addBolusCalculations("Bolus: Carb Corr(" + UtilitiesDisplay.displayInsulin(insulin_correction_carbs, 2) + ") = " + UtilitiesDisplay.displayInsulin(suggested_bolus, 2));
+
+
+            if (suggested_bolus < 0) suggested_bolus = 0D;
+
+            bolusWizardResult.setSuggestedBolus(suggested_bolus);
+            bolusWizardResult.setSuggestedCorrectionBolus(suggested_correction);
+            JSONObject miscData = new JSONObject();
+            try {
+                miscData.put("net_biob", UtilitiesDisplay.displayPosSign(net_correction_biob) + UtilitiesDisplay.displayInsulin(net_correction_biob, 1));
+                miscData.put("insulin_correction_carbs", UtilitiesDisplay.displayPosSign(insulin_correction_carbs) + UtilitiesDisplay.displayInsulin(insulin_correction_carbs, 1));
+                miscData.put("insulin_correction_bg", UtilitiesDisplay.displayPosSign(insulin_correction_bg) + UtilitiesDisplay.displayInsulin(insulin_correction_bg, 1));
+            } catch (JSONException e) {
+                Log.e(TAG, "runBolusWizard: Failed to add Bolus Wizard Data");
+            }
+            bolusWizardResult.setData(miscData);
+
+            return bolusWizardResult;
         } else {
-            net_correction_biob         =   (cob / profileCarbRatio) - iob;
-            if (net_correction_biob.isNaN() || net_correction_biob.isInfinite()) net_correction_biob = 0D;
 
-            //Ignore positive correction if lastCGMValue is low
-            if (lastSGV <= profileMinSGV && net_correction_biob > 0) {
-                bolusWizardResult.addBolusCalculations("Net Bolus IOB: Low SGV: Suggested Corr " + UtilitiesDisplay.displayInsulin(net_correction_biob,2) + " Setting to 0");
-                net_correction_biob = 0D;
-            } else {
-                bolusWizardResult.addBolusCalculations("Net Bolus IOB: (COB(" + cob + ") / Carb Ratio(" + profileCarbRatio + "g)) - IOB(" + UtilitiesDisplay.displayInsulin(iob,2) + ") = " + UtilitiesDisplay.displayInsulin(net_correction_biob,2));
-            }
-        }
-
-        //Insulin required for pram1 about to be consumed
-        Double insulin_correction_carbs         = pram1 / profileCarbRatio;
-        if (insulin_correction_carbs.isNaN() || insulin_correction_carbs.isInfinite()) insulin_correction_carbs = 0D;
-        bolusWizardResult.addBolusCalculations("Carb Correction: pram1(" + pram1 + "g) / Carb Ratio(" + profileCarbRatio + "g) = " + UtilitiesDisplay.displayInsulin(insulin_correction_carbs,2));
-
-        //Insulin required for lastCGMValue correction
-        if (lastSGV >= profileMaxSGV) {                                                             //True HIGH
-            insulin_correction_bg = (lastSGV - profileMaxSGV) / profileISF;
-            bolusWizardResult.addBolusCalculations("lastCGMValue(" + lastSGV + ") - (Max lastCGMValue(" + profileMaxSGV + ") / ISF(" + profileISF + ")) = " + UtilitiesDisplay.displayInsulin(insulin_correction_bg,2));
-
-        } else if (lastSGV <= (profileMinSGV-30)){                                                  //Critical LOW
-            insulin_correction_bg       = (lastSGV - profileTargetSGV) / profileISF;
-            bolusWizardResult.addErrorReason("Critical Low");
             bolusWizardResult.setHaveError(true);
-            if (insulin_correction_carbs > 0)   insulin_correction_carbs   = 0D;
-            if (net_correction_biob > 0)        net_correction_biob        = 0D;
-            if(insulin_correction_bg > 0) {
-                bolusWizardResult.addBolusCalculations("Suggestion " + insulin_correction_bg + "U, Blood Sugars below " + (profileMinSGV-30) + ". Setting to 0.");
-                insulin_correction_bg   = 0D;
-            } else {
-                bolusWizardResult.addBolusCalculations("(lastCGMValue(" + lastSGV + ") - Target lastCGMValue(" + profileTargetSGV + ") / ISF(" + profileISF + ") = " + UtilitiesDisplay.displayInsulin(insulin_correction_bg,2));
-            }
-
-        } else if (lastSGV <= profileMinSGV){                                                       //True LOW
-            insulin_correction_bg       = (lastSGV - profileTargetSGV) / profileISF;
-            bolusWizardResult.addBolusCalculations("(lastCGMValue(" + lastSGV + ") - Target lastCGMValue(" + profileTargetSGV + ") / ISF(" + profileISF + ") = " + UtilitiesDisplay.displayInsulin(insulin_correction_bg,2));
-        } else {                                                                                    //IN RANGE
-            insulin_correction_bg       = 0D;
-            bolusWizardResult.addBolusCalculations("NA - lastCGMValue within Target");
+            return bolusWizardResult;
         }
-
-        if (insulin_correction_bg.isNaN() || insulin_correction_bg.isInfinite()) insulin_correction_bg = 0D;
-
-        suggested_correction        = insulin_correction_bg + net_correction_biob;
-        bolusWizardResult.addBolusCalculations("Correction: SGV Corr(" + UtilitiesDisplay.displayInsulin(insulin_correction_bg,2) + ") - Net Bolus(" + UtilitiesDisplay.displayInsulin(net_correction_biob,2) + ") = " + UtilitiesDisplay.displayInsulin(suggested_correction,2));
-        suggested_bolus             = insulin_correction_carbs;
-        bolusWizardResult.addBolusCalculations("Bolus: Carb Corr(" + UtilitiesDisplay.displayInsulin(insulin_correction_carbs, 2) + ") = " + UtilitiesDisplay.displayInsulin(suggested_bolus,2));
-
-
-        if (suggested_bolus < 0) suggested_bolus=0D;
-
-        bolusWizardResult.setSuggestedBolus(suggested_bolus);
-        bolusWizardResult.setSuggestedCorrectionBolus(suggested_correction);
-        JSONObject miscData = new JSONObject();
-        try {
-            miscData.put("net_biob", UtilitiesDisplay.displayPosSign(net_correction_biob) + UtilitiesDisplay.displayInsulin(net_correction_biob, 1));
-            miscData.put("insulin_correction_carbs", UtilitiesDisplay.displayPosSign(insulin_correction_carbs) + UtilitiesDisplay.displayInsulin(insulin_correction_carbs, 1));
-            miscData.put("insulin_correction_bg", UtilitiesDisplay.displayPosSign(insulin_correction_bg) + UtilitiesDisplay.displayInsulin(insulin_correction_bg, 1));
-        } catch (JSONException e){
-            Log.e(TAG, "runBolusWizard: Failed to add Bolus Wizard Data");
-        }
-        bolusWizardResult.setData(miscData);
-
-        return bolusWizardResult;
     }
 
     public JSONArray getDebug(){

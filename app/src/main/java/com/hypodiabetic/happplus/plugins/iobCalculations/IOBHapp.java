@@ -5,7 +5,9 @@ import android.util.Log;
 import com.hypodiabetic.happplus.Events.BolusEvent;
 import com.hypodiabetic.happplus.Events.TempBasalEvent;
 import com.hypodiabetic.happplus.helperObjects.DeviceStatus;
+import com.hypodiabetic.happplus.helperObjects.ItemRemaining;
 import com.hypodiabetic.happplus.helperObjects.PluginPref;
+import com.hypodiabetic.happplus.helperObjects.RealmHelper;
 import com.hypodiabetic.happplus.helperObjects.SysPref;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractEventActivities;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
@@ -49,15 +51,28 @@ public class IOBHapp extends AbstractPluginBase implements InterfaceIOB {
     }
     protected void onPrefChange(SysPref sysPref){
     }
-    //public String getPluginType(){ return AbstractPluginBase.}
 
-    public Double getIOB(List<BolusEvent> bolusEvents, Date asOf){
-        return 0D;
+    public Double getIOB(Date asOf){
+        RealmHelper realmHelper = new RealmHelper();
+        JSONObject jsonObject = iobTotal(asOf, realmHelper.getRealm());
+        realmHelper.closeRealm();
+        return jsonObject.optDouble("iob", 0D);
     }
 
-    public Double getMinsRemaining(BolusEvent bolusEvent, Double dia){
+    public Double getInsulinActive(Date asOf){
+        RealmHelper realmHelper = new RealmHelper();
+        JSONObject jsonObject = iobTotal(asOf, realmHelper.getRealm());
+        realmHelper.closeRealm();
+        return jsonObject.optDouble("activity", 0D);
+    }
+
+    public ItemRemaining getMinsRemaining(BolusEvent bolusEvent, Double dia){
+        ItemRemaining iobRemaining = new ItemRemaining();
         JSONObject jsonObject = iobCalc(bolusEvent, new Date(), dia);
-        return jsonObject.optDouble("iobContrib", 0D);
+        iobRemaining.setAmount(jsonObject.optDouble("iobContrib", 0D));
+        iobRemaining.setMins((double) (bolusEvent.getDeliveredDate().getTime() + (long) (dia * 60 * 60000)) );
+
+         return iobRemaining;
     }
 
 

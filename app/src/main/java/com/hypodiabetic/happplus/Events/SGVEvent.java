@@ -1,9 +1,11 @@
 package com.hypodiabetic.happplus.Events;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
@@ -54,6 +56,8 @@ public class SGVEvent extends AbstractEvent {
         return new Date(this.getData().optLong(TIMESTAMP, 0L));
     }
 
+    public String getDisplayName(){ return MainApp.getInstance().getString(R.string.event_sgv);}
+
     public String getMainText(){
         CGMDevice cgmDevice         =   (CGMDevice) PluginManager.getPluginByClass(CGMDevice.class);
         return UtilitiesDisplay.displaySGV(this,true,false, cgmDevice.getPref(cgmDevice.PREF_BG_UNITS).getStringValue());
@@ -71,4 +75,7 @@ public class SGVEvent extends AbstractEvent {
     public Drawable getPrimaryActionIcon(){                 return ContextCompat.getDrawable(MainApp.getInstance(), R.drawable.invert_colors);}
     public View.OnClickListener getOnPrimaryActionClick() { return null;}
 
+    public LinearLayout getNewEventLayout(Context context) {
+        return new LinearLayout(context);
+    }
 }

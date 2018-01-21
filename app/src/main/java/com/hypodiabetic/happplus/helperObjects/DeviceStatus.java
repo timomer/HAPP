@@ -1,10 +1,16 @@
 package com.hypodiabetic.happplus.helperObjects;
 
+import android.support.design.widget.TabLayout;
+import android.util.Log;
+
 import com.hypodiabetic.happplus.MainApp;
 import com.hypodiabetic.happplus.R;
+import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractDevice;
 import com.hypodiabetic.happplus.plugins.AbstractClasses.AbstractPluginBase;
+import com.hypodiabetic.happplus.plugins.PluginManager;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Tim on 25/12/2016.
@@ -17,6 +23,8 @@ public class DeviceStatus {
     private boolean warning;
     private String comment;
     private Date captured;
+
+    private static final String TAG =   "DeviceStatus";
 
     public DeviceStatus(){
         captured        =   new Date();
